@@ -1,0 +1,24 @@
+[submodule "libp2p"]
+	path = libp2p
+	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/libp2p.git
+[submodule "ipfs-lite-cpp"]
+	path = ipfs-lite-cpp
+	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-lite-cpp.git
+[submodule "restclient-cpp"]
+	path = restclient-cpp
+	url = https://github.com/mrtazz/restclient-cpp.git
+[submodule "celer-network/pb3-gen-sol"]
+	path = celer-network/pb3-gen-sol
+	url = https://github.com/celer-network/pb3-gen-sol.git
+[submodule "boost-for-mobile"]
+	path = boost-for-mobile
+	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/boost-for-mobile.git
+[submodule "lmdb"]
+	path = lmdb
+	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/lmdb.git
+[submodule "flutter"]
+	path = flutter
+	url = https://github.com/flutter/flutter.git
+[submodule "curl-android-ios"]
+	path = curl-android-ios
+	url = https://github.com/gcesarmza/curl-android-ios.git
