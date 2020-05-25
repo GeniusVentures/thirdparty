@@ -22,3 +22,6 @@
 [submodule "curl-android-ios"]
 	path = curl-android-ios
 	url = https://github.com/gcesarmza/curl-android-ios.git
+[submodule "grpc"]
+	path = grpc
+	url = https://github.com/grpc/grpc
