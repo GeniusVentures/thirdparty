@@ -1,9 +1,11 @@
 [submodule "libp2p"]
 	path = libp2p
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/libp2p.git
+	branch = cross-compile
 [submodule "ipfs-lite-cpp"]
 	path = ipfs-lite-cpp
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-lite-cpp.git
+	branch = develop
 [submodule "restclient-cpp"]
 	path = restclient-cpp
 	url = https://github.com/mrtazz/restclient-cpp.git
@@ -25,3 +27,6 @@
 [submodule "grpc"]
 	path = grpc
 	url = https://github.com/grpc/grpc
+[submodule "leveldb"]
+	path = leveldb
+	url = https://github.com/google/leveldb
