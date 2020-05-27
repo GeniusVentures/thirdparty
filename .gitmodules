@@ -30,3 +30,6 @@
 [submodule "leveldb"]
 	path = leveldb
 	url = https://github.com/google/leveldb
+[submodule "GSL"]
+	path = GSL
+	url = https://github.com/Microsoft/GSL
