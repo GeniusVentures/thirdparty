@@ -33,3 +33,6 @@
 [submodule "GSL"]
 	path = GSL
 	url = https://github.com/Microsoft/GSL
+[submodule "spdlog"]
+	path = spdlog
+	url = https://github.com/gabime/spdlog
