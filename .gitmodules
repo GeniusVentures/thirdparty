@@ -39,3 +39,6 @@
 [submodule "hat-trie"]
 	path = hat-trie
 	url = https://github.com/masterjedy/hat-trie
+[submodule "Boost.DI"]
+	path = Boost.DI
+	url = https://github.com/masterjedy/di
