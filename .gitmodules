@@ -33,3 +33,10 @@
 [submodule "cryptopp"]
 	path = cryptopp
 	url = https://github.com/weidai11/cryptopp
+	branch = CRPTOPP_8_1_0
+[submodule "cpp-ipfs-http-client"]
+	path = cpp-ipfs-http-client
+	url = https://github.com/vasild/cpp-ipfs-http-client
+[submodule "json"]
+	path = json
+	url = https://github.com/nlohmann/json
