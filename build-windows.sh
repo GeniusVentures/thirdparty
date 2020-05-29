@@ -37,7 +37,7 @@ cd $rootdir/restclient-cpp
 try mkdir -p build/Windows/
 try cd build/Windows
 try rm CMakeCache.txt
-cmake ../.. -G "Visual Studio 15 2017 Win64"  -DCURL_LIBRARY=../../../curl-android-ios/curl/build/lib/Release/libcurl.lib    -DCURL_INCLUDE_DIR=../../../curl-android-ios/curl/include -DBUILD_SHARED_LIBS=NO
+cmake ../.. -G "Visual Studio 15 2017 Win64"  -DCURL_LIBRARY=../../../curl-android-ios/curl/build/Windows/lib/Release/libcurl.lib    -DCURL_INCLUDE_DIR=../../../curl-android-ios/curl/include -DBUILD_SHARED_LIBS=NO
 cmake --build . --config Release
 echo "*****************************************"
 echo "Building Windows version of cpp-ipfs-http-client"
@@ -49,8 +49,7 @@ $CacheFile = $currentDir/CMakeCache.txt
 if [ -f "$CacheFile" ]; then    
 	try rm CMakeCache.txt
 fi
-
-cmake ../.. -G "Visual Studio 15 2017 Win64"  -DCURL_LIBRARY=../../../curl-android-ios/curl/build/Windows/lib/Release/libcurl.lib    -DCURL_INCLUDE_DIR=../../../curl-android-ios/curl/include -DBUILD_SHARED_LIBS=NO -DJSON_FOR_MODERN_CXX_INCLUDE_DIR=../../../json/include -DBUILD_TESTING=OFF
-cmake --build . --config Release
+cmake ../.. -G "Visual Studio 15 2017 Win64"  -DCURL_LIBRARY=../../../curl-android-ios/curl/build/Windows/lib/Release/libcurl.lib    -DCURL_INCLUDE_DIR=../../../curl-android-ios/curl/include -DBUILD_SHARED_LIBS=NO -DJSON_FOR_MODERN_CXX_INCLUDE_DIR=../../../json/include -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX:PATH=. -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /DCURL_STATICLIB"
+cmake --build . --config Release --target install
 #try cmake  -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=../../Lib/Windows -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=../../Lib/Windows ../../
 
