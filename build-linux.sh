@@ -15,3 +15,17 @@ cd restclient-cpp
 try mkdir -p build/Linux/
 try cd build/Linux/
 try cmake -DCMAKE_INSTALL_PREFIX=../../Lib/Linux -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=../../Lib/Linux ../../
+
+
+cd boost
+# check for headers directory
+if [ ! -d boost ] then 
+./bootstrap.sh
+./b2 headers
+fi
+
+#
+# build with 8 jobs, boost/ is include directory and libs end up in boost/stage/linux/
+#
+./b2 -j8 link=static runtime-link=static --with-filesystem --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --stagedir=./stage/linux/ release
+
