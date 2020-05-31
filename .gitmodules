@@ -1,9 +1,11 @@
 [submodule "libp2p"]
 	path = libp2p
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/libp2p.git
+	branch = cross-compile
 [submodule "ipfs-lite-cpp"]
 	path = ipfs-lite-cpp
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-lite-cpp.git
+	branch = develop
 [submodule "restclient-cpp"]
 	path = restclient-cpp
 	url = https://github.com/mrtazz/restclient-cpp.git
@@ -22,3 +24,21 @@
 [submodule "curl-android-ios"]
 	path = curl-android-ios
 	url = https://github.com/gcesarmza/curl-android-ios.git
+[submodule "grpc"]
+	path = grpc
+	url = https://github.com/grpc/grpc
+[submodule "leveldb"]
+	path = leveldb
+	url = https://github.com/google/leveldb
+[submodule "GSL"]
+	path = GSL
+	url = https://github.com/Microsoft/GSL
+[submodule "spdlog"]
+	path = spdlog
+	url = https://github.com/gabime/spdlog
+[submodule "hat-trie"]
+	path = hat-trie
+	url = https://github.com/masterjedy/hat-trie
+[submodule "Boost.DI"]
+	path = Boost.DI
+	url = https://github.com/masterjedy/di

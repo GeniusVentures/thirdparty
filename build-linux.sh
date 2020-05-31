@@ -1,6 +1,6 @@
 yell() { echo "$0: $*" >&2; }
 die() { yell "$*"; exit 111; }
-try() { "$@" >>$rootdir/build-osx.log 2>&1 || die "command $* failed see build-linux.log"; }
+try() { "$@" >>$rootdir/build-linux.log 2>&1 || die "command $* failed see build-linux.log"; }
 
 # get the current working directory
 rootdir=$(pwd)
