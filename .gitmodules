@@ -30,6 +30,7 @@
 [submodule "leveldb"]
 	path = leveldb
 	url = https://github.com/google/leveldb
+
 [submodule "GSL"]
 	path = GSL
 	url = https://github.com/Microsoft/GSL
@@ -45,4 +46,16 @@
 [submodule "boost"]
 	path = boost
 	url = https://github.com/boostorg/boost.git
-	branch = boost-1.72.0
+	branch = boost-1.72.
+
+[submodule "cryptopp"]
+	path = cryptopp
+	url = https://github.com/weidai11/cryptopp
+	branch = CRPTOPP_8_1_0
+[submodule "cpp-ipfs-http-client"]
+	path = cpp-ipfs-http-client
+	url = https://github.com/vasild/cpp-ipfs-http-client
+[submodule "json"]
+	path = json
+	url = https://github.com/nlohmann/json
+
