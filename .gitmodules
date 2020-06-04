@@ -59,3 +59,6 @@
 	path = json
 	url = https://github.com/nlohmann/json
 
+[submodule "ipfs-pubsub"]
+	path = ipfs-pubsub
+	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-pubsub.git
