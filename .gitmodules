@@ -62,3 +62,6 @@
 [submodule "ipfs-pubsub"]
 	path = ipfs-pubsub
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-pubsub.git
+[submodule "GTest"]
+	path = GTest
+	url = https://github.com/google/googletest
