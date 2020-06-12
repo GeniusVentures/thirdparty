@@ -24,6 +24,21 @@
 
 # Build results
 /Lib
+/build
+
 # Log
 build-*.log
 
+
+# CMake artifacts
+_CPack_Packages
+CPack*
+cmake_install.cmake
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+compile_commands.json
+CTestTestfile.cmake
+install_manifest.txt
+Makefile
+Testing
