@@ -2,10 +2,13 @@
 # this is the common stuff for building
 cmake_minimum_required(VERSION 3.15)
 
-# if on Windows system, build the windows executables
-if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
+project(LINUX_SHARED_THIRD_PARTY)
 
-project(WINDOWS_SHARED_THIRD_PARTY)
+
+if("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
+    set(LINUX_TARGET_ARCHITECTURES "${CMAKE_HOST_SYSTEM_PROCESSOR}")
+endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
+
 	set (CPACK_PACKAGE_VERSION_MAJOR "0")
 	set (CPACK_PACKAGE_VERSION_MINOR "2")
 	set (CPACK_PACKAGE_VERSION_PATCH "1")
@@ -22,9 +25,8 @@ project(WINDOWS_SHARED_THIRD_PARTY)
 
 	include(../cmake.in/functions.cmake)
 	include(ExternalProject)
-	set(CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS}")
-	set(Boost_USE_STATIC_LIBS OFF)
+		set(CXX_FLAGS_FOR_P2P "")
+		set(Boost_USE_STATIC_LIBS OFF)
 	include(../CommonTargets.CMake)
 
-endif (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
 
