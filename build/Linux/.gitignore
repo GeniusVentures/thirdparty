@@ -1,0 +1,11 @@
+############################################################
+# build for Linux
+############################################################
+
+# Ignore everything
+*
+
+# not these files ...
+!.gitignore
+!CMakeLists.txt
+!README.md

@@ -1,9 +1,0 @@
-libdir=/media/pik/Work10/Work/SuperGeniusWork/GeniusVenture/GeniusTokens/thirdparty/build/Android/GTest/lib
-includedir=/media/pik/Work10/Work/SuperGeniusWork/GeniusVenture/GeniusTokens/thirdparty/build/Android/GTest/include
-
-Name: gtest
-Description: GoogleTest (without main() function)
-Version: 1.10.0
-URL: https://github.com/google/googletest
-Libs: -L${libdir} -lgtest -lpthread
-Cflags: -I${includedir} -DGTEST_HAS_PTHREAD=1
