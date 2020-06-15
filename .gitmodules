@@ -43,11 +43,6 @@
 [submodule "Boost.DI"]
 	path = Boost.DI
 	url = https://github.com/masterjedy/di
-[submodule "boost"]
-	path = boost
-	url = https://github.com/boostorg/boost.git
-	branch = boost-1.72.
-
 [submodule "cryptopp"]
 	path = cryptopp
 	url = https://github.com/weidai11/cryptopp
