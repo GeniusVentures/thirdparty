@@ -12,6 +12,18 @@ mark_as_advanced(JSON_FOR_MODERN_CXX_INCLUDE_DIR)
 set(PROTOBUF_ROOT_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf")
 set(PROTOBUF_SRC_DIR "${PROTOBUF_ROOT_DIR}/cmake")
 
+
+# Builds Microsoft.GSL
+ExternalProject_Add(GSL
+  PREFIX GSL
+  SOURCE_DIR "${THIRDPARTY_DIR}/GSL"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/GSL
+        -DGSL_TEST:BOOL=OFF
+)
+set(_FINDPACKAGE_GSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/GSL/include")
+
+
 # Builds GTest project from the git submodule.
 ExternalProject_Add(GTest
   PREFIX GTest
@@ -49,17 +61,6 @@ if (OPENSSL_ROOT_DIR)
   set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}")
   set(OPENSSL_INCLUDE_DIR, "${OPENSSL_ROOT_DIR}/include")
 endif()
-
-
-# Builds Microsoft.GSL
-ExternalProject_Add(Microsoft.GSL
-  PREFIX Microsoft.GSL
-  SOURCE_DIR "${THIRDPARTY_DIR}/GSL"
-  CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/GSL
-        -DGSL_TEST:BOOL=OFF
-)
-set(_FINDPACKAGE_GSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/GSL/include")
 
 # Builds spdlog v1.4.2
 ExternalProject_Add(spdlog
@@ -145,7 +146,7 @@ ExternalProject_Add(libp2p
         -DGMock_DIR:PATH=${GTest_DIR}
         -DCMAKE_CXX_FLAGS:STRING=-I\ ${BOOST_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ \\\"${OPENSSL_INCLUDE_DIR}\\\"\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ ${CXX_FLAGS_FOR_P2P} 
 
-  DEPENDS protobuf spdlog tsl_hat_trie Boost.DI 
+  DEPENDS protobuf spdlog tsl_hat_trie Boost.DI GSL
 )
 
 
