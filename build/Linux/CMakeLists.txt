@@ -28,5 +28,15 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 		set(CXX_FLAGS_FOR_P2P "")
 		set(Boost_USE_STATIC_LIBS OFF)
 	include(../CommonTargets.CMake)
+	# Build curl 7.60
+	ExternalProject_Add(curl
+	PREFIX curl
+	SOURCE_DIR "${THIRDPARTY_DIR}/curl-android-ios/curl"
+	CMAKE_CACHE_ARGS
+		-DBUILD_TESTING:BOOL=OFF
+		-DCMAKE_USE_OPENSSL:BOOL=ON
+		-DCURL_STATICLIB:BOOL=ON
+		-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/curl
+	)
 
 
