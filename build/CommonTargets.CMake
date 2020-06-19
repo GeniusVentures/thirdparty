@@ -4,6 +4,7 @@ set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
 set(JSON_FOR_MODERN_CXX_INCLUDE_DIR "${THIRDPARTY_DIR}/json")
 
+
 # Find json library
 find_path(JSON_FOR_MODERN_CXX_INCLUDE_DIR NAMES nlohmann/json.hpp)
 include_directories(${JSON_FOR_MODERN_CXX_INCLUDE_DIR})
@@ -11,7 +12,6 @@ mark_as_advanced(JSON_FOR_MODERN_CXX_INCLUDE_DIR)
 
 set(PROTOBUF_ROOT_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf")
 set(PROTOBUF_SRC_DIR "${PROTOBUF_ROOT_DIR}/cmake")
-
 
 # Builds Microsoft.GSL
 ExternalProject_Add(GSL
@@ -34,6 +34,7 @@ ExternalProject_Add(GTest
 
 set(GTest_DIR "${CMAKE_CURRENT_BINARY_DIR}/GTest/lib/cmake/GTest")
 
+
 # Build protobuf project from the git submodule.
 ExternalProject_Add(protobuf
   PREFIX protobuf
@@ -47,10 +48,12 @@ ExternalProject_Add(protobuf
 
 # The location where protobuf-config.cmake will be installed varies by platform
 if (WIN32)
-set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/cmake")
+  set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/cmake")
+  set(Protobuf_DIR "${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}")
 else()
-set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+  set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
 endif()
+
 set(_FINDPACKAGE_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
 set(_FINDPACKAGE_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
 
@@ -92,6 +95,7 @@ ExternalProject_Add(Boost.DI
   CMAKE_CACHE_ARGS
         -DBOOST_DI_OPT_BUILD_TESTS:BOOL=OFF
         -DBOOST_DI_OPT_BUILD_EXAMPLES:BOOL=OFF
+        -DCMAKE_CXX_STANDARD:STRING=14
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Boost.DI
 )
 set(_FINDPACKAGE_BOOST_DI_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/lib/cmake/Boost.DI")
@@ -113,9 +117,10 @@ if(CMAKE_USE_OPENSSL)
   set(USE_OPENSSL ON)
 endif()
 
-#set(tsl_hat_trie_DIR "${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}")
-#find_package(tsl_hat_trie  REQUIRED)
-
+set(tsl_hat_trie_DIR "${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}")
+find_package(tsl_hat_trie  REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
 # Builds libp2p
 #message(${CMAKE_CXX_FLAGS})
 ExternalProject_Add(libp2p
@@ -125,8 +130,8 @@ ExternalProject_Add(libp2p
         ${_CMAKE_ARGS_OPENSSL_ROOT_DIR}
         -DCMAKE_USE_OPENSSL:BOOL=ON
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/libp2p
-        -DTESTING:BOOL=ON 
-        -DBUILD_EXAMPLES:BOOL=OFF
+        -DTESTING:BOOL=OFF
+        -DBUILD_EXAMPLES:BOOL=ON
         -DBUILD_TESTING:BOOL=OFF
         -DEXPOSE_MOCKS:BOOL=ON
         -DHUNTER_ENABLED:BOOL=OFF        
@@ -145,7 +150,6 @@ ExternalProject_Add(libp2p
         -DCMAKE_FIND_USE_PACKAGE_ROOT_PATH:BOOL=ON
         -DCLANG_TIDY:BOOL=OFF
         -DGTest_DIR:PATH=${GTest_DIR}
-        -DGMock_DIR:PATH=${GTest_DIR}
         -DCMAKE_CXX_FLAGS:STRING=-I\ ${BOOST_INCLUDE_DIR}\ -I\ ${BOOST_DI_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${TSL_HAT_TRIE_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ \\\"${OPENSSL_INCLUDE_DIR}\\\"\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ ${CXX_FLAGS_FOR_P2P} 
 
   DEPENDS protobuf spdlog tsl_hat_trie Boost.DI GSL

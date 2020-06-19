@@ -1,0 +1,13 @@
+############################################################
+# build directory
+############################################################
+
+# Ignore 
+temp/
+.temp/
+Temp/
+
+# not these files ...
+!.gitignore
+!CMakeLists.txt
+!README.md

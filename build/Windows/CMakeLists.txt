@@ -22,7 +22,7 @@ project(WINDOWS_SHARED_THIRD_PARTY)
 
 	include(../cmake.in/functions.cmake)
 	include(ExternalProject)
-	set(CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS}")
+	set(CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS} /std:c++14 ")
 	set(Boost_USE_STATIC_LIBS OFF)
 	include(../CommonTargets.CMake)
 	# Build curl 7.60
