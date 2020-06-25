@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.15)
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
 
 project(WINDOWS_SHARED_THIRD_PARTY)
+
 	set (CPACK_PACKAGE_VERSION_MAJOR "0")
 	set (CPACK_PACKAGE_VERSION_MINOR "2")
 	set (CPACK_PACKAGE_VERSION_PATCH "1")
@@ -20,12 +21,17 @@ project(WINDOWS_SHARED_THIRD_PARTY)
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 
-	include(../cmake.in/functions.cmake)
+	include(../cmake.in/functions.cmake)	
 	include(ExternalProject)
-	set(CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS} /std:c++14 ")
-	set(Boost_USE_STATIC_LIBS OFF)
+
+# Config Paths by Platforms
+	set(CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS}")	
+	set(Boost_USE_STATIC_LIBS ON)	
+	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/cmake")  
+
+# Common build by platforms
 	include(../CommonTargets.CMake)
-	# Build curl 7.60
+# Build curl 7.60
 	ExternalProject_Add(curl
 	PREFIX curl
 	SOURCE_DIR "${THIRDPARTY_DIR}/curl-android-ios/curl"

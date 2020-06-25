@@ -25,10 +25,14 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 
 	include(../cmake.in/functions.cmake)
 	include(ExternalProject)
-		set(CXX_FLAGS_FOR_P2P "")
-		set(Boost_USE_STATIC_LIBS OFF)
+# Config Paths by Platforms
+	set(CXX_FLAGS_FOR_P2P "")
+	set(Boost_USE_STATIC_LIBS OFF)
+	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+	
+# Common build by platforms
 	include(../CommonTargets.CMake)
-	# Build curl 7.60
+# Build curl 7.60
 	ExternalProject_Add(curl
 	PREFIX curl
 	SOURCE_DIR "${THIRDPARTY_DIR}/curl-android-ios/curl"
