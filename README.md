@@ -11,11 +11,28 @@ This is the repository for third party of SuperGenius
 - Perl 
 - Openssl
 
-## Run build script
-./build-windows.sh
-
+## Building
+	○ cd ./build/Windows
+	○ cmake . -G "Visual Studio 15 2017 Win64"   -DCMAKE_USE_OPENSSL=ON     -DBOOST_ROOT="to_boost_install_path"   \  -DBOOST_INCLUDE_DIR="to_boost_install_path"     -DBOOST_LIBRARY_DIR="to_boost_install_path/lib64-msvc-14.1"   \ -DOPENSSL_ROOT_DIR="C:/Program Files/OpenSSL-Win64"
+	○ cmake --build . --config Release
 # Build on Linux
-./build-linux.sh
+## Preinstall
+- CMake 
+- Openssl
+## Building
+	○ cd ./build/Linux
+	○ cmake . -DOPENSSL_INCLUDE_DIR=/usr/include/openssl  -DBOOST_INCLUDE_DIR=/usr/local/include/boost
+	○ make
+# Build on Android
+## Preinstall
+- CMake 
+- Openssl
+## Building
+		○ export ANDROID_NDK=/to_android_ndk_path
+		○ export NDK_ROOT=$ANDROID_NDK
+		○ export CROSS_COMPILER=$PATH:$ANDROID_NDK/prebuilt/linux-x86_64/bin/
+		○ cmake . -DOPENSSL_INCLUDE_DIR=/usr/include/openssl  -DCMAKE_SYSTEM_NAME="Android" -DBoost_NO_SYSTEM_PATHS=TRUE -DBoost_ADDITIONAL_VERSIONS="1.72" -DCMAKETOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_ABI="armeabi-v7a,arm64-v8a,x86,x86_64" -DANDROID_NATIVE_API_LEVEL=23 -DANDROID_TOOLCHAIN=clang  -DBOOST_ROOT=/media/pik/Work10/sdk/ndk_21_boost_1.72.0 -DBOOST_INCLUDE_DIR=/media/pik/Work10/sdk/ndk_21_boost_1.72.0/include  -DBOOST_LIBRARY_DIR=/media/pik/Work10/sdk/ndk_21_boost_1.72.0/libs
+		○ make
 
 
 
