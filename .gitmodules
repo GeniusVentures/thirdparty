@@ -63,3 +63,6 @@
 [submodule "ed25519"]
 	path = ed25519
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ed25519.git
+[submodule "sr25519"]
+	path = sr25519
+	url = https://github.com/Warchant/sr25519-crust
