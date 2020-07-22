@@ -15,32 +15,59 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	set (CPACK_PACKAGE_VERSION_PRE_RELEASE "1")
 	set (CPACK_PACKAGE_VENDOR "Genius Ventures")
 
-	set(CMAKE_CXX_STANDARD 17)
-	set(CMAKE_CXX_STANDARD_REQUIRED ON)
-	set(CMAKE_CXX_EXTENSIONS OFF)
-	set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+	# set(CMAKE_CXX_STANDARD 17)
+	# set(CMAKE_CXX_STANDARD_REQUIRED ON)
+	# set(CMAKE_CXX_EXTENSIONS OFF)
+	# set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+
+	#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+	#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+	#include(../cmake.in/functions.cmake)
 
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
 
-	include(../cmake.in/functions.cmake)
+	if (CMAKE_BUILD_TYPE EQUAL Debug)
+	  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MTd")
+	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MTd")
+	endif (CMAKE_BUILD_TYPE EQUAL Debug) 
+
+	if (CMAKE_BUILD_TYPE EQUAL Release)
+	  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MT")
+	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
+	endif (CMAKE_BUILD_TYPE EQUAL Release) 
+	
+	set(CompilerFlags
+			CMAKE_CXX_FLAGS
+			CMAKE_CXX_FLAGS_DEBUG
+			CMAKE_CXX_FLAGS_RELEASE
+			CMAKE_C_FLAGS
+			CMAKE_C_FLAGS_DEBUG
+			CMAKE_C_FLAGS_RELEASE
+			)
+	foreach(CompilerFlag ${CompilerFlags})
+	  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+	endforeach()
+
 	include(ExternalProject)
 # Config Paths by Platforms
-	set(CXX_FLAGS_FOR_P2P "")
-	set(Boost_USE_STATIC_LIBS OFF)
+	#set(CXX_FLAGS_FOR_P2P "")
+	#set(Boost_USE_STATIC_LIBS OFF)
 	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
 	
 # Common build by platforms
 	include(../CommonTargets.CMake)
 # Build curl 7.60
-	ExternalProject_Add(curl
-	PREFIX curl
-	SOURCE_DIR "${THIRDPARTY_DIR}/curl-android-ios/curl"
-	CMAKE_CACHE_ARGS
-		-DBUILD_TESTING:BOOL=OFF
-		-DCMAKE_USE_OPENSSL:BOOL=ON
-		-DCURL_STATICLIB:BOOL=ON
-		-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/curl
-	)
+	# ExternalProject_Add(curl
+	# PREFIX curl
+	# SOURCE_DIR "${THIRDPARTY_DIR}/curl-android-ios/curl"
+	# CMAKE_CACHE_ARGS
+	# 	-DBUILD_TESTING:BOOL=OFF
+	# 	-DCMAKE_USE_OPENSSL:BOOL=ON
+	# 	-DCURL_STATICLIB:BOOL=ON
+	# 	-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/curl
+	# )
 
 

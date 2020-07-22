@@ -14,18 +14,14 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
 
 if (CMAKE_BUILD_TYPE EQUAL Debug)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MTd")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MTd")
-  if(MSVC)
-    set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MTd")  
+  set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Debug>:Debug>")  
 endif (CMAKE_BUILD_TYPE EQUAL Debug) 
 
 if (CMAKE_BUILD_TYPE EQUAL Release)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MT")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
-  if(MSVC)
-    set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Realease>:Release>")
-  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")  
+  set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Realease>:Release>")  
 endif (CMAKE_BUILD_TYPE EQUAL Release) 
 
 function(print)
@@ -52,19 +48,20 @@ print("CXX Debug flags: ${CMAKE_CXX_FLAGS_DEBUG}")
 print("C Release flags: ${CMAKE_C_FLAGS_RELEASE}")
 print("CXX Release flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 
-	include(../cmake.in/functions.cmake)	
-	include(ExternalProject)
+#include(../cmake.in/functions.cmake)	
+include(ExternalProject)
 	
 # Config Paths by Platforms
 #	set(CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS}")	
 #	set(Boost_USE_STATIC_LIBS ON)	
-	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/cmake")  
+set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/cmake")  
 	
 # Set Third party directory
 set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
 # Common build by platforms
-	include(../CommonTargets.CMake)
+include(../CommonTargets.CMake)
+  
 # Build curl 7.60
 	ExternalProject_Add(curl
 	PREFIX curl
