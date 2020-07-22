@@ -6,7 +6,10 @@
 temp/
 .temp/
 Temp/
-
+Rel/
+Release/
+Deb/
+Debug/
 # not these files ...
 !.gitignore
 !CMakeLists.txt
