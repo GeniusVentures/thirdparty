@@ -11,9 +11,11 @@ This is the repository for third party of SuperGenius
 - Perl 
 - Openssl
 
-## Building
-	○ cd ./build/Windows
-	○ cmake . -G "Visual Studio 15 2017 Win64"   -DCMAKE_USE_OPENSSL=ON     -DBOOST_ROOT="to_boost_install_path"   \  -DBOOST_INCLUDE_DIR="to_boost_install_path"     -DBOOST_LIBRARY_DIR="to_boost_install_path/lib64-msvc-14.1"   \ -DOPENSSL_ROOT_DIR="C:/Program Files/OpenSSL-Win64"
+## Building	
+	○ cd ./build
+	○ mkdir Release
+	○ cd Release
+	○ cmake ../Windows -G "Visual Studio 15 2017 Win64"   -DCMAKE_USE_OPENSSL=ON     -DBOOST_ROOT="to_boost_install_path"   \  -DBOOST_INCLUDE_DIR="to_boost_install_path"     -DBOOST_LIBRARY_DIR="to_boost_install_path/lib64-msvc-14.1"   \ -DOPENSSL_ROOT_DIR="C:/Program Files/OpenSSL-Win64"
 	○ cmake --build . --config Release
 # Build on Linux
 ## Preinstall
