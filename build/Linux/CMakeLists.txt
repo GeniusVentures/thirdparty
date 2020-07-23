@@ -51,12 +51,19 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
 	endforeach()
 
+	set(CMAKE_CHCHE_ARGS_CFLAGES_ADD            
+      #-DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}
+      #-DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}
+      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+	)
 	include(ExternalProject)
 # Config Paths by Platforms
 	#set(CXX_FLAGS_FOR_P2P "")
 	#set(Boost_USE_STATIC_LIBS OFF)
 	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
-	
+
+	# Set Third party directory
+	set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 # Common build by platforms
 	include(../CommonTargets.CMake)
 # Build curl 7.60
