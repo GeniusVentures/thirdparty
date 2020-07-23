@@ -62,8 +62,14 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	#set(Boost_USE_STATIC_LIBS OFF)
 	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
 
-	# Set Third party directory
+# Set Third party directory
 	set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+
+# set config for ed25519 crypto
+	set(_ED25519_EDIIMPL ref10) 
+	set(_ED25519_HASH sha3_brainhub) 
+	set(_ED25519_RANDOM dev_urandom) 
+
 # Common build by platforms
 	include(../CommonTargets.CMake)
 # Build curl 7.60

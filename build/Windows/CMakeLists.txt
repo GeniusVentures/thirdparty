@@ -70,6 +70,12 @@ set(CMAKE_CHCHE_ARGS_CFLAGES_ADD
       -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}
       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
 )
+
+# set config for ed25519 crypto
+set(_ED25519_EDIIMPL ref10) 
+set(_ED25519_HASH sha3_brainhub) 
+set(_ED25519_RANDOM bcryptgen) 
+
 # Common build by platforms
 include(../CommonTargets.CMake)
   
