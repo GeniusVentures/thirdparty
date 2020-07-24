@@ -66,3 +66,6 @@
 [submodule "sr25519"]
 	path = sr25519
 	url = https://github.com/Warchant/sr25519-crust
+[submodule "rapidjson"]
+	path = rapidjson
+	url = https://github.com/Tencent/rapidjson
