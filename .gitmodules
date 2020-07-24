@@ -69,3 +69,6 @@
 [submodule "rapidjson"]
 	path = rapidjson
 	url = https://github.com/Tencent/rapidjson
+[submodule "jsonrpc-lean"]
+	path = jsonrpc-lean
+	url = https://github.com/uskr/jsonrpc-lean
