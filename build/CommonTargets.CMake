@@ -295,4 +295,9 @@ ExternalProject_Add(rapidjson
         ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}        
 )
 
-#jsonrpc-lean
+#jsonrpc-lean ---install header file because there are any source files.  
+
+install(
+        DIRECTORY ${THIRDPARTY_DIR}/jsonrpc-lean
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/jsonrpc-lean
+    )
