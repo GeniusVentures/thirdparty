@@ -72,7 +72,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	set(_ED25519_EDIIMPL ref10) 
 	set(_ED25519_HASH sha3_brainhub) 
 	set(_ED25519_RANDOM dev_urandom) 
-
+message("---BOOST ${BOOST_ROOT}")
 # Common build by platforms
 	include(../CommonTargets.CMake)
 # Build curl 7.60

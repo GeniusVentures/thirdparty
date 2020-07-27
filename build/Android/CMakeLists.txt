@@ -67,6 +67,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 # Set Third party directory
 	set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
+	message("--BOOST ${BOOST_ROOT}")
 # set config for ed25519 crypto
 	set(_ED25519_EDIIMPL ref10) 
 	set(_ED25519_HASH sha3_brainhub) 
