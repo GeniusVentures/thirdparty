@@ -79,6 +79,9 @@ set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub) 
 set(_ED25519_RANDOM bcryptgen) 
 
+##find_package(Boost REQUIRED  random filesystem program_options)
+##message("---include -- ${BOOST_INCLUDE_DIR}")
+
 # Common build by platforms
 include(../CommonTargets.CMake)
   

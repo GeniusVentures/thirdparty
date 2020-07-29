@@ -84,7 +84,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
    set(Boost_NO_SYSTEM_PATHS  ON)
    #set(Boost_DIR "${BOOST_LIBRARY_DIR}/cmake/Boost-1.72.0")
 	message("---sizeof -- ${CMAKE_SIZEOF_VOID_P}")
-   #find_package(Boost REQUIRED  random filesystem program_options)
+   find_package(Boost REQUIRED  random filesystem program_options)
 # set config for ed25519 crypto
 	set(_ED25519_EDIIMPL ref10) 
 	set(_ED25519_HASH sha3_brainhub) 
