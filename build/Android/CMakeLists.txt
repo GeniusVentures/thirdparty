@@ -57,6 +57,18 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	)
 	set(_CMAKE_COMMON_BUILD_PARAMS 
    	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
+	-DBoost_DIR:PATH=${Boost_DIR}
+	-DBoost_NO_SYSTEM_PATHS:BOOL=ON
+	-Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=OFF
+	-DANDROID_ABI:STRING=${ANDROID_ABI}
+	-DANDROID_NATIVE_API_LEVEL:STRING=${ANDROID_NATIVE_API_LEVEL}
+	-DANDROID_TOOLCHAIN:STRING=${ANDROID_TOOLCHAIN}		
+#	-DANDROID_STL:STRING=c++_static
+	-DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
+	-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+	-DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=OFF
+#	-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}
+	#-Dgrpc_cpp_plugin_ROOT:PATH=${grpc_cpp_plugin_ROOT}
 	)
 	include(ExternalProject)
 # Config Paths by Platforms
@@ -67,7 +79,12 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 # Set Third party directory
 	set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
-	message("--BOOST ${BOOST_ROOT}")
+	message("--opessl ${OPENSSL_ROOT_DIR}")
+# Set boost config
+   set(Boost_NO_SYSTEM_PATHS  ON)
+   #set(Boost_DIR "${BOOST_LIBRARY_DIR}/cmake/Boost-1.72.0")
+	message("---sizeof -- ${CMAKE_SIZEOF_VOID_P}")
+   #find_package(Boost REQUIRED  random filesystem program_options)
 # set config for ed25519 crypto
 	set(_ED25519_EDIIMPL ref10) 
 	set(_ED25519_HASH sha3_brainhub) 
@@ -86,4 +103,5 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	# 	-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/curl
 	# )
    
+
 
