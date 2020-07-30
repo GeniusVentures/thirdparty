@@ -84,7 +84,6 @@ endif()
 	message("---boost include ${BOOST_INCLUDE_DIR}")
 # Common build by platforms
 	include(../CommonTargets.CMake)
-
 # Build curl 7.60
 	# ExternalProject_Add(curl
 	# PREFIX curl

@@ -49,22 +49,24 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	foreach(CompilerFlag ${CompilerFlags})
 	  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
 	endforeach()
-
-	set(CMAKE_CHCHE_ARGS_CFLAGES_ADD            
+## Config param for cxx flags
+   set(CMAKE_CHCHE_ARGS_CFLAGES_ADD            
       #-DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}
       #-DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}
       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
 	)
-	set(_CMAKE_COMMON_BUILD_PARAMS 
+## Config param for android
+   set(_CMAKE_COMMON_BUILD_PARAMS 
    	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
 	-DBoost_DIR:PATH=${Boost_DIR}
 	-DBoost_NO_SYSTEM_PATHS:BOOL=ON
+	-DBoost_USE_STATIC_LIBS:BOOL=ON	
 	-DANDROID_ABI:STRING=${ANDROID_ABI}
 	-DANDROID_NATIVE_API_LEVEL:STRING=${ANDROID_NATIVE_API_LEVEL}
 	-DANDROID_TOOLCHAIN:STRING=${ANDROID_TOOLCHAIN}		
 	-DANDROID_STL:STRING=c++_static
 	-DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
-	-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+	-DOPENSSL_USE_STATIC_LIBS:BOOL=TRUE
 #	-DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=OFF
 #	-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}
 	#-Dgrpc_cpp_plugin_ROOT:PATH=${grpc_cpp_plugin_ROOT}
@@ -81,16 +83,36 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	message("--opessl ${OPENSSL_ROOT_DIR}")
 # Set boost config
    set(Boost_NO_SYSTEM_PATHS  ON)
-   #set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH OFF)
+   #set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH ON)
    #set(Boost_NO_BOOST_CMAKE  OFF)
    #set(Boost_DIR "${BOOST_LIBRARY_DIR}/cmake/Boost-1.72.0")
-	message("---boost -- ${CMAKE_SIZEOF_VOID_P}")
+	message("---size of  -- ${CMAKE_SIZEOF_VOID_P}")
    	set(boost_headers_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_headers-1.72.0")
 	set(boost_random_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_random-1.72.0")
 	set(boost_system_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_system-1.72.0")
 	set(boost_filesystem_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_filesystem-1.72.0")
 	set(boost_program_options_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_program_options-1.72.0")
+   #message("${boost_random_DIR}")
    find_package(Boost  REQUIRED COMPONENTS random filesystem program_options)
+##### Test find openssl
+	
+# If OPENSSL_ROOT_DIR is set, propagate that hint path to the external projects with OpenSSL dependency.
+	set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "")
+	message("${OPENSSL_ROOT_DIR}---")
+	string(COMPARE NOTEQUAL "${OPENSSL_ROOT_DIR}" "" not_empty)
+	if (OPENSSL_ROOT_DIR)
+	  message("openssl root dir is set.")
+	  set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}")
+	  set(OPENSSL_INCLUDE_DIR  "${OPENSSL_ROOT_DIR}/include")
+	else()
+	  message("openssl root dir is not set.")
+	endif()
+	SET(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}")
+	SET(OPENSSL_LIBRARIES "ssl" "crypto")
+	find_package(OpenSSL REQUIRED)
+
+
+#message("---${OPENSSL_INCLUDE_DIR}")
 	if(BOOST_INCLUDE_DIR)
 	else()
 		set(BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
@@ -168,20 +190,7 @@ set(_FINDPACKAGE_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/incl
 set(_FINDPACKAGE_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
 set(_PROTOBUF_PROTOC_EXEC "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
 
-# If OPENSSL_ROOT_DIR is set, propagate that hint path to the external projects with OpenSSL dependency.
-set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "")
-message("${OPENSSL_ROOT_DIR}---")
-string(COMPARE NOTEQUAL "${OPENSSL_ROOT_DIR}" "" not_empty)
-if (OPENSSL_ROOT_DIR)
-  message("openssl root dir is set.")
-  set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}")
-  set(OPENSSL_INCLUDE_DIR  "${OPENSSL_ROOT_DIR}/include")
-else()
-  message("openssl root dir is not set.")
-endif()
 
-
-#message("---${OPENSSL_INCLUDE_DIR}")
 # Builds leveldb
 ExternalProject_Add(leveldb
   PREFIX leveldb
@@ -215,7 +224,7 @@ ExternalProject_Add(spdlog
 	${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
-set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/spdlog/cmake")
+set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
 set(_FINDPACKAGE_SPDLOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/include")
 
 # Builds tsl_hat_trie 343e0dac54fc8491065e8a059a02db9a2b1248ab
@@ -253,7 +262,7 @@ ExternalProject_Add(libp2p
         -DTESTING:BOOL=OFF 
         -DEXPOSE_MOCKS:BOOL=ON
         -DHUNTER_ENABLED:BOOL=OFF
-        -DBUILD_EXAMPLES:BOOL=ON
+        -DBUILD_EXAMPLES:BOOL=OFF
         -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
         -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
         -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
@@ -270,17 +279,22 @@ ExternalProject_Add(libp2p
 	-Dboost_system_DIR:PATH=${boost_system_DIR}
 	-Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
 	-Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
+	${_CMAKE_COMMON_BUILD_PARAMS}
+#        -DOPENSSL_CRYPTO_LIBRARY:STRING="${OPENSSL_ROOT_DIR}/libcrypto.a"
+        -DOPENSSL_INCLUDE_DIR:STRING=${OPENSSL_ROOT_DIR}/include
+     	-DOPENSSL_LIBRARIES:PATH=${OPENSSL_ROOT_DIR}
 #        -DCMAKE_FIND_USE_PACKAGE_ROOT_PATH:BOOL=ON
-#        -DBoost_NO_SYSTEM_PATHS:BOOL=ON
+        -DBoost_NO_SYSTEM_PATHS:BOOL=ON
         ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}            
         -DCMAKE_CXX_FLAGS:STRING=-I\ ${BOOST_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ \\\"${OPENSSL_INCLUDE_DIR}\\\"\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ ${_CXX_FLAGS_FOR_P2P}
         -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
         ${_CMAKE_COMMON_BUILD_PARAMS}
+#	-DBoost_ARCHITECTURE:STRING="-x64"
 
   DEPENDS GTest protobuf spdlog tsl_hat_trie Boost.DI Microsoft.GSL
 )
 
-
+#message("${boost_random_DIR}")
 
 # Build curl 7.60
 	# ExternalProject_Add(curl
