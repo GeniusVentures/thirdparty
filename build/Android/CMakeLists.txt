@@ -98,8 +98,10 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	
 # If OPENSSL_ROOT_DIR is set, propagate that hint path to the external projects with OpenSSL dependency.
 	set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "")
+      
 	message("${OPENSSL_ROOT_DIR}---")
 	string(COMPARE NOTEQUAL "${OPENSSL_ROOT_DIR}" "" not_empty)
+        set(OPENSSL)
 	if (OPENSSL_ROOT_DIR)
 	  message("openssl root dir is set.")
 	  set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}")
@@ -107,8 +109,10 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	else()
 	  message("openssl root dir is not set.")
 	endif()
-	SET(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}")
-	SET(OPENSSL_LIBRARIES "ssl" "crypto")
+	SET(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_ROOT_DIR}/lib")
+	
+        set(OPENSSL_USE_STATIC_LIBS TRUE)
+	#SET(OPENSSL_LIBRARIES )
 	find_package(OpenSSL REQUIRED)
 
 
@@ -280,9 +284,10 @@ ExternalProject_Add(libp2p
 	-Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
 	-Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
 	${_CMAKE_COMMON_BUILD_PARAMS}
-#        -DOPENSSL_CRYPTO_LIBRARY:STRING="${OPENSSL_ROOT_DIR}/libcrypto.a"
+        -DOPENSSL_CRYPTO_LIBRARY:PATH=${OPENSSL_CRYPTO_LIBRARY}
+	-DOPENSSL_SSL_LIBRARY:PATH=${OPENSSL_CRYPTO_LIBRARY}
         -DOPENSSL_INCLUDE_DIR:STRING=${OPENSSL_ROOT_DIR}/include
-     	-DOPENSSL_LIBRARIES:PATH=${OPENSSL_ROOT_DIR}
+     	-DOPENSSL_LIBRARIES:PATH=${OPENSSL_LIBRARIES}
 #        -DCMAKE_FIND_USE_PACKAGE_ROOT_PATH:BOOL=ON
         -DBoost_NO_SYSTEM_PATHS:BOOL=ON
         ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}            
