@@ -73,7 +73,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	)
 	include(ExternalProject)
 # Config Paths by Platforms
-	set(CXX_FLAGS_FOR_P2P "")
+	set(_CXX_FLAGS_FOR_P2P " -std=c++17")
 	#set(Boost_USE_STATIC_LIBS OFF)
 	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
 
