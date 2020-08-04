@@ -136,6 +136,8 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 
 find_program(MAKE_EXE NAMES gmake nmake make)
 
+##message("--grpc source dir ${CMAKE_CURRENT_SOURCE_DIR}grpc/src/grpc-build")
+
 ExternalProject_Add(grpc
   PREFIX grpc
   SOURCE_DIR "${THIRDPARTY_DIR}/grpc"
@@ -156,7 +158,11 @@ ExternalProject_Add(grpc
 	${_CMAKE_COMMON_BUILD_PARAMS}
 	${_grpc_BUILD_PARAMS}
   BUILD_COMMAND     ${MAKE_EXE} grpc++
-#  INSTALL_COMMAND    ""
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/grpc/lib
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/grpc/include
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc-build/libgrpc.a ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc-build/libgrpc++.a ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc-build/libgpr.a ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc-build/libaddress_sorting.a ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc-build/libupb.a  ${CMAKE_CURRENT_BINARY_DIR}/grpc/lib  
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${THIRDPARTY_DIR}/grpc/include ${CMAKE_CURRENT_BINARY_DIR}/grpc/include
+  INSTALL_COMMAND ""
 )
 
 #message("${THIRDPARTY_DIR}")
