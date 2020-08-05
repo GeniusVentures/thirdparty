@@ -10,7 +10,7 @@ This is the repository for third party of SuperGenius
 - Visual Studio 2015 or 2017
 - Perl 
 - Openssl
-
+- Python >=3.5
 ## Building	
     ○ git pull
 	○ git submodule update --init --recursive

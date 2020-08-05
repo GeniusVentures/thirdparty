@@ -72,3 +72,6 @@
 [submodule "jsonrpc-lean"]
 	path = jsonrpc-lean
 	url = https://github.com/uskr/jsonrpc-lean
+[submodule "binaryen"]
+	path = binaryen
+	url = https://github.com/WebAssembly/binaryen
