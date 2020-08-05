@@ -53,6 +53,7 @@ include(ExternalProject)
 	
 # Config Paths by Platforms
 set(_CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS}")	
+#set(_CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS}")	
 #	set(Boost_USE_STATIC_LIBS ON)	
 set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/cmake")  
 set(_PROTOBUF_PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
