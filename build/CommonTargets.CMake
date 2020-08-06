@@ -319,6 +319,7 @@ ExternalProject_Add(binaryen
   SOURCE_DIR "${THIRDPARTY_DIR}/binaryen"
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/binaryen                        
+        -DBUILD_STATIC_LIB:BOOL=ON
         ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}  
 	      ${_CMAKE_COMMON_BUILD_PARAMS} 
 )
