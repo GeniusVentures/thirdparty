@@ -63,6 +63,10 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 	set(_ED25519_EDIIMPL ref10) 
 	set(_ED25519_HASH sha3_brainhub) 
 	set(_ED25519_RANDOM dev_urandom) 
+
+# Set config for spdlog config path
+set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
+
 find_package(Boost REQUIRED  random filesystem program_options)
 #message("---BOOST ${Boost_INCLUDE_DIRS}")
 if(BOOST_INCLUDE_DIR)

@@ -49,6 +49,16 @@ This is the repository for third party of SuperGenius
 		○ export CROSS_COMPILER=$PATH:$ANDROID_NDK/prebuilt/linux-x86_64/bin/
 		○ cmake . -DOPENSSL_ROOT_DIR=/to_prebuilt_openssl_root_dir  -DCMAKE_SYSTEM_NAME="Android" -DBoost_ADDITIONAL_VERSIONS="1.72" -DCMAKETOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_ABI="armeabi-v7a(or arm64-v8a,x86,x86_64)" -DANDROID_NATIVE_API_LEVEL=26 -DANDROID_TOOLCHAIN=clang  -DBOOST_DIR=/to_boost_forNDK_dir/libs/arm64-v8a(or arm64-v8a,x86,x86_64)/cmake/Boost-1.72.0 -DBOOST_ROOT=/to_boost_forNDK_dir -DCMAKE_BUILD_TYPE=Release
 		○ make
-
+   
+# Build on OSX
+## Preinstall
+   - CMake 
+    - Openssl
+    - Python >=3.5
+    - Boost >=1.68
+ ## Building
+       ○ cd ./build/OSX
+       ○ cmake . -DBOOST_ROOT="/to_boost_root_path"   -DBOOST_INCLUDE_DIR="/to_boost_include_path"     -DBOOST_LIBRARY_DIR="/to_boost_library_path"  -DCMAKE_BUILD_TYPE=Release -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+       ○ cmake --build . --config Release
 
 

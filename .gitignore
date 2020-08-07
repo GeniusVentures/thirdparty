@@ -27,3 +27,5 @@
 # Log
 build-*.log
 
+# Excutables
+*.DS_Store

@@ -83,6 +83,8 @@ set(CMAKE_CHCHE_ARGS_CFLAGES_ADD
 set(_ED25519_EDIIMPL ref10) 
 set(_ED25519_HASH sha3_brainhub) 
 set(_ED25519_RANDOM bcryptgen) 
+# Set config for spdlog config path
+set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/spdlog/cmake")
 
 ##find_package(Boost REQUIRED  random filesystem program_options)
 ##message("---include -- ${BOOST_INCLUDE_DIR}")
