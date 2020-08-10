@@ -50,12 +50,19 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 	  -DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}
 	  -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
 	  -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-	  -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
+	  -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}	  
 	  -DOPENSSL_USE_STATIC_LIBS:BOOL=TRUE
+	  -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
+	  -DIOS_PLATFORM:STRING=${IOS_PLATFORM}
+	  -DIOS_ARCH:STRING=${IOS_ARCH}	  
+	  -DENABLE_ARC:STRING="0"
+	  -DENABLE_BITCODE:STRING=${ENABLED_BITCODE}
+	  -DENABLE_VISIBILITY:STRING=${ENABLED_VISIBILITY}
 	)
 	set(_CMAKE_COMMON_BUILD_PARAMS 
 	-DBoost_DIR:PATH=${Boost_DIR}
 	-DBoost_NO_SYSTEM_PATHS:BOOL=ON
+	-DBoost_USE_STATIC_LIBS:BOOL=ON	
    	#-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
 	)
 	include(ExternalProject)
@@ -67,10 +74,16 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 # Set Third party directory
 	set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
-# set config for ed25519 crypto
-	set(_ED25519_EDIIMPL ref10) 
-	set(_ED25519_HASH sha3_brainhub) 
-	set(_ED25519_RANDOM dev_urandom) 
+# Config for Boost
+set(Boost_NO_SYSTEM_PATHS  ON)
+set(Boost_USE_STATIC_LIBS ON)
+message("---boost dir ${Boost_DIR}")
+set(boost_headers_DIR "${BOOST_ROOT}/lib/release/${iOS_ABI}/cmake/boost_headers-1.72.0")
+set(boost_random_DIR "${BOOST_ROOT}/lib/release/${iOS_ABI}/cmake/boost_random-1.72.0")
+set(boost_system_DIR "${BOOST_ROOT}/lib/release/${iOS_ABI}/cmake/boost_system-1.72.0")
+set(boost_filesystem_DIR "${BOOST_ROOT}/lib/release/${iOS_ABI}/cmake/boost_filesystem-1.72.0")
+set(boost_program_options_DIR "${BOOST_ROOT}/lib/release/${iOS_ABI}/cmake/boost_program_options-1.72.0")
+
 find_package(Boost REQUIRED  random filesystem program_options)
 #message("---BOOST ${Boost_INCLUDE_DIRS}")
 if(BOOST_INCLUDE_DIR)
@@ -99,8 +112,14 @@ endif()
     set(OPENSSL_USE_STATIC_LIBS TRUE)
 	#SET(OPENSSL_LIBRARIES )
 	find_package(OpenSSL REQUIRED)
+
+# set config for ed25519 crypto
+set(_ED25519_EDIIMPL ref10) 
+set(_ED25519_HASH sha3_brainhub) 
+set(_ED25519_RANDOM dev_urandom) 
+
 # Common build by platforms
-	include(../CommonTargets.CMake)
+	include(CommonTargetsForiOS.CMake)
 # Build curl 7.60
 	# ExternalProject_Add(curl
 	# PREFIX curl
