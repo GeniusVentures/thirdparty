@@ -9,3 +9,5 @@
 !.gitignore
 !CMakeLists.txt
 !README.md
+!CommonTargetsForiOS.CMake
+!iOS.cmake

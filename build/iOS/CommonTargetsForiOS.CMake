@@ -1,0 +1,148 @@
+
+
+#
+# Set Protobug library path
+set(PROTOBUF_ROOT_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf")
+set(PROTOBUF_SRC_DIR "${PROTOBUF_ROOT_DIR}/cmake")
+
+
+
+# Builds GTest project from the git submodule.
+ExternalProject_Add(GTest
+  PREFIX GTest
+  SOURCE_DIR "${THIRDPARTY_DIR}/GTest"  
+  CMAKE_CACHE_ARGS                
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/GTest
+        -DCMAKE_CXX_STANDARD:STRING=17        
+)
+
+set(_FINDPACKAGE_GTEST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/GTest/lib/cmake/GTest")
+
+
+# Build protobuf project from the git submodule.
+ExternalProject_Add(protobuf
+  PREFIX protobuf
+  SOURCE_DIR "${PROTOBUF_SRC_DIR}"
+  CMAKE_CACHE_ARGS
+        -Dprotobuf_BUILD_TESTS:BOOL=OFF
+        -Dprotobuf_WITH_ZLIB:BOOL=OFF
+        -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
+        ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}
+	${_CMAKE_COMMON_BUILD_PARAMS}
+)
+
+# The location where protobuf-config.cmake will be installed varies by platform
+set(Protobuf_DIR "${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}")
+set(_FINDPACKAGE_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
+set(_FINDPACKAGE_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
+set(_PROTOBUF_PROTOC_EXEC "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
+
+# If OPENSSL_ROOT_DIR is set, propagate that hint path to the external projects with OpenSSL dependency.
+set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "")
+message("${OPENSSL_ROOT_DIR}---")
+string(COMPARE NOTEQUAL "${OPENSSL_ROOT_DIR}" "" not_empty)
+if (OPENSSL_ROOT_DIR)
+  message("openssl root dir is set.")
+  set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}")
+  set(OPENSSL_INCLUDE_DIR  "${OPENSSL_ROOT_DIR}/include")
+else()
+  message("openssl root dir is not set.")
+endif()
+
+
+#message("---${OPENSSL_INCLUDE_DIR}")
+# Builds leveldb
+ExternalProject_Add(leveldb
+  PREFIX leveldb
+  SOURCE_DIR "${THIRDPARTY_DIR}/leveldb"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/leveldb
+        ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}
+)
+set(_FINDPACKAGE_LEVELDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/leveldb/lib/cmake/leveldb")
+set(_FINDPACKAGE_LEVELDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/leveldb/include")
+
+# Builds Microsoft.GSL
+ExternalProject_Add(Microsoft.GSL
+  PREFIX Microsoft.GSL
+  SOURCE_DIR "${THIRDPARTY_DIR}/GSL"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/GSL
+        -DGSL_TEST:BOOL=OFF
+)
+set(_FINDPACKAGE_GSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/GSL/include")
+# Builds spdlog v1.4.2
+ExternalProject_Add(spdlog
+  PREFIX spdlog
+  SOURCE_DIR "${THIRDPARTY_DIR}/spdlog"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/spdlog
+        # -DSPDLOG_FMT_EXTERNAL:BOOL=ON
+        ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}
+)
+
+
+set(_FINDPACKAGE_SPDLOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/include")
+
+# Builds tsl_hat_trie 343e0dac54fc8491065e8a059a02db9a2b1248ab
+ExternalProject_Add(tsl_hat_trie
+  PREFIX tsl_hat_trie
+  SOURCE_DIR "${THIRDPARTY_DIR}/hat-trie"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/hat-trie
+)
+set(_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/hat-trie/lib/cmake/tsl_hat_trie")
+set(_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/hat-trie/include")
+# Builds Boost.DI c5287ee710ad90f5286d0cc2b9e49b72d89267a6
+ExternalProject_Add(Boost.DI
+  PREFIX Boost.DI
+  SOURCE_DIR "${THIRDPARTY_DIR}/Boost.DI"
+  CMAKE_CACHE_ARGS
+        -DBOOST_DI_OPT_BUILD_TESTS:BOOL=OFF
+        -DBOOST_DI_OPT_BUILD_EXAMPLES:BOOL=OFF
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Boost.DI
+)
+set(_FINDPACKAGE_BOOST_DI_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/lib/cmake/Boost.DI")
+set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/include")
+
+
+# Builds libp2p
+
+ExternalProject_Add(libp2p
+  PREFIX libp2p
+  SOURCE_DIR "${THIRDPARTY_DIR}/libp2p"
+  CMAKE_CACHE_ARGS
+        ${_CMAKE_ARGS_OPENSSL_ROOT_DIR}
+        -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
+        -DCMAKE_USE_OPENSSL:BOOL=ON
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/libp2p
+        -DTESTING:BOOL=OFF 
+        -DEXPOSE_MOCKS:BOOL=ON
+        -DHUNTER_ENABLED:BOOL=OFF
+        -DBUILD_EXAMPLES:BOOL=ON
+        -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
+        -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+        -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
+        -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
+        -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
+        -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
+        -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
+        -DBOOST_ROOT:PATH=${BOOST_ROOT}
+        -DBOOST_INCLUDE_DIR:PATH=${BOOST_INCLUDE_DIR}
+        -DBOOST_LIBRARY_DIR:PATH=${BOOST_LIBRARY_DIR}
+        -DBoost_LIB_DIR_STR:STRING="${BOOST_LIBRARY_DIR}"
+#        -DCMAKE_FIND_USE_PACKAGE_ROOT_PATH:BOOL=ON
+#        -DBoost_NO_SYSTEM_PATHS:BOOL=ON
+        ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}            
+        -DCMAKE_CXX_FLAGS:STRING=-I\ ${BOOST_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ \\\"${OPENSSL_INCLUDE_DIR}\\\"\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ ${_CXX_FLAGS_FOR_P2P}
+        -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+
+  DEPENDS GTest protobuf spdlog tsl_hat_trie Boost.DI Microsoft.GSL
+)
+set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p")
+set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
+set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR    "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include")
+
+
