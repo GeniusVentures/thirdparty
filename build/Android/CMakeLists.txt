@@ -92,6 +92,11 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	set(boost_program_options_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_program_options-1.72.0")
    #message("${boost_random_DIR}")
    find_package(Boost  REQUIRED COMPONENTS random filesystem program_options)
+   if(BOOST_INCLUDE_DIR)
+   else()
+	   set(BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
+	   set(BOOST_LIBRARY_DIR "${Boost_LIBRARIES}")
+   endif()
 ##### Test find openssl
 	
 # If OPENSSL_ROOT_DIR is set, propagate that hint path to the external projects with OpenSSL dependency.
@@ -115,11 +120,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 
 
 #message("---${OPENSSL_INCLUDE_DIR}")
-	if(BOOST_INCLUDE_DIR)
-	else()
-		set(BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
-		set(BOOST_LIBRARY_DIR "${Boost_LIBRARIES}")
-	endif()
+
 
 # Set config for grpc
   set(_grpc_BUILD_PARAMS

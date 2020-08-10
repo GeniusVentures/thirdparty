@@ -51,11 +51,12 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 	  -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
 	  -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
 	  -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
+	  -DOPENSSL_USE_STATIC_LIBS:BOOL=TRUE
 	)
 	set(_CMAKE_COMMON_BUILD_PARAMS 
 	-DBoost_DIR:PATH=${Boost_DIR}
 	-DBoost_NO_SYSTEM_PATHS:BOOL=ON
-   	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
+   	#-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
 	)
 	include(ExternalProject)
 # Config Paths by Platforms
@@ -78,6 +79,26 @@ else()
 	set(BOOST_LIBRARY_DIR "${Boost_LIBRARIES}")
 endif()
 	message("---boost include ${BOOST_INCLUDE_DIR}")
+
+
+# If OPENSSL_ROOT_DIR is set, propagate that hint path to the external projects with OpenSSL dependency.
+	set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "")
+     
+	message("${OPENSSL_ROOT_DIR}---")
+	string(COMPARE NOTEQUAL "${OPENSSL_ROOT_DIR}" "" not_empty)
+        set(OPENSSL)
+	if (OPENSSL_ROOT_DIR)
+	  message("openssl root dir is set.")
+	  set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}")
+	  set(OPENSSL_INCLUDE_DIR  "${OPENSSL_ROOT_DIR}/include")
+	else()
+	  message("openssl root dir is not set.")
+	endif()
+	SET(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_ROOT_DIR}/lib")
+	
+    set(OPENSSL_USE_STATIC_LIBS TRUE)
+	#SET(OPENSSL_LIBRARIES )
+	find_package(OpenSSL REQUIRED)
 # Common build by platforms
 	include(../CommonTargets.CMake)
 # Build curl 7.60
