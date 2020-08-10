@@ -318,15 +318,54 @@ ExternalProject_Add(rapidjson
 # Builds binaryen
 ExternalProject_Add(binaryen
   PREFIX binaryen
-  SOURCE_DIR "${THIRDPARTY_DIR}/binaryen"
+  #SOURCE_DIR "${THIRDPARTY_DIR}/binaryen"
+  URL https://github.com/Warchant/binaryen/archive/1.38.28-p0.zip
+  #URL_HASH SHA1=e34a32691eef432a87bdf63d3ca68e2669d04b21
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/binaryen                        
         -DBUILD_STATIC_LIB:BOOL=ON
+        -DBUILD_TOOLS:BOOL=OFF
+        -DENABLE_WERROR:BOOL=OFF
         ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}  
 	      ${_CMAKE_COMMON_BUILD_PARAMS} 
 )
 
+if(";${CMAKE_VS_PLATFORM_NAME};${MSVC_C_ARCHITECTURE_ID};${MSVC_CXX_ARCHITECTURE_ID};"
+    MATCHES ";(Win64|Itanium|x64|IA64);")
+   set(CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT ml64)
+else()
+   set(CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT ml)
+endif()
+
+
+ExternalProject_Add(libsecp256k1
+PREFIX libsecp256k1
+#SOURCE_DIR "${THIRDPARTY_DIR}/libsecp256k1"
+URL https://github.com/soramitsu/soramitsu-libsecp256k1/archive/c7630e1bac638c0f16ee66d4dce7b5c49eecbaa5.zip
+URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
+CMAKE_CACHE_ARGS
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/libsecp256k1                        
+      -DSECP256K1_BUILD_TEST:BOOL=OFF
+    #  -DUSE_ASM_X86_64:BOOL=ON 
+      ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}  
+      ${_CMAKE_COMMON_BUILD_PARAMS} 
+PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+      "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/libsecp256k1-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
+)
+
 #jsonrpc-lean ---install header file because there are any source files.  
+ExternalProject_Add(xxhash
+PREFIX xxhash
+#SOURCE_DIR "${THIRDPARTY_DIR}/libsecp256k1"
+URL https://github.com/hunter-packages/xxHash/archive/0.6.5-p0.tar.gz
+#URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
+CMAKE_CACHE_ARGS
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/xxhash                        
+      -DSECP256K1_BUILD_TEST:BOOL=OFF
+    #  -DUSE_ASM_X86_64:BOOL=ON
+      ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}  
+      ${_CMAKE_COMMON_BUILD_PARAMS} 
+)
 
 install(
         DIRECTORY ${THIRDPARTY_DIR}/jsonrpc-lean
