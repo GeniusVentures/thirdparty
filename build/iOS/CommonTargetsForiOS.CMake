@@ -56,9 +56,35 @@ ExternalProject_Add(grpc
   #  ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}
   	${_CMAKE_COMMON_BUILD_PARAMS}
 	#  ${_grpc_BUILD_PARAMS}
-  BUILD_COMMAND  make grpc++
+  BUILD_COMMAND  cmake --build . --target grpc++
   INSTALL_COMMAND ""
   )
+
+# Builds GTest project from the git submodule.
+ExternalProject_Add(GTest
+PREFIX GTest
+SOURCE_DIR "${THIRDPARTY_DIR}/GTest"  
+CMAKE_CACHE_ARGS                
+	  -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/GTest
+	  -DCMAKE_CXX_STANDARD:STRING=17
+	  ${_CMAKE_COMMON_BUILD_PARAMS}
+)
+
+set(_FINDPACKAGE_GTEST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/GTest/lib/cmake/GTest")
+
+# Builds leveldb
+ExternalProject_Add(leveldb
+  PREFIX leveldb
+  SOURCE_DIR "${THIRDPARTY_DIR}/leveldb"
+  CMAKE_CACHE_ARGS
+		-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/leveldb
+		-DLEVELDB_BUILD_BENCHMARKS:BOOL=OFF
+		-DLEVELDB_BUILD_TESTS:BOOL=OFF		
+        ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+)
+set(_FINDPACKAGE_LEVELDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/leveldb/lib/cmake/leveldb")
+set(_FINDPACKAGE_LEVELDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/leveldb/include")
 
 
 
