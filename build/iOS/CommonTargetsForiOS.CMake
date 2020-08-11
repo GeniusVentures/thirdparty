@@ -75,13 +75,16 @@ set(_FINDPACKAGE_GTEST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/GTest/lib/cmake/G
 # Builds leveldb
 ExternalProject_Add(leveldb
   PREFIX leveldb
-  SOURCE_DIR "${THIRDPARTY_DIR}/leveldb"
+  #SOURCE_DIR "${THIRDPARTY_DIR}/leveldb"
+  URL https://github.com/google/leveldb/archive/1.22.tar.gz
   CMAKE_CACHE_ARGS
 		-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/leveldb
 		-DLEVELDB_BUILD_BENCHMARKS:BOOL=OFF
 		-DLEVELDB_BUILD_TESTS:BOOL=OFF		
         ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}
         ${_CMAKE_COMMON_BUILD_PARAMS}
+  PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/leveldb-patch/CMakeLists.foriOS.txt" <SOURCE_DIR>/CMakeLists.txt
 )
 set(_FINDPACKAGE_LEVELDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/leveldb/lib/cmake/leveldb")
 set(_FINDPACKAGE_LEVELDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/leveldb/include")
