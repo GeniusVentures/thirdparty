@@ -48,6 +48,7 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 	set(_CMAKE_COMMON_BUILD_PARAMS 
 	-DBoost_DIR:PATH=${Boost_DIR}
 	-DBoost_NO_SYSTEM_PATHS:BOOL=ON
+	-DBoost_USE_STATIC_LIBS:BOOL=ON	
    	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
 	)
 	include(ExternalProject)
@@ -75,6 +76,7 @@ else()
 	set(BOOST_LIBRARY_DIR "${Boost_LIBRARIES}")
 endif()
 	message("---boost include ${BOOST_INCLUDE_DIR}")
+	message("-cmake system name ${CMAKE_SYSTEM_NAME}")
 # Common build by platforms
 	include(../CommonTargets.CMake)
 # Build curl 7.60

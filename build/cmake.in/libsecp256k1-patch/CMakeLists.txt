@@ -148,7 +148,8 @@ if(SECP256K1_ECMULT_STATIC_PRECOMPUTATION)
 
 	include(NativeExecutable)
 	add_native_executable(gen_context src/gen_context.c)
-	target_compile_definitions(gen_context PRIVATE HAVE_CONFIG_H)
+	#target_compile_definitions(gen_context PRIVATE HAVE_CONFIG_H)
+	target_compile_definitions(gen_context INTERFACE HAVE_CONFIG_H)
 
     add_custom_command(
         OUTPUT ecmult_static_context.h.stamp
