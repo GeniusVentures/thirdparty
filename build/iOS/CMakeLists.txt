@@ -41,8 +41,8 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 	  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
 	endforeach()
 
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -arch armv7")
- 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -arch armv7")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -arch ${IOS_ARCH}")
+ 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -arch ${IOS_ARCH}")
 	
 	set(CMAKE_CHCHE_ARGS_CFLAGES_ADD            
       #-DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}
@@ -51,6 +51,7 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 	 #-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
   
 	)
+	set(CMAKE_SYSTEM_NAME "iOS")
 	set(_CMAKE_COMMON_BUILD_PARAMS 
 		-DBoost_DIR:PATH=${Boost_DIR}
 		-DBoost_NO_SYSTEM_PATHS:BOOL=ON
@@ -120,7 +121,7 @@ endif()
 set(_ED25519_EDIIMPL ref10) 
 set(_ED25519_HASH sha3_brainhub) 
 set(_ED25519_RANDOM dev_urandom) 
-
+message("----target platform IOS=${IOS}")
 # Common build by platforms
 	include(CommonTargetsForiOS.CMake)
 # Build curl 7.60

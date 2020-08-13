@@ -118,10 +118,14 @@ set(_FINDPACKAGE_SPDLOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/include"
 # Builds tsl_hat_trie 343e0dac54fc8491065e8a059a02db9a2b1248ab
 ExternalProject_Add(tsl_hat_trie
   PREFIX tsl_hat_trie
-  SOURCE_DIR "${THIRDPARTY_DIR}/hat-trie"
+  #SOURCE_DIR "${THIRDPARTY_DIR}/hat-trie"
+  URL https://github.com/masterjedy/hat-trie/archive/343e0dac54fc8491065e8a059a02db9a2b1248ab.zip
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/hat-trie
         ${_CMAKE_COMMON_BUILD_PARAMS}
+        -DCMAKE_CXX_STANDARD:STRING="17"
+  PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/hat-trie-patch/CMakeLists.foriOS.txt" <SOURCE_DIR>/CMakeLists.txt
   TEST_COMMAND ""  
 )
 set(_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/hat-trie/lib/cmake/tsl_hat_trie")
