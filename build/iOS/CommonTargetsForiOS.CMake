@@ -43,7 +43,7 @@ ExternalProject_Add(grpc
   CMAKE_CACHE_ARGS
 	  -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/grpc	   
 	  -DgRPC_INSTALL:BOOL=OFF        
-      -DgRPC_BUILD_TESTS:BOOL=OFF
+    -DgRPC_BUILD_TESTS:BOOL=OFF
 	  -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
 	  -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
 	  -DgRPC_BUILD_GRPC_PHP_PLUGIN:BOOL=OFF
@@ -52,7 +52,7 @@ ExternalProject_Add(grpc
 	  -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
 	  -DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=OFF
 	  -DgRPC_BUILD_CSHARP_EXT:BOOL=OFF
-      -DgRPC_BUILD_CODEGEN:BOOL=OFF
+    -DgRPC_BUILD_CODEGEN:BOOL=OFF
   #  ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}
   	${_CMAKE_COMMON_BUILD_PARAMS}
 	#  ${_grpc_BUILD_PARAMS}
@@ -191,6 +191,39 @@ ExternalProject_Add(libp2p
 #	-DBoost_ARCHITECTURE:STRING="-x64"
 
   DEPENDS GTest protobuf spdlog tsl_hat_trie Boost.DI Microsoft.GSL
+)
+
+# builds ipfs-lite-cpp
+ExternalProject_Add(ipfs-lite-cpp
+  PREFIX ipfs-lite-cpp
+  SOURCE_DIR "${THIRDPARTY_DIR}/ipfs-lite-cpp"
+  CMAKE_CACHE_ARGS
+        ${_CMAKE_ARGS_OPENSSL_ROOT_DIR}
+        -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
+        -DBOOST_ROOT:PATH=${BOOST_ROOT}
+        -DBOOST_INCLUDE_DIR:PATH=${BOOST_INCLUDE_DIR}
+        -DBOOST_LIBRARY_DIR:PATH=${BOOST_LIBRARY_DIR}
+        -DBoost_LIB_DIR_STR:STRING="${BOOST_LIBRARY_DIR}"
+        -Dboost_headers_DIR:PATH=${boost_headers_DIR}
+		    -Dboost_random_DIR:PATH=${boost_random_DIR}
+		    -Dboost_system_DIR:PATH=${boost_system_DIR}
+		    -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
+		    -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp
+        -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
+        -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
+        -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
+        -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}	
+        -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+        -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
+	      -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
+        -Dleveldb_DIR:PATH=${_FINDPACKAGE_LEVELDB_DIR}        	      
+        -DTESTING:BOOL=${TESTING}
+        ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}  
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${BOOST_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ \\\"${OPENSSL_ROOT_DIR}/include\\\"\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+        #${_BOOST_FLAGS}
+  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p protobuf leveldb Boost.DI
 )
 
 
