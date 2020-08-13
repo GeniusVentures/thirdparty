@@ -27,3 +27,11 @@
 # Log
 build-*.log
 
+# Excutables
+*.DS_Store
+
+# boost libary
+boost/
+
+# restclient build directory
+restclient-cpp/build

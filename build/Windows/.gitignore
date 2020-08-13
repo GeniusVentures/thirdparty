@@ -1,0 +1,13 @@
+############################################################
+# build for Windows
+############################################################
+
+# not these files ...
+!.gitignore
+!CMakeLists.txt
+!README.md
+!config/
+
+# Ignore everything
+*
+
