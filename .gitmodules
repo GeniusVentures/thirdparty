@@ -9,12 +9,14 @@
 [submodule "restclient-cpp"]
 	path = restclient-cpp
 	url = https://github.com/mrtazz/restclient-cpp.git
+	ignore = untracked
 [submodule "celer-network/pb3-gen-sol"]
 	path = celer-network/pb3-gen-sol
 	url = https://github.com/celer-network/pb3-gen-sol.git
 [submodule "boost-for-mobile"]
 	path = boost-for-mobile
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/boost-for-mobile.git
+        branch = develop
 [submodule "lmdb"]
 	path = lmdb
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/lmdb.git
@@ -27,10 +29,11 @@
 [submodule "grpc"]
 	path = grpc
 	url = https://github.com/grpc/grpc
+        branch = master
 [submodule "leveldb"]
 	path = leveldb
 	url = https://github.com/google/leveldb
-
+        branch = master
 [submodule "GSL"]
 	path = GSL
 	url = https://github.com/Microsoft/GSL
@@ -57,12 +60,14 @@
 [submodule "ipfs-pubsub"]
 	path = ipfs-pubsub
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-pubsub.git
+        branch = develop
 [submodule "GTest"]
 	path = GTest
 	url = https://github.com/google/googletest
 [submodule "ed25519"]
 	path = ed25519
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ed25519.git
+        branch = develop
 [submodule "sr25519"]
 	path = sr25519
 	url = https://github.com/Warchant/sr25519-crust
