@@ -16,7 +16,6 @@
 [submodule "boost-for-mobile"]
 	path = boost-for-mobile
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/boost-for-mobile.git
-        branch = develop
 [submodule "lmdb"]
 	path = lmdb
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/lmdb.git
@@ -46,21 +45,20 @@
 [submodule "Boost.DI"]
 	path = Boost.DI
 	url = https://github.com/masterjedy/di
+        branch = cpp14
 [submodule "cryptopp"]
 	path = cryptopp
 	url = https://github.com/weidai11/cryptopp
-	branch = CRPTOPP_8_1_0
 [submodule "cpp-ipfs-http-client"]
 	path = cpp-ipfs-http-client
 	url = https://github.com/vasild/cpp-ipfs-http-client
 [submodule "json"]
 	path = json
 	url = https://github.com/nlohmann/json
-
 [submodule "ipfs-pubsub"]
 	path = ipfs-pubsub
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-pubsub.git
-        branch = develop
+        branch = cross-build
 [submodule "GTest"]
 	path = GTest
 	url = https://github.com/google/googletest
