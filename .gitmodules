@@ -50,25 +50,23 @@
 [submodule "cryptopp"]
 	path = cryptopp
 	url = https://github.com/weidai11/cryptopp
-	branch = CRPTOPP_8_1_0
 [submodule "cpp-ipfs-http-client"]
 	path = cpp-ipfs-http-client
 	url = https://github.com/vasild/cpp-ipfs-http-client
 [submodule "json"]
 	path = json
 	url = https://github.com/nlohmann/json
-
 [submodule "ipfs-pubsub"]
 	path = ipfs-pubsub
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-pubsub.git
-        branch = master
+        branch = cross-build
 [submodule "GTest"]
 	path = GTest
 	url = https://github.com/google/googletest
 [submodule "ed25519"]
 	path = ed25519
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ed25519.git
-        branch = develop
+        branch = master
 [submodule "sr25519"]
 	path = sr25519
 	url = https://github.com/Warchant/sr25519-crust
