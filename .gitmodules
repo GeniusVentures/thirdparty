@@ -5,7 +5,7 @@
 [submodule "ipfs-lite-cpp"]
 	path = ipfs-lite-cpp
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-lite-cpp.git
-	branch = develop
+	branch = master
 [submodule "restclient-cpp"]
 	path = restclient-cpp
 	url = https://github.com/mrtazz/restclient-cpp.git
@@ -16,7 +16,7 @@
 [submodule "boost-for-mobile"]
 	path = boost-for-mobile
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/boost-for-mobile.git
-        branch = develop
+        branch = master
 [submodule "lmdb"]
 	path = lmdb
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/lmdb.git
@@ -60,7 +60,7 @@
 [submodule "ipfs-pubsub"]
 	path = ipfs-pubsub
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-pubsub.git
-        branch = develop
+        branch = master
 [submodule "GTest"]
 	path = GTest
 	url = https://github.com/google/googletest
