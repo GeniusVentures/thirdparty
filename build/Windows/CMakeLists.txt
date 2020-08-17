@@ -12,17 +12,18 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
 
-if (CMAKE_BUILD_TYPE EQUAL Debug)
+if (CMAKE_BUILD_TYPE STREQUAL Debug)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MTd")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MTd")  
   set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Debug>:Debug>")  
-endif (CMAKE_BUILD_TYPE EQUAL Debug) 
+endif (CMAKE_BUILD_TYPE STREQUAL Debug) 
 
-if (CMAKE_BUILD_TYPE EQUAL Release)
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MT")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")  
+  message("-----------Release --")
   set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Realease>:Release>")  
-endif (CMAKE_BUILD_TYPE EQUAL Release) 
+endif (CMAKE_BUILD_TYPE STREQUAL "Release") 
 
 function(print)
   message(STATUS "[${CMAKE_PROJECT_NAME}] ${ARGV}")
@@ -53,6 +54,7 @@ include(ExternalProject)
 	
 # Config Paths by Platforms
 set(_CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS}")
+
 set(_BOOST_FLAGS  
   -DBoost_USE_MULTITHREADED:BOOL=ON
   -DBoost_USE_STATIC_RUNTIME:BOOL=ON
@@ -69,7 +71,7 @@ set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 set(_CMAKE_COMMON_BUILD_PARAMS 
    #-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
 )
-set(CMAKE_CHCHE_ARGS_CFLAGES_ADD
+set(CMAKE_CACHE_ARGS_CFLAGES_ADD
       -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
       -DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}
       -DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}
@@ -78,6 +80,8 @@ set(CMAKE_CHCHE_ARGS_CFLAGES_ADD
       -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}
       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}      
 )
+
+#message("----cmake cache ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}")
 
 # set config for ed25519 crypto
 set(_ED25519_EDIIMPL ref10) 
@@ -93,16 +97,16 @@ set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake
 
 set(_BOOST_SRC_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost/src/Boost")
 ExternalProject_Add( Boost
-PREFIX Boost  
-GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
-GIT_TAG           "boost-1.72.0"
-GIT_SUBMODULES_RECURSE  TRUE
-CONFIGURE_COMMAND  ""
-PATCH_COMMAND "${_BOOST_SRC_DIR}/bootstrap.bat"
-BUILD_COMMAND ${_BOOST_SRC_DIR}/b2.exe headers
-BUILD_IN_SOURCE  TRUE
-INSTALL_COMMAND <SOURCE_DIR>/b2.exe address-model=64 architecture=x86 link=static threading=multi runtime-link=shared  --build-type=minimal stage --stagedir=stage/x64 --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --build-dir=<SOURCE_DIR>/../build  --prefix=<SOURCE_DIR>/../..   --libdir=<SOURCE_DIR>/../../lib install
-UPDATE_COMMAND ""
+      PREFIX Boost  
+      GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
+      GIT_TAG           "boost-1.72.0"
+      GIT_SUBMODULES_RECURSE  TRUE
+      CONFIGURE_COMMAND  ""
+      PATCH_COMMAND <SOURCE_DIR>/bootstrap.bat vc141
+      BUILD_COMMAND <SOURCE_DIR>/b2.exe headers
+      BUILD_IN_SOURCE  TRUE
+      INSTALL_COMMAND <SOURCE_DIR>/b2.exe toolset=msvc-14.1 runtime-link=static cxxflags="${CMAKE_CXX_FLAGS}"  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release  link=static threading=multi   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../build  --prefix=<SOURCE_DIR>/../..   --libdir=<SOURCE_DIR>/../../lib install
+      UPDATE_COMMAND ""
 )
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/Boost")
 set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
@@ -121,21 +125,34 @@ set(_BOOST_CACHE_ARGS
       -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
       -DBoost_DIR:PATH=${boost_DIR}
       -DBoost_USE_MULTITHREADED:BOOL=ON
-      -DBoost_USE_STATIC_RUNTIME:BOOL=OFF
+      -DBoost_USE_STATIC_RUNTIME:BOOL=ON
       -DBoost_USE_STATIC_LIBS:BOOL=ON
       -DBoost_NO_SYSTEM_PATHS:BOOL=ON
       #-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include/boost-1_72      
 )
 # OpenSSL 
-set(_OPENSSL_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/grpc/lib)
-set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/grpc/third_party/boringssl-with-bazel/src/include)
-set(_OPENSSL_CACHE_ARGS
-    -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
-    -DOPENSSL_CRYPTO_LIBRARY:PATH=${_OPENSSL_LIB_DIR}
-    -DOPENSSL_SSL_LIBRARY:PATH=${_OPENSSL_LIB_DIR}
-    -DOPENSSL_INCLUDE_DIR:STRING=${THIRDPARTY_DIR}/grpc/third_party/boringssl-with-bazel/src/include
-    -DOPENSSL_LIBRARIES:PATH=${_OPENSSL_LIB_DIR}
-)
+find_package(OpenSSL)
+
+if(OPENSSL_FOUND)
+  message("openssl package is found. include path is ${OPENSSL_INCLUDE_DIR}")
+  set(_OPENSSL_INCLUDE_DIR ${OPENSSL_INCLUDE_DIR})
+  set(_OPENSSL_CACHE_ARGS 
+      #-DOPENSSL_USE_STATIC_LIBS:BOOL=OFF    
+      -DOPENSSL_INCLUDE_DIR:STRING=${_OPENSSL_INCLUDE_DIR}    
+  )
+
+else()
+  set(_OPENSSL_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/grpc/lib)
+  set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/grpc/third_party/boringssl-with-bazel/src/include)
+  set(_OPENSSL_CACHE_ARGS
+      -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+      -DOPENSSL_CRYPTO_LIBRARY:PATH=${_OPENSSL_LIB_DIR}
+      -DOPENSSL_SSL_LIBRARY:PATH=${_OPENSSL_LIB_DIR}
+      -DOPENSSL_INCLUDE_DIR:STRING=${THIRDPARTY_DIR}/grpc/third_party/boringssl-with-bazel/src/include
+      -DOPENSSL_LIBRARIES:PATH=${_OPENSSL_LIB_DIR}
+  )
+endif()
+
 # Common build by platforms
 include(../CommonTargets.CMake)
   
