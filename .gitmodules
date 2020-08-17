@@ -9,6 +9,7 @@
 [submodule "restclient-cpp"]
 	path = restclient-cpp
 	url = https://github.com/mrtazz/restclient-cpp.git
+	ignore = untracked
 [submodule "celer-network/pb3-gen-sol"]
 	path = celer-network/pb3-gen-sol
 	url = https://github.com/celer-network/pb3-gen-sol.git
@@ -27,10 +28,11 @@
 [submodule "grpc"]
 	path = grpc
 	url = https://github.com/grpc/grpc
+        branch = master
 [submodule "leveldb"]
 	path = leveldb
 	url = https://github.com/google/leveldb
-
+        branch = master
 [submodule "GSL"]
 	path = GSL
 	url = https://github.com/Microsoft/GSL
@@ -43,26 +45,27 @@
 [submodule "Boost.DI"]
 	path = Boost.DI
 	url = https://github.com/masterjedy/di
+        branch = cpp14
 [submodule "cryptopp"]
 	path = cryptopp
 	url = https://github.com/weidai11/cryptopp
-	branch = CRPTOPP_8_1_0
 [submodule "cpp-ipfs-http-client"]
 	path = cpp-ipfs-http-client
 	url = https://github.com/vasild/cpp-ipfs-http-client
 [submodule "json"]
 	path = json
 	url = https://github.com/nlohmann/json
-
 [submodule "ipfs-pubsub"]
 	path = ipfs-pubsub
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-pubsub.git
+        branch = cross-build
 [submodule "GTest"]
 	path = GTest
 	url = https://github.com/google/googletest
 [submodule "ed25519"]
 	path = ed25519
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ed25519.git
+        branch = develop
 [submodule "sr25519"]
 	path = sr25519
 	url = https://github.com/Warchant/sr25519-crust
