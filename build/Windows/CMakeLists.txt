@@ -84,23 +84,70 @@ set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub) 
 set(_ED25519_RANDOM bcryptgen) 
 # Set config for spdlog config path
-set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/spdlog/cmake")
-
+#set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/spdlog/cmake")
+set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
 ##find_package(Boost REQUIRED  random filesystem program_options)
 ##message("---include -- ${BOOST_INCLUDE_DIR}")
 
+# build ------------boost ---------------------# 
+
+set(_BOOST_SRC_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost/src/Boost")
+ExternalProject_Add( Boost
+PREFIX Boost  
+GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
+GIT_TAG           "boost-1.72.0"
+GIT_SUBMODULES_RECURSE  TRUE
+CONFIGURE_COMMAND  ""
+PATCH_COMMAND "${_BOOST_SRC_DIR}/bootstrap.bat"
+BUILD_COMMAND ${_BOOST_SRC_DIR}/b2.exe headers
+BUILD_IN_SOURCE  TRUE
+INSTALL_COMMAND <SOURCE_DIR>/b2.exe address-model=64 architecture=x86 link=static threading=multi runtime-link=shared  --build-type=minimal stage --stagedir=stage/x64 --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --build-dir=<SOURCE_DIR>/../build  --prefix=<SOURCE_DIR>/../..   --libdir=<SOURCE_DIR>/../../lib install
+UPDATE_COMMAND ""
+)
+set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/Boost")
+set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
+set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-1.72.0")
+set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-1.72.0")
+set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-1.72.0")
+set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-1.72.0")
+set(boost_DIR "${_BOOST_ROOT}/lib/cmake/Boost-1.72.0")
+set(_Boost_INCLUDE_DIR "${_BOOST_ROOT}/include/boost-1_72")
+
+set(_BOOST_CACHE_ARGS
+      -Dboost_headers_DIR:PATH=${boost_headers_DIR}
+      -Dboost_random_DIR:PATH=${boost_random_DIR}
+      -Dboost_system_DIR:PATH=${boost_system_DIR}
+      -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
+      -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
+      -DBoost_DIR:PATH=${boost_DIR}
+      -DBoost_USE_MULTITHREADED:BOOL=ON
+      -DBoost_USE_STATIC_RUNTIME:BOOL=OFF
+      -DBoost_USE_STATIC_LIBS:BOOL=ON
+      -DBoost_NO_SYSTEM_PATHS:BOOL=ON
+      #-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include/boost-1_72      
+)
+# OpenSSL 
+set(_OPENSSL_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/grpc/lib)
+set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/grpc/third_party/boringssl-with-bazel/src/include)
+set(_OPENSSL_CACHE_ARGS
+    -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+    -DOPENSSL_CRYPTO_LIBRARY:PATH=${_OPENSSL_LIB_DIR}
+    -DOPENSSL_SSL_LIBRARY:PATH=${_OPENSSL_LIB_DIR}
+    -DOPENSSL_INCLUDE_DIR:STRING=${THIRDPARTY_DIR}/grpc/third_party/boringssl-with-bazel/src/include
+    -DOPENSSL_LIBRARIES:PATH=${_OPENSSL_LIB_DIR}
+)
 # Common build by platforms
 include(../CommonTargets.CMake)
   
 # Build curl 7.60
-	ExternalProject_Add(curl
-	PREFIX curl
-	SOURCE_DIR "${THIRDPARTY_DIR}/curl-android-ios/curl"
-	CMAKE_CACHE_ARGS
-		-DBUILD_TESTING:BOOL=OFF
-		-DCMAKE_USE_OPENSSL:BOOL=ON
-		-DCURL_STATICLIB:BOOL=ON
-		-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/curl
-	)
+# 	ExternalProject_Add(curl
+# 	PREFIX curl
+# 	SOURCE_DIR "${THIRDPARTY_DIR}/curl-android-ios/curl"
+# 	CMAKE_CACHE_ARGS
+# 		-DBUILD_TESTING:BOOL=OFF
+# 	-DCMAKE_USE_OPENSSL:BOOL=ON
+# 	-DCURL_STATICLIB:BOOL=ON
+# 	-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/curl
+# )
 endif (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
 
