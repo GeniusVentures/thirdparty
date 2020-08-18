@@ -130,6 +130,9 @@ set(_BOOST_CACHE_ARGS
       -DBoost_NO_SYSTEM_PATHS:BOOL=ON
       #-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include/boost-1_72      
 )
+message("---opensssl root=${OpenSSL_ROOT}")
+set(OPENSSL_MSVC_STATIC_RT  ON)
+set(OPENSSL_USE_STATIC_LIBS  ON)
 # OpenSSL 
 find_package(OpenSSL)
 
@@ -146,6 +149,7 @@ else()
   set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/grpc/third_party/boringssl-with-bazel/src/include)
   set(_OPENSSL_CACHE_ARGS
       -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+	  -DOPENSSL_MSVC_STATIC_RT:BOOL=ON
       -DOPENSSL_CRYPTO_LIBRARY:PATH=${_OPENSSL_LIB_DIR}
       -DOPENSSL_SSL_LIBRARY:PATH=${_OPENSSL_LIB_DIR}
       -DOPENSSL_INCLUDE_DIR:STRING=${THIRDPARTY_DIR}/grpc/third_party/boringssl-with-bazel/src/include

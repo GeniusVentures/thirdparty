@@ -9,7 +9,7 @@ This is the repository for third party of SuperGenius
 - CMake 
 - Visual Studio 2015 or 2017
 - Perl 
-- Openssl
+- Openssl   Click the link to visit OpenSSL download page: [here](http://slproweb.com/products/Win32OpenSSL.html)
 - Python >=3.5
 ## Building	
     ○ git pull
@@ -17,7 +17,7 @@ This is the repository for third party of SuperGenius
 	○ cd ./build
 	○ mkdir Release
 	○ cd Release
-	○ cmake ../Windows -G "Visual Studio 15 2017 Win64"   -DCMAKE_USE_OPENSSL=ON     -DBOOST_ROOT="to_boost_install_path"   \  -DBOOST_INCLUDE_DIR="to_boost_install_path"     -DBOOST_LIBRARY_DIR="to_boost_install_path/lib64-msvc-14.1"   \ -DOPENSSL_ROOT_DIR="C:/Program Files/OpenSSL-Win64" -DCMAKE_BUILD_TYPE=Release
+	○ cmake ../Windows -G "Visual Studio 15 2017 Win64"  -DCMAKE_BUILD_TYPE=Release
 	○ cmake --build . --config Release
 ### Building for debugging
 	○ git pull
