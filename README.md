@@ -25,7 +25,7 @@ This is the repository for third party of SuperGenius
 	○ cd ./build
 	○ mkdir Debug
 	○ cd Debug
-	○ cmake ../Windows -G "Visual Studio 15 2017 Win64"   -DCMAKE_USE_OPENSSL=ON     -DBOOST_ROOT="to_boost_install_path"   \  -DBOOST_INCLUDE_DIR="to_boost_install_path"     -DBOOST_LIBRARY_DIR="to_boost_install_path/lib64-msvc-14.1"   \ -DOPENSSL_ROOT_DIR="C:/Program Files/OpenSSL-Win64" -DCMAKE_BUILD_TYPE=Debug
+	○ cmake ../Windows -G "Visual Studio 15 2017 Win64"  -DCMAKE_BUILD_TYPE=Debug
 	○ cmake --build . --config Debug
 # Build on Linux
 ## Preinstall
