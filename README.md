@@ -25,7 +25,7 @@ This is the repository for third party of SuperGenius
 	○ cd ./build
 	○ mkdir Debug
 	○ cd Debug
-	○ cmake ../Windows -G "Visual Studio 15 2017 Win64"  -DCMAKE_BUILD_TYPE=Debug
+	○ cmake ../Windows -G "Visual Studio 15 2017 Win64"  -DCMAKE_BUILD_TYPE=Debug -DOPENSSL_ROOT_DIR=/to_prebuilt_openssl_root_dir 
 	○ cmake --build . --config Debug
 # Build on Linux
 ## Preinstall
@@ -34,7 +34,8 @@ This is the repository for third party of SuperGenius
 - Python >=3.5
 ## Building
 	○ cd ./build/Linux
-	○ cmake . -DOPENSSL_ROOT_DIR=/usr/include/openssl -DCMAKE_BUILD_TYPE=Release -DBOOST_DIR=/to_boost_install_root_path()
+	○ export PATH=$PATH:$(pwd)/grpc/src/grpc-build
+	○ cmake . -DCMAKE_BUILD_TYPE=Release
 	○ make
 # Build on Android
 ## Preinstall

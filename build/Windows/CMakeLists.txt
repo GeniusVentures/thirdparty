@@ -55,12 +55,6 @@ include(ExternalProject)
 # Config Paths by Platforms
 set(_CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS}")
 
-set(_BOOST_FLAGS  
-  -DBoost_USE_MULTITHREADED:BOOL=ON
-  -DBoost_USE_STATIC_RUNTIME:BOOL=ON
-)	
-#set(_CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS}")	
-#	set(Boost_USE_STATIC_LIBS ON)	
 set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/cmake")  
 set(_PROTOBUF_PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
 set(_FORCE_MULTILE ON)
@@ -157,8 +151,8 @@ else()
   )
 endif()
 
-# Common build by platforms
-include(../CommonTargets.CMake)
+# build common libraries by platforms
+  include(../CommonTargets.CMake)
   
 # Build curl 7.60
 # 	ExternalProject_Add(curl

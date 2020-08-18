@@ -51,22 +51,34 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
 	endforeach()
 
-	set(CMAKE_CHCHE_ARGS_CFLAGES_ADD            
-      #-DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}
-      #-DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}
-      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+	set(CMAKE_CACHE_ARGS_CFLAGES_ADD
+    #   -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
+    #   -DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}
+    #   -DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}
+    #   -DCMAKE_C_FLAGS_RELEASE:STRING=${CMAKE_C_FLAGS_RELEASE}
+    #   -DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}
+    #   -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}
+      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}      
 	)
+
 	set(_CMAKE_COMMON_BUILD_PARAMS 
-	-DBoost_DIR:PATH=${Boost_DIR}
-	-DBoost_NO_SYSTEM_PATHS:BOOL=ON
+	#-DBoost_DIR:PATH=${Boost_DIR}
+	#-DBoost_NO_SYSTEM_PATHS:BOOL=ON
    	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
 	)
 	include(ExternalProject)
 # Config Paths by Platforms
 	set(CXX_FLAGS_FOR_P2P "")
-	#set(Boost_USE_STATIC_LIBS OFF)
-	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+	# set(_CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS}")
 
+# Set config path for protobuf	
+	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+	# set(_PROTOBUF_PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
+# Set grpc config
+	set(_grpc_BUILD_PARAMS
+		-DCMAKE_PROGRAM_PATH:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin#:${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc-build:${CMAKE_CURRENT_BINARY_DIR}/grpc/bin"
+	)
+	
 # Set Third party directory
 	set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
@@ -74,17 +86,79 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	set(_ED25519_EDIIMPL ref10) 
 	set(_ED25519_HASH sha3_brainhub) 
 	set(_ED25519_RANDOM dev_urandom) 
-# Set config for spdlog config path
-set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/spdlog/cmake")
 
-find_package(Boost REQUIRED  random filesystem program_options)
+# Set config for spdlog config path
+	set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
+
+# build boost 
+	ExternalProject_Add( Boost
+		PREFIX Boost  
+		GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
+		GIT_TAG           "boost-1.72.0"
+		GIT_SUBMODULES_RECURSE  TRUE
+		CONFIGURE_COMMAND  ""
+		PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
+		BUILD_COMMAND <SOURCE_DIR>/b2 headers
+		BUILD_IN_SOURCE  TRUE
+		INSTALL_COMMAND <SOURCE_DIR>/b2 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../build  --prefix=<SOURCE_DIR>/../..   --libdir=<SOURCE_DIR>/../../lib install
+		UPDATE_COMMAND ""
+	)
+	set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/Boost")
+	set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
+	set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-1.72.0")
+	set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-1.72.0")
+	set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-1.72.0")
+	set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-1.72.0")
+	set(boost_DIR "${_BOOST_ROOT}/lib/cmake/Boost-1.72.0")
+	set(_Boost_INCLUDE_DIR "${_BOOST_ROOT}/include")
+
+	set(_BOOST_CACHE_ARGS
+		-Dboost_headers_DIR:PATH=${boost_headers_DIR}
+		-Dboost_random_DIR:PATH=${boost_random_DIR}
+		-Dboost_system_DIR:PATH=${boost_system_DIR}
+		-Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
+		-Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
+		-DBoost_DIR:PATH=${boost_DIR}
+		-DBoost_USE_MULTITHREADED:BOOL=ON
+		-DBoost_USE_STATIC_RUNTIME:BOOL=ON
+		-DBoost_USE_STATIC_LIBS:BOOL=ON
+		-DBoost_NO_SYSTEM_PATHS:BOOL=ON
+		#-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include/boost-1_72      
+	)
+# build OpenSSL 
+	# ExternalProject_Add(OpenSSL
+	# 	PRIFIX OpenSSL
+	# 	URL   https://github.com/openssl/openssl/archive/OpenSSL_1_1_1g.tar.gz
+	# 	DOWNLOAD_DIR  "${THIRDPARTY_DIR}/openssl/download"
+	# 	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
+	# 	CONFIGURE_COMMAND  ""
+	# 	PATCH_COMMAND ""
+	# 	BUILD_COMMAND ""
+	# 	BUILD_IN_SOURCE  TRUE
+	# 	INSTALL_COMMAND ""
+	# 	UPDATE_COMMAND ""  
+	#    )
+	set(OPENSSL_USE_STATIC_LIBS  ON)
+	find_package(OpenSSL)
+
+	if(OPENSSL_FOUND)
+		message("openssl package is found. include path is ${OPENSSL_INCLUDE_DIR}")
+		set(_OPENSSL_INCLUDE_DIR ${OPENSSL_INCLUDE_DIR})
+		set(_OPENSSL_CACHE_ARGS 
+			-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+			-DOPENSSL_INCLUDE_DIR:STRING=${_OPENSSL_INCLUDE_DIR}    
+		)
+	else()
+	   
+	endif()
+#find_package(Boost REQUIRED  random filesystem program_options)
 #message("---BOOST ${Boost_INCLUDE_DIRS}")
-if(BOOST_INCLUDE_DIR)
-else()
-	set(BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
-	set(BOOST_LIBRARY_DIR "${Boost_LIBRARIES}")
-endif()
-	message("---boost include ${BOOST_INCLUDE_DIR}")
+# if(BOOST_INCLUDE_DIR)
+# else()
+# 	set(BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
+# 	set(BOOST_LIBRARY_DIR "${Boost_LIBRARIES}")
+# endif()
+# 	message("---boost include ${BOOST_INCLUDE_DIR}")
 # Common build by platforms
 	include(../CommonTargets.CMake)
 # Build curl 7.60
