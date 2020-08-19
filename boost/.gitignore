@@ -38,6 +38,7 @@ config.h
 # files commonly related to building out-of-tree
 /build/
 /src/
+/include/
 /tmp
 /download
 # macOS
