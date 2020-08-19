@@ -153,6 +153,10 @@ else()
   )
 endif()
 
+# Set config for patching binaryen 
+set(_binaryen_patch
+ PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/binaryen-patch/parser.h" <SOURCE_DIR>/src/emscripten-optimizer/parser.h)
+
 # build common libraries by platforms
   include(../CommonTargets.CMake)
   

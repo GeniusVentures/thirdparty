@@ -33,8 +33,9 @@ This is the repository for third party of SuperGenius
 - Openssl
 - Python >=3.5
 ## Building
-	○ cd ./build/Linux
-	○ export PATH=$PATH:$(pwd)/grpc/src/grpc-build
+	○ cd ./build/Linux	
+	○ ../../sr25519/scripts/install_dependencies.sh
+	○ export PATH=$PATH:$(pwd)/grpc/src/grpc-build:~/.cargo/bin
 	○ cmake . -DCMAKE_BUILD_TYPE=Release
 	○ make
 # Build on Android

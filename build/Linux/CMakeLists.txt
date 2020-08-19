@@ -126,31 +126,49 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 		#-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include/boost-1_72      
 	)
 # build OpenSSL 
-	# ExternalProject_Add(OpenSSL
-	# 	PRIFIX OpenSSL
-	# 	URL   https://github.com/openssl/openssl/archive/OpenSSL_1_1_1g.tar.gz
-	# 	DOWNLOAD_DIR  "${THIRDPARTY_DIR}/openssl/download"
-	# 	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
-	# 	CONFIGURE_COMMAND  ""
-	# 	PATCH_COMMAND ""
-	# 	BUILD_COMMAND ""
-	# 	BUILD_IN_SOURCE  TRUE
-	# 	INSTALL_COMMAND ""
-	# 	UPDATE_COMMAND ""  
-	#    )
+	ExternalProject_Add(openssl
+		PREFIX openssl
+		#URL   https://github.com/openssl/openssl/archive/OpenSSL_1_1_1g.tar.gz
+		GIT_REPOSITORY "https://github.com/openssl/openssl.git"
+		GIT_TAG "OpenSSL_1_1_1g"
+		GIT_SUBMODULES_RECURSE  TRUE
+		# DOWNLOAD_DIR  "${THIRDPARTY_DIR}/openssl/download"
+		SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
+		CONFIGURE_COMMAND  <SOURCE_DIR>/config --prefix=${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Linux --openssldir=${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Linux
+		PATCH_COMMAND ""
+		BUILD_COMMAND make
+		BUILD_IN_SOURCE  TRUE
+		INSTALL_COMMAND make install
+		UPDATE_COMMAND ""  
+	   )
 	set(OPENSSL_USE_STATIC_LIBS  ON)
-	find_package(OpenSSL)
-
-	if(OPENSSL_FOUND)
-		message("openssl package is found. include path is ${OPENSSL_INCLUDE_DIR}")
-		set(_OPENSSL_INCLUDE_DIR ${OPENSSL_INCLUDE_DIR})
-		set(_OPENSSL_CACHE_ARGS 
+	# find_package(OpenSSL)
+	set(_OPENSSL_CACHE_ARGS 
 			-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
-			-DOPENSSL_INCLUDE_DIR:STRING=${_OPENSSL_INCLUDE_DIR}    
+			-DOPENSSL_ROOT_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Linux  
 		)
-	else()
+	set(_OPENSSL_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Linux/include)
+	set(_OPENSSL_target openssl)
+	# if(OPENSSL_FOUND)
+	# 	message("openssl package is found. include path is ${OPENSSL_INCLUDE_DIR}")
+	# 	set(_OPENSSL_INCLUDE_DIR ${OPENSSL_INCLUDE_DIR})
+	# 	set(_OPENSSL_CACHE_ARGS 
+	# 		-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+	# 		-DOPENSSL_INCLUDE_DIR:STRING=${_OPENSSL_INCLUDE_DIR}    
+	# 	)
+	# else()
 	   
-	endif()
+	# endif()
+# check rustc
+# find_program(rustc MAMES rustc)
+# if(rustc)	
+# else()
+#     message("--installing rustc.")
+# 	execute_process(
+# 		COMMAND ${THIRDPARTY_DIR}/sr25519/scripts/install_dependencies.sh
+# 		WORKING_DIRECTORY ~
+# 		)
+# endif()
 #find_package(Boost REQUIRED  random filesystem program_options)
 #message("---BOOST ${Boost_INCLUDE_DIRS}")
 # if(BOOST_INCLUDE_DIR)

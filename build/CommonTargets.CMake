@@ -226,7 +226,7 @@ ExternalProject_Add(libp2p
         -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
         ${_CMAKE_COMMON_BUILD_PARAMS}
 
-  DEPENDS GTest protobuf spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost
+  DEPENDS GTest protobuf spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost ${_OPENSSL_target}
 )
 set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p")
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
@@ -280,14 +280,14 @@ ExternalProject_Add(ed25519
 set(_FINDPACKAGE_ed25519_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ed25519/lib/cmake/ed25519")
 
 
-option(INSTALL_RUSTC "Build RUSTC" OFF)
+# option(INSTALL_RUSTC "Build RUSTC" OFF)
 
-if(INSTALL_RUSTC)
-  execute_process(
-    COMMAND bash -c "${THIRDPARTY_DIR}/sr25519/scripts/install_dependencies.sh"
-    WORKING_DIRECTORY ${THIRDPARTY_DIR}/sr25519
-  )
-endif()
+# if(INSTALL_RUSTC)
+#   execute_process(
+#     COMMAND bash -c "${THIRDPARTY_DIR}/sr25519/scripts/install_dependencies.sh"
+#     WORKING_DIRECTORY ${THIRDPARTY_DIR}/sr25519
+#   )
+# endif()
 ##### apply patch for building on windows ######
 configure_file(${THIRDPARTY_DIR}/build-patch/config/sr25519/sr25519Config-noconfig.cmake  ${THIRDPARTY_DIR}/sr25519/sr25519Config-noconfig.cmake COPYONLY)
 
@@ -302,8 +302,8 @@ ExternalProject_Add(sr25519
         -DBUILD_SHARED_LIBS:BOOL=FALSE
         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}  
         -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
+  # DEPENDS rustc
 )
-
 # Builds rapidjson
 ExternalProject_Add(rapidjson
   PREFIX rapidjson
@@ -332,7 +332,8 @@ ExternalProject_Add(binaryen
         -DENABLE_WERROR:BOOL=OFF
         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}  
         ${_CMAKE_COMMON_BUILD_PARAMS} 
-  PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/binaryen-patch/parser.h" <SOURCE_DIR>/src/emscripten-optimizer/parser.h
+  # PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/binaryen-patch/parser.h" <SOURCE_DIR>/src/emscripten-optimizer/parser.h
+  ${_binaryen_patch}
 )
 
 if(";${CMAKE_VS_PLATFORM_NAME};${MSVC_C_ARCHITECTURE_ID};${MSVC_CXX_ARCHITECTURE_ID};"
