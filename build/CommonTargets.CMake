@@ -226,7 +226,7 @@ ExternalProject_Add(libp2p
         -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
         ${_CMAKE_COMMON_BUILD_PARAMS}
 
-  DEPENDS GTest protobuf spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost OpenSSL
+  DEPENDS GTest protobuf spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost
 )
 set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p")
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
@@ -330,8 +330,9 @@ ExternalProject_Add(binaryen
         -DBUILD_STATIC_LIB:BOOL=ON
         -DBUILD_TOOLS:BOOL=OFF
         -DENABLE_WERROR:BOOL=OFF
-        ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}  
-	      ${_CMAKE_COMMON_BUILD_PARAMS} 
+        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}  
+        ${_CMAKE_COMMON_BUILD_PARAMS} 
+  PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/binaryen-patch/parser.h" <SOURCE_DIR>/src/emscripten-optimizer/parser.h
 )
 
 if(";${CMAKE_VS_PLATFORM_NAME};${MSVC_C_ARCHITECTURE_ID};${MSVC_CXX_ARCHITECTURE_ID};"
@@ -351,7 +352,7 @@ CMAKE_CACHE_ARGS
       -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/libsecp256k1                        
       -DSECP256K1_BUILD_TEST:BOOL=OFF
     #  -DUSE_ASM_X86_64:BOOL=ON 
-      ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}  
+      ${CMAKE_CACHE_ARGS_CFLAGES_ADD}  
       ${_CMAKE_COMMON_BUILD_PARAMS} 
 PATCH_COMMAND ${CMAKE_COMMAND} -E copy
       "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/libsecp256k1-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
@@ -367,7 +368,7 @@ CMAKE_CACHE_ARGS
       -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/xxhash                        
       -DSECP256K1_BUILD_TEST:BOOL=OFF
     #  -DUSE_ASM_X86_64:BOOL=ON
-      ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}  
+      ${CMAKE_CACHE_ARGS_CFLAGES_ADD}  
       ${_CMAKE_COMMON_BUILD_PARAMS} 
 )
 

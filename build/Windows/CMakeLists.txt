@@ -90,19 +90,21 @@ set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake
 # build ------------boost ---------------------# 
 
 set(_BOOST_SRC_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost/src/Boost")
+
 ExternalProject_Add( Boost
-      PREFIX Boost  
+      PREFIX "${THIRDPARTY_DIR}/boost"   ## --- Use thirdparty root directory, not build directory to avoid duplicate cloning ----
       GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
       GIT_TAG           "boost-1.72.0"
       GIT_SUBMODULES_RECURSE  TRUE
+      # SOURCE_DIR       "${THIRDPARTY_DIR}/boost/src"
       CONFIGURE_COMMAND  ""
       PATCH_COMMAND <SOURCE_DIR>/bootstrap.bat vc141
       BUILD_COMMAND <SOURCE_DIR>/b2.exe headers
       BUILD_IN_SOURCE  TRUE
-      INSTALL_COMMAND <SOURCE_DIR>/b2.exe toolset=msvc-14.1 runtime-link=static cxxflags="${CMAKE_CXX_FLAGS}"  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release  link=static threading=multi   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../build  --prefix=<SOURCE_DIR>/../..   --libdir=<SOURCE_DIR>/../../lib install
+      INSTALL_COMMAND <SOURCE_DIR>/b2.exe toolset=msvc-14.1 runtime-link=static cxxflags="${CMAKE_CXX_FLAGS}"  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release,debug  link=static threading=multi   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../build  --prefix=<SOURCE_DIR>/../..   --libdir=<SOURCE_DIR>/../../lib install
       UPDATE_COMMAND ""
 )
-set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/Boost")
+set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost")
 set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
 set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-1.72.0")
 set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-1.72.0")
@@ -143,7 +145,7 @@ else()
   set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/grpc/third_party/boringssl-with-bazel/src/include)
   set(_OPENSSL_CACHE_ARGS
       -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
-	  -DOPENSSL_MSVC_STATIC_RT:BOOL=ON
+	    -DOPENSSL_MSVC_STATIC_RT:BOOL=ON
       -DOPENSSL_CRYPTO_LIBRARY:PATH=${_OPENSSL_LIB_DIR}
       -DOPENSSL_SSL_LIBRARY:PATH=${_OPENSSL_LIB_DIR}
       -DOPENSSL_INCLUDE_DIR:STRING=${THIRDPARTY_DIR}/grpc/third_party/boringssl-with-bazel/src/include
