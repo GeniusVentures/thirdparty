@@ -1,5 +1,6 @@
 CMakeFiles
-build
+/build
+/tmp
 tests/CMakeFiles
 tests/Debug
 *.opensdf
