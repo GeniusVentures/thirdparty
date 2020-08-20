@@ -78,6 +78,12 @@ set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake
 # 	message("---boost include ${BOOST_INCLUDE_DIR}")
 # 	message("-cmake system name ${CMAKE_SYSTEM_NAME}")
 # build boost 
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+	set(address_model 32)
+else()
+	set(address_model 64)
+endif()
+
 ExternalProject_Add( Boost
 	PREFIX  "${THIRDPARTY_DIR}/boost"  
 	GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
@@ -88,7 +94,7 @@ ExternalProject_Add( Boost
 	PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
 	BUILD_COMMAND <SOURCE_DIR>/b2 headers
 	BUILD_IN_SOURCE  TRUE
-	INSTALL_COMMAND <SOURCE_DIR>/b2 cxxflags=-std=c++17 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../../build/OSX/  --prefix=<SOURCE_DIR>/../../build/OSX/   --libdir=<SOURCE_DIR>/../../build/OSX/lib  install
+	INSTALL_COMMAND <SOURCE_DIR>/b2 cxxflags=-std=c++17 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=${address_model} architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../../build/OSX/  --prefix=<SOURCE_DIR>/../../build/OSX/   --libdir=<SOURCE_DIR>/../../build/OSX/lib  install
 	UPDATE_COMMAND ""
 )
 set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost/build/OSX")
