@@ -56,7 +56,10 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 	set(CXX_FLAGS_FOR_P2P "")
 	#set(Boost_USE_STATIC_LIBS OFF)
 	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
-
+# Set grpc config
+	set(_grpc_BUILD_PARAMS
+		-DCMAKE_PROGRAM_PATH:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin:${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc-build:${CMAKE_CURRENT_BINARY_DIR}/grpc/bin
+	)
 # Set Third party directory
 	set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
@@ -66,7 +69,7 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 	set(_ED25519_RANDOM dev_urandom) 
 
 # Set config for spdlog config path
-set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
+set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/spdlog/cmake")
 
 # find_package(Boost REQUIRED  random filesystem program_options)
 #message("---BOOST ${Boost_INCLUDE_DIRS}")
@@ -107,11 +110,11 @@ set(boost_DIR "${_BOOST_ROOT}/lib/cmake/Boost-1.72.0")
 set(_Boost_INCLUDE_DIR "${_BOOST_ROOT}/include")
 
 set(_BOOST_CACHE_ARGS
-	-Dboost_headers_DIR:PATH=${boost_headers_DIR}
-	-Dboost_random_DIR:PATH=${boost_random_DIR}
-	-Dboost_system_DIR:PATH=${boost_system_DIR}
-	-Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
-	-Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
+#	-Dboost_headers_DIR:PATH=${boost_headers_DIR}
+#	-Dboost_random_DIR:PATH=${boost_random_DIR}
+#	-Dboost_system_DIR:PATH=${boost_system_DIR}
+#	-Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
+#	-Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
 	-DBoost_DIR:PATH=${boost_DIR}
 	-DBoost_USE_MULTITHREADED:BOOL=ON
 	-DBoost_USE_STATIC_RUNTIME:BOOL=ON
