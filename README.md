@@ -30,7 +30,6 @@ This is the repository for third party of SuperGenius
 # Build on Linux
 ## Preinstall
 - CMake 
-- Openssl
 - Python >=3.5
 ## Building
 	○ cd ./build/Linux	
@@ -54,13 +53,13 @@ This is the repository for third party of SuperGenius
    
 # Build on OSX
 ## Preinstall
-   - CMake 
-    - Openssl
-    - Python >=3.5
-    - Boost >=1.68
+   - CMake    
+   - Python >=3.5    
  ## Building
        ○ cd ./build/OSX
-       ○ cmake . -DBOOST_ROOT="/to_boost_root_path"   -DBOOST_INCLUDE_DIR="/to_boost_include_path"     -DBOOST_LIBRARY_DIR="/to_boost_library_path"  -DCMAKE_BUILD_TYPE=Release -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+	   ○ ../../sr25519/scripts/install_dependencies.sh 
+	   ○ export PATH=$PATH:$(pwd)/grpc/src/grpc-build:$(pwd)/protobuf/bin:~/.cargo/bin
+       ○ cmake . -DCMAKE_BUILD_TYPE=Release
        ○ cmake --build . --config Release
 
 # Build for iOS
