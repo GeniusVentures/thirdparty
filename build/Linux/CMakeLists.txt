@@ -76,7 +76,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	# set(_PROTOBUF_PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
 # Set grpc config
 	set(_grpc_BUILD_PARAMS
-		-DCMAKE_PROGRAM_PATH:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin#:${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc-build:${CMAKE_CURRENT_BINARY_DIR}/grpc/bin"
+		-DCMAKE_PROGRAM_PATH:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin# :${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc-build:${CMAKE_CURRENT_BINARY_DIR}/grpc/bin
 	)
 	
 # Set Third party directory
@@ -88,7 +88,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	set(_ED25519_RANDOM dev_urandom) 
 
 # Set config for spdlog config path
-	set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
+	set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/spdlog/cmake")
 
 # build boost 
 	ExternalProject_Add( Boost
@@ -96,14 +96,16 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 		GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
 		GIT_TAG           "boost-1.72.0"
 		GIT_SUBMODULES_RECURSE  TRUE
-		CONFIGURE_COMMAND  ""
+		GIT_SHALLOW TRUE		
+		SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"	
+		CONFIGURE_COMMAND  ""		
 		PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
 		BUILD_COMMAND <SOURCE_DIR>/b2 headers
 		BUILD_IN_SOURCE  TRUE
-		INSTALL_COMMAND <SOURCE_DIR>/b2 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../build  --prefix=<SOURCE_DIR>/../..   --libdir=<SOURCE_DIR>/../../lib install
+		INSTALL_COMMAND <SOURCE_DIR>/b2 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../build/Linux  --prefix=<SOURCE_DIR>/../build/Linux   --libdir=<SOURCE_DIR>/../build/Linux/lib install
 		UPDATE_COMMAND ""
 	)
-	set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/Boost")
+	set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost/build/Linux")
 	set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
 	set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-1.72.0")
 	set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-1.72.0")
@@ -113,17 +115,17 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	set(_Boost_INCLUDE_DIR "${_BOOST_ROOT}/include")
 
 	set(_BOOST_CACHE_ARGS
-		-Dboost_headers_DIR:PATH=${boost_headers_DIR}
-		-Dboost_random_DIR:PATH=${boost_random_DIR}
-		-Dboost_system_DIR:PATH=${boost_system_DIR}
-		-Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
-		-Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
+		# -Dboost_headers_DIR:PATH=${boost_headers_DIR}
+		# -Dboost_random_DIR:PATH=${boost_random_DIR}
+		# -Dboost_system_DIR:PATH=${boost_system_DIR}
+		# -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
+		# -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
 		-DBoost_DIR:PATH=${boost_DIR}
 		-DBoost_USE_MULTITHREADED:BOOL=ON
 		-DBoost_USE_STATIC_RUNTIME:BOOL=ON
 		-DBoost_USE_STATIC_LIBS:BOOL=ON
 		-DBoost_NO_SYSTEM_PATHS:BOOL=ON
-		#-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include/boost-1_72      
+		-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include
 	)
 # build OpenSSL 
 	ExternalProject_Add(openssl

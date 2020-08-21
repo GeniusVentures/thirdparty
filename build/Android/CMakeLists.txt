@@ -91,7 +91,8 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	set(boost_filesystem_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_filesystem-1.72.0")
 	set(boost_program_options_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_program_options-1.72.0")
    #message("${boost_random_DIR}")
-   find_package(Boost  REQUIRED COMPONENTS random filesystem program_options)
+   set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
+   find_package(Boost   COMPONENTS random filesystem program_options)
    if(BOOST_INCLUDE_DIR)
    else()
 	   set(BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
@@ -100,24 +101,58 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 ##### Test find openssl
 	
 # If OPENSSL_ROOT_DIR is set, propagate that hint path to the external projects with OpenSSL dependency.
-	set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "")
+	# set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "")
       
-	message("${OPENSSL_ROOT_DIR}---")
-	string(COMPARE NOTEQUAL "${OPENSSL_ROOT_DIR}" "" not_empty)
-        set(OPENSSL)
-	if (OPENSSL_ROOT_DIR)
-	  message("openssl root dir is set.")
-	  set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}")
-	  set(OPENSSL_INCLUDE_DIR  "${OPENSSL_ROOT_DIR}/include")
-	else()
-	  message("openssl root dir is not set.")
-	endif()
-	SET(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_ROOT_DIR}/lib")
+	# message("${OPENSSL_ROOT_DIR}---")
+	# string(COMPARE NOTEQUAL "${OPENSSL_ROOT_DIR}" "" not_empty)
+    #     set(OPENSSL)
+	# if (OPENSSL_ROOT_DIR)
+	#   message("openssl root dir is set.")
+	#   set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}")
+	#   set(OPENSSL_INCLUDE_DIR  "${OPENSSL_ROOT_DIR}/include")
+	# else()
+	#   message("openssl root dir is not set.")
+	# endif()
+	# SET(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_ROOT_DIR}/lib")
 	
-        set(OPENSSL_USE_STATIC_LIBS TRUE)
-	#SET(OPENSSL_LIBRARIES )
-	find_package(OpenSSL REQUIRED)
+    # set(OPENSSL_USE_STATIC_LIBS TRUE)
+	
+	# find_package(OpenSSL REQUIRED)
 
+#-----------------------------#
+# build OpenSSL 
+if(ANDROID_ABI STREQUAL "arm64-v8a")
+	set(_abi android_arm64)
+elseif(ANDROID_ABI STREQUAL "armeabi-v7a")
+	set(_abi android_arm)
+elseif(ANDROID_ABI STREQUAL "x86")
+	set(_abi android_x86)	
+elseif(ANDROID_ABI STREQUAL "x86_64")	
+	set(_abi android_x86_64)
+endif()
+message("--- android abi is ${_abi}")
+ExternalProject_Add(openssl
+	PREFIX openssl	
+	GIT_REPOSITORY "https://github.com/openssl/openssl.git"
+	GIT_TAG "OpenSSL_1_1_1g"
+	GIT_SUBMODULES_RECURSE  TRUE
+	GIT_SHALLOW TRUE	
+	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
+	CONFIGURE_COMMAND  <SOURCE_DIR>/Configure ${_abi} -D__ANDROID_API__=${ANDROID_NATIVE_API_LEVEL} --prefix=<SOURCE_DIR>/../build/Android --openssldir=<SOURCE_DIR>/../build/Android
+	PATCH_COMMAND ""
+	BUILD_COMMAND make
+	BUILD_IN_SOURCE  TRUE
+	INSTALL_COMMAND make install
+	UPDATE_COMMAND ""  
+)
+set(OPENSSL_USE_STATIC_LIBS  ON)
+set(_OPENSSL_CACHE_ARGS 
+	-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+	-DOPENSSL_ROOT_DIR:STRING=${THIRDPARTY_DIR}/openssl/build/Android  
+)
+set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/openssl/build/Android/include)
+set(_OPENSSL_target openssl)
+#-----------------------------#
 
 #message("---${OPENSSL_INCLUDE_DIR}")
 
