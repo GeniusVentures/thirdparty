@@ -1,6 +1,7 @@
 CMakeFiles
 /build
 /tmp
+/src
 tests/CMakeFiles
 tests/Debug
 *.opensdf
@@ -14,5 +15,4 @@ Testing/Temporary/*.*
 CMakeCache.txt
 *.suo
 .vs/
-/src
 .vscode/

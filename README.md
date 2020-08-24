@@ -40,15 +40,16 @@ This is the repository for third party of SuperGenius
 # Build on Android
 ## Preinstall
 - CMake 
-- Openssl(For Android)
 - Boost (For Android NDK)
 - protoc and grpc_cpp_plugin (They should be prebuilt on host system)
 
 ## Building
 		○ export ANDROID_NDK=/to_android_ndk_path
 		○ export NDK_ROOT=$ANDROID_NDK
+		○ export ANDROID_NDK_ROOT=$ANDROID_NDK
+		○ PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
 		○ export CROSS_COMPILER=$PATH:$ANDROID_NDK/prebuilt/linux-x86_64/bin/
-		○ cmake . -DOPENSSL_ROOT_DIR=/to_prebuilt_openssl_root_dir  -DCMAKE_SYSTEM_NAME="Android" -DBoost_ADDITIONAL_VERSIONS="1.72" -DCMAKETOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_ABI="armeabi-v7a(or arm64-v8a,x86,x86_64)" -DANDROID_NATIVE_API_LEVEL=26 -DANDROID_TOOLCHAIN=clang  -DBOOST_DIR=/to_boost_forNDK_dir/libs/arm64-v8a(or arm64-v8a,x86,x86_64)/cmake/Boost-1.72.0 -DBOOST_ROOT=/to_boost_forNDK_dir -DCMAKE_BUILD_TYPE=Release
+		○ cmake . -DCMAKE_SYSTEM_NAME="Android" -DBoost_ADDITIONAL_VERSIONS="1.72" -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_ABI="armeabi-v7a(or arm64-v8a,x86,x86_64)" -DANDROID_NATIVE_API_LEVEL=26 -DANDROID_TOOLCHAIN=clang  -DBOOST_DIR=/to_boost_forNDK_dir/libs/arm64-v8a(or arm64-v8a,x86,x86_64)/cmake/Boost-1.72.0 -DBOOST_ROOT=/to_boost_forNDK_dir -DCMAKE_BUILD_TYPE=Release
 		○ make
    
 # Build on OSX

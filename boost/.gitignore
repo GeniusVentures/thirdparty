@@ -12,6 +12,8 @@ tags
 /out/
 /boost
 /Boost
+/src
+/download
 # files related to building in-tree
 CMakeFiles
 *.cmake

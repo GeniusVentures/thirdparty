@@ -64,7 +64,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	set(_CMAKE_COMMON_BUILD_PARAMS 
 	#-DBoost_DIR:PATH=${Boost_DIR}
 	#-DBoost_NO_SYSTEM_PATHS:BOOL=ON
-   	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
+   	# -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
 	)
 	include(ExternalProject)
 # Config Paths by Platforms
@@ -91,8 +91,10 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/spdlog/cmake")
 
 # build boost 
+	set(_BOOST_BUILD_ROOT "${THIRDPARTY_DIR}/boost/build/Linux")
+
 	ExternalProject_Add( Boost
-		PREFIX Boost  
+		PREFIX boost
 		GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
 		GIT_TAG           "boost-1.72.0"
 		GIT_SUBMODULES_RECURSE  TRUE
@@ -102,17 +104,19 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 		PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
 		BUILD_COMMAND <SOURCE_DIR>/b2 headers
 		BUILD_IN_SOURCE  TRUE
-		INSTALL_COMMAND <SOURCE_DIR>/b2 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../build/Linux  --prefix=<SOURCE_DIR>/../build/Linux   --libdir=<SOURCE_DIR>/../build/Linux/lib install
+		INSTALL_COMMAND <SOURCE_DIR>/b2 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
 		UPDATE_COMMAND ""
+		# DEPENDS Boost_Download
 	)
-	set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost/build/Linux")
-	set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
-	set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-1.72.0")
-	set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-1.72.0")
-	set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-1.72.0")
-	set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-1.72.0")
-	set(boost_DIR "${_BOOST_ROOT}/lib/cmake/Boost-1.72.0")
-	set(_Boost_INCLUDE_DIR "${_BOOST_ROOT}/include")
+	
+	# set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
+	# set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-1.72.0")
+	# set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-1.72.0")
+	# set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-1.72.0")
+	# set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-1.72.0")
+
+	set(boost_DIR "${_BOOST_BUILD_ROOT}/lib/cmake/Boost-1.72.0")
+	set(_Boost_INCLUDE_DIR "${_BOOST_BUILD_ROOT}/include")
 
 	set(_BOOST_CACHE_ARGS
 		# -Dboost_headers_DIR:PATH=${boost_headers_DIR}
@@ -125,31 +129,56 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 		-DBoost_USE_STATIC_RUNTIME:BOOL=ON
 		-DBoost_USE_STATIC_LIBS:BOOL=ON
 		-DBoost_NO_SYSTEM_PATHS:BOOL=ON
-		-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include
+		-DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
 	)
-# build OpenSSL 
+# build openssl
+	set(_openssl_BUILD_ROOT "${THIRDPARTY_DIR}/openssl/build/Linux")
+	# ExternalProject_Add(openssl_download
+	# 	PREFIX "${THIRDPARTY_DIR}/openssl/download"		
+	# 	GIT_REPOSITORY "https://github.com/openssl/openssl.git"
+	# 	GIT_TAG "OpenSSL_1_1_1g"
+	# 	GIT_SUBMODULES_RECURSE  TRUE
+	# 	SOURCE_DIR "${THIRDPARTY_DIR}/openssl/src"		
+	# 	CONFIGURE_COMMAND  "" 
+	# 	PATCH_COMMAND ""
+	# 	BUILD_COMMAND ""
+	# 	BUILD_IN_SOURCE  TRUE
+	# 	INSTALL_COMMAND ""
+	# 	UPDATE_COMMAND ""  
+	# )
+
 	ExternalProject_Add(openssl
 		PREFIX openssl
-		#URL   https://github.com/openssl/openssl/archive/OpenSSL_1_1_1g.tar.gz
 		GIT_REPOSITORY "https://github.com/openssl/openssl.git"
 		GIT_TAG "OpenSSL_1_1_1g"
 		GIT_SUBMODULES_RECURSE  TRUE
-		# DOWNLOAD_DIR  "${THIRDPARTY_DIR}/openssl/download"
-		SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
-		CONFIGURE_COMMAND  <SOURCE_DIR>/config --prefix=${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Linux --openssldir=${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Linux
+		# TMP_DIR  ${CMAKE_BINARY_DIR}/openssl/tmp
+		# STAMP_DIR ${CMAKE_BINARY_DIR}/openssl/stamp
+		SOURCE_DIR  "${THIRDPARTY_DIR}/openssl/src"
+		CONFIGURE_COMMAND  <SOURCE_DIR>/config --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
 		PATCH_COMMAND ""
 		BUILD_COMMAND make
 		BUILD_IN_SOURCE  TRUE
 		INSTALL_COMMAND make install
 		UPDATE_COMMAND ""  
+		# DEPENDS openssl_download
 	   )
-	set(OPENSSL_USE_STATIC_LIBS  ON)
+	# check openssl installed 
+	# set(OPENSSL_USE_STATIC_LIBS ON)
+	# set(OPENSSL_ROOT_DIR ${_openssl_BUILD_ROOT})  
+	# set(OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
+	# set(OPENSSL_CRYPTO_LIBRARY ${_openssl_BUILD_ROOT}/lib)
+	# set(OPENSSL_SSL_LIBRARY ${_openssl_BUILD_ROOT}/lib)
 	# find_package(OpenSSL)
 	set(_OPENSSL_CACHE_ARGS 
 			-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
-			-DOPENSSL_ROOT_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Linux  
+			-DOPENSSL_ROOT_DIR:STRING=${_openssl_BUILD_ROOT}  
+			-DOPENSSL_INCLUDE_DIR:PATH=${_openssl_BUILD_ROOT}/include
+			-DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
+			# -DOPENSSL_CRYPTO_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib
+			# -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib
 		)
-	set(_OPENSSL_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Linux/include)
+	set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 	set(_OPENSSL_target openssl)
 	# if(OPENSSL_FOUND)
 	# 	message("openssl package is found. include path is ${OPENSSL_INCLUDE_DIR}")
