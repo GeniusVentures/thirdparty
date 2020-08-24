@@ -10,3 +10,4 @@
 !CMakeLists.txt
 !README.md
 !CommonTargetsForAndroid.CMake
+!/Boost-build

@@ -93,7 +93,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 		SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"	
 		CONFIGURE_COMMAND  ""
 		PATCH_COMMAND cp -R  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/ ${CMAKE_CURRENT_BINARY_DIR}/boost/src  #  <SOURCE_DIR>/bootstrap.sh	
-		BUILD_COMMAND  ./build.sh  "${_BOOST_ROOT}"  #   <SOURCE_DIR>/b2 headers
+		BUILD_COMMAND  ./build.sh  "${_BOOST_ROOT}"  "${ANDROID_ABI}" "${THIRDPARTY_DIR}/boost/src"#   <SOURCE_DIR>/b2 headers
 		# BUILD_IN_SOURCE  TRUE
 		INSTALL_COMMAND ""   # <SOURCE_DIR>/b2 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
 		UPDATE_COMMAND ""
