@@ -3,7 +3,7 @@
 ############################################################
 
 # Ignore everything
-*
+/*
 
 # not these files ...
 !.gitignore
@@ -11,3 +11,6 @@
 !README.md
 !CommonTargetsForAndroid.CMake
 !/Boost-build
+# !/Boost-build/build.sh
+# !/Boost-build/user-config.jam
+# !/Boost-build/bin/
