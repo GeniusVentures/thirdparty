@@ -160,7 +160,7 @@ ExternalProject_Add(libp2p
         ${_CMAKE_COMMON_BUILD_PARAMS}
 #	-DBoost_ARCHITECTURE:STRING="-x64"
 
-  DEPENDS GTest protobuf spdlog tsl_hat_trie Boost.DI Microsoft.GSL ${_OPENSSL_target}
+  DEPENDS GTest protobuf spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost ${_OPENSSL_target} 
 )
 # Builds binaryen
 ExternalProject_Add(binaryen

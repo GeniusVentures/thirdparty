@@ -82,26 +82,30 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	set(BOOST_VERSION2 1_72_0)
 # Set boost config
 # build boost 
-	# ExternalProject_Add( Boost
-	# 	PREFIX ${THIRDPARTY_DIR}/boost  
-	# 	GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
-	# 	GIT_TAG           "boost-1.72.0"
-	# 	GIT_SUBMODULES_RECURSE  TRUE
-	# 	GIT_SHALLOW TRUE		
-	# 	SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"	
-	# 	CONFIGURE_COMMAND  cat ${THIRDPARTY_DIR}/boost-for-mobile/patches/boost_${BOOST_VERSION2}*.patch | patch -p2		
-	# 	PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
-	# 	BUILD_COMMAND <SOURCE_DIR>/b2 headers
-	# 	BUILD_IN_SOURCE  TRUE
-	# 	INSTALL_COMMAND <SOURCE_DIR>/b2 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../../build/Android${ANDROID_ABI}/ --prefix=<SOURCE_DIR>/../../build/Android/${ANDROID_ABI}   --libdir=<SOURCE_DIR>/../../build/Android/${ANDROID_ABI}/lib install
-	# 	UPDATE_COMMAND ""
-	# )
-set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost/build/Linux")
+	set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost/build/Android")
+
+	ExternalProject_Add( Boost
+		PREFIX boost
+		GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
+		GIT_TAG           "boost-1.72.0"
+		GIT_SUBMODULES_RECURSE  TRUE
+		GIT_SHALLOW TRUE		
+		SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"	
+		CONFIGURE_COMMAND  ""
+		PATCH_COMMAND cp -R  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/ ${CMAKE_CURRENT_BINARY_DIR}/boost/src  #  <SOURCE_DIR>/bootstrap.sh	
+		BUILD_COMMAND  ./build.sh  "${_BOOST_ROOT}"  #   <SOURCE_DIR>/b2 headers
+		# BUILD_IN_SOURCE  TRUE
+		INSTALL_COMMAND ""   # <SOURCE_DIR>/b2 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
+		UPDATE_COMMAND ""
+		# WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android"
+		# DEPENDS Boost_Download
+	)
+
    set(Boost_NO_SYSTEM_PATHS  ON)
    set(Boost_USE_STATIC_LIBS  ON)
     # set(Boost_USE_STATIC_RUNTIME OFF)
     # set(Boost_USE_MULTITHREADED OFF)
-   
+   set(BOOST_ROOT ${_BOOST_ROOT})
    set(Boost_INCLUDE_DIR  ${BOOST_ROOT}/include)
 #    set(BOOST_INCLUDEDIR ${Boost_INCLUDE_DIR})
    set(BOOST_LIBRARYDIR ${BOOST_ROOT}/libs/${ANDROID_ABI})
@@ -119,7 +123,7 @@ set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost/build/Linux")
 	set(boost_regex_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_regex-1.72.0")
    message("---boost dir ${Boost_USE_STATIC_RUNTIME}")
    message("---boost lib ${Boost_USE_MULTITHREADED}")
-    find_package(Boost   COMPONENTS random filesystem program_options date_time regex)
+    # find_package(Boost   COMPONENTS random filesystem program_options date_time regex)
 
    if(BOOST_INCLUDE_DIR)
    else()
@@ -132,8 +136,8 @@ set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost/build/Linux")
 	set(BOOST_INCLUDE_DIR ${Boost_INCLUDE_DIR})
    set(_BOOST_CACHE_ARGS   
    -DBOOST_ROOT:PATH=${BOOST_ROOT}
-#    -DBoost_USE_MULTITHREADED:BOOL=ON
-#    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
+   -DBoost_USE_MULTITHREADED:BOOL=ON
+   -DBoost_USE_STATIC_RUNTIME:BOOL=ON
    -DBoost_USE_STATIC_LIBS:BOOL=ON
    -DBoost_NO_SYSTEM_PATHS:BOOL=ON
    -DBoost_INCLUDE_DIR:PATH=${Boost_INCLUDE_DIR}
