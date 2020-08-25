@@ -104,7 +104,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 		PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
 		BUILD_COMMAND <SOURCE_DIR>/b2 headers
 		BUILD_IN_SOURCE  TRUE
-		INSTALL_COMMAND <SOURCE_DIR>/b2 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
+		INSTALL_COMMAND <SOURCE_DIR>/b2 runtime-link=static link=static threading=multi  --build-type=minimal  --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
 		UPDATE_COMMAND ""
 		# DEPENDS Boost_Download
 	)

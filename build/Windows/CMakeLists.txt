@@ -102,7 +102,7 @@ ExternalProject_Add( Boost
       CONFIGURE_COMMAND  ""
       BUILD_COMMAND <SOURCE_DIR>/b2.exe headers
       BUILD_IN_SOURCE  TRUE
-      INSTALL_COMMAND <SOURCE_DIR>/b2.exe toolset=msvc-14.1 runtime-link=static cxxflags="${CMAKE_CXX_FLAGS}"  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release,debug  link=static threading=multi   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../build  --prefix=<SOURCE_DIR>/../..   --libdir=<SOURCE_DIR>/../../lib install
+      INSTALL_COMMAND <SOURCE_DIR>/b2.exe toolset=msvc-14.1 runtime-link=static cxxflags="${CMAKE_CXX_FLAGS}"  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release,debug  link=static threading=multi   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../build  --prefix=<SOURCE_DIR>/../..   --libdir=<SOURCE_DIR>/../../lib install
 )
 set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost")
 set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
