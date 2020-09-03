@@ -31,7 +31,7 @@ ABI_NAMES=$2
 BOOST_DIR=$3
 
 # only build these libs
-WITH_LIBRARIES="--with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem"
+WITH_LIBRARIES="--with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  --with-log"
 
 
 LOG_FILE=${BUILD_DIR}/build.log
