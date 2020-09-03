@@ -75,3 +75,6 @@
 [submodule "binaryen"]
 	path = binaryen
 	url = https://github.com/WebAssembly/binaryen
+[submodule "sr25519"]
+	path = sr25519
+	url = https://github.com/Harrm/sr25519-crust
