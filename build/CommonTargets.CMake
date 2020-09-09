@@ -342,7 +342,7 @@ PATCH_COMMAND ${CMAKE_COMMAND} -E copy
 )
 
 #jsonrpc-lean ---install header file because there are any source files.  
-ExternalProject_Add(xxhash
+ExternalProject_Add( xxhash
 PREFIX xxhash
 #SOURCE_DIR "${THIRDPARTY_DIR}/libsecp256k1"
 URL https://github.com/hunter-packages/xxHash/archive/0.6.5-p0.tar.gz
@@ -355,7 +355,20 @@ CMAKE_CACHE_ARGS
       ${_CMAKE_COMMON_BUILD_PARAMS} 
 )
 
+ExternalProject_Add( hawktracer
+PREFIX hawktracer
+URL https://github.com/amzn/hawktracer/archive/v0.10.0.zip
+# GIT_TAG           "v0.10.0"
+# GIT_SHALLOW TRUE
+#URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
+CMAKE_CACHE_ARGS
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/hawktracer                              
+      ${CMAKE_CACHE_ARGS_CFLAGES_ADD}  
+      ${_CMAKE_COMMON_BUILD_PARAMS} 
+)
+
 install(
         DIRECTORY ${THIRDPARTY_DIR}/jsonrpc-lean
         DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/jsonrpc-lean
     )
+    
