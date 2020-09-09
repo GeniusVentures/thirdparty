@@ -361,7 +361,9 @@ URL https://github.com/amzn/hawktracer/archive/v0.10.0.zip
 # GIT_TAG           "v0.10.0"
 # GIT_SHALLOW TRUE
 #URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
+
 CMAKE_CACHE_ARGS
+	  -DBUILD_STATIC_LIB:BOOL=ON
       -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/hawktracer                              
       ${CMAKE_CACHE_ARGS_CFLAGES_ADD}  
       ${_CMAKE_COMMON_BUILD_PARAMS} 
