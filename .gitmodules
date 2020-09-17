@@ -78,3 +78,6 @@
 [submodule "sr25519"]
 	path = sr25519
 	url = https://github.com/Harrm/sr25519-crust
+[submodule "gnostic"]
+	path = gnostic
+	url = https://github.com/googleapis/gnostic
