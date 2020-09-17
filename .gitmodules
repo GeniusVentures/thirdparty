@@ -81,3 +81,6 @@
 [submodule "gnostic"]
 	path = gnostic
 	url = https://github.com/googleapis/gnostic
+[submodule "protobuf"]
+	path = protobuf
+	url = https://github.com/protocolbuffers/protobuf.git
