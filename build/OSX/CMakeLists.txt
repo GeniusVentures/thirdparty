@@ -146,6 +146,10 @@ set(_OPENSSL_CACHE_ARGS
 )
 set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/openssl/build/OSX/include)
 set(_OPENSSL_target openssl)
+set(_grpc_SSL_PARAM
+		-DgRPC_SSL_PROVIDER:STRING=package
+		${_OPENSSL_CACHE_ARGS} 
+)
 # Common build by platforms
 include(../CommonTargets.CMake)
 # Build curl 7.60

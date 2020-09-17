@@ -115,8 +115,9 @@ ExternalProject_Add(grpc
       #   -Dabsl_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/absl/lib/cmake/absl
       #   -DgRPC_CARES_PROVIDER:STRING=package
       #   -Dc-ares_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/c-ares/lib/cmake/c-ares
-      #   -DgRPC_SSL_PROVIDER:STRING=package
-      #   ${_OPENSSL_CACHE_ARGS}        
+        #  -DgRPC_SSL_PROVIDER:STRING=package
+        #  ${_OPENSSL_CACHE_ARGS}   
+        ${_grpc_SSL_PARAM}     
         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
       #   -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
       #   -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
