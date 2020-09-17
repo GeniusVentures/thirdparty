@@ -11,6 +11,7 @@ This is the repository for third party of SuperGenius
 - Perl 
 - Openssl   Click the link to visit OpenSSL download page: [here](http://slproweb.com/products/Win32OpenSSL.html)
 - Python >=3.5
+- Go     >=1.11
 ## Building	
     ○ git pull
 	○ git submodule update --init --recursive

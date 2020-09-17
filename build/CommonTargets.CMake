@@ -361,7 +361,6 @@ URL https://github.com/amzn/hawktracer/archive/v0.10.0.zip
 # GIT_TAG           "v0.10.0"
 # GIT_SHALLOW TRUE
 #URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
-
 CMAKE_CACHE_ARGS
 	  -DBUILD_STATIC_LIB:BOOL=ON
       -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/hawktracer                              
@@ -369,6 +368,34 @@ CMAKE_CACHE_ARGS
       ${_CMAKE_COMMON_BUILD_PARAMS} 
 )
 
+
+# build third party for grpc
+# ExternalProject_ADd(go-protobuf
+# PREFIX go-protobuf
+# URL https://github.com/golang/protobuf/archive/v1.4.2.zip    
+# CONFIGURE_COMMAND  ""
+# BUILD_COMMAND <SOURCE_DIR>/COMPILE-PROTOS.sh
+# INSTALL_COMMAND  go install .
+# BUILD_IN_SOURCE  TRUE
+# )
+# build third party for grpc
+ExternalProject_ADd(gnostic
+PREFIX gnostic
+URL https://github.com/googleapis/gnostic/archive/v0.5.1.zip    
+CONFIGURE_COMMAND  ""
+BUILD_COMMAND go install .
+INSTALL_COMMAND  ""
+BUILD_IN_SOURCE  TRUE
+)
+# build third party for grpc
+ExternalProject_ADd(gnostic-grpc
+PREFIX gnostic-grpc
+URL https://github.com/googleapis/gnostic-grpc/archive/v0.1.0.zip    
+CONFIGURE_COMMAND  ""
+BUILD_COMMAND go install .
+INSTALL_COMMAND  ""
+BUILD_IN_SOURCE  TRUE
+)
 install(
         DIRECTORY ${THIRDPARTY_DIR}/jsonrpc-lean
         DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/jsonrpc-lean
