@@ -128,7 +128,7 @@ ExternalProject_Add(grpc
 	#   -DgRPC_BUILD_CSHARP_EXT:BOOL=OFF
 	  ${_CMAKE_COMMON_BUILD_PARAMS}
 	#   ${_grpc_BUILD_PARAMS}
-#   DEPENDS c-ares protobuf zlib absl ${_OPENSSL_target}
+  DEPENDS protobuf # zlib absl ${_OPENSSL_target}
 )
 
 #message("---${OPENSSL_INCLUDE_DIR}")
