@@ -55,7 +55,8 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 # Config Paths by Platforms
 	set(CXX_FLAGS_FOR_P2P "")
 	#set(Boost_USE_STATIC_LIBS OFF)
-	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+	# set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib/cmake/protobuf")
 # Set grpc config
 	set(_grpc_BUILD_PARAMS
 		-DCMAKE_PROGRAM_PATH:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin:${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc-build:${CMAKE_CURRENT_BINARY_DIR}/grpc/bin

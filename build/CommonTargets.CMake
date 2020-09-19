@@ -26,23 +26,27 @@ set(_FINDPACKAGE_GTEST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/GTest/lib/cmake/G
 
 
 # Build protobuf project from the git submodule.
-ExternalProject_Add(protobuf
-  PREFIX protobuf
-  SOURCE_DIR "${PROTOBUF_SRC_DIR}"
-  CMAKE_CACHE_ARGS
-        -Dprotobuf_BUILD_TESTS:BOOL=OFF
-        -Dprotobuf_WITH_ZLIB:BOOL=OFF
-        -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-	  ${_CMAKE_COMMON_BUILD_PARAMS}
-)
+# ExternalProject_Add(protobuf
+#   PREFIX protobuf
+#   SOURCE_DIR "${PROTOBUF_SRC_DIR}"
+#   CMAKE_CACHE_ARGS
+#         -Dprotobuf_BUILD_TESTS:BOOL=OFF
+#         -Dprotobuf_WITH_ZLIB:BOOL=OFF
+#         -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
+#         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
+#         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
+# 	  ${_CMAKE_COMMON_BUILD_PARAMS}
+# )
 
 # The location where protobuf-config.cmake will be installed varies by platform
 # set(Protobuf_DIR "${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}")
-set(_FINDPACKAGE_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
-set(_FINDPACKAGE_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
-set(_PROTOBUF_PROTOC_EXEC "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
+# set(_FINDPACKAGE_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
+# set(_FINDPACKAGE_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
+# set(_PROTOBUF_PROTOC_EXEC "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
+
+set(_FINDPACKAGE_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/include")
+set(_FINDPACKAGE_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib")
+set(_PROTOBUF_PROTOC_EXEC "${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/protoc")
 
 # If OPENSSL_ROOT_DIR is set, propagate that hint path to the external projects with OpenSSL dependency.
 # set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "")
@@ -97,10 +101,11 @@ set(_PROTOBUF_PROTOC_EXEC "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
 # Builds gRPC based on locally checked-out sources and set arguments so that all the dependencies
 # are correctly located.
 
-message("--protoc---${_PROTOBUF_PROTOC_EXEC} --cmake program path --${CMAKE_PROGRAM_PATH}")
+# message("--protoc---${_PROTOBUF_PROTOC_EXEC} --cmake program path --${CMAKE_PROGRAM_PATH}")
 
 ExternalProject_Add(grpc
   PREFIX grpc
+  BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/build"
   SOURCE_DIR "${THIRDPARTY_DIR}/grpc"
   CMAKE_CACHE_ARGS
   -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/grpc         
@@ -108,30 +113,16 @@ ExternalProject_Add(grpc
         -DgRPC_BUILD_TESTS:BOOL=OFF
       #   -DgRPC_PROTOBUF_PROVIDER:STRING=package
       #   -DgRPC_PROTOBUF_PACKAGE_TYPE:STRING=CONFIG
-      #   -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
-      #   -DgRPC_ZLIB_PROVIDER:STRING=package
-      #   -DZLIB_ROOT:STRING=${CMAKE_CURRENT_BINARY_DIR}/zlib
-      #   -DgRPC_ABSL_PROVIDER:STRING=package
-      #   -Dabsl_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/absl/lib/cmake/absl
-      #   -DgRPC_CARES_PROVIDER:STRING=package
-      #   -Dc-ares_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/c-ares/lib/cmake/c-ares
+      #   -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}      
         #  -DgRPC_SSL_PROVIDER:STRING=package
-        #  ${_OPENSSL_CACHE_ARGS}   
+        ${_OPENSSL_CACHE_ARGS}   
         ${_grpc_SSL_PARAM}     
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-      #   -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
-      #   -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
-      #   -DgRPC_BUILD_GRPC_PHP_PLUGIN:BOOL=OFF
-      #   -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN:BOOL=OFF
-      #   -DgRPC_BUILD_GRPC_NODE_PLUGIN:BOOL=OFF	
-      #   -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
-	#   -DgRPC_BUILD_CSHARP_EXT:BOOL=OFF
-	  ${_CMAKE_COMMON_BUILD_PARAMS}
+        ${CMAKE_CACHE_ARGS_CFLAGES_ADD} 
+	      # ${_CMAKE_COMMON_BUILD_PARAMS}
 	#   ${_grpc_BUILD_PARAMS}
-  DEPENDS protobuf # zlib absl ${_OPENSSL_target}
+  DEPENDS # protobuf # zlib absl ${_OPENSSL_target}
 )
 
-#message("---${OPENSSL_INCLUDE_DIR}")
 # Builds leveldb
 ExternalProject_Add(leveldb
   PREFIX leveldb
@@ -162,7 +153,6 @@ ExternalProject_Add(spdlog
         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
 )
 
-
 set(_FINDPACKAGE_SPDLOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/include")
 
 # Builds tsl_hat_trie 343e0dac54fc8491065e8a059a02db9a2b1248ab
@@ -174,6 +164,7 @@ ExternalProject_Add(tsl_hat_trie
 )
 set(_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/hat-trie/lib/cmake/tsl_hat_trie")
 set(_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/hat-trie/include")
+
 # Builds Boost.DI c5287ee710ad90f5286d0cc2b9e49b72d89267a6
 ExternalProject_Add(Boost.DI
   PREFIX Boost.DI
@@ -188,7 +179,6 @@ set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/incl
 
 
 # Builds libp2p
-
 ExternalProject_Add(libp2p
   PREFIX libp2p
   SOURCE_DIR "${THIRDPARTY_DIR}/libp2p"
@@ -215,7 +205,7 @@ ExternalProject_Add(libp2p
         -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
         ${_CMAKE_COMMON_BUILD_PARAMS}
 
-  DEPENDS GTest protobuf spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost ${_OPENSSL_target}
+  DEPENDS GTest grpc spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost ${_OPENSSL_target}
 )
 set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p")
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
@@ -242,7 +232,7 @@ ExternalProject_Add(ipfs-lite-cpp
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_BOOST_CACHE_ARGS}
         ${_OPENSSL_CACHE_ARGS}
-  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p protobuf leveldb Boost.DI
+  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p grpc leveldb Boost.DI
 )
 
 # Builds ed25519
