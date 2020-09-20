@@ -81,3 +81,6 @@
 [submodule "gnostic"]
 	path = gnostic
 	url = https://github.com/googleapis/gnostic
+[submodule "Parabeac-Core"]
+	path = Parabeac-Core
+	url = https://github.com/Parabeac/Parabeac-Core.git
