@@ -72,7 +72,8 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	# set(_CXX_FLAGS_FOR_P2P "${CMAKE_CXX_FLAGS}")
 
 # Set config path for protobuf	
-	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+	# set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib/cmake/protobuf")
 	# set(_PROTOBUF_PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
 # Set grpc config
 	set(_grpc_BUILD_PARAMS
