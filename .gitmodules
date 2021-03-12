@@ -84,3 +84,6 @@
 [submodule "Parabeac-Core"]
 	path = Parabeac-Core
 	url = https://github.com/Parabeac/Parabeac-Core.git
+[submodule "delta-enabled-crdts"]
+	path = delta-enabled-crdts
+	url = https://github.com/CBaquero/delta-enabled-crdts
