@@ -94,6 +94,13 @@ set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/spdlo
 
 set(_BOOST_SRC_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost/src/Boost")
 
+set(VC_PLATFORMTOOLSET "vc141")
+set(BOOST_TOOLSET "msvc-14.1")
+if(MSVC_VERSION AND MSVC_VERSION GREATER_EQUAL 1920) # v142 toolset
+	set(VC_PLATFORMTOOLSET "vc142")
+	set(BOOST_TOOLSET "msvc-14.2")
+endif()
+
 ExternalProject_Add( Boost
       PREFIX "${THIRDPARTY_DIR}/boost"   ## --- Use thirdparty root directory, not build directory to avoid duplicate cloning ----
       GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
@@ -101,11 +108,11 @@ ExternalProject_Add( Boost
       GIT_SUBMODULES_RECURSE  TRUE
       # SOURCE_DIR       "${THIRDPARTY_DIR}/boost/src"      
       UPDATE_COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/boost-patch/system_category_win32.hpp" <SOURCE_DIR>/libs/system/include/boost/system/detail/system_category_win32.hpp
-      PATCH_COMMAND <SOURCE_DIR>/bootstrap.bat vc141
+      PATCH_COMMAND <SOURCE_DIR>/bootstrap.bat ${VC_PLATFORMTOOLSET}
       CONFIGURE_COMMAND  ""
       BUILD_COMMAND <SOURCE_DIR>/b2.exe headers
       BUILD_IN_SOURCE  TRUE
-      INSTALL_COMMAND <SOURCE_DIR>/b2.exe toolset=msvc-14.1 runtime-link=static cxxflags="${CMAKE_CXX_FLAGS}"  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release,debug  link=static threading=multi   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../build  --prefix=<SOURCE_DIR>/../..   --libdir=<SOURCE_DIR>/../../lib install
+      INSTALL_COMMAND <SOURCE_DIR>/b2.exe toolset=${BOOST_TOOLSET} runtime-link=static cxxflags="${CMAKE_CXX_FLAGS}"  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release,debug  link=static threading=multi   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>/../build  --prefix=<SOURCE_DIR>/../..   --libdir=<SOURCE_DIR>/../../lib install
 )
 set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost")
 set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
