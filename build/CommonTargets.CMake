@@ -178,6 +178,17 @@ set(_FINDPACKAGE_BOOST_DI_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/lib/c
 set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/include")
 
 
+# Builds delta-enabled-crdts
+ExternalProject_Add(delta-enabled-crdts
+  PREFIX delta-enabled-crdts
+  SOURCE_DIR "${THIRDPARTY_DIR}/delta-enabled-crdts"
+  CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts
+)
+
+set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/cmake/delta-enabled-crdts")
+set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/include")
+
 # Builds libp2p
 ExternalProject_Add(libp2p
   PREFIX libp2p
