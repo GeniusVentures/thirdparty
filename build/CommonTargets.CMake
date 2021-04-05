@@ -183,10 +183,14 @@ ExternalProject_Add(delta-enabled-crdts
   PREFIX delta-enabled-crdts
   SOURCE_DIR "${THIRDPARTY_DIR}/delta-enabled-crdts"
   CMAKE_CACHE_ARGS
-    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts
+        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}  
+        -DELTACRDTS_BUILD_TESTS:BOOL=ON
+        -DELTACRDTS_INSTALL:BOOL=ON
+  PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/delta-enabled-crdts-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
 )
 
-set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/cmake/delta-enabled-crdts")
 set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/include")
 
 # Builds libp2p
