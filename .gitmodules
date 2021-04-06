@@ -87,3 +87,6 @@
 [submodule "delta-enabled-crdts"]
 	path = delta-enabled-crdts
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/delta-enabled-crdts.git
+[submodule "trustwallet/wallet-core"]
+	path = trustwallet/wallet-core
+	url = https://github.com/trustwallet/wallet-core.git
