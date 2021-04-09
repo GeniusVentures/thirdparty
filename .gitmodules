@@ -90,3 +90,7 @@
 [submodule "trustwallet/wallet-core"]
 	path = trustwallet/wallet-core
 	url = https://github.com/trustwallet/wallet-core.git
+[submodule "rocksdb"]
+	path = rocksdb
+	url = https://github.com/facebook/rocksdb.git
+	branch = v6.17.3
