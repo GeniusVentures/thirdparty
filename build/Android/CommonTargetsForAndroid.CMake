@@ -69,18 +69,26 @@ set(_FINDPACKAGE_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/incl
 set(_FINDPACKAGE_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
 set(_PROTOBUF_PROTOC_EXEC "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
 
-
-# Builds leveldb
-ExternalProject_Add(leveldb
-  PREFIX leveldb
-  SOURCE_DIR "${THIRDPARTY_DIR}/leveldb"
+# Builds rocksdb
+ExternalProject_Add(rocksdb
+  PREFIX rocksdb
+  SOURCE_DIR "${THIRDPARTY_DIR}/rocksdb"
   CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/leveldb
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/rocksdb
         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
         ${_CMAKE_COMMON_BUILD_PARAMS}
+        -DROCKSDB_BUILD_SHARED:BOOL=OFF
+        -DWITH_ALL_TESTS:BOOL=OFF
+        -DWITH_TESTS:BOOL=OFF
+        -DWITH_TOOLS:BOOL=OFF
+        -DWITH_CORE_TOOLS:BOOL=OFF
+        -DWITH_BENCHMARK_TOOLS:BOOL=OFF
+        -DWITH_RUNTIME_DEBUG:BOOL=ON
+        -DWITH_MD_LIBRARY:BOOL=OFF  
+        -DPORTABLE:BOOL=ON
 )
-set(_FINDPACKAGE_LEVELDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/leveldb/lib/cmake/leveldb")
-set(_FINDPACKAGE_LEVELDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/leveldb/include")
+set(_FINDPACKAGE_ROCKSDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/cmake/rocksdb")
+set(_FINDPACKAGE_ROCKSDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/include")
 
 # Builds Microsoft.GSL
 ExternalProject_Add(Microsoft.GSL
@@ -190,7 +198,7 @@ ExternalProject_Add(ipfs-lite-cpp
         -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
         -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
         -DProtobuf_PROTOC_EXECUTABLE:PATH=protoc # ${_PROTOBUF_PROTOC_EXEC}
-        -Dleveldb_DIR:PATH=${_FINDPACKAGE_LEVELDB_DIR}        
+        -Drocksdb_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}        
         -DTESTING:BOOL=${TESTING}
         ${_BOOST_CACHE_ARGS}
         ${_OPENSSL_CACHE_ARGS}
@@ -198,7 +206,7 @@ ExternalProject_Add(ipfs-lite-cpp
         -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${BOOST_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ \\\"${_OPENSSL_INCLUDE_DIR}/include\\\"\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}
         ${_CMAKE_COMMON_BUILD_PARAMS}
       
-  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p protobuf leveldb Boost.DI
+  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p protobuf rocksdb Boost.DI
 )
 
 # Builds ed25519

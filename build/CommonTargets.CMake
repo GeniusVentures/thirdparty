@@ -123,17 +123,6 @@ ExternalProject_Add(grpc
   DEPENDS # protobuf # zlib absl ${_OPENSSL_target}
 )
 
-# Builds leveldb
-ExternalProject_Add(leveldb
-  PREFIX leveldb
-  SOURCE_DIR "${THIRDPARTY_DIR}/leveldb"
-  CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/leveldb
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-)
-set(_FINDPACKAGE_LEVELDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/leveldb/lib/cmake/leveldb")
-set(_FINDPACKAGE_LEVELDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/leveldb/include")
-
 # Builds rocksdb
 ExternalProject_Add(rocksdb
   PREFIX rocksdb
@@ -261,14 +250,14 @@ ExternalProject_Add(ipfs-lite-cpp
         -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
         -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
         -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
-        -Dleveldb_DIR:PATH=${_FINDPACKAGE_LEVELDB_DIR}        
+        -Drocksdb_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}        
         -DTESTING:BOOL=${TESTING}
         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}  
         -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ \\\"${_OPENSSL_INCLUDE_DIR}/include\\\"\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_BOOST_CACHE_ARGS}
         ${_OPENSSL_CACHE_ARGS}
-  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p grpc leveldb Boost.DI
+  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p grpc rocksdb Boost.DI
 )
 
 # Builds ed25519
