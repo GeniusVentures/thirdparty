@@ -136,7 +136,7 @@ set(_BOOST_CACHE_ARGS
       -DBoost_NO_SYSTEM_PATHS:BOOL=ON
       #-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include/boost-1_72      
 )
-message("---opensssl root=${OpenSSL_ROOT}")
+message("---opensssl root=${OPENSSL_ROOT_DIR}")
 set(OPENSSL_MSVC_STATIC_RT  ON)
 set(OPENSSL_USE_STATIC_LIBS  ON)
 # OpenSSL 
@@ -149,18 +149,8 @@ if(OPENSSL_FOUND)
       #-DOPENSSL_USE_STATIC_LIBS:BOOL=OFF    
       -DOPENSSL_INCLUDE_DIR:STRING=${_OPENSSL_INCLUDE_DIR}    
   )
-
 else()
-  set(_OPENSSL_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/grpc/lib)
-  set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/grpc/third_party/boringssl-with-bazel/src/include)
-  set(_OPENSSL_CACHE_ARGS
-      -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
-	    -DOPENSSL_MSVC_STATIC_RT:BOOL=ON
-      -DOPENSSL_CRYPTO_LIBRARY:PATH=${_OPENSSL_LIB_DIR}
-      -DOPENSSL_SSL_LIBRARY:PATH=${_OPENSSL_LIB_DIR}
-      -DOPENSSL_INCLUDE_DIR:STRING=${THIRDPARTY_DIR}/grpc/third_party/boringssl-with-bazel/src/include
-      -DOPENSSL_LIBRARIES:PATH=${_OPENSSL_LIB_DIR}
-  )
+  message(FATAL_ERROR "OpenSSL is not found. Please specify OPENSSL_ROOT_DIR")
 endif()
 
 # Set config for patching binaryen 

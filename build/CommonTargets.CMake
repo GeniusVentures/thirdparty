@@ -114,8 +114,10 @@ ExternalProject_Add(grpc
         -DABSL_ENABLE_INSTALL:BOOL=ON
       #   -DgRPC_PROTOBUF_PROVIDER:STRING=package
       #   -DgRPC_PROTOBUF_PACKAGE_TYPE:STRING=CONFIG
-      #   -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}      
-        #  -DgRPC_SSL_PROVIDER:STRING=package
+      #   -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
+        # gRPC_SSL_PROVIDER should be set to "package" to use an extermal OpenSSL implementation.
+        # When it is set to "module" (default value) a bundled OpenSSL implementation is linked.
+        -DgRPC_SSL_PROVIDER:STRING=package
         ${_OPENSSL_CACHE_ARGS}   
         ${_grpc_SSL_PARAM}     
         ${CMAKE_CACHE_ARGS_CFLAGES_ADD} 
