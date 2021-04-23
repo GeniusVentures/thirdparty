@@ -1,5 +1,4 @@
 
-
 This is the repository for third party of SuperGenius
 ===================================
 
@@ -31,10 +30,12 @@ This is the repository for third party of SuperGenius
 # Build on Linux
 ## Preinstall
 - CMake 
-- Python >=3.5
+- Python >=3.5 (make sure /bin/python links to your python3 version, e.g. `ln -s /bin/python3.8 /bin/python`)
+- libgflags-dev (RocksDB dependency): `sudo apt-get install libgflags-dev`
 ## Building
-	○ cd ./build/Linux	
-	○ ../../sr25519/scripts/install_dependencies.sh
+	○ mkdir .build.Release
+	○ cd ./.build.Release	
+	○ ../sr25519/scripts/install_dependencies.sh
 	○ export PATH=$PATH:$(pwd)/grpc/src/grpc-build:~/.cargo/bin
 	○ cmake . -DCMAKE_BUILD_TYPE=Release
 	○ make
