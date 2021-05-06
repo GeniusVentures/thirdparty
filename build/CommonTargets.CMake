@@ -123,7 +123,7 @@ ExternalProject_Add(grpc
         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
 	      # ${_CMAKE_COMMON_BUILD_PARAMS}
 	#   ${_grpc_BUILD_PARAMS}
-  DEPENDS # protobuf # zlib absl ${_OPENSSL_target}
+  DEPENDS ${_OPENSSL_target} # protobuf # zlib absl
 )
 
 # Builds rocksdb
@@ -192,20 +192,20 @@ set(_FINDPACKAGE_BOOST_DI_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/lib/c
 set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/include")
 
 
-# Builds delta-enabled-crdts
-ExternalProject_Add(delta-enabled-crdts
-  PREFIX delta-enabled-crdts
-  SOURCE_DIR "${THIRDPARTY_DIR}/delta-enabled-crdts"
-  CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-        -DELTACRDTS_BUILD_TESTS:BOOL=ON
-        -DELTACRDTS_INSTALL:BOOL=ON
-  PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-        "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/delta-enabled-crdts-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
-)
+## Builds delta-enabled-crdts
+#ExternalProject_Add(delta-enabled-crdts
+#  PREFIX delta-enabled-crdts
+#  SOURCE_DIR "${THIRDPARTY_DIR}/delta-enabled-crdts"
+#  CMAKE_CACHE_ARGS
+#        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts
+#        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
+#        -DELTACRDTS_BUILD_TESTS:BOOL=ON
+#        -DELTACRDTS_INSTALL:BOOL=ON
+#  PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+#        "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/delta-enabled-crdts-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
+#)
 
-set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/include")
+#set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/include")
 
 # Builds libp2p
 ExternalProject_Add(libp2p
@@ -399,18 +399,18 @@ CMAKE_CACHE_ARGS
       ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
-ExternalProject_Add( hawktracer
-PREFIX hawktracer
-URL https://github.com/amzn/hawktracer/archive/v0.10.0.zip
-# GIT_TAG           "v0.10.0"
-# GIT_SHALLOW TRUE
-#URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
-CMAKE_CACHE_ARGS
-	  -DBUILD_STATIC_LIB:BOOL=ON
-      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/hawktracer
-      ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-      ${_CMAKE_COMMON_BUILD_PARAMS}
-)
+#ExternalProject_Add( hawktracer
+#PREFIX hawktracer
+#URL https://github.com/amzn/hawktracer/archive/v0.10.0.zip
+## GIT_TAG           "v0.10.0"
+## GIT_SHALLOW TRUE
+##URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
+#CMAKE_CACHE_ARGS
+#	  -DBUILD_STATIC_LIB:BOOL=ON
+#      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/hawktracer
+#      ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
+#      ${_CMAKE_COMMON_BUILD_PARAMS}
+#)
 
 
 # build third party for grpc

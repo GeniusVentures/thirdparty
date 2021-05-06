@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 project(OSX_SHARED_THIRD_PARTY)
-
+set(CMAKE_MACOSX_RPATH 1)
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 
@@ -21,13 +21,13 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 	if (CMAKE_BUILD_TYPE EQUAL Debug)
 	  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MTd")
 	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MTd")
-	endif (CMAKE_BUILD_TYPE EQUAL Debug) 
+	endif (CMAKE_BUILD_TYPE EQUAL Debug)
 
 	if (CMAKE_BUILD_TYPE EQUAL Release)
 	  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MT")
 	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
-	endif (CMAKE_BUILD_TYPE EQUAL Release) 
-	
+	endif (CMAKE_BUILD_TYPE EQUAL Release)
+
 	set(CompilerFlags
 			CMAKE_CXX_FLAGS
 			CMAKE_CXX_FLAGS_DEBUG
@@ -40,15 +40,15 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 	  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
 	endforeach()
 
-	set(CMAKE_CHCHE_ARGS_CFLAGES_ADD            
+	set(CMAKE_CHCHE_ARGS_CFLAGES_ADD
       #-DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}
       #-DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}
       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
 	)
-	set(_CMAKE_COMMON_BUILD_PARAMS 
+	set(_CMAKE_COMMON_BUILD_PARAMS
 	-DBoost_DIR:PATH=${Boost_DIR}
 	-DBoost_NO_SYSTEM_PATHS:BOOL=ON
-	-DBoost_USE_STATIC_LIBS:BOOL=ON	
+	-DBoost_USE_STATIC_LIBS:BOOL=ON
    	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
 	)
 	include(ExternalProject)
@@ -65,9 +65,9 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 	set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
 # set config for ed25519 crypto
-	set(_ED25519_EDIIMPL ref10) 
-	set(_ED25519_HASH sha3_brainhub) 
-	set(_ED25519_RANDOM dev_urandom) 
+	set(_ED25519_EDIIMPL ref10)
+	set(_ED25519_HASH sha3_brainhub)
+	set(_ED25519_RANDOM dev_urandom)
 
 # Set config for spdlog config path
 set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/spdlog/cmake")
@@ -81,7 +81,7 @@ set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/spdlo
 # endif()
 # 	message("---boost include ${BOOST_INCLUDE_DIR}")
 # 	message("-cmake system name ${CMAKE_SYSTEM_NAME}")
-# build boost 
+# build boost
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
 	set(address_model 32)
 else()
@@ -89,7 +89,7 @@ else()
 endif()
 
 ExternalProject_Add( Boost
-	PREFIX  "${THIRDPARTY_DIR}/boost"  
+	PREFIX  "${THIRDPARTY_DIR}/boost"
 	GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
 	GIT_TAG           "boost-1.72.0"
 	GIT_SUBMODULES_RECURSE  TRUE
@@ -121,9 +121,9 @@ set(_BOOST_CACHE_ARGS
 	-DBoost_USE_STATIC_RUNTIME:BOOL=ON
 	-DBoost_USE_STATIC_LIBS:BOOL=ON
 	-DBoost_NO_SYSTEM_PATHS:BOOL=ON
-	-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include   
+	-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include
 )
-# build OpenSSL 
+# build OpenSSL
 ExternalProject_Add(openssl
 PREFIX "${THIRDPARTY_DIR}/openssl"
 #URL   https://github.com/openssl/openssl/archive/OpenSSL_1_1_1g.tar.gz
@@ -137,28 +137,30 @@ PATCH_COMMAND ""
 BUILD_COMMAND make
 BUILD_IN_SOURCE  TRUE
 INSTALL_COMMAND make install
-UPDATE_COMMAND ""  
+UPDATE_COMMAND ""
 )
 set(OPENSSL_USE_STATIC_LIBS  ON)
 # find_package(OpenSSL)
-set(_OPENSSL_CACHE_ARGS 
+set(_OPENSSL_CACHE_ARGS
 	-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
-	-DOPENSSL_ROOT_DIR:STRING=${THIRDPARTY_DIR}/openssl/build/OSX  
+	-DOPENSSL_ROOT_DIR:STRING=${THIRDPARTY_DIR}/openssl/build/OSX
 )
 set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/openssl/build/OSX/include)
 set(_OPENSSL_target openssl)
 set(_grpc_SSL_PARAM
 		-DgRPC_SSL_PROVIDER:STRING=package
-		${_OPENSSL_CACHE_ARGS} 
+		${_OPENSSL_CACHE_ARGS}
 	    -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
         -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
         -DgRPC_BUILD_GRPC_PHP_PLUGIN:BOOL=OFF
         -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN:BOOL=OFF
-        -DgRPC_BUILD_GRPC_NODE_PLUGIN:BOOL=OFF	
+        -DgRPC_BUILD_GRPC_NODE_PLUGIN:BOOL=OFF
         -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
 )
+
 # Common build by platforms
 include(../CommonTargets.CMake)
+
 # Build curl 7.60
 	# ExternalProject_Add(curl
 	# PREFIX curl
