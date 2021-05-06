@@ -57,7 +57,10 @@ This is the repository for third party of SuperGenius
 # Build on OSX
 ## Preinstall
    - CMake    
-   - Python >=3.5    
+   - Python >=3.5
+   - go (brew install go)
+   - openssl (brew install openssl)
+   - gflags (brew install gflags)
  ## Building
     ○ cd ./build/OSX
 	○ ../../sr25519/scripts/install_dependencies.sh 
