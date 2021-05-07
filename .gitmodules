@@ -1,10 +1,10 @@
 [submodule "libp2p"]
 	path = libp2p
-	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/libp2p.git
+	url = ./libp2p.git
 	branch = cross-compile
 [submodule "ipfs-lite-cpp"]
 	path = ipfs-lite-cpp
-	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-lite-cpp.git
+	url = ./ipfs-lite-cpp.git
 	branch = v.5
 [submodule "restclient-cpp"]
 	path = restclient-cpp
@@ -15,10 +15,10 @@
 	url = https://github.com/celer-network/pb3-gen-sol.git
 [submodule "boost-for-mobile"]
 	path = boost-for-mobile
-	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/boost-for-mobile.git
+	url = ./boost-for-mobile.git
 [submodule "lmdb"]
 	path = lmdb
-	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/lmdb.git
+	url = ./lmdb.git
 [submodule "flutter"]
 	path = flutter
 	url = https://github.com/flutter/flutter.git
@@ -57,14 +57,14 @@
 	url = https://github.com/nlohmann/json
 [submodule "ipfs-pubsub"]
 	path = ipfs-pubsub
-	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-pubsub.git
+	url = ./ipfs-pubsub.git
         branch = cross-build
 [submodule "GTest"]
 	path = GTest
 	url = https://github.com/google/googletest
 [submodule "ed25519"]
 	path = ed25519
-	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ed25519.git
+	url = ./ed25519.git
         branch = develop
 [submodule "rapidjson"]
 	path = rapidjson
@@ -87,7 +87,7 @@
         branch = dev
 [submodule "delta-enabled-crdts"]
 	path = delta-enabled-crdts
-	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/delta-enabled-crdts.git
+	url = ./delta-enabled-crdts.git
 [submodule "trustwallet/wallet-core"]
 	path = trustwallet/wallet-core
 	url = https://github.com/trustwallet/wallet-core.git
