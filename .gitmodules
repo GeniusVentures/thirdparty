@@ -84,6 +84,7 @@
 [submodule "Parabeac-Core"]
 	path = Parabeac-Core
 	url = https://github.com/Parabeac/Parabeac-Core.git
+        branch = dev
 [submodule "delta-enabled-crdts"]
 	path = delta-enabled-crdts
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/delta-enabled-crdts.git
