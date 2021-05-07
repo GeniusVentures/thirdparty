@@ -5,7 +5,7 @@
 [submodule "ipfs-lite-cpp"]
 	path = ipfs-lite-cpp
 	url = ssh://git@gitlab.geniusventures.io:8487/GeniusVentures/ipfs-lite-cpp.git
-	branch = develop
+	branch = v.5
 [submodule "restclient-cpp"]
 	path = restclient-cpp
 	url = https://github.com/mrtazz/restclient-cpp.git
