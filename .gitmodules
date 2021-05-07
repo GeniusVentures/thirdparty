@@ -4,7 +4,7 @@
 	branch = cross-compile
 [submodule "ipfs-lite-cpp"]
 	path = ipfs-lite-cpp
-	url = ../ifps-lite-cpp.git
+	url = ../ipfs-lite-cpp.git
 	branch = v.5
 [submodule "restclient-cpp"]
 	path = restclient-cpp
