@@ -5,11 +5,10 @@ This is the repository for third party of SuperGenius
 
 ## Preinstall
 - CMake 
-- Visual Studio 2015 or 2017
+- Visual Studio 2015, 2017 or 2019
 - Perl 
 - Openssl   Click the link to visit OpenSSL download page: [here](http://slproweb.com/products/Win32OpenSSL.html)
 - Python >=3.5
-- Go     >=1.11
 ## Building	
     ○ git submodule update --init --recursive
     ○ cd ./build
@@ -30,11 +29,9 @@ This is the repository for third party of SuperGenius
 ## Preinstall
 - CMake 
 - Python >=3.5 (make sure /bin/python links to your python3 version, e.g. `ln -s /bin/python3.8 /bin/python`)
-- libgflags-dev (RocksDB dependency): `sudo apt-get install libgflags-dev`
 ## Building
 	○ mkdir .build.Release
 	○ cd ./.build.Release	
-	○ ../sr25519/scripts/install_dependencies.sh
 	○ export PATH=$PATH:$(pwd)/grpc/src/grpc-build:~/.cargo/bin
 	○ cmake . -DCMAKE_BUILD_TYPE=Release
 	○ make
@@ -58,12 +55,8 @@ This is the repository for third party of SuperGenius
 ## Preinstall
    - CMake    
    - Python >=3.5
-   - go (brew install go)
-   - openssl (brew install openssl)
-   - gflags (brew install gflags)
  ## Building
     ○ cd ./build/OSX
-	○ ../../sr25519/scripts/install_dependencies.sh 
 	○ export PATH=$PATH:$(pwd)/grpc/src/grpc-build:$(pwd)/protobuf/bin:~/.cargo/bin
     ○ cmake . -DCMAKE_BUILD_TYPE=Release
     ○ cmake --build . --config Release
