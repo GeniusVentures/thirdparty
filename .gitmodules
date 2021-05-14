@@ -29,10 +29,6 @@
 	path = grpc
 	url = https://github.com/grpc/grpc
         branch = master
-[submodule "leveldb"]
-	path = leveldb
-	url = https://github.com/google/leveldb
-        branch = master
 [submodule "GSL"]
 	path = GSL
 	url = https://github.com/Microsoft/GSL
@@ -75,9 +71,6 @@
 [submodule "binaryen"]
 	path = binaryen
 	url = https://github.com/WebAssembly/binaryen
-[submodule "sr25519"]
-	path = sr25519
-	url = https://github.com/Harrm/sr25519-crust
 [submodule "gnostic"]
 	path = gnostic
 	url = https://github.com/googleapis/gnostic
@@ -95,3 +88,6 @@
 	path = rocksdb
 	url = https://github.com/facebook/rocksdb.git
 	branch = v6.17.3
+[submodule "sr25519-donna"]
+	path = sr25519-donna
+	url = ../sr25519-donna

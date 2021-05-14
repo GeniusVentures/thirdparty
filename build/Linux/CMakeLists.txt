@@ -191,16 +191,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	# else()
 	   
 	# endif()
-# check rustc
-# find_program(rustc MAMES rustc)
-# if(rustc)	
-# else()
-#     message("--installing rustc.")
-# 	execute_process(
-# 		COMMAND ${THIRDPARTY_DIR}/sr25519/scripts/install_dependencies.sh
-# 		WORKING_DIRECTORY ~
-# 		)
-# endif()
+
 #find_package(Boost REQUIRED  random filesystem program_options)
 #message("---BOOST ${Boost_INCLUDE_DIRS}")
 # if(BOOST_INCLUDE_DIR)

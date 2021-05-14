@@ -305,31 +305,18 @@ ExternalProject_Add(ed25519
 )
 set(_FINDPACKAGE_ed25519_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ed25519/lib/cmake/ed25519")
 
-
-# option(INSTALL_RUSTC "Build RUSTC" OFF)
-
-# if(INSTALL_RUSTC)
-#   execute_process(
-#     COMMAND bash -c "${THIRDPARTY_DIR}/sr25519/scripts/install_dependencies.sh"
-#     WORKING_DIRECTORY ${THIRDPARTY_DIR}/sr25519
-#   )
-# endif()
-##### apply patch for building on windows ######
-configure_file(${THIRDPARTY_DIR}/build-patch/config/sr25519/sr25519Config-noconfig.cmake  ${THIRDPARTY_DIR}/sr25519/sr25519Config-noconfig.cmake COPYONLY)
-
-# Builds sr25519
-ExternalProject_Add(sr25519
-  PREFIX sr25519
-  SOURCE_DIR "${THIRDPARTY_DIR}/sr25519"
+# Builds sr25519-donna
+ExternalProject_Add(sr25519-donna
+  PREFIX sr25519-donna
+  SOURCE_DIR "${THIRDPARTY_DIR}/sr25519-donna"
   CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/sr25519
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/sr25519-donna
         -DTESTING:BOOL=OFF
-        -DHUNTER_ENABLED:BOOL=OFF
-        -DBUILD_SHARED_LIBS:BOOL=FALSE
+        -DBUILD_SHARED_LIBS:BOOL=OFF
+        -DHASH_USE_SHA3_BRAINHUB:BOOL=ON
         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-        -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
-  # DEPENDS rustc
 )
+
 # Builds rapidjson
 ExternalProject_Add(rapidjson
   PREFIX rapidjson
