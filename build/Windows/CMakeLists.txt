@@ -90,6 +90,7 @@ set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake
 ##find_package(Boost REQUIRED  random filesystem program_options)
 ##message("---include -- ${BOOST_INCLUDE_DIR}")
 
+
 # build ------------boost ---------------------# 
 
 set(_BOOST_SRC_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost/src/Boost")
@@ -136,23 +137,28 @@ set(_BOOST_CACHE_ARGS
       -DBoost_NO_SYSTEM_PATHS:BOOL=ON
       #-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include/boost-1_72      
 )
-message("---opensssl root=${OPENSSL_ROOT_DIR}")
-set(OPENSSL_MSVC_STATIC_RT  ON)
-set(OPENSSL_USE_STATIC_LIBS  ON)
-# OpenSSL 
-find_package(OpenSSL)
 
-if(OPENSSL_FOUND)
-  message("openssl package is found. include path is ${OPENSSL_INCLUDE_DIR}")
-  set(_OPENSSL_INCLUDE_DIR ${OPENSSL_INCLUDE_DIR})
-  set(_OPENSSL_CACHE_ARGS 
-      #-DOPENSSL_USE_STATIC_LIBS:BOOL=OFF    
-      -DOPENSSL_INCLUDE_DIR:STRING=${_OPENSSL_INCLUDE_DIR}    
-  )
-else()
-  message(FATAL_ERROR "OpenSSL is not found. Please specify OPENSSL_ROOT_DIR")
-endif()
-
+set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl")
+ExternalProject_Add(openssl
+	PREFIX openssl
+	GIT_REPOSITORY "https://github.com/openssl/openssl.git"
+	GIT_TAG "OpenSSL_1_1_1g"
+	GIT_SUBMODULES_RECURSE TRUE
+	SOURCE_DIR  "${THIRDPARTY_DIR}/openssl/src"
+	CONFIGURE_COMMAND perl <SOURCE_DIR>/Configure VC-WIN64A no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+	BUILD_COMMAND nmake
+	BUILD_IN_SOURCE  TRUE
+	INSTALL_COMMAND nmake install
+	)
+set(_OPENSSL_CACHE_ARGS 
+		-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+		-DOPENSSL_ROOT_DIR:STRING=${_openssl_BUILD_ROOT}  
+		-DOPENSSL_INCLUDE_DIR:PATH=${_openssl_BUILD_ROOT}/include
+		-DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
+	)
+set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
+set(_OPENSSL_target openssl)
+   
 # Set config for patching binaryen 
 set(_binaryen_patch
  PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/binaryen-patch/parser.h" <SOURCE_DIR>/src/emscripten-optimizer/parser.h)
