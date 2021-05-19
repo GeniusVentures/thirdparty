@@ -6,15 +6,14 @@ This is the repository for third party of SuperGenius
 ## Preinstall
 - CMake 
 - Visual Studio 2015, 2017 or 2019
-- Perl 
-- Openssl   Click the link to visit OpenSSL download page: [here](http://slproweb.com/products/Win32OpenSSL.html)
+- Strawberry Perl (https://strawberryperl.com/)
 - Python >=3.5
 ## Building	
     ○ git submodule update --init --recursive
     ○ cd ./build
     ○ mkdir Release
     ○ cd Release
-    ○ cmake ../Windows -G "Visual Studio 15 2017 Win64"  -DCMAKE_BUILD_TYPE=Release
+    ○ cmake ../Windows -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release
     ○ cmake --build . --config Release
 
 ### Building for debugging
@@ -23,7 +22,7 @@ This is the repository for third party of SuperGenius
 	○ cd ./build
 	○ mkdir Debug
 	○ cd Debug
-	○ cmake ../Windows -G "Visual Studio 15 2017 Win64"  -DCMAKE_BUILD_TYPE=Debug -DOPENSSL_ROOT_DIR=/to_prebuilt_openssl_root_dir 
+	○ cmake ../Windows -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug 
 	○ cmake --build . --config Debug
 # Build on Linux
 ## Preinstall
