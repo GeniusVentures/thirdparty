@@ -145,13 +145,14 @@ ExternalProject_Add(openssl
 	GIT_TAG "OpenSSL_1_1_1g"
 	GIT_SUBMODULES_RECURSE TRUE
 	SOURCE_DIR  "${THIRDPARTY_DIR}/openssl/src"
-	CONFIGURE_COMMAND perl <SOURCE_DIR>/Configure VC-WIN64A no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+	CONFIGURE_COMMAND perl <SOURCE_DIR>/Configure VC-WIN64A enable-capieng no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
 	BUILD_COMMAND nmake
 	BUILD_IN_SOURCE  TRUE
 	INSTALL_COMMAND nmake install
 	)
 set(_OPENSSL_CACHE_ARGS 
 		-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+        -DOPENSSL_MSVC_STATIC_RT:BOOL=ON
 		-DOPENSSL_ROOT_DIR:STRING=${_openssl_BUILD_ROOT}  
 		-DOPENSSL_INCLUDE_DIR:PATH=${_openssl_BUILD_ROOT}/include
 		-DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
