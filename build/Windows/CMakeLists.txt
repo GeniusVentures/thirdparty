@@ -138,6 +138,11 @@ set(_BOOST_CACHE_ARGS
       #-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include/boost-1_72      
 )
 
+set(OPENSSL_CONFIG_MODE VC-WIN64A)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(OPENSSL_CONFIG_MODE VC-WIN64A --debug)
+endif()
+
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl")
 ExternalProject_Add(openssl
 	PREFIX openssl
@@ -145,11 +150,19 @@ ExternalProject_Add(openssl
 	GIT_TAG "OpenSSL_1_1_1g"
 	GIT_SUBMODULES_RECURSE TRUE
 	SOURCE_DIR  "${THIRDPARTY_DIR}/openssl/src"
-	CONFIGURE_COMMAND perl <SOURCE_DIR>/Configure VC-WIN64A enable-capieng no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+	CONFIGURE_COMMAND perl <SOURCE_DIR>/Configure ${OPENSSL_CONFIG_MODE} enable-capieng no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
 	BUILD_COMMAND nmake
 	BUILD_IN_SOURCE  TRUE
 	INSTALL_COMMAND nmake install
 	)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    ExternalProject_Add_Step(openssl AddDebugSuffix
+        DEPENDEES install
+        COMMAND ${CMAKE_COMMAND} -E rename ${_openssl_BUILD_ROOT}/lib/libcrypto.lib ${_openssl_BUILD_ROOT}/lib/libcryptod.lib
+        COMMAND ${CMAKE_COMMAND} -E rename ${_openssl_BUILD_ROOT}/lib/libssl.lib ${_openssl_BUILD_ROOT}/lib/libssld.lib
+        )
+endif()
+    
 set(_OPENSSL_CACHE_ARGS 
 		-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
         -DOPENSSL_MSVC_STATIC_RT:BOOL=ON
