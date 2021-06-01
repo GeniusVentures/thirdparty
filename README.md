@@ -34,22 +34,35 @@ This is the repository for third party of SuperGenius
 	○ export PATH=$PATH:$(pwd)/grpc/src/grpc-build:~/.cargo/bin
 	○ cmake . -DCMAKE_BUILD_TYPE=Release
 	○ make
-# Build on Android
+# Build on Linux for Android cross compile
 ## Preinstall
 - CMake 
-- Boost (For Android NDK)
-- protoc and grpc_cpp_plugin (They should be prebuilt on host system)
-
+- Android NDK Latest LTS Version (r21e) [(link)](https://developer.android.com/ndk/downloads#lts-downloads)
 ## Building
-	○ export ANDROID_NDK=/to_android_ndk_path
-	○ export NDK_ROOT=$ANDROID_NDK
-	○ export ANDROID_NDK_ROOT=$ANDROID_NDK
-	○ export protoc_PATH=/to_protoc_path
-	○ PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$protoc_PATH:$PATH
-	○ export CROSS_COMPILER=$PATH:$ANDROID_NDK/prebuilt/linux-x86_64/bin/
-	○ cmake . -DCMAKE_SYSTEM_NAME="Android" -DBoost_ADDITIONAL_VERSIONS="1.72" -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_ABI="armeabi-v7a(or arm64-v8a,x86,x86_64)" -DANDROID_NATIVE_API_LEVEL=26 -DCMAKE_BUILD_TYPE=Release
-	○ make
-   
+	○ export ANDROID_NDK=/path/to/android-ndk-r21e
+	○ export ANDROID_TOOLCHAIN="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
+	○ export PATH="$ANDROID_TOOLCHAIN":"$PATH" 
+### armeabi-v7a
+	○ mkdir .build.Android.armeabi-v7a
+	○ cd ./.build.Android.armeabi-v7a
+	○ cmake -S ../build/Android/ -DANDROID_ABI="armeabi-v7a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+	○ make -j4
+### arm64-v8a
+	○ mkdir .build.Android.arm64-v8a
+	○ cd ./.build.Android.arm64-v8a
+	○ cmake -S ../build/Android/ -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+	○ make -j4
+### x86
+	○ mkdir .build.Android.x86
+	○ cd ./.build.Android.x86
+	○ cmake -S ../build/Android/ -DANDROID_ABI="x86" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+	○ make -j4
+### x86_64
+	○ mkdir .build.Android.x86_64
+	○ cd ./.build.Android.x86_64
+	○ cmake -S ../build/Android/ -DANDROID_ABI="x86_64" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+	○ make -j4
+
 # Build on OSX
 ## Preinstall
    - CMake    
