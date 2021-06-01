@@ -42,27 +42,34 @@ This is the repository for third party of SuperGenius
 	○ export ANDROID_NDK=/path/to/android-ndk-r21e
 	○ export ANDROID_TOOLCHAIN="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
 	○ export PATH="$ANDROID_TOOLCHAIN":"$PATH" 
-### armeabi-v7a
-	○ mkdir .build.Android.armeabi-v7a
-	○ cd ./.build.Android.armeabi-v7a
-	○ cmake -S ../build/Android/ -DANDROID_ABI="armeabi-v7a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-	○ make -j4
-### arm64-v8a
-	○ mkdir .build.Android.arm64-v8a
-	○ cd ./.build.Android.arm64-v8a
-	○ cmake -S ../build/Android/ -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-	○ make -j4
-### x86
-	○ mkdir .build.Android.x86
-	○ cd ./.build.Android.x86
-	○ cmake -S ../build/Android/ -DANDROID_ABI="x86" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-	○ make -j4
-### x86_64
-	○ mkdir .build.Android.x86_64
-	○ cd ./.build.Android.x86_64
-	○ cmake -S ../build/Android/ -DANDROID_ABI="x86_64" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-	○ make -j4
-
+* armeabi-v7a
+```
+○ mkdir .build.Android.armeabi-v7a
+○ cd ./.build.Android.armeabi-v7a
+○ cmake -S ../build/Android/ -DANDROID_ABI="armeabi-v7a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+○ make -j4
+```	
+* arm64-v8a
+```
+○ mkdir .build.Android.arm64-v8a
+○ cd ./.build.Android.arm64-v8a
+○ cmake -S ../build/Android/ -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+○ make -j4
+```
+* x86
+```
+○ mkdir .build.Android.x86
+○ cd ./.build.Android.x86
+○ cmake -S ../build/Android/ -DANDROID_ABI="x86" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+○ make -j4
+```
+* x86_64
+```
+○ mkdir .build.Android.x86_64
+○ cd ./.build.Android.x86_64
+○ cmake -S ../build/Android/ -DANDROID_ABI="x86_64" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+○ make -j4
+```
 # Build on OSX
 ## Preinstall
    - CMake    
