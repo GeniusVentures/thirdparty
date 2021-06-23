@@ -1,15 +1,3 @@
 ############################################################
 # build for iOS
 ############################################################
-
-# Ignore everything
-*
-
-# not these files ...
-!.gitignore
-!CMakeLists.txt
-!README.md
-!CommonTargetsForiOS.CMake
-!iOS.cmake
-!Boost-build/*
-!Openssl-build/*
