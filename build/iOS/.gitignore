@@ -1,5 +1,5 @@
 ############################################################
-# build for Linux
+# build for iOS
 ############################################################
 
 # Ignore everything
@@ -11,3 +11,5 @@
 !README.md
 !CommonTargetsForiOS.CMake
 !iOS.cmake
+!Boost-build/*
+!Openssl-build/*

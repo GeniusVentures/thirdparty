@@ -20,7 +20,7 @@
 .project
 .settings/
 .vscode/
-
+.build/
 
 # Build results
 /Lib
