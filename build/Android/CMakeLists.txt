@@ -5,10 +5,34 @@ cmake_minimum_required(VERSION 3.15)
 
 project(ANDROID_SHARED_THIRD_PARTY)
 
+set(CMAKE_SYSTEM_NAME Android)
+set(CMAKE_SYSTEM_VERSION 28) # API level
+set(ANDROID_NATIVE_API_LEVEL 28)
+
+if(NOT CMAKE_ANDROID_NDK)
+	message(FATAL_ERROR "Cannot find Android NDK, make sure you pass -DCMAKE_ANDROID_NDK=[path_to_NDK]")
+endif()
+
+file(READ "${CMAKE_ANDROID_NDK}/source.properties" SOURCE_PROPERTIES_CONTENT)
+string(REGEX MATCH "Pkg\\.Revision = ([0-9]+)\\.([0-9]+)\\." NDK_VERSION_MATCH "${SOURCE_PROPERTIES_CONTENT}")
+set(CMAKE_ANDROID_NDK_VERSION ${CMAKE_MATCH_1})
+set(CMAKE_ANDROID_NDK_VERSION_MINOR ${CMAKE_MATCH_2})
+
+message("--Android NDK version: ${CMAKE_ANDROID_NDK_VERSION}.${CMAKE_ANDROID_NDK_VERSION_MINOR}")
+
+if (NOT CMAKE_ANDROID_NDK_VERSION EQUAL 21)
+  message(FATAL_ERROR "Android NDK LTS Version (r21e) stable long term support version required")
+endif()
+
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_ANDROID_NDK}/build/cmake/android.toolchain.cmake")
+if(NOT EXISTS ${CMAKE_TOOLCHAIN_FILE})
+  message(FATAL_ERROR "Android NDK toolchain file ${CMAKE_TOOLCHAIN_FILE} not found")
+endif()
+
 if("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
     set(LINUX_TARGET_ARCHITECTURES "${CMAKE_HOST_SYSTEM_PROCESSOR}")
 endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
-    set (CPACK_PACKAGE_VERSION_MAJOR "0")
+  set (CPACK_PACKAGE_VERSION_MAJOR "0")
 	set (CPACK_PACKAGE_VERSION_MINOR "2")
 	set (CPACK_PACKAGE_VERSION_PATCH "1")
 	set (CPACK_PACKAGE_VERSION_PRE_RELEASE "1")
@@ -31,13 +55,13 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	if (CMAKE_BUILD_TYPE EQUAL Debug)
 	  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MTd")
 	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MTd")
-	endif (CMAKE_BUILD_TYPE EQUAL Debug) 
+	endif (CMAKE_BUILD_TYPE EQUAL Debug)
 
 	if (CMAKE_BUILD_TYPE EQUAL Release)
 	  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MT")
 	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
-	endif (CMAKE_BUILD_TYPE EQUAL Release) 
-	
+	endif (CMAKE_BUILD_TYPE EQUAL Release)
+
 	set(CompilerFlags
 			CMAKE_CXX_FLAGS
 			CMAKE_CXX_FLAGS_DEBUG
@@ -50,20 +74,21 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
 	endforeach()
 ## Config param for cxx flags
-   set(CMAKE_CACHE_ARGS_CFLAGES_ADD            
+   set(CMAKE_CACHE_ARGS_CFLAGES_ADD
       #-DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}
       #-DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}
       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
 	)
 ## Config param for android
-   set(_CMAKE_COMMON_BUILD_PARAMS 
+   set(_CMAKE_COMMON_BUILD_PARAMS
    	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
+    -DCMAKE_ANDROID_NDK:PATH=${CMAKE_ANDROID_NDK}
 	# -DBoost_DIR:PATH=${Boost_DIR}
 	# -DBoost_NO_SYSTEM_PATHS:BOOL=ON
-	# -DBoost_USE_STATIC_LIBS:BOOL=ON	
+	# -DBoost_USE_STATIC_LIBS:BOOL=ON
 	-DANDROID_ABI:STRING=${ANDROID_ABI}
 	-DANDROID_NATIVE_API_LEVEL:STRING=${ANDROID_NATIVE_API_LEVEL}
-	-DANDROID_TOOLCHAIN:STRING=${ANDROID_TOOLCHAIN}		
+	-DANDROID_TOOLCHAIN:STRING=${ANDROID_TOOLCHAIN}
 	-DANDROID_STL:STRING=c++_static
 	-DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
 	-DOPENSSL_USE_STATIC_LIBS:BOOL=TRUE
@@ -73,7 +98,6 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 # Config Paths by Platforms
 	set(_CXX_FLAGS_FOR_P2P " -std=c++17")
 	#set(Boost_USE_STATIC_LIBS OFF)
-	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
 
 # Set Third party directory
 	set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
@@ -81,7 +105,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	message("--opessl ${OPENSSL_ROOT_DIR}")
 	set(BOOST_VERSION2 1_72_0)
 # Set boost config
-# build boost 
+# build boost
 	set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost/build/Android")
 
 	ExternalProject_Add( Boost
@@ -89,10 +113,10 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 		GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
 		GIT_TAG           "boost-1.72.0"
 		GIT_SUBMODULES_RECURSE  TRUE
-		GIT_SHALLOW TRUE		
-		SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"	
+		GIT_SHALLOW TRUE
+		SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"
 		CONFIGURE_COMMAND  ""
-		PATCH_COMMAND cp -R  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/ ${CMAKE_CURRENT_BINARY_DIR}/boost/src  #  <SOURCE_DIR>/bootstrap.sh	
+		PATCH_COMMAND cp -R  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/ ${CMAKE_CURRENT_BINARY_DIR}/boost/src  #  <SOURCE_DIR>/bootstrap.sh
 		BUILD_COMMAND  ./build.sh  "${_BOOST_ROOT}"  "${ANDROID_ABI}" "${THIRDPARTY_DIR}/boost/src"#   <SOURCE_DIR>/b2 headers
 		# BUILD_IN_SOURCE  TRUE
 		INSTALL_COMMAND ""   # <SOURCE_DIR>/b2 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
@@ -109,7 +133,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
    set(Boost_INCLUDE_DIR  ${BOOST_ROOT}/include)
 #    set(BOOST_INCLUDEDIR ${Boost_INCLUDE_DIR})
    set(BOOST_LIBRARYDIR ${BOOST_ROOT}/libs/${ANDROID_ABI})
-   
+
    #set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH ON)
    #set(Boost_NO_BOOST_CMAKE  OFF)
    set(Boost_DIR "${BOOST_LIBRARYDIR}/cmake/Boost-1.72.0")
@@ -130,11 +154,11 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 	   set(BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
 	   set(BOOST_LIBRARY_DIR "${Boost_LIBRARIES}")
    endif()
-   
+
 	message("---include-  ${Boost_INCLUDE_DIR}")
 	message("----- lib ${BOOST_LIBRARYDIR}")
 	set(BOOST_INCLUDE_DIR ${Boost_INCLUDE_DIR})
-   set(_BOOST_CACHE_ARGS   
+   set(_BOOST_CACHE_ARGS
    -DBOOST_ROOT:PATH=${BOOST_ROOT}
    -DBoost_USE_MULTITHREADED:BOOL=ON
    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
@@ -142,11 +166,11 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
    -DBoost_NO_SYSTEM_PATHS:BOOL=ON
    -DBoost_INCLUDE_DIR:PATH=${Boost_INCLUDE_DIR}
 #    -DBOOST_INCLUDEDIR:PATH=${Boost_INCLUDE_DIR}
-   -DBOOST_LIBRARYDIR:PATH=${BOOST_LIBRARYDIR}  
+   -DBOOST_LIBRARYDIR:PATH=${BOOST_LIBRARYDIR}
    -DBOOST_MIN_VERSION:STRING="1.70.0"
-#    -DBoost_LIBRARY_DIR:PATH=${Boost_LIBRARIES}  
+#    -DBoost_LIBRARY_DIR:PATH=${Boost_LIBRARIES}
 #    -DBoost_ADDITIONAL_VERSIONS:STRING="1.72.0"
-#    -DBoost_LIBRARIES:PATH=${Boost_LIBRARIES}  
+#    -DBoost_LIBRARIES:PATH=${Boost_LIBRARIES}
    -DBoost_DIR:PATH=${Boost_DIR}
    -Dboost_headers_DIR:PATH=${boost_headers_DIR}
    -Dboost_random_DIR:PATH=${boost_random_DIR}
@@ -159,58 +183,59 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 ##### Test find openssl
 
 
-# build OpenSSL 
+# build OpenSSL
 
 if(ANDROID_ABI STREQUAL "arm64-v8a")
 	set(_abi android-arm64)
 elseif(ANDROID_ABI STREQUAL "armeabi-v7a")
 	set(_abi android-arm)
 elseif(ANDROID_ABI STREQUAL "x86")
-	set(_abi android-x86)	
-elseif(ANDROID_ABI STREQUAL "x86_64")	
+	set(_abi android-x86)
+elseif(ANDROID_ABI STREQUAL "x86_64")
 	set(_abi android-x86_64)
 endif()
 message("--- android abi is ${_abi}")
 set(_openssl_BUILD_ROOT "${THIRDPARTY_DIR}/openssl/build/Android/${ANDROID_ABI}")
 ExternalProject_Add(openssl
-	PREFIX openssl	
+	PREFIX openssl
 	GIT_REPOSITORY "https://github.com/openssl/openssl.git"
 	GIT_TAG "OpenSSL_1_1_1g"
 	GIT_SUBMODULES_RECURSE  TRUE
-	GIT_SHALLOW TRUE	
-	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"	
+	GIT_SHALLOW TRUE
+	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
 	CONFIGURE_COMMAND  <SOURCE_DIR>/Configure ${_abi} -D__ANDROID_API__=${ANDROID_NATIVE_API_LEVEL} --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
 	PATCH_COMMAND ""
 	BUILD_COMMAND make
 	BUILD_IN_SOURCE  TRUE
 	INSTALL_COMMAND make install
-	UPDATE_COMMAND ""  
+	UPDATE_COMMAND ""
 )
 
 # set(OPENSSL_USE_STATIC_LIBS  ON)
-set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/openssl/build/Android/${ANDROID_ABI}/include)
-set(_OPENSSL_CACHE_ARGS 
+set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
+set(_OPENSSL_CACHE_ARGS
 	-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
-	-DOPENSSL_ROOT_DIR:PATH=${THIRDPARTY_DIR}/openssl/build/Android/${ANDROID_ABI}  
+	-DOPENSSL_ROOT_DIR:PATH=${_openssl_BUILD_ROOT}
 	-DOPENSSL_INCLUDE_DIR:PATH=${_OPENSSL_INCLUDE_DIR}
-	-DOPENSSL_CRYPTO_LIBRARY:PATH=${THIRDPARTY_DIR}/openssl/build/Android/${ANDROID_ABI}/lib
-	-DOPENSSL_SSL_LIBRARY:PATH=${THIRDPARTY_DIR}/openssl/build/Android/${ANDROID_ABI}/lib
+  -DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
+  -DOPENSSL_CRYPTO_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}
+  -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
-
 set(_OPENSSL_target openssl)
 #-----------------------------#
 
 #message("---${OPENSSL_INCLUDE_DIR}")
 
 
-# Set config for grpc
-  set(_grpc_BUILD_PARAMS
-	-Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=OFF
-	)
 # set config for ed25519 crypto
-	set(_ED25519_EDIIMPL ref10) 
-	set(_ED25519_HASH sha3_brainhub) 
-	set(_ED25519_RANDOM dev_urandom) 
+	set(_ED25519_EDIIMPL ref10)
+	set(_ED25519_HASH sha3_brainhub)
+	set(_ED25519_RANDOM dev_urandom)
+
+	# Set config for patching binaryen
+	set(_binaryen_patch
+	 PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/binaryen-patch/alloc.h" <SOURCE_DIR>/alloc.h)
+
 
 # Common build by platforms
 
@@ -229,6 +254,3 @@ include(CommonTargetsForAndroid.CMake)
 	# 	-DCURL_STATICLIB:BOOL=ON
 	# 	-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/curl
 	# )
-   
-
-
