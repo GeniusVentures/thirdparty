@@ -83,10 +83,10 @@ This is the repository for third party of SuperGenius
 # Build for iOS
 ## Preinstall
   - CMake
-  - Openssl(build for iOS platform)
-  - Boost (build with boost-for-mobile)
 
 ## Building
+```
     ○ cd ./build/iOS
-    ○ cmake .  -DCMAKE_SYSTEM_NAME=iOS -DBOOST_ROOT="/to_boost_root_path"   -DBoost_DIR="/to_thirdparty_path/boost-for-mobile/target/outputs/boost/1.72.0/ios/lib/release/arm64-v8a/cmake/Boost-1.72.0"  -DCMAKE_BUILD_TYPE=Release -DOPENSSL_ROOT_DIR=/to_openssl_path  -DiOS_ABI=arm64-v8a   -DCMAKE_TOOLCHAIN_FILE=/to_thirdparty_path/build/iOS/iOS.cmake -DIOS_PLATFORM=OS64 -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64
-
+    ○ cmake ../../build/iOS -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a  -DIOS_PLATFORM=OS64 -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=[/path/to/GeniusTokens/thirdparty/build/iOS/iOS.cmake]
+    ○ make -j4
+```
