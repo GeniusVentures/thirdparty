@@ -1,93 +1,95 @@
 [submodule "libp2p"]
-	path = libp2p
-	url = ../libp2p.git
-	branch = cross-compile
+    path = libp2p
+    url = ../libp2p.git
+    branch = develop
 [submodule "ipfs-lite-cpp"]
-	path = ipfs-lite-cpp
-	url = ../ipfs-lite-cpp.git
-	branch = v.5
+    path = ipfs-lite-cpp
+    url = ../ipfs-lite-cpp.git
+    branch = develop
 [submodule "restclient-cpp"]
-	path = restclient-cpp
-	url = https://github.com/mrtazz/restclient-cpp.git
-	ignore = untracked
+    path = restclient-cpp
+    url = https://github.com/mrtazz/restclient-cpp.git
+    ignore = untracked
 [submodule "celer-network/pb3-gen-sol"]
-	path = celer-network/pb3-gen-sol
-	url = https://github.com/celer-network/pb3-gen-sol.git
+    path = celer-network/pb3-gen-sol
+    url = https://github.com/celer-network/pb3-gen-sol.git
 [submodule "boost-for-mobile"]
-	path = boost-for-mobile
-	url = ../boost-for-mobile.git
+    path = boost-for-mobile
+    url = ../boost-for-mobile.git
 [submodule "lmdb"]
-	path = lmdb
-	url = ../lmdb.git
+    path = lmdb
+    url = ../lmdb.git
 [submodule "flutter"]
-	path = flutter
-	url = https://github.com/flutter/flutter.git
+    path = flutter
+    url = https://github.com/flutter/flutter.git
 [submodule "curl-android-ios"]
-	path = curl-android-ios
-	url = https://github.com/gcesarmza/curl-android-ios.git
+    path = curl-android-ios
+    url = https://github.com/gcesarmza/curl-android-ios.git
 [submodule "grpc"]
-	path = grpc
-	url = https://github.com/grpc/grpc
-        branch = master
+    path = grpc
+    url = https://github.com/grpc/grpc
+    branch = master
 [submodule "GSL"]
-	path = GSL
-	url = https://github.com/Microsoft/GSL
+    path = GSL
+    url = https://github.com/Microsoft/GSL
 [submodule "spdlog"]
-	path = spdlog
-	url = https://github.com/gabime/spdlog
+    path = spdlog
+    url = https://github.com/gabime/spdlog
 [submodule "hat-trie"]
-	path = hat-trie
-	url = https://github.com/masterjedy/hat-trie
+    path = hat-trie
+    url = https://github.com/masterjedy/hat-trie
 [submodule "Boost.DI"]
-	path = Boost.DI
-	url = https://github.com/masterjedy/di
-        branch = cpp14
+    path = Boost.DI
+    url = https://github.com/masterjedy/di
+    branch = cpp14
 [submodule "cryptopp"]
-	path = cryptopp
-	url = https://github.com/weidai11/cryptopp
+    path = cryptopp
+    url = https://github.com/weidai11/cryptopp
 [submodule "cpp-ipfs-http-client"]
-	path = cpp-ipfs-http-client
-	url = https://github.com/vasild/cpp-ipfs-http-client
+    path = cpp-ipfs-http-client
+    url = https://github.com/vasild/cpp-ipfs-http-client
 [submodule "json"]
-	path = json
-	url = https://github.com/nlohmann/json
+    path = json
+    url = https://github.com/nlohmann/json
 [submodule "ipfs-pubsub"]
-	path = ipfs-pubsub
-	url = ../ipfs-pubsub.git
-        branch = cross-build
+    path = ipfs-pubsub
+    url = ../ipfs-pubsub.git
+    branch = develop
 [submodule "GTest"]
-	path = GTest
-	url = https://github.com/google/googletest
+    path = GTest
+    url = https://github.com/google/googletest
 [submodule "ed25519"]
-	path = ed25519
-	url = ../ed25519.git
-        branch = develop
+    path = ed25519
+    url = ../ed25519.git
+    branch = develop
 [submodule "rapidjson"]
-	path = rapidjson
-	url = https://github.com/Tencent/rapidjson
+    path = rapidjson
+    url = https://github.com/Tencent/rapidjson
 [submodule "jsonrpc-lean"]
-	path = jsonrpc-lean
-	url = https://github.com/uskr/jsonrpc-lean
+    path = jsonrpc-lean
+    url = https://github.com/uskr/jsonrpc-lean
 [submodule "binaryen"]
-	path = binaryen
-	url = https://github.com/WebAssembly/binaryen
+    path = binaryen
+    url = https://github.com/WebAssembly/binaryen
 [submodule "gnostic"]
-	path = gnostic
-	url = https://github.com/googleapis/gnostic
+    path = gnostic
+    url = https://github.com/googleapis/gnostic
 [submodule "Parabeac-Core"]
-	path = Parabeac-Core
-	url = https://github.com/Parabeac/Parabeac-Core.git
-        branch = dev
+    path = Parabeac-Core
+    url = https://github.com/Parabeac/Parabeac-Core.git
+    branch = dev
 [submodule "delta-enabled-crdts"]
-	path = delta-enabled-crdts
-	url = ../delta-enabled-crdts.git
+    path = delta-enabled-crdts
+    url = ../delta-enabled-crdts.git
+    branch = develop
 [submodule "trustwallet/wallet-core"]
-	path = trustwallet/wallet-core
-	url = https://github.com/trustwallet/wallet-core.git
+    path = trustwallet/wallet-core
+    url = https://github.com/trustwallet/wallet-core.git
 [submodule "rocksdb"]
-	path = rocksdb
-	url = https://github.com/facebook/rocksdb.git
-	branch = v6.17.3
+    path = rocksdb
+    url = https://github.com/facebook/rocksdb.git
+    branch = v6.17.3
 [submodule "sr25519-donna"]
-	path = sr25519-donna
-	url = ../sr25519-donna
+    path = sr25519-donna
+    url = ../sr25519-donna
+    branch = develop
