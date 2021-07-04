@@ -20,7 +20,7 @@ BUILD_DIR_TMP=$(pwd)/tmp
 PREFIX_DIR=${BUILD_DIR}
 mkdir --parents ${PREFIX_DIR}
 
-LIBS_DIR=${PREFIX_DIR}/libs
+LIBS_DIR=${PREFIX_DIR}/lib
 INCLUDE_DIR=${PREFIX_DIR}/include
 
 LINKAGES=static

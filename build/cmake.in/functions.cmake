@@ -86,3 +86,7 @@ function(compile_proto_to_cpp PB_H PB_CC PROTO)
   set(${PB_H} ${SCHEMA_OUT_DIR}/${SCHEMA_REL}/${GEN_PB_HEADER} PARENT_SCOPE)
   set(${PB_CC} ${SCHEMA_OUT_DIR}/${SCHEMA_REL}/${GEN_PB} PARENT_SCOPE)
 endfunction()
+
+function(print)
+  message(STATUS "[${CMAKE_PROJECT_NAME}] ${ARGV}")
+endfunction()

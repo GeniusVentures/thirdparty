@@ -1,18 +1,15 @@
-
+# --------------------------------------------------------
 # Find json library
 set(JSON_FOR_MODERN_CXX_INCLUDE_DIR "${THIRDPARTY_DIR}/json")
 find_path(JSON_FOR_MODERN_CXX_INCLUDE_DIR NAMES nlohmann/json.hpp)
 include_directories(${JSON_FOR_MODERN_CXX_INCLUDE_DIR})
 mark_as_advanced(JSON_FOR_MODERN_CXX_INCLUDE_DIR)
 
+# --------------------------------------------------------
+# Set config for spdlog config path
+set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
 
-#message("${THIRDPARTY_DIR}")
-# Set Protobug library path
-set(PROTOBUF_ROOT_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf")
-set(PROTOBUF_SRC_DIR "${PROTOBUF_ROOT_DIR}/cmake")
-
-
-
+# --------------------------------------------------------
 # Builds GTest project from the git submodule.
 ExternalProject_Add(GTest
   PREFIX GTest
@@ -20,88 +17,31 @@ ExternalProject_Add(GTest
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/GTest
         -DCMAKE_CXX_STANDARD:STRING=17
+        ${_CMAKE_COMMON_BUILD_PARAMS}
 )
-
 set(_FINDPACKAGE_GTEST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/GTest/lib/cmake/GTest")
 
+# --------------------------------------------------------
+# Set Protobuf library path
+if (NOT DEFINED _PROTOBUF_CONFIG_DIR)
+    set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib/cmake/protobuf")
+endif()
+set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${_PROTOBUF_CONFIG_DIR}")
 
-# Build protobuf project from the git submodule.
-# ExternalProject_Add(protobuf
-#   PREFIX protobuf
-#   SOURCE_DIR "${PROTOBUF_SRC_DIR}"
-#   CMAKE_CACHE_ARGS
-#         -Dprotobuf_BUILD_TESTS:BOOL=OFF
-#         -Dprotobuf_WITH_ZLIB:BOOL=OFF
-#         -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
-#         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
-#         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-# 	  ${_CMAKE_COMMON_BUILD_PARAMS}
-# )
+if (NOT DEFINED _PROTOBUF_INCLUDE_DIR)
+    set(_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/include")
+endif()
+set(_FINDPACKAGE_PROTOBUF_INCLUDE_DIR "${_PROTOBUF_INCLUDE_DIR}")
 
-# The location where protobuf-config.cmake will be installed varies by platform
-# set(Protobuf_DIR "${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}")
-# set(_FINDPACKAGE_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
-# set(_FINDPACKAGE_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
-# set(_PROTOBUF_PROTOC_EXEC "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
+if (NOT DEFINED _PROTOBUF_LIB_DIR)
+    set(_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib")
+endif()
+set(_FINDPACKAGE_PROTOBUF_LIB_DIR "${_PROTOBUF_LIB_DIR}")
 
-set(_FINDPACKAGE_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/include")
-set(_FINDPACKAGE_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib")
-set(_PROTOBUF_PROTOC_EXEC "${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/protoc")
-
-# If OPENSSL_ROOT_DIR is set, propagate that hint path to the external projects with OpenSSL dependency.
-# set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "")
-# message("${OPENSSL_ROOT_DIR}---")
-# string(COMPARE NOTEQUAL "${OPENSSL_ROOT_DIR}" "" not_empty)
-# if (OPENSSL_ROOT_DIR)
-#   message("openssl root dir is set.")
-#   set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}")
-#   set(OPENSSL_INCLUDE_DIR  "${OPENSSL_ROOT_DIR}/include")
-# else()
-#   message("openssl root dir is not set.")
-# endif()
-
-
-# Builds absl project from the git submodule.
-# ExternalProject_Add(absl
-#   PREFIX absl
-#   SOURCE_DIR "${THIRDPARTY_DIR}/grpc/third_party/abseil-cpp"
-#   CMAKE_CACHE_ARGS
-#         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
-#         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/absl
-#         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-# 	${_CMAKE_COMMON_BUILD_PARAMS}
-
-# )
-
-# Builds c-ares project from the git submodule.
-# ExternalProject_Add(c-ares
-#   PREFIX c-ares
-#   SOURCE_DIR "${THIRDPARTY_DIR}/grpc/third_party/cares/cares"
-#   CMAKE_CACHE_ARGS
-#         -DCARES_SHARED:BOOL=OFF
-#         -DCARES_STATIC:BOOL=ON
-#         -DCARES_STATIC_PIC:BOOL=ON
-#         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/c-ares
-#         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-# 	${_CMAKE_COMMON_BUILD_PARAMS}
-# )
-
-
-
-# Builds zlib project from the git submodule.
-# ExternalProject_Add(zlib
-#   PREFIX zlib
-#   SOURCE_DIR "${THIRDPARTY_DIR}/grpc/third_party/zlib"
-#   CMAKE_CACHE_ARGS
-#         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/zlib
-#         ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-# 	${_CMAKE_COMMON_BUILD_PARAMS}
-# )
-
-# Builds gRPC based on locally checked-out sources and set arguments so that all the dependencies
-# are correctly located.
-
-# message("--protoc---${_PROTOBUF_PROTOC_EXEC} --cmake program path --${CMAKE_PROGRAM_PATH}")
+if (NOT DEFINED PROTOC_EXECUTABLE)
+    set(PROTOC_EXECUTABLE "${_THIRDPARTY_BUILD_DIR}/grpc/bin/protoc${CMAKE_EXECUTABLE_SUFFIX}")
+endif()
+set(_PROTOBUF_PROTOC_EXEC "${PROTOC_EXECUTABLE}")
 
 ExternalProject_Add(grpc
   PREFIX grpc
@@ -112,20 +52,14 @@ ExternalProject_Add(grpc
         -DgRPC_INSTALL:BOOL=ON
         -DgRPC_BUILD_TESTS:BOOL=OFF
         -DABSL_ENABLE_INSTALL:BOOL=ON
-      #   -DgRPC_PROTOBUF_PROVIDER:STRING=package
-      #   -DgRPC_PROTOBUF_PACKAGE_TYPE:STRING=CONFIG
-      #   -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
-        # gRPC_SSL_PROVIDER should be set to "package" to use an extermal OpenSSL implementation.
-        # When it is set to "module" (default value) a bundled OpenSSL implementation is linked.
         -DgRPC_SSL_PROVIDER:STRING=package
         ${_OPENSSL_CACHE_ARGS}
-        ${_grpc_SSL_PARAM}
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-	      # ${_CMAKE_COMMON_BUILD_PARAMS}
-	#   ${_grpc_BUILD_PARAMS}
-  DEPENDS ${_OPENSSL_target} # protobuf # zlib absl
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+        ${_grpc_EXTRA_PARAM}
+  DEPENDS openssl # protobuf # zlib absl
 )
 
+# --------------------------------------------------------
 # Builds rocksdb
 ExternalProject_Add(rocksdb
   PREFIX rocksdb
@@ -145,11 +79,13 @@ ExternalProject_Add(rocksdb
         -DPORTABLE:BOOL=ON
         -DWITH_GFLAGS:BOOL=OFF
         -DFAIL_ON_WARNINGS:BOOL=OFF
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
+        ${_rocksdb_EXTRA_PARAM}
+        ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 set(_FINDPACKAGE_ROCKSDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/cmake/rocksdb")
 set(_FINDPACKAGE_ROCKSDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/include")
 
+# --------------------------------------------------------
 # Builds Microsoft.GSL
 ExternalProject_Add(Microsoft.GSL
   PREFIX Microsoft.GSL
@@ -157,32 +93,37 @@ ExternalProject_Add(Microsoft.GSL
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/GSL
         -DGSL_TEST:BOOL=OFF
+        ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 set(_FINDPACKAGE_GSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/GSL/include")
+
+# --------------------------------------------------------
 # Builds spdlog v1.4.2
 ExternalProject_Add(spdlog
   PREFIX spdlog
   SOURCE_DIR "${THIRDPARTY_DIR}/spdlog"
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/spdlog
-        # -DSPDLOG_FMT_EXTERNAL:BOOL=ON
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
+        -DSPDLOG_BUILD_EXAMPLE:BOOL=OFF
+        ${_CMAKE_COMMON_BUILD_PARAMS}
 )
-
 set(_FINDPACKAGE_SPDLOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/include")
 set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
 
-# Builds tsl_hat_trie 343e0dac54fc8491065e8a059a02db9a2b1248ab
+# --------------------------------------------------------
+# Builds tsl_hat_trie 
 ExternalProject_Add(tsl_hat_trie
   PREFIX tsl_hat_trie
   SOURCE_DIR "${THIRDPARTY_DIR}/hat-trie"
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/hat-trie
+        ${_tsl_hat_trie_patch}
 )
 set(_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/hat-trie/lib/cmake/tsl_hat_trie")
 set(_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/hat-trie/include")
 
-# Builds Boost.DI c5287ee710ad90f5286d0cc2b9e49b72d89267a6
+# --------------------------------------------------------
+# Builds Boost.DI 
 ExternalProject_Add(Boost.DI
   PREFIX Boost.DI
   SOURCE_DIR "${THIRDPARTY_DIR}/Boost.DI"
@@ -190,26 +131,28 @@ ExternalProject_Add(Boost.DI
         -DBOOST_DI_OPT_BUILD_TESTS:BOOL=OFF
         -DBOOST_DI_OPT_BUILD_EXAMPLES:BOOL=OFF
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Boost.DI
+        ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 set(_FINDPACKAGE_BOOST_DI_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/lib/cmake/Boost.DI")
 set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/include")
 
 
+# --------------------------------------------------------
 ## Builds delta-enabled-crdts
 #ExternalProject_Add(delta-enabled-crdts
 #  PREFIX delta-enabled-crdts
 #  SOURCE_DIR "${THIRDPARTY_DIR}/delta-enabled-crdts"
 #  CMAKE_CACHE_ARGS
 #        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts
-#        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
 #        -DELTACRDTS_BUILD_TESTS:BOOL=ON
 #        -DELTACRDTS_INSTALL:BOOL=ON
 #  PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-#        "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/delta-enabled-crdts-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
+#        "${PROJECT_BUILD_FOLDER}/cmake.in/delta-enabled-crdts-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
 #)
 
 #set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/include")
 
+# --------------------------------------------------------
 # Builds libp2p
 ExternalProject_Add(libp2p
   PREFIX libp2p
@@ -222,6 +165,8 @@ ExternalProject_Add(libp2p
         -DEXPOSE_MOCKS:BOOL=ON
         -DHUNTER_ENABLED:BOOL=OFF
         -DBUILD_EXAMPLES:BOOL=ON
+        -DCMAKE_FIND_USE_PACKAGE_ROOT_PATH:BOOL=ON
+        -DBoost_NO_SYSTEM_PATHS:BOOL=ON
         -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
         -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
         -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
@@ -229,20 +174,18 @@ ExternalProject_Add(libp2p
         -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
         -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
         -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
-
         ${_BOOST_CACHE_ARGS}
         ${_OPENSSL_CACHE_ARGS}
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-        -DCMAKE_CXX_FLAGS:STRING=-I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ \\\"${_OPENSSL_INCLUDE_DIR}\\\"\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ ${_CXX_FLAGS_FOR_P2P}
+        -DCMAKE_CXX_FLAGS:STRING=-I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ \\\"${_OPENSSL_INCLUDE_DIR}\\\"\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ ${CMAKE_CXX_FLAGS}
         -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
         ${_CMAKE_COMMON_BUILD_PARAMS}
-
-  DEPENDS GTest grpc spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost ${_OPENSSL_target}
+  DEPENDS GTest grpc ${_PROTOBUF_TARGET} spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost openssl
 )
 set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p")
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
 set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR    "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include")
 
+# --------------------------------------------------------
 # builds ipfs-lite-cpp
 ExternalProject_Add(ipfs-lite-cpp
   PREFIX ipfs-lite-cpp
@@ -259,14 +202,14 @@ ExternalProject_Add(ipfs-lite-cpp
         -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
         -DRocksDB_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}
         -DTESTING:BOOL=${TESTING}
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ \\\"${_OPENSSL_INCLUDE_DIR}/include\\\"\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_ROCKSDB_INCLUDE_DIR}\ -std=c++17
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_BOOST_CACHE_ARGS}
         ${_OPENSSL_CACHE_ARGS}
-  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p grpc rocksdb Boost.DI
+  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p grpc ${_PROTOBUF_TARGET} rocksdb Boost.DI
 )
 
+# --------------------------------------------------------
 # builds ipfs-pubsub
 ExternalProject_Add(ipfs-pubsub
   PREFIX ipfs-pubsub
@@ -283,14 +226,14 @@ ExternalProject_Add(ipfs-pubsub
         -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
         -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
         -DTESTING:BOOL=${TESTING}
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ \\\"${_OPENSSL_INCLUDE_DIR}/include\\\"\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ -std=c++17
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_BOOST_CACHE_ARGS}
         ${_OPENSSL_CACHE_ARGS}
   DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p  Boost.DI
 )
 
+# --------------------------------------------------------
 # Builds ed25519
 ExternalProject_Add(ed25519
   PREFIX ed25519
@@ -303,11 +246,12 @@ ExternalProject_Add(ed25519
         -DRANDOM:STRING=${_ED25519_RANDOM}
         -DBUILD:STRING=STATIC
         -DTESTING:BOOL=OFF
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
         -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
+        ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 set(_FINDPACKAGE_ed25519_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ed25519/lib/cmake/ed25519")
 
+# --------------------------------------------------------
 # Builds sr25519-donna
 ExternalProject_Add(sr25519-donna
   PREFIX sr25519-donna
@@ -317,9 +261,10 @@ ExternalProject_Add(sr25519-donna
         -DTESTING:BOOL=OFF
         -DBUILD_SHARED_LIBS:BOOL=OFF
         -DHASH_USE_SHA3_BRAINHUB:BOOL=ON
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
+        ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
+# --------------------------------------------------------
 # Builds rapidjson
 ExternalProject_Add(rapidjson
   PREFIX rapidjson
@@ -327,68 +272,58 @@ ExternalProject_Add(rapidjson
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/rapidjson
         -DRAPIDJSON_BUILD_TESTS:BOOL=OFF
+        -DRAPIDJSON_BUILD_EXAMPLES:BOOL=OFF
         -DHUNTER_ENABLED:BOOL=OFF
         -DBUILD_SHARED_LIBS:BOOL=FALSE
         -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-	${_CMAKE_COMMON_BUILD_PARAMS}
-
+        ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
+# --------------------------------------------------------
 # Builds binaryen
 ExternalProject_Add(binaryen
   PREFIX binaryen
-  #SOURCE_DIR "${THIRDPARTY_DIR}/binaryen"
   URL https://github.com/Warchant/binaryen/archive/1.38.28-p0.zip
-  #URL_HASH SHA1=e34a32691eef432a87bdf63d3ca68e2669d04b21
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/binaryen
         -DBUILD_STATIC_LIB:BOOL=ON
         -DBUILD_TOOLS:BOOL=OFF
         -DENABLE_WERROR:BOOL=OFF
-        ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
         ${_CMAKE_COMMON_BUILD_PARAMS}
-  # PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/binaryen-patch/parser.h" <SOURCE_DIR>/src/emscripten-optimizer/parser.h
-  ${_binaryen_patch}
+        ${_binaryen_patch}
 )
 
-if(";${CMAKE_VS_PLATFORM_NAME};${MSVC_C_ARCHITECTURE_ID};${MSVC_CXX_ARCHITECTURE_ID};"
-    MATCHES ";(Win64|Itanium|x64|IA64);")
-   set(CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT ml64)
-else()
-   set(CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT ml)
-endif()
 
-
+# --------------------------------------------------------
+# Builds libsecp256k1
 ExternalProject_Add(libsecp256k1
-PREFIX libsecp256k1
-#SOURCE_DIR "${THIRDPARTY_DIR}/libsecp256k1"
-URL https://github.com/soramitsu/soramitsu-libsecp256k1/archive/c7630e1bac638c0f16ee66d4dce7b5c49eecbaa5.zip
-URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
-CMAKE_CACHE_ARGS
+    PREFIX libsecp256k1
+    URL https://github.com/soramitsu/soramitsu-libsecp256k1/archive/c7630e1bac638c0f16ee66d4dce7b5c49eecbaa5.zip
+    URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
+    CMAKE_CACHE_ARGS
       -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/libsecp256k1
       -DSECP256K1_BUILD_TEST:BOOL=OFF
-    #  -DUSE_ASM_X86_64:BOOL=ON
-      ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
       ${_CMAKE_COMMON_BUILD_PARAMS}
-PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-      "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.in/libsecp256k1-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
+    PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+      "${PROJECT_BUILD_FOLDER}/cmake.in/libsecp256k1-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
 )
 
-#jsonrpc-lean ---install header file because there are any source files.
+# --------------------------------------------------------
+# Builds xxhash
 ExternalProject_Add( xxhash
-PREFIX xxhash
-#SOURCE_DIR "${THIRDPARTY_DIR}/libsecp256k1"
-URL https://github.com/hunter-packages/xxHash/archive/0.6.5-p0.tar.gz
-#URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
-CMAKE_CACHE_ARGS
-      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/xxhash
-      -DSECP256K1_BUILD_TEST:BOOL=OFF
-    #  -DUSE_ASM_X86_64:BOOL=ON
-      ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
-      ${_CMAKE_COMMON_BUILD_PARAMS}
+    PREFIX xxhash
+    URL https://github.com/hunter-packages/xxHash/archive/0.6.5-p0.tar.gz
+    CMAKE_CACHE_ARGS
+          -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/xxhash
+          -DSECP256K1_BUILD_TEST:BOOL=OFF
+          ${_CMAKE_COMMON_BUILD_PARAMS}
 )
+install(
+        DIRECTORY ${THIRDPARTY_DIR}/jsonrpc-lean
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/jsonrpc-lean
+    )
 
+# --------------------------------------------------------
 #ExternalProject_Add( hawktracer
 #PREFIX hawktracer
 #URL https://github.com/amzn/hawktracer/archive/v0.10.0.zip
@@ -398,37 +333,30 @@ CMAKE_CACHE_ARGS
 #CMAKE_CACHE_ARGS
 #	  -DBUILD_STATIC_LIB:BOOL=ON
 #      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/hawktracer
-#      ${CMAKE_CACHE_ARGS_CFLAGES_ADD}
 #      ${_CMAKE_COMMON_BUILD_PARAMS}
 #)
 
 
+# --------------------------------------------------------
 # build third party for grpc
-# ExternalProject_ADd(go-protobuf
-# PREFIX go-protobuf
-# URL https://github.com/golang/protobuf/archive/v1.4.2.zip
-# CONFIGURE_COMMAND  ""
-# BUILD_COMMAND <SOURCE_DIR>/COMPILE-PROTOS.sh
-# INSTALL_COMMAND  go install .
-# BUILD_IN_SOURCE  TRUE
-# )
-# build third party for grpc
-ExternalProject_ADd(gnostic
-PREFIX gnostic
-URL https://github.com/googleapis/gnostic/archive/v0.5.1.zip
-CONFIGURE_COMMAND  ""
-BUILD_COMMAND go install .
-INSTALL_COMMAND  ""
-BUILD_IN_SOURCE  TRUE
+ExternalProject_Add(gnostic
+    PREFIX gnostic
+    URL https://github.com/googleapis/gnostic/archive/v0.5.1.zip
+    CONFIGURE_COMMAND  ""
+    BUILD_COMMAND go install .
+    INSTALL_COMMAND  ""
+    BUILD_IN_SOURCE  TRUE
 )
+
+# --------------------------------------------------------
 # build third party for grpc
 ExternalProject_ADd(gnostic-grpc
-PREFIX gnostic-grpc
-URL https://github.com/googleapis/gnostic-grpc/archive/v0.1.0.zip
-CONFIGURE_COMMAND  ""
-BUILD_COMMAND go install .
-INSTALL_COMMAND  ""
-BUILD_IN_SOURCE  TRUE
+    PREFIX gnostic-grpc
+    URL https://github.com/googleapis/gnostic-grpc/archive/v0.1.0.zip
+    CONFIGURE_COMMAND  ""
+    BUILD_COMMAND go install .
+    INSTALL_COMMAND  ""
+    BUILD_IN_SOURCE  TRUE
 )
 install(
         DIRECTORY ${THIRDPARTY_DIR}/jsonrpc-lean

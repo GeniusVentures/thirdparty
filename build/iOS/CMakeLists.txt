@@ -1,6 +1,11 @@
-# special settings for Windows build on windows machine
-# this is the common stuff for building
+
 cmake_minimum_required(VERSION 3.15)
+
+# --------------------------------------------------------
+# if on OSX Darwin system, build the iOS executables
+if (NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
+    message(FATAL_ERROR "${CMAKE_HOST_SYSTEM_NAME} host system name does not match OSX Darwin for iOS cross compiling - Please select the correct folder for configuring project")
+endif()
 
 if(POLICY CMP0025)
 	#NEW: report OS X version of Clang as "AppleClang"
@@ -13,86 +18,36 @@ endif()
 
 project(iOS_SHARED_THIRD_PARTY)
 
+# --------------------------------------------------------
+# build common libraries by platforms
+include(../CommonCompilerOptions.CMake)
 
-message("---${CMAKE_HOST_SYSTEM_NAME}")
+# ------------------------------------------
+# Set OSX specific runtime options  
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
+set(CMAKE_SYSTEM_NAME "iOS")
+set(_CMAKE_COMMON_BUILD_PARAMS
+	-DBoost_DIR:PATH=${Boost_DIR}
+	-DBoost_NO_SYSTEM_PATHS:BOOL=ON
+	-DBoost_USE_STATIC_LIBS:BOOL=ON
+	-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
+	-DOPENSSL_USE_STATIC_LIBS:BOOL=TRUE
+	-DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
+	-DIOS_PLATFORM:STRING=${IOS_PLATFORM}
+	-DIOS_ARCH:STRING=${IOS_ARCH}
+	-DENABLE_ARC:STRING="0"
+	-DENABLE_BITCODE:STRING=NO
+	-DENABLE_VISIBILITY:STRING=${ENABLED_VISIBILITY}
+	-DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+	-DIOS_SDK_VERSION:STRING=${IOS_SDK_VERSION}
+	-DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH:STRING=YES
+    -DCMAKE_POLICY_DEFAULT_CMP0025:STRING=NEW
+    -DCMAKE_POLICY_DEFAULT_CMP0042:STRING=NEW
+)
 
-if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 
-	set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
-
-	set (CPACK_PACKAGE_VERSION_MAJOR "0")
-	set (CPACK_PACKAGE_VERSION_MINOR "2")
-	set (CPACK_PACKAGE_VERSION_PATCH "1")
-	set (CPACK_PACKAGE_VERSION_PRE_RELEASE "1")
-	set (CPACK_PACKAGE_VENDOR "Genius Ventures")
-
-	set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
-	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
-
-	if (CMAKE_BUILD_TYPE EQUAL Debug)
-	  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MTd")
-	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MTd")
-	endif (CMAKE_BUILD_TYPE EQUAL Debug)
-
-	if (CMAKE_BUILD_TYPE EQUAL Release)
-	  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MT")
-	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
-	endif (CMAKE_BUILD_TYPE EQUAL Release)
-
-	set(CompilerFlags
-			CMAKE_CXX_FLAGS
-			CMAKE_CXX_FLAGS_DEBUG
-			CMAKE_CXX_FLAGS_RELEASE
-			CMAKE_C_FLAGS
-			CMAKE_C_FLAGS_DEBUG
-			CMAKE_C_FLAGS_RELEASE
-			)
-	foreach(CompilerFlag ${CompilerFlags})
-	  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
-	endforeach()
-
-	set(CMAKE_CHCHE_ARGS_CFLAGES_ADD
-    #-DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}
-	  #-DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}
- 	  #-DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}
- 	  #-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
-	)
-	set(CMAKE_SYSTEM_NAME "iOS")
-	set(_CMAKE_COMMON_BUILD_PARAMS
-		-DBoost_DIR:PATH=${Boost_DIR}
-		-DBoost_NO_SYSTEM_PATHS:BOOL=ON
-		-DBoost_USE_STATIC_LIBS:BOOL=ON
-		-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-		-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
-		-DOPENSSL_USE_STATIC_LIBS:BOOL=TRUE
-		-DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
-		-DIOS_PLATFORM:STRING=${IOS_PLATFORM}
-		-DIOS_ARCH:STRING=${IOS_ARCH}
-		-DENABLE_ARC:STRING="0"
-		-DENABLE_BITCODE:STRING=NO
-		-DENABLE_VISIBILITY:STRING=${ENABLED_VISIBILITY}
-		-DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
-		-DIOS_SDK_VERSION:STRING=${IOS_SDK_VERSION}
-		-DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH:STRING=YES
-	#	-DCMAKE_SYSTEM_PROCESSOR:STRING=${CMAKE_SYSTEM_PROCESSOR}
-	)
-	include(ExternalProject)
-# Config Paths by Platforms
-	set(_CXX_FLAGS_FOR_P2P " -std=c++17")
-	#set(Boost_USE_STATIC_LIBS OFF)
-	set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
-
-# Set Third party directory
-	set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
-
-# Config for Boost
-set(Boost_NO_SYSTEM_PATHS  ON)
-set(Boost_USE_STATIC_LIBS ON)
-
+# --------------------------------------------------------
 # build boost
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
 	set(address_model 32)
@@ -100,7 +55,6 @@ else()
 	set(address_model 64)
 endif()
 set(BOOST_ROOT "${THIRDPARTY_DIR}/boost/build/iOS/${iOS_ABI}")
-
 ExternalProject_Add( Boost
 	PREFIX  "${THIRDPARTY_DIR}/boost"
 	SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"
@@ -112,7 +66,7 @@ ExternalProject_Add( Boost
 	UPDATE_COMMAND ""
 )
 
-message("---boost dir ${Boost_DIR}")
+print("boost dir ${Boost_DIR}")
 set(boost_headers_DIR "${BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
 set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-1.72.0")
 set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-1.72.0")
@@ -134,6 +88,7 @@ set(_BOOST_CACHE_ARGS
 	-DBoost_INCLUDE_DIR:PATH=${BOOST_INCLUDE_DIR}
 )
 
+# --------------------------------------------------------
 # build OpenSSL
 ExternalProject_Add(openssl
 	PREFIX "${THIRDPARTY_DIR}/openssl"
@@ -147,10 +102,6 @@ ExternalProject_Add(openssl
 )
 
 set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/openssl/build/iOS/${iOS_ABI}/include)
-set(_OPENSSL_target openssl)
-
-set(OPENSSL_USE_STATIC_LIBS  ON)
-# find_package(OpenSSL)
 set(_OPENSSL_CACHE_ARGS
 	-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
 	-DOPENSSL_ROOT_DIR:STRING=${THIRDPARTY_DIR}/openssl/build/iOS/${iOS_ABI}
@@ -159,9 +110,48 @@ set(_OPENSSL_CACHE_ARGS
 	-DOPENSSL_SSL_LIBRARY:PATH=${THIRDPARTY_DIR}/openssl/build/iOS/${iOS_ABI}/lib
 )
 
-set(_grpc_SSL_PARAM
+# --------------------------------------------------------
+# Build protobuf project from the git submodule for local executation of protoc.
+set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake")
+
+# Build protobuf project from the git submodule.
+ExternalProject_Add(protobuf
+    PREFIX protobuf
+    SOURCE_DIR "${PROTOBUF_SRC_DIR}"
+    CMAKE_CACHE_ARGS
+          -Dprotobuf_BUILD_TESTS:BOOL=OFF
+          -Dprotobuf_WITH_ZLIB:BOOL=OFF
+          -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
+          -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
+  		    -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=OFF
+          ${_CMAKE_COMMON_BUILD_PARAMS}
+    DEPENDS
+  )
+
+set(_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
+set(_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
+
+# Build protoc for host OS
+ExternalProject_Add(protobuf-host
+    PREFIX protobuf-host
+    SOURCE_DIR "${PROTOBUF_SRC_DIR}"
+    CMAKE_CACHE_ARGS
+          -Dprotobuf_BUILD_TESTS:BOOL=OFF
+          -Dprotobuf_WITH_ZLIB:BOOL=OFF
+          -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
+          -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf-host
+          -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
+          ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}
+    DEPENDS
+  )
+set(PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf-host/bin/protoc")
+set(_PROTOBUF_TARGET protobuf protobuf-host)
+
+# --------------------------------------------------------
+# set config for grpc
+set(_grpc_EXTRA_PARAM
 		-DgRPC_SSL_PROVIDER:STRING=package
-		${_OPENSSL_CACHE_ARGS}
 	    -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
         -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
         -DgRPC_BUILD_GRPC_PHP_PLUGIN:BOOL=OFF
@@ -170,23 +160,21 @@ set(_grpc_SSL_PARAM
         -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
 )
 
+# --------------------------------------------------------
 # set config for ed25519 crypto
 set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
-message("----target platform IOS=${IOS}")
-# Common build by platforms
-	include(CommonTargetsForiOS.CMake)
+print("target platform IOS=${IOS}")
 
-# Build curl 7.60
-	# ExternalProject_Add(curl
-	# PREFIX curl
-	# SOURCE_DIR "${THIRDPARTY_DIR}/curl-android-ios/curl"
-	# CMAKE_CACHE_ARGS
-	# 	-DBUILD_TESTING:BOOL=OFF
-	# 	-DCMAKE_USE_OPENSSL:BOOL=ON
-	# 	-DCURL_STATICLIB:BOOL=ON
-	# 	-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/curl
-	# )
 
-endif()
+# --------------------------------------------------------
+# Set tsl_hat_trie iOS specific configurations 
+set(tsl_hat_trie_patch
+  PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+        "${PROJECT_BUILD_FOLDER}/cmake.in/hat-trie-patch/CMakeLists.foriOS.txt" <SOURCE_DIR>/CMakeLists.txt
+)
+
+# --------------------------------------------------------
+# build common targets
+include(../CommonTargets.CMake)
