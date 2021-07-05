@@ -22,7 +22,7 @@ project(OSX_SHARED_THIRD_PARTY)
 include(../CommonCompilerOptions.CMake)
 
 # ------------------------------------------
-# Set OSX specific runtime options  
+# Set OSX specific runtime options
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
 set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
@@ -42,7 +42,7 @@ ExternalProject_Add( Boost
 	PREFIX  "${THIRDPARTY_DIR}/boost"
 	GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
 	GIT_TAG           "boost-1.72.0"
-	GIT_SUBMODULES_RECURSE  TRUE
+	#GIT_SUBMODULES_RECURSE  TRUE
 	CONFIGURE_COMMAND  ""
 	PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
 	BUILD_COMMAND <SOURCE_DIR>/b2 headers
@@ -79,7 +79,7 @@ ExternalProject_Add(openssl
     PREFIX "${THIRDPARTY_DIR}/openssl"
     GIT_REPOSITORY "https://github.com/openssl/openssl.git"
     GIT_TAG "OpenSSL_1_1_1g"
-    GIT_SUBMODULES_RECURSE  TRUE
+    #GIT_SUBMODULES_RECURSE  TRUE
     CONFIGURE_COMMAND  <SOURCE_DIR>/config --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
     PATCH_COMMAND ""
     BUILD_COMMAND make
@@ -120,4 +120,3 @@ set(_ED25519_RANDOM dev_urandom)
 # --------------------------------------------------------
 # build common targets
 include(../CommonTargets.CMake)
-

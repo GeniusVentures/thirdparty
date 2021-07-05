@@ -9,11 +9,11 @@ endif()
 project(ANDROID_SHARED_THIRD_PARTY)
 
 # --------------------------------------------------------
-# Include common compiler options 
+# Include common compiler options
 include(../CommonCompilerOptions.CMake)
 
 # --------------------------------------------------------
-# Set Android cross compile specific options 
+# Set Android cross compile specific options
 find_program(MAKE_EXE NAMES gmake nmake make)
 set(CMAKE_SYSTEM_NAME Android)
 set(CMAKE_SYSTEM_VERSION 28) # API level
@@ -65,13 +65,13 @@ ExternalProject_Add( Boost
 	PREFIX boost
 	GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
 	GIT_TAG           "boost-1.72.0"
-	GIT_SUBMODULES_RECURSE  TRUE
+	#GIT_SUBMODULES_RECURSE  TRUE
 	GIT_SHALLOW TRUE
 	SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"
 	CONFIGURE_COMMAND  ""
 	PATCH_COMMAND cp -R  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/ ${CMAKE_CURRENT_BINARY_DIR}/boost/src  #  <SOURCE_DIR>/bootstrap.sh
 	BUILD_COMMAND  ./build.sh  "${_BOOST_ROOT}"  "${ANDROID_ABI}" "${THIRDPARTY_DIR}/boost/src"
-	INSTALL_COMMAND ""   
+	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )
 
@@ -137,7 +137,7 @@ ExternalProject_Add(openssl
 	PREFIX openssl
 	GIT_REPOSITORY "https://github.com/openssl/openssl.git"
 	GIT_TAG "OpenSSL_1_1_1g"
-	GIT_SUBMODULES_RECURSE  TRUE
+	#GIT_SUBMODULES_RECURSE  TRUE
 	GIT_SHALLOW TRUE
 	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
 	CONFIGURE_COMMAND  <SOURCE_DIR>/Configure ${_abi} -D__ANDROID_API__=${ANDROID_NATIVE_API_LEVEL} --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}

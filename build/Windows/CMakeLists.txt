@@ -14,20 +14,20 @@ project(WINDOWS_SHARED_THIRD_PARTY)
 include(../CommonCompilerOptions.CMake)
 
 # ------------------------------------------
-# Set Windows specific runtime options  
+# Set Windows specific runtime options
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Debug>:Debug>")  
+  set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Realease>:Release>")  
+    set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Realease>:Release>")
 endif()
 
 # ------------------------------------------
-# Set Windows specific protobuf options  
+# Set Windows specific protobuf options
 set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/cmake")
 
 # --------------------------------------------------------
-# Set Boost Windows specific configurations 
+# Set Boost Windows specific configurations
 set(VC_PLATFORMTOOLSET "vc141")
 set(BOOST_TOOLSET "msvc-14.1")
 if(MSVC_VERSION AND MSVC_VERSION GREATER_EQUAL 1920) # v142 toolset
@@ -40,10 +40,10 @@ endif()
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 
 ExternalProject_Add(Boost
-      PREFIX "${THIRDPARTY_DIR}/boost" 
+      PREFIX "${THIRDPARTY_DIR}/boost"
       GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
       GIT_TAG           "boost-1.72.0"
-      GIT_SUBMODULES_RECURSE  TRUE
+      #GIT_SUBMODULES_RECURSE  TRUE
       UPDATE_COMMAND ${CMAKE_COMMAND} -E copy ${THIRDPARTY_DIR}/build/cmake.in/boost-patch/system_category_win32.hpp ${THIRDPARTY_DIR}/boost/src/Boost/libs/system/include/boost/system/detail/system_category_win32.hpp
       PATCH_COMMAND ./bootstrap.bat ${VC_PLATFORMTOOLSET}
       CONFIGURE_COMMAND  ""
@@ -81,7 +81,7 @@ ExternalProject_Add(openssl
 	PREFIX openssl
 	GIT_REPOSITORY "https://github.com/openssl/openssl.git"
 	GIT_TAG "OpenSSL_1_1_1g"
-	GIT_SUBMODULES_RECURSE TRUE
+	#GIT_SUBMODULES_RECURSE TRUE
 	SOURCE_DIR  "${THIRDPARTY_DIR}/openssl/src"
 	CONFIGURE_COMMAND perl ./Configure ${OPENSSL_CONFIG_MODE} enable-capieng no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
 	BUILD_COMMAND nmake
@@ -96,27 +96,26 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Debug
         )
 endif()
 
-set(_OPENSSL_CACHE_ARGS 
+set(_OPENSSL_CACHE_ARGS
 		-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
         -DOPENSSL_MSVC_STATIC_RT:BOOL=ON
-		-DOPENSSL_ROOT_DIR:STRING=${_openssl_BUILD_ROOT}  
+		-DOPENSSL_ROOT_DIR:STRING=${_openssl_BUILD_ROOT}
 		-DOPENSSL_INCLUDE_DIR:PATH=${_openssl_BUILD_ROOT}/include
 		-DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
 	)
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 
 # --------------------------------------------------------
-# Set binaryen Windows specific configurations 
+# Set binaryen Windows specific configurations
 set(_binaryen_patch
  PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/binaryen-patch/parser.h" <SOURCE_DIR>/src/emscripten-optimizer/parser.h)
 
 # --------------------------------------------------------
 # Set ed25519 OS specific configurations
-set(_ED25519_EDIIMPL ref10) 
-set(_ED25519_HASH sha3_brainhub) 
-set(_ED25519_RANDOM bcryptgen) 
+set(_ED25519_EDIIMPL ref10)
+set(_ED25519_HASH sha3_brainhub)
+set(_ED25519_RANDOM bcryptgen)
 
 # --------------------------------------------------------
 # build common targets
 include(../CommonTargets.CMake)
-  
