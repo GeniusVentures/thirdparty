@@ -53,8 +53,9 @@ ExternalProject_Add(grpc
   PREFIX grpc
   BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/build"
   SOURCE_DIR "${THIRDPARTY_DIR}/grpc"
+  CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/grpc
   CMAKE_CACHE_ARGS
-  -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/grpc
         -DgRPC_INSTALL:BOOL=ON
         -DgRPC_BUILD_TESTS:BOOL=OFF
         -DABSL_ENABLE_INSTALL:BOOL=ON
@@ -117,7 +118,7 @@ set(_FINDPACKAGE_SPDLOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/include"
 set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
 
 # --------------------------------------------------------
-# Builds tsl_hat_trie 
+# Builds tsl_hat_trie
 ExternalProject_Add(tsl_hat_trie
   PREFIX tsl_hat_trie
   SOURCE_DIR "${THIRDPARTY_DIR}/hat-trie"
@@ -129,7 +130,7 @@ set(_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/hat-trie/l
 set(_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/hat-trie/include")
 
 # --------------------------------------------------------
-# Builds Boost.DI 
+# Builds Boost.DI
 ExternalProject_Add(Boost.DI
   PREFIX Boost.DI
   SOURCE_DIR "${THIRDPARTY_DIR}/Boost.DI"
@@ -183,8 +184,9 @@ ExternalProject_Add(libp2p
         ${_BOOST_CACHE_ARGS}
         ${_OPENSSL_CACHE_ARGS}
         ${_CMAKE_COMMON_BUILD_PARAMS}
-        -DCMAKE_CXX_FLAGS:STRING=-I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ \\\"${_OPENSSL_INCLUDE_DIR}\\\"\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ ${CMAKE_CXX_FLAGS}
+        -DCMAKE_CXX_FLAGS:STRING=-I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ ${CMAKE_CXX_FLAGS}
         -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
+        -DMULTIPLE_OPTION:STRING=${MULTIPLE_OPTION}
   DEPENDS GTest grpc ${_PROTOBUF_TARGET} spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost openssl
 )
 set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p")
@@ -343,28 +345,24 @@ install(
 #)
 
 
-# --------------------------------------------------------
-# build third party for grpc
-ExternalProject_Add(gnostic
-    PREFIX gnostic
-    URL https://github.com/googleapis/gnostic/archive/v0.5.1.zip
-    CONFIGURE_COMMAND  ""
-    BUILD_COMMAND go install .
-    INSTALL_COMMAND  ""
-    BUILD_IN_SOURCE  TRUE
-)
+## --------------------------------------------------------
+## build third party for grpc
+#ExternalProject_Add(gnostic
+#    PREFIX gnostic
+#    URL https://github.com/googleapis/gnostic/archive/v0.5.1.zip
+#    CONFIGURE_COMMAND  ""
+#    BUILD_COMMAND go install .
+#    INSTALL_COMMAND  ""
+#    BUILD_IN_SOURCE  TRUE
+#)
 
-# --------------------------------------------------------
-# build third party for grpc
-ExternalProject_ADd(gnostic-grpc
-    PREFIX gnostic-grpc
-    URL https://github.com/googleapis/gnostic-grpc/archive/v0.1.0.zip
-    CONFIGURE_COMMAND  ""
-    BUILD_COMMAND go install .
-    INSTALL_COMMAND  ""
-    BUILD_IN_SOURCE  TRUE
-)
-install(
-        DIRECTORY ${THIRDPARTY_DIR}/jsonrpc-lean
-        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/jsonrpc-lean
-    )
+## --------------------------------------------------------
+## build third party for grpc
+#ExternalProject_ADd(gnostic-grpc
+#    PREFIX gnostic-grpc
+#    URL https://github.com/googleapis/gnostic-grpc/archive/v0.1.0.zip
+#    CONFIGURE_COMMAND  ""
+#    BUILD_COMMAND go install .
+#    INSTALL_COMMAND  ""
+#    BUILD_IN_SOURCE  TRUE
+#)

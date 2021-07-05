@@ -209,5 +209,9 @@ set(_binaryen_patch
 )
 
 # --------------------------------------------------------
+# Allow multiple definitions
+set(FORCE_MULTILE OFF)
+
+# --------------------------------------------------------
 # build common targets
 include(../CommonTargets.CMake)

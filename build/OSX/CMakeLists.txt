@@ -97,7 +97,6 @@ set(_OPENSSL_CACHE_ARGS
 	-DOPENSSL_CRYPTO_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib
 	-DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib
 )
-set(_OPENSSL_target openssl)
 
 # --------------------------------------------------------
 # set config for grpc
@@ -116,6 +115,11 @@ set(_grpc_EXTRA_PARAM
 set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
+
+# --------------------------------------------------------
+# Allow multiple definitions
+set(FORCE_MULTILE ON)
+set(MULTIPLE_OPTION "-Xlink=-force:multiple")
 
 # --------------------------------------------------------
 # build common targets

@@ -23,7 +23,7 @@ project(iOS_SHARED_THIRD_PARTY)
 include(../CommonCompilerOptions.CMake)
 
 # ------------------------------------------
-# Set OSX specific runtime options  
+# Set OSX specific runtime options
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
 set(CMAKE_SYSTEM_NAME "iOS")
 set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
@@ -169,11 +169,16 @@ print("target platform IOS=${IOS}")
 
 
 # --------------------------------------------------------
-# Set tsl_hat_trie iOS specific configurations 
+# Set tsl_hat_trie iOS specific configurations
 set(tsl_hat_trie_patch
   PATCH_COMMAND ${CMAKE_COMMAND} -E copy
         "${PROJECT_BUILD_FOLDER}/cmake.in/hat-trie-patch/CMakeLists.foriOS.txt" <SOURCE_DIR>/CMakeLists.txt
 )
+
+# --------------------------------------------------------
+# Allow multiple definitions
+set(FORCE_MULTILE ON)
+set(MULTIPLE_OPTION "-Xlink=-force:multiple")
 
 # --------------------------------------------------------
 # build common targets

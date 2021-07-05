@@ -117,5 +117,10 @@ set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM bcryptgen)
 
 # --------------------------------------------------------
+# Allow multiple definitions
+set(FORCE_MULTILE ON)
+set(MULTIPLE_OPTION /FORCE:MULTIPLE)
+
+# --------------------------------------------------------
 # build common targets
 include(../CommonTargets.CMake)
