@@ -54,13 +54,13 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 4)
 else()
 	set(address_model 64)
 endif()
-set(BOOST_ROOT "${THIRDPARTY_DIR}/boost/build/iOS/${iOS_ABI}")
+set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/iOS/${iOS_ABI}")
 ExternalProject_Add( Boost
 	PREFIX  "${THIRDPARTY_DIR}/boost"
 	SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"
-	BINARY_DIR    "${THIRDPARTY_DIR}/boost"
+	BINARY_DIR    "${CMAKE_CURRENT_BINARY_DIR}/boost"
 	CONFIGURE_COMMAND  ""
-	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${THIRDPARTY_DIR}/boost
+	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${CMAKE_CURRENT_BINARY_DIR}/boost
 	BUILD_COMMAND ./build.sh -ios --boost-version 1.72.0 --build-dir ${BOOST_ROOT}
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
@@ -90,24 +90,25 @@ set(_BOOST_CACHE_ARGS
 
 # --------------------------------------------------------
 # build OpenSSL
+set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}/${iOS_ABI}")
 ExternalProject_Add(openssl
 	PREFIX "${THIRDPARTY_DIR}/openssl"
 	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
-	BINARY_DIR    "${THIRDPARTY_DIR}/openssl"
+	BINARY_DIR    "${CMAKE_CURRENT_BINARY_DIR}/openssl"
 	CONFIGURE_COMMAND  ""
-	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${THIRDPARTY_DIR}/openssl
-	BUILD_COMMAND ./build-libssl.sh --version=1.1.1g --targets=ios64-cross-arm64 --build-dir=${THIRDPARTY_DIR}/openssl/build/iOS/${iOS_ABI}
+	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${CMAKE_CURRENT_BINARY_DIR}/openssl
+	BUILD_COMMAND ./build-libssl.sh --version=1.1.1g --targets=ios64-cross-arm64 --build-dir=${_openssl_BUILD_ROOT}
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )
 
-set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/openssl/build/iOS/${iOS_ABI}/include)
+set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 set(_OPENSSL_CACHE_ARGS
 	-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
-	-DOPENSSL_ROOT_DIR:STRING=${THIRDPARTY_DIR}/openssl/build/iOS/${iOS_ABI}
+	-DOPENSSL_ROOT_DIR:STRING=${_openssl_BUILD_ROOT}
 	-DOPENSSL_INCLUDE_DIR:PATH=${_OPENSSL_INCLUDE_DIR}
-	-DOPENSSL_CRYPTO_LIBRARY:PATH=${THIRDPARTY_DIR}/openssl/build/iOS/${iOS_ABI}/lib
-	-DOPENSSL_SSL_LIBRARY:PATH=${THIRDPARTY_DIR}/openssl/build/iOS/${iOS_ABI}/lib
+	-DOPENSSL_CRYPTO_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib
+	-DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib
 )
 
 # --------------------------------------------------------

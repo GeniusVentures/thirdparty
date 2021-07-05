@@ -20,7 +20,7 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 
 # --------------------------------------------------------
 # build boost
-set(_BOOST_BUILD_ROOT "${THIRDPARTY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
+set(_BOOST_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 
 ExternalProject_Add(Boost
     PREFIX boost
@@ -50,7 +50,7 @@ set(_BOOST_CACHE_ARGS
 
 # --------------------------------------------------------
 # build openssl
-set(_openssl_BUILD_ROOT "${THIRDPARTY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
+set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 
 ExternalProject_Add(openssl
     PREFIX openssl
@@ -82,7 +82,7 @@ set(_ED25519_RANDOM dev_urandom)
 # --------------------------------------------------------
 # Allow multiple definitions
 set(FORCE_MULTILE ON)
-set(MULTIPLE_OPTION "-zmuldefs")
+set(MULTIPLE_OPTION "-z muldefs")
 
 # --------------------------------------------------------
 # build common targets

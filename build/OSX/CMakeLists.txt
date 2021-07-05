@@ -37,7 +37,7 @@ else()
 	set(address_model 64)
 endif()
 
-set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
+set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add( Boost
 	PREFIX  "${THIRDPARTY_DIR}/boost"
 	GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
@@ -74,7 +74,7 @@ set(_BOOST_CACHE_ARGS
 
 # ------------------------------------------
 # build OpenSSL
-set(_openssl_BUILD_ROOT "${THIRDPARTY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
+set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add(openssl
     PREFIX "${THIRDPARTY_DIR}/openssl"
     GIT_REPOSITORY "https://github.com/openssl/openssl.git"

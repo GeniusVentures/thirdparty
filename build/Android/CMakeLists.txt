@@ -59,7 +59,7 @@ set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
 # --------------------------------------------------------
 # build boost
 set(BOOST_VERSION2 1_72_0)
-set(_BOOST_ROOT "${THIRDPARTY_DIR}/boost/build/Android")
+set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/Android/${ANDROID_ABI}")
 
 ExternalProject_Add( Boost
 	PREFIX boost
@@ -69,7 +69,7 @@ ExternalProject_Add( Boost
 	GIT_SHALLOW TRUE
 	SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"
 	CONFIGURE_COMMAND  ""
-	PATCH_COMMAND cp -R  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/ ${CMAKE_CURRENT_BINARY_DIR}/boost/src  #  <SOURCE_DIR>/bootstrap.sh
+	PATCH_COMMAND cp -R  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/ ${THIRDPARTY_DIR}/boost/src  #  <SOURCE_DIR>/bootstrap.sh
 	BUILD_COMMAND  ./build.sh  "${_BOOST_ROOT}"  "${ANDROID_ABI}" "${THIRDPARTY_DIR}/boost/src"
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
@@ -120,7 +120,7 @@ set(_BOOST_CACHE_ARGS
 
 # --------------------------------------------------------
 # build OpenSSL
-print("openssl ${OPENSSL_ROOT_DIR}")
+print("openssl ${_openssl_BUILD_ROOT}")
 
 if(ANDROID_ABI STREQUAL "arm64-v8a")
 	set(_abi android-arm64)
@@ -131,8 +131,9 @@ elseif(ANDROID_ABI STREQUAL "x86")
 elseif(ANDROID_ABI STREQUAL "x86_64")
 	set(_abi android-x86_64)
 endif()
-messge("android abi is ${_abi}")
-set(_openssl_BUILD_ROOT "${THIRDPARTY_DIR}/openssl/build/Android/${ANDROID_ABI}")
+message("android abi is ${_abi}")
+
+set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Android/${ANDROID_ABI}")
 ExternalProject_Add(openssl
 	PREFIX openssl
 	GIT_REPOSITORY "https://github.com/openssl/openssl.git"

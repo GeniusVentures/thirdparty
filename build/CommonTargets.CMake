@@ -326,6 +326,9 @@ ExternalProject_Add( xxhash
           -DSECP256K1_BUILD_TEST:BOOL=OFF
           ${_CMAKE_COMMON_BUILD_PARAMS}
 )
+
+# --------------------------------------------------------
+# jsonrpc-lean
 install(
         DIRECTORY ${THIRDPARTY_DIR}/jsonrpc-lean
         DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/jsonrpc-lean
