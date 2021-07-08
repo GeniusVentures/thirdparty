@@ -352,7 +352,7 @@ echo " cores available = " $num_cores
         # toolset=clang-$toolset_name     \
 
         {
-            echo "./b2 toolset=clang runtime-link=static binary-format=elf \
+            ./b2 toolset=clang runtime-link=static binary-format=elf \
                 address-model=$address_model \
                 architecture=$arch_for_abi \
                 abi=$abi    \
@@ -368,7 +368,7 @@ echo " cores available = " $num_cores
                 --build-dir=${BUILD_DIR_TMP}/$ABI_NAME \
                 --includedir=${INCLUDE_DIR} \
                 --libdir=${LIBS_DIR}/$ABI_NAME \
-                install 2>&1 "                \
+                install 2>&1               \
                 || { echo "Error: Failed to build boost for $ABI_NAME!";}
         } | tee -a ${LOG_FILE}
 
