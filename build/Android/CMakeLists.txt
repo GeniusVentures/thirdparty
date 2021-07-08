@@ -46,8 +46,8 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 # --------------------------------------------------------
 ## Config param for android
 set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
-  	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
-    -DCMAKE_ANDROID_NDK:PATH=${CMAKE_ANDROID_NDK}
+  -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
+  -DCMAKE_ANDROID_NDK:PATH=${CMAKE_ANDROID_NDK}
 	-DANDROID_ABI:STRING=${ANDROID_ABI}
 	-DANDROID_NATIVE_API_LEVEL:STRING=${ANDROID_NATIVE_API_LEVEL}
 	-DANDROID_TOOLCHAIN:STRING=${ANDROID_TOOLCHAIN}
@@ -69,8 +69,8 @@ ExternalProject_Add( Boost
 	GIT_SHALLOW TRUE
 	SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"
 	CONFIGURE_COMMAND  ""
-	PATCH_COMMAND cp -R  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/ ${THIRDPARTY_DIR}/boost/src  #  <SOURCE_DIR>/bootstrap.sh
-	BUILD_COMMAND  ./build.sh  "${_BOOST_ROOT}"  "${ANDROID_ABI}" "${THIRDPARTY_DIR}/boost/src"
+	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${THIRDPARTY_DIR}/boost/src
+	BUILD_COMMAND  <SOURCE_DIR>/build.sh "${_BOOST_ROOT}" ${ANDROID_ABI} "${THIRDPARTY_DIR}/boost/src" ${CMAKE_BUILD_TYPE}
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )
@@ -78,34 +78,33 @@ ExternalProject_Add( Boost
 set(Boost_NO_SYSTEM_PATHS  ON)
 set(Boost_USE_STATIC_LIBS  ON)
 set(BOOST_ROOT ${_BOOST_ROOT})
-set(Boost_INCLUDE_DIR  ${BOOST_ROOT}/include)
-set(BOOST_INCLUDEDIR ${Boost_INCLUDE_DIR})
-set(BOOST_LIBRARYDIR ${BOOST_ROOT}/libs/${ANDROID_ABI})
+set(_Boost_INCLUDE_DIR  ${BOOST_ROOT}/include)
+set(BOOST_LIBRARYDIR ${BOOST_ROOT}/lib/${ANDROID_ABI})
 set(Boost_DIR "${BOOST_LIBRARYDIR}/cmake/Boost-1.72.0")
-set(boost_headers_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_headers-1.72.0")
-set(boost_random_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_random-1.72.0")
-set(boost_system_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_system-1.72.0")
-set(boost_filesystem_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_filesystem-1.72.0")
-set(boost_program_options_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_program_options-1.72.0")
-set(boost_date_time_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_date_time-1.72.0")
-set(boost_regex_DIR "${BOOST_ROOT}/libs/${ANDROID_ABI}/cmake/boost_regex-1.72.0")
-print("boost dir ${Boost_USE_STATIC_RUNTIME}")
-print("boost lib ${Boost_USE_MULTITHREADED}")
+set(boost_headers_DIR "${BOOST_LIBRARYDIR}/cmake/boost_headers-1.72.0")
+set(boost_random_DIR "${BOOST_LIBRARYDIR}/cmake/boost_random-1.72.0")
+set(boost_system_DIR "${BOOST_LIBRARYDIR}/cmake/boost_system-1.72.0")
+set(boost_filesystem_DIR "${BOOST_LIBRARYDIR}/cmake/boost_filesystem-1.72.0")
+set(boost_program_options_DIR "${BOOST_LIBRARYDIR}/cmake/boost_program_options-1.72.0")
+set(boost_date_time_DIR "${BOOST_LIBRARYDIR}/cmake/boost_date_time-1.72.0")
+set(boost_regex_DIR "${BOOST_LIBRARYDIR}/cmake/boost_regex-1.72.0")
+print("boost dir ${_BOOST_ROOT}")
+print("boost lib ${BOOST_LIBRARYDIR}")
 
-if(BOOST_INCLUDE_DIR)
+if(_BOOST_INCLUDE_DIR)
 else()
-   set(BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
+   set(_BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
    set(BOOST_LIBRARY_DIR "${Boost_LIBRARIES}")
 endif()
 
-set(BOOST_INCLUDE_DIR ${Boost_INCLUDE_DIR})
+set(BOOST_INCLUDE_DIR ${_Boost_INCLUDE_DIR})
 set(_BOOST_CACHE_ARGS
    -DBOOST_ROOT:PATH=${BOOST_ROOT}
    -DBoost_USE_MULTITHREADED:BOOL=ON
    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
    -DBoost_USE_STATIC_LIBS:BOOL=ON
    -DBoost_NO_SYSTEM_PATHS:BOOL=ON
-   -DBoost_INCLUDE_DIR:PATH=${Boost_INCLUDE_DIR}
+   -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
    -DBOOST_LIBRARYDIR:PATH=${BOOST_LIBRARYDIR}
    -DBOOST_MIN_VERSION:STRING="1.70.0"
    -DBoost_DIR:PATH=${Boost_DIR}
@@ -120,7 +119,6 @@ set(_BOOST_CACHE_ARGS
 
 # --------------------------------------------------------
 # build OpenSSL
-print("openssl ${_openssl_BUILD_ROOT}")
 
 if(ANDROID_ABI STREQUAL "arm64-v8a")
 	set(_abi android-arm64)
@@ -149,11 +147,12 @@ ExternalProject_Add(openssl
 	UPDATE_COMMAND ""
 )
 
+print("openssl ${_openssl_BUILD_ROOT}")
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 set(_OPENSSL_CACHE_ARGS
-	-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
-	-DOPENSSL_ROOT_DIR:PATH=${_openssl_BUILD_ROOT}
-	-DOPENSSL_INCLUDE_DIR:PATH=${_OPENSSL_INCLUDE_DIR}
+	  -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+	  -DOPENSSL_ROOT_DIR:PATH=${_openssl_BUILD_ROOT}
+	  -DOPENSSL_INCLUDE_DIR:PATH=${_OPENSSL_INCLUDE_DIR}
     -DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
     -DOPENSSL_CRYPTO_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}
     -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
@@ -170,12 +169,12 @@ set(_grpc_EXTRA_PARAM
 	-DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
 	-DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=OFF
 	-DgRPC_BUILD_CSHARP_EXT:BOOL=OFF
-    -DgRPC_BUILD_CODEGEN:BOOL=OFF
-    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -llog\ -Wno-unused-command-line-argument
+  -DgRPC_BUILD_CODEGEN:BOOL=OFF
+  -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -llog\ -Wno-unused-command-line-argument
 )
 
 # --------------------------------------------------------
-# set config for grpc
+# set config for rocksdb
 set(_rocksdb_EXTRA_PARAM
     -DROCKSDB_LITE:BOOL=ON
 )
@@ -192,7 +191,7 @@ ExternalProject_Add(protobuf
         -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
         -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
-  DEPENDS grpc
+  DEPENDS
 )
 set(PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
 set(_PROTOBUF_TARGET protobuf)

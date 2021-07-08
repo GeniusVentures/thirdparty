@@ -9,6 +9,11 @@ include(CheckCXXCompilerFlag)
 include(${PROJECT_BUILD_FOLDER}/cmake.in/functions.cmake)
 include(ExternalProject)
 
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+print("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
@@ -25,7 +30,6 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
   endif (CMAKE_BUILD_TYPE STREQUAL "Release")
 
-  print("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
   set(CompilerFlags
           CMAKE_CXX_FLAGS
           CMAKE_CXX_FLAGS_DEBUG
@@ -68,3 +72,6 @@ endif()
 # --------------------------------------------------------
 # define third party directory
 set(THIRDPARTY_DIR "${PROJECT_SRC_FOLDER}")
+if(NOT EXISTS "${THIRDPARTY_DIR}/build")
+  message(FATAL_ERROR "Unable to find thirdparty source folder ${THIRDPARTY_DIR}")
+endif()
