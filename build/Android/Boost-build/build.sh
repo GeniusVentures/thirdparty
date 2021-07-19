@@ -5,8 +5,6 @@
 # also useful ndk details:
 # https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md
 
-SAVED_PATH=$PATH
-export PATH=$(pwd)/bin:$SAVED_PATH
 
 #----------------------------------------------------
 
@@ -15,7 +13,7 @@ BUILD_DIR=$1
 mkdir --parents ${BUILD_DIR}
 
 
-BUILD_DIR_TMP=$(pwd)/tmp
+BUILD_DIR_TMP=$BUILD_DIR/tmp
 
 PREFIX_DIR=${BUILD_DIR}
 mkdir --parents ${PREFIX_DIR}
@@ -29,6 +27,10 @@ LINKAGES=static
 ABI_NAMES=$2
 # ABI_NAME=arm64-v8a
 BOOST_DIR=$3
+
+SAVED_PATH=$PATH
+export PATH=$BOOST_DIR/bin:$SAVED_PATH
+
 
 # release | debug
 
@@ -252,7 +254,7 @@ fix_version_suffices() {
     #echo "+++++++++++++++++++++++++++"
     for DIR_NAME in $ABI_NAMES; do
         # DIR_NAME=$ABI_NAME
-        DIR_PATH=$LIBS_DIR/$DIR_NAME
+        DIR_PATH=$LIBS_DIR
       #  echo ""
        # echo "DIR_PATH = " $DIR_PATH
         FILE_NAMES=$(ls $DIR_PATH)
@@ -347,12 +349,12 @@ echo " cores available = " $num_cores
         echo "\t- variant: $BUILD_VARIANT"| tee -a ${LOG_FILE}
         echo "\t- abi: $abi"| tee -a ${LOG_FILE}
         echo "\t- build-dir: ${BUILD_DIR_TMP}/$ABI_NAME"| tee -a ${LOG_FILE}
-        echo "\t- lib-dir: ${LIBS_DIR}/$ABI_NAME"| tee -a ${LOG_FILE}
+        echo "\t- lib-dir: ${LIBS_DIR}"| tee -a ${LOG_FILE}
         echo "------------------------------------------------------------"| tee -a ${LOG_FILE}
         # toolset=clang-$toolset_name     \
 
         {
-            ./b2 toolset=clang runtime-link=static binary-format=elf \
+            ./b2 runtime-link=static binary-format=elf \
                 address-model=$address_model \
                 architecture=$arch_for_abi \
                 abi=$abi    \
@@ -363,11 +365,10 @@ echo " cores available = " $num_cores
                 --user-config=$USER_CONFIG_FILE \
                 --ignore-site-config         \
                 --layout=system           \
-                $WITH_LIBRARIES           \
-                $WITHOUT_LIBRARIES           \
+                $WITH_LIBRARIES $WITHOUT_LIBRARIES    \
                 --build-dir=${BUILD_DIR_TMP}/$ABI_NAME \
                 --includedir=${INCLUDE_DIR} \
-                --libdir=${LIBS_DIR}/$ABI_NAME \
+                --libdir=${LIBS_DIR} \
                 install 2>&1               \
                 || { echo "Error: Failed to build boost for $ABI_NAME!";}
         } | tee -a ${LOG_FILE}
