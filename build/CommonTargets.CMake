@@ -61,6 +61,7 @@ ExternalProject_Add(grpc
         ${_OPENSSL_CACHE_ARGS}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_grpc_EXTRA_PARAM}
+  ${grpc_patch}
   DEPENDS openssl # protobuf # zlib absl
 )
 

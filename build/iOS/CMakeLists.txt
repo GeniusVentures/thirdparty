@@ -16,6 +16,8 @@ if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
+set(IOS_DEPLOYMENT_TARGET 12.0)
+
 project(iOS_SHARED_THIRD_PARTY)
 
 # --------------------------------------------------------
@@ -42,8 +44,8 @@ set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
 	-DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
 	-DIOS_SDK_VERSION:STRING=${IOS_SDK_VERSION}
 	-DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH:STRING=YES
-    -DCMAKE_POLICY_DEFAULT_CMP0025:STRING=NEW
-    -DCMAKE_POLICY_DEFAULT_CMP0042:STRING=NEW
+  -DCMAKE_POLICY_DEFAULT_CMP0025:STRING=NEW
+  -DCMAKE_POLICY_DEFAULT_CMP0042:STRING=NEW
 )
 
 
@@ -56,23 +58,22 @@ else()
 endif()
 set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/iOS/${iOS_ABI}")
 ExternalProject_Add( Boost
-	PREFIX  "${THIRDPARTY_DIR}/boost"
-	SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"
-	BINARY_DIR    "${CMAKE_CURRENT_BINARY_DIR}/boost"
+	SOURCE_DIR  "${CMAKE_CURRENT_BINARY_DIR}/boost"
+  PREFIX  "${CMAKE_CURRENT_BINARY_DIR}/boost"
 	CONFIGURE_COMMAND  ""
-	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${CMAKE_CURRENT_BINARY_DIR}/boost
-	BUILD_COMMAND ./build.sh -ios --boost-version 1.72.0 --build-dir ${BOOST_ROOT}
+	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build
+	BUILD_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build/build.sh -ios --boost-version 1.72.0 --build-dir ${BOOST_ROOT}
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )
 
-print("boost dir ${Boost_DIR}")
+print("boost dir ${BOOST_ROOT}")
 set(boost_headers_DIR "${BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
 set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-1.72.0")
 set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-1.72.0")
 set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-1.72.0")
 set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-1.72.0")
-set(BOOST_INCLUDE_DIR ${BOOST_ROOT}/include)
+set(_Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
 set(_BOOST_CACHE_ARGS
 	-DBOOST_ROOT:PATH=${BOOST_ROOT}
 	-Dboost_headers_DIR:PATH=${boost_headers_DIR}
@@ -80,24 +81,23 @@ set(_BOOST_CACHE_ARGS
 	-Dboost_system_DIR:PATH=${boost_system_DIR}
 	-Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
 	-Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
-	-DBoost_DIR:PATH=${Boost_DIR}
+	-DBoost_DIR:PATH=${BOOST_ROOT}
 	-DBoost_USE_MULTITHREADED:BOOL=ON
 	-DBoost_USE_STATIC_RUNTIME:BOOL=OFF
 	-DBoost_USE_STATIC_LIBS:BOOL=ON
 	-DBoost_NO_SYSTEM_PATHS:BOOL=ON
-	-DBoost_INCLUDE_DIR:PATH=${BOOST_INCLUDE_DIR}
+	-DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
 )
 
 # --------------------------------------------------------
 # build OpenSSL
+print("${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${CMAKE_CURRENT_BINARY_DIR}/openssl")
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}/${iOS_ABI}")
 ExternalProject_Add(openssl
 	PREFIX "${THIRDPARTY_DIR}/openssl"
-	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
-	BINARY_DIR    "${CMAKE_CURRENT_BINARY_DIR}/openssl"
 	CONFIGURE_COMMAND  ""
-	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${CMAKE_CURRENT_BINARY_DIR}/openssl
-	BUILD_COMMAND ./build-libssl.sh --version=1.1.1g --targets=ios64-cross-arm64 --build-dir=${_openssl_BUILD_ROOT}
+	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${CMAKE_CURRENT_BINARY_DIR}/openssl
+	BUILD_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/openssl/build-libssl.sh --version=1.1.1g --targets=ios64-cross-arm64 --build-dir=${_openssl_BUILD_ROOT}
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )
@@ -107,8 +107,8 @@ set(_OPENSSL_CACHE_ARGS
 	-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
 	-DOPENSSL_ROOT_DIR:STRING=${_openssl_BUILD_ROOT}
 	-DOPENSSL_INCLUDE_DIR:PATH=${_OPENSSL_INCLUDE_DIR}
-	-DOPENSSL_CRYPTO_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib
-	-DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib
+	-DOPENSSL_CRYPTO_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}
+	-DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
 # --------------------------------------------------------
@@ -159,6 +159,13 @@ set(_grpc_EXTRA_PARAM
         -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN:BOOL=OFF
         -DgRPC_BUILD_GRPC_NODE_PLUGIN:BOOL=OFF
         -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
+        -DgRPC_BUILD_CODEGEN:BOOL=OFF
+        -DHAVE_LIBNSL:BOOL=FALSE
+        -DHAVE_SOCKET_LIBSOCKET:BOOL=FALSE
+        -DHAVE_GHBN_LIBSOCKET:BOOL=FALSE
+        -DHAVE_LIBSOCKET:BOOL=FALSE
+        -DHAVE_LIBRT:BOOL=FALSE
+        -DCARES_BUILD_TOOLS:BOOL=OFF
 )
 
 # --------------------------------------------------------
@@ -175,6 +182,11 @@ set(tsl_hat_trie_patch
   PATCH_COMMAND ${CMAKE_COMMAND} -E copy
         "${PROJECT_BUILD_FOLDER}/cmake.in/hat-trie-patch/CMakeLists.foriOS.txt" <SOURCE_DIR>/CMakeLists.txt
 )
+
+# --------------------------------------------------------
+# Set o iOS specific configurations
+set(grpc_patch
+ PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/ssl_transport_security.cc" <SOURCE_DIR>/src/core/tsi/ssl_transport_security.cc)
 
 # --------------------------------------------------------
 # Allow multiple definitions
