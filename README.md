@@ -31,7 +31,6 @@ This is the repository for third party of SuperGenius
 ## Building
 	○ mkdir .build.Release
 	○ cd ./.build.Release	
-	○ export PATH=$PATH:$(pwd)/grpc/src/grpc-build:~/.cargo/bin
 	○ cmake . -DCMAKE_BUILD_TYPE=Release
 	○ make
 # Build on Linux for Android cross compile
@@ -76,7 +75,6 @@ This is the repository for third party of SuperGenius
    - Python >=3.5
  ## Building
     ○ cd ./build/OSX
-	○ export PATH=$PATH:$(pwd)/grpc/src/grpc-build:$(pwd)/protobuf/bin:~/.cargo/bin
     ○ cmake . -DCMAKE_BUILD_TYPE=Release
     ○ cmake --build . --config Release
 
