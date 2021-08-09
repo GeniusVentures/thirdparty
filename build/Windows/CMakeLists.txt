@@ -23,6 +23,10 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # ------------------------------------------
+# Enable c++ exceptions 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+
+# ------------------------------------------
 # Set Windows specific protobuf options
 set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/cmake")
 
