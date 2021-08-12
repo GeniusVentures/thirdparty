@@ -94,6 +94,7 @@ set(_BOOST_CACHE_ARGS
 print("${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${CMAKE_CURRENT_BINARY_DIR}/openssl")
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}/${iOS_ABI}")
 ExternalProject_Add(openssl
+    SOURCE_DIR  "${CMAKE_CURRENT_BINARY_DIR}/openssl"
 	PREFIX "${THIRDPARTY_DIR}/openssl"
 	CONFIGURE_COMMAND  ""
 	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${CMAKE_CURRENT_BINARY_DIR}/openssl
