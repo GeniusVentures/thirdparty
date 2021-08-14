@@ -73,6 +73,7 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         working-directory: ${{github.workspace}}/.build
         run: |
+          export CC=clang
           export ANDROID_NDK=${{ env.ANDROID_NDK_HOME }}
           export ANDROID_NDK_HOME=${{ env.ANDROID_NDK_HOME }}
           export ANDROID_TOOLCHAIN="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
