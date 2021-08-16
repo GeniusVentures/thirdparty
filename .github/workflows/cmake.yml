@@ -71,7 +71,7 @@ jobs:
       - name: Configure CMake
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-          CC: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/clang
+          CC: $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang
           
         working-directory: ${{github.workspace}}/.build
         run: |
