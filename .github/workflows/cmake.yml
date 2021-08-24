@@ -78,7 +78,7 @@ jobs:
           export ANDROID_NDK=${{ env.ANDROID_NDK_HOME }}
           export ANDROID_NDK_HOME=${{ env.ANDROID_NDK_HOME }}
           export ANDROID_TOOLCHAIN=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin
-          echo "$ANDROID_TOOLCHAIN" >> $GITHUB_PATH
+          echo "${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_PATH
           echo $PATH
           echo $CC
           ls -la $ANDROID_TOOLCHAIN
