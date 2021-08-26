@@ -71,13 +71,14 @@ jobs:
       - name: Configure CMake
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_TOOLCHAIN: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin
           CC: clang
           
         working-directory: ${{github.workspace}}/.build
         run: |
           export ANDROID_NDK=${{ env.ANDROID_NDK_HOME }}
           export ANDROID_NDK_HOME=${{ env.ANDROID_NDK_HOME }}
-          export ANDROID_TOOLCHAIN=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin
+          export ANDROID_TOOLCHAIN=${{ env.ANDROID_TOOLCHAIN }}
           echo "${{ env.ANDROID_TOOLCHAIN }}" >> $GITHUB_PATH
           echo $PATH
           echo $CC
