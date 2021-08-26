@@ -66,7 +66,12 @@ jobs:
           ndk-version: r21e 
       
       - name: Create Build Directory
-        run: cmake -E make_directory ${{github.workspace}}/.build          
+        run: cmake -E make_directory ${{github.workspace}}/.build 
+        
+      - name: Set PATH
+        env:
+          ANDROID_TOOLCHAIN: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin
+        run: echo "${{ env.ANDROID_TOOLCHAIN }}" >> $GITHUB_PATH
 
       - name: Configure CMake
         env:
@@ -79,7 +84,7 @@ jobs:
           export ANDROID_NDK=${{ env.ANDROID_NDK_HOME }}
           export ANDROID_NDK_HOME=${{ env.ANDROID_NDK_HOME }}
           export ANDROID_TOOLCHAIN=${{ env.ANDROID_TOOLCHAIN }}
-          echo "${{ env.ANDROID_TOOLCHAIN }}" >> $GITHUB_PATH
+          echo $PATH
           export PATH=${{ env.ANDROID_TOOLCHAIN }}:$PATH 
           echo $PATH
           echo $CC
