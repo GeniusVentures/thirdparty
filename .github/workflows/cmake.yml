@@ -80,7 +80,7 @@ jobs:
           export ANDROID_NDK_HOME=${{ env.ANDROID_NDK_HOME }}
           export ANDROID_TOOLCHAIN=${{ env.ANDROID_TOOLCHAIN }}
           echo "${{ env.ANDROID_TOOLCHAIN }}" >> $GITHUB_PATH
-          echo "${{ env.ANDROID_TOOLCHAIN }}:$PATH" > $PATH
+          export PATH=${{ env.ANDROID_TOOLCHAIN }}:$PATH 
           echo $PATH
           echo $CC
           ls -la $ANDROID_TOOLCHAIN
