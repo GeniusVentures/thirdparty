@@ -138,7 +138,7 @@ ExternalProject_Add(openssl
 	#GIT_SUBMODULES_RECURSE  TRUE
 	GIT_SHALLOW TRUE
 	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
-	CONFIGURE_COMMAND  <SOURCE_DIR>/Configure ${_abi} -D__ANDROID_API__=${ANDROID_NATIVE_API_LEVEL} --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env CC=clang PATH=$ENV{PATH} <SOURCE_DIR>/Configure ${_abi} -D__ANDROID_API__=${ANDROID_NATIVE_API_LEVEL} --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
 	PATCH_COMMAND ""
 	BUILD_COMMAND make
 	BUILD_IN_SOURCE  TRUE
