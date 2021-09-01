@@ -93,3 +93,21 @@
     path = sr25519-donna
     url = ../sr25519-donna
     branch = develop
+[submodule "fmt"]
+    path = fmt
+    url = https://github.com/fmtlib/fmt.git
+    branch = 8.0.1
+[submodule "yaml-cpp"]
+    path = yaml-cpp
+    url = https://github.com/jbeder/yaml-cpp.git
+    branch = yaml-cpp-0.7.0
+[submodule "c-ares"]
+    path = c-ares
+    url = https://github.com/c-ares/c-ares.git
+    branch = cares-1_17_2
+[submodule "soralog"]
+    path = soralog
+    url = https://github.com/xDimon/soralog.git
+    branch = v0.0.9
+
+
