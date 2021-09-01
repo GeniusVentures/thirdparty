@@ -11,6 +11,7 @@
 !README.md
 !CommonTargetsForAndroid.CMake
 !/Boost-build
+!/Openssl-build
 # !/Boost-build/build.sh
 # !/Boost-build/user-config.jam
 # !/Boost-build/bin/

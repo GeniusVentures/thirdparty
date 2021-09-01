@@ -13,6 +13,8 @@ project(WINDOWS_SHARED_THIRD_PARTY)
 # build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+
 # ------------------------------------------
 # Set Windows specific runtime options
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
