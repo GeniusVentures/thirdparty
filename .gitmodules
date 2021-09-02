@@ -102,8 +102,8 @@
     url = https://github.com/jbeder/yaml-cpp.git
     branch = yaml-cpp-0.7.0
 [submodule "c-ares"]
-	path = c-ares
-	url = https://github.com/c-ares/c-ares.git
+    path = c-ares
+    url = https://github.com/c-ares/c-ares.git
     branch = cares-1_17_2
 [submodule "soralog"]
     path = soralog
