@@ -106,8 +106,7 @@
     url = https://github.com/c-ares/c-ares.git
     branch = cares-1_17_2
 [submodule "soralog"]
-    path = soralog
-    url = https://github.com/xDimon/soralog.git
-    branch = v0.0.9
+	path = soralog
+	url = https://github.com/GeniusVentures/soralog
 
 
