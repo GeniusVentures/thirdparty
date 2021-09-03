@@ -113,3 +113,6 @@
 [submodule "cpp-libp2p"]
 	path = cpp-libp2p
 	url = https://github.com/libp2p/cpp-libp2p.git
+[submodule "libp2p-sqlite-modern-cpp"]
+	path = libp2p-sqlite-modern-cpp
+	url = https://github.com/soramitsu/libp2p-sqlite-modern-cpp.git
