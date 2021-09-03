@@ -87,6 +87,7 @@ ExternalProject_Add(rocksdb
         -DFAIL_ON_WARNINGS:BOOL=OFF
         ${_rocksdb_EXTRA_PARAM}
         ${_CMAKE_COMMON_BUILD_PARAMS}
+  ${_rocksdb_patch}
 )
 set(_FINDPACKAGE_ROCKSDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/cmake/rocksdb")
 set(_FINDPACKAGE_ROCKSDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/include")
