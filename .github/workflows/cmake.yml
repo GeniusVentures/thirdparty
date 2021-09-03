@@ -55,11 +55,9 @@ jobs:
   Android:
     runs-on: ubuntu-latest    
     env:
-      ANDROID_NDK_VERSION: "r21e"
-      ANDROID_NDK_HOME: ${{github.workspace}}/android-ndk/android-ndk-$ANDROID_NDK_VERSION
-      ANDROID_NDK: $ANDROID_NDK_HOME
-      ANDROID_TOOLCHAIN: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin
-      NDK_URL: "https://dl.google.com/android/repository/android-ndk-$ANDROID_NDK_VERSION-linux-x86_64.zip"
+      ANDROID_NDK_HOME: ${{github.workspace}}/android-ndk/android-ndk-r21e
+      ANDROID_TOOLCHAIN: ${{github.workspace}}/android-ndk/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin
+      NDK_URL: "https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip"
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
