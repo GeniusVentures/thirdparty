@@ -60,18 +60,18 @@ jobs:
         with:
           submodules: 'recursive'
           
-      - uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r21e 
+      #- uses: nttld/setup-ndk@v1
+      #  id: setup-ndk
+      #  with:
+      #    ndk-version: r21e 
           
       - name: Download Android NDK
         env:
-          ANDROID_NDK_VERSION: r21e
-          ANDROID_NDK_HOME: ${{github.workspace}}/android-ndk/android-ndk-${{ env.ANDROID_NDK_VERSION }}
-          ANDROID_NDK: ${{ env.ANDROID_NDK_HOME }}
-          ANDROID_TOOLCHAIN: ${{ env.ANDROID_NDK }}/toolchains/llvm/prebuilt/linux-x86_64/bin
-          NDK_URL: "https://dl.google.com/android/repository/android-ndk-${{ env.ANDROID_NDK_VERSION }}-linux-x86_64.zip"
+          ANDROID_NDK_VERSION: "r21e"
+          ANDROID_NDK_HOME: ${{github.workspace}}/android-ndk/android-ndk-$ANDROID_NDK_VERSION
+          ANDROID_NDK: $ANDROID_NDK_HOME
+          ANDROID_TOOLCHAIN: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin
+          NDK_URL: "https://dl.google.com/android/repository/android-ndk-$ANDROID_NDK_VERSION-linux-x86_64.zip"
         run: |
           mkdir "${{github.workspace}}/android-ndk" 
           cd "${{github.workspace}}/android-ndk" 
