@@ -64,6 +64,20 @@ jobs:
         id: setup-ndk
         with:
           ndk-version: r21e 
+          
+      - name: Download Android NDK
+        env:
+          ANDROID_NDK_VERSION: r21e
+          ANDROID_NDK_HOME: /usr/local/android-ndk/android-ndk-${ANDROID_NDK_VERSION}
+          ANDROID_NDK: $ANDROID_NDK_HOME
+          ANDROID_TOOLCHAIN: "$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          NDK_URL: "https://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.zip"
+        run: |
+          mkdir "/usr/local/android-ndk" 
+          cd "/usr/local/android-ndk" 
+          curl -o ndk.zip $NDK_URL 
+          unzip ndk.zip 
+          rm ndk.zip
       
       - name: Create Build Directory
         run: cmake -E make_directory ${{github.workspace}}/.build 
@@ -75,8 +89,6 @@ jobs:
 
       - name: Configure CMake
         env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-          ANDROID_TOOLCHAIN: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin
           CC: clang
           
         working-directory: ${{github.workspace}}/.build
