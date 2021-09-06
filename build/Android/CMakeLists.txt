@@ -211,6 +211,10 @@ set(_binaryen_patch
 )
 
 # --------------------------------------------------------
+# Set config for libp2p
+set(_libp2p_BUILD_EXAMPLES OFF)
+
+# --------------------------------------------------------
 # Allow multiple definitions
 set(FORCE_MULTILE OFF)
 

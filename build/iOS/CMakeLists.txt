@@ -187,6 +187,10 @@ set(tsl_hat_trie_patch
 )
 
 # --------------------------------------------------------
+# Set config for libp2p
+set(_libp2p_BUILD_EXAMPLES ON)
+
+# --------------------------------------------------------
 # Set o iOS specific configurations
 set(grpc_patch
  PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/ssl_transport_security.cc" <SOURCE_DIR>/src/core/tsi/ssl_transport_security.cc)

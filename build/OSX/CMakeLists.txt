@@ -120,6 +120,10 @@ set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
 
 # --------------------------------------------------------
+# Set config for libp2p
+set(_libp2p_BUILD_EXAMPLES ON)
+
+# --------------------------------------------------------
 # Allow multiple definitions
 set(FORCE_MULTILE ON)
 set(MULTIPLE_OPTION "-Xlink=-force:multiple")

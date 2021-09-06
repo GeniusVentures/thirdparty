@@ -25,7 +25,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # ------------------------------------------
-# Enable c++ exceptions 
+# Enable c++ exceptions
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
 
 # ------------------------------------------
@@ -121,6 +121,10 @@ set(_binaryen_patch
 set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM bcryptgen)
+
+# --------------------------------------------------------
+# Set config for libp2p
+set(_libp2p_BUILD_EXAMPLES ON)
 
 # --------------------------------------------------------
 # Allow multiple definitions
