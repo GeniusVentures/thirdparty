@@ -53,39 +53,48 @@ jobs:
         run: make -j8
         
   Android:
-    runs-on: ubuntu-latest        
+    runs-on: ubuntu-latest    
+    env:
+      ANDROID_NDK_HOME: ${{github.workspace}}/android-ndk/android-ndk-r21e
+      ANDROID_TOOLCHAIN: ${{github.workspace}}/android-ndk/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin
+      NDK_URL: "https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip"
+
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
           
-      - uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r21e 
+      #- uses: nttld/setup-ndk@v1
+      #  id: setup-ndk
+      #  with:
+      #    ndk-version: r21e 
+          
+      - name: Download Android NDK
+        run: |
+          mkdir "${{github.workspace}}/android-ndk" 
+          cd "${{github.workspace}}/android-ndk" 
+          curl -o ndk.zip ${{ env.NDK_URL }} 
+          unzip ndk.zip 
+          rm ndk.zip
       
       - name: Create Build Directory
         run: cmake -E make_directory ${{github.workspace}}/.build 
         
       - name: Set PATH
-        env:
-          ANDROID_TOOLCHAIN: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin
-        run: echo "${{ env.ANDROID_TOOLCHAIN }}" >> $GITHUB_PATH
+        run: echo "${{env.ANDROID_TOOLCHAIN}}" >> $GITHUB_PATH
 
       - name: Configure CMake
         env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-          ANDROID_TOOLCHAIN: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin
           CC: clang
           
         working-directory: ${{github.workspace}}/.build
         run: |
-          export ANDROID_NDK=${{ env.ANDROID_NDK_HOME }}
-          export ANDROID_NDK_HOME=${{ env.ANDROID_NDK_HOME }}
-          export ANDROID_TOOLCHAIN=${{ env.ANDROID_TOOLCHAIN }}
+          export ANDROID_NDK=${{env.ANDROID_NDK_HOME}}
+          export ANDROID_NDK_HOME=${{env.ANDROID_NDK_HOME}}
+          export ANDROID_TOOLCHAIN=${{env.ANDROID_TOOLCHAIN}}
           echo $PATH
-          export PATH=${{ env.ANDROID_TOOLCHAIN }}:$PATH 
+          export PATH=${{env.ANDROID_TOOLCHAIN}}:$PATH 
           echo $PATH
           echo $CC
           ls -la $ANDROID_TOOLCHAIN
