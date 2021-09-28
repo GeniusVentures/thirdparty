@@ -104,6 +104,22 @@ ExternalProject_Add(Microsoft.GSL
 set(_FINDPACKAGE_GSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/GSL/include")
 
 # --------------------------------------------------------
+ExternalProject_Add(fmt
+  PREFIX fmt
+  SOURCE_DIR "${THIRDPARTY_DIR}/fmt"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/fmt
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+        -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
+        -DBUILD_SHARED_LIBS:BOOL=OFF
+        -DFMT_TEST:BOOL=OFF
+)
+
+set(_FINDPACKAGE_FMT_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/lib/cmake/fmt")
+set(_FINDPACKAGE_FMT_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/lib")
+set(_FINDPACKAGE_FMT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/include")
+
+# --------------------------------------------------------
 # Builds spdlog v1.4.2
 ExternalProject_Add(spdlog
   PREFIX spdlog
@@ -111,7 +127,10 @@ ExternalProject_Add(spdlog
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/spdlog
         -DSPDLOG_BUILD_EXAMPLE:BOOL=OFF
+        -DSPDLOG_FMT_EXTERNAL:BOOL=ON
+        -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
         ${_CMAKE_COMMON_BUILD_PARAMS}
+  DEPENDS fmt
 )
 set(_FINDPACKAGE_SPDLOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/include")
 set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
@@ -157,22 +176,6 @@ set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/incl
 #)
 
 #set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/include")
-
-# --------------------------------------------------------
-ExternalProject_Add(fmt
-  PREFIX fmt
-  SOURCE_DIR "${THIRDPARTY_DIR}/fmt"
-  CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/fmt
-        ${_CMAKE_COMMON_BUILD_PARAMS}
-        -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
-        -DBUILD_SHARED_LIBS:BOOL=OFF
-        -DFMT_TEST:BOOL=OFF
-)
-
-set(_FINDPACKAGE_FMT_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/lib/cmake/fmt")
-set(_FINDPACKAGE_FMT_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/lib")
-set(_FINDPACKAGE_FMT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/include")
 
 ExternalProject_Add(yaml-cpp
   PREFIX yaml-cpp
@@ -311,6 +314,7 @@ ExternalProject_Add(ipfs-lite-cpp
         -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
         -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
         -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
+        -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
         -DTESTING:BOOL=${TESTING}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_BOOST_CACHE_ARGS}
