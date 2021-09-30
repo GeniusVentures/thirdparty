@@ -58,7 +58,7 @@ ExternalProject_Add(openssl
     GIT_TAG "OpenSSL_1_1_1g"
     #GIT_SUBMODULES_RECURSE  TRUE
     SOURCE_DIR  "${THIRDPARTY_DIR}/openssl/src"
-    CONFIGURE_COMMAND  <SOURCE_DIR>/config --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+    CONFIGURE_COMMAND  <SOURCE_DIR>/config -fPIC --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
     PATCH_COMMAND ""
     BUILD_COMMAND make
     BUILD_IN_SOURCE  TRUE
