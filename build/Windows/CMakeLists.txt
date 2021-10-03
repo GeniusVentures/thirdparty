@@ -13,7 +13,7 @@ project(WINDOWS_SHARED_THIRD_PARTY)
 # build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /Zc:preprocessor")
 
 # ------------------------------------------
 # Set Windows specific runtime options
