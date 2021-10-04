@@ -217,6 +217,8 @@ ExternalProject_Add(soralog
         -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
         -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
         ${_CMAKE_COMMON_BUILD_PARAMS}
+        # Override CMAKE_CXX_FLAGS to apply updated preprocessor settings
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
         -DCMAKE_CXX_STANDARD:STRING=17
   DEPENDS fmt yaml-cpp
 )
