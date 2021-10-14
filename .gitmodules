@@ -93,3 +93,7 @@
     path = sr25519-donna
     url = ../sr25519-donna
     branch = develop
+[submodule "ipfs-bitswap-cpp"]
+    path = ipfs-bitswap-cpp
+    url = ../ipfs-bitswap-cpp
+    branch = develop
