@@ -354,7 +354,7 @@ echo " cores available = " $num_cores
         # toolset=clang-$toolset_name     \
 
         {
-            ./b2 runtime-link=static binary-format=elf \
+            ./b2 cxxflags="-fPIC" runtime-link=static binary-format=elf \
                 address-model=$address_model \
                 architecture=$arch_for_abi \
                 abi=$abi    \

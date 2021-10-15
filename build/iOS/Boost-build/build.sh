@@ -850,7 +850,7 @@ buildBoost_iOS()
 
     echo Building Boost for iPhone
     # Install this one so we can copy the headers for the frameworks...
-    ./b2 "$THREADS" \
+    ./b2 cxxflags="-fPIC" "$THREADS" \
         --build-dir=iphone-build \
         --stagedir=iphone-build/stage \
         --prefix="$IOS_OUTPUT_DIR" \
@@ -861,7 +861,7 @@ buildBoost_iOS()
     # shellcheck disable=SC2181
     if [ $? != 0 ]; then echo "Error staging iPhone. Check log."; exit 1; fi
 
-    ./b2 "$THREADS" \
+    ./b2 cxxflags="-fPIC" "$THREADS" \
         --build-dir=iphone-build \
         --stagedir=iphone-build/stage \
         --prefix="$IOS_OUTPUT_DIR" \
@@ -935,7 +935,7 @@ buildBoost_macOS()
     mkdir -p "$MACOS_OUTPUT_DIR"
 
     echo building Boost for macOS
-    ./b2 "$THREADS" \
+    ./b2 cxxflags="-fPIC" "$THREADS" \
         --build-dir=macos-build \
         --stagedir=macos-build/stage \
         --prefix="$MACOS_OUTPUT_DIR" \
@@ -946,7 +946,7 @@ buildBoost_macOS()
     # shellcheck disable=SC2181
     if [ $? != 0 ]; then echo "Error staging macOS. Check log."; exit 1; fi
 
-    ./b2 "$THREADS" \
+    ./b2 cxxflags="-fPIC" "$THREADS" \
         --build-dir=macos-build \
         --stagedir=macos-build/stage \
         --prefix="$MACOS_OUTPUT_DIR" \
