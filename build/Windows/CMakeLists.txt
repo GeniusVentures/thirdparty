@@ -13,8 +13,6 @@ project(WINDOWS_SHARED_THIRD_PARTY)
 # build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
-
 # ------------------------------------------
 # Set Windows specific runtime options
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -27,6 +25,10 @@ endif()
 # ------------------------------------------
 # Enable c++ exceptions
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+
+# Enable cross-platform preprocessor syntax
+# https://docs.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview?view=msvc-160
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:preprocessor")
 
 # ------------------------------------------
 # Set Windows specific protobuf options

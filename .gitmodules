@@ -91,9 +91,27 @@
     branch = v6.17.3
 [submodule "sr25519-donna"]
     path = sr25519-donna
-    url = ../sr25519-donna
+    url = ../sr25519-donna.git
     branch = develop
+[submodule "fmt"]
+    path = fmt
+    url = https://github.com/fmtlib/fmt.git
+    branch = 7.1.3
+[submodule "yaml-cpp"]
+    path = yaml-cpp
+    url = https://github.com/jbeder/yaml-cpp.git
+    branch = yaml-cpp-0.7.0
+[submodule "c-ares"]
+    path = c-ares
+    url = https://github.com/c-ares/c-ares.git
+    branch = cares-1_17_2
+[submodule "soralog"]
+    path = soralog
+    url = https://github.com/GeniusVentures/soralog
+[submodule "libp2p-sqlite-modern-cpp"]
+    path = libp2p-sqlite-modern-cpp
+    url = https://github.com/soramitsu/libp2p-sqlite-modern-cpp.git
 [submodule "ipfs-bitswap-cpp"]
     path = ipfs-bitswap-cpp
-    url = ../ipfs-bitswap-cpp
+    url = ../ipfs-bitswap-cpp.git
     branch = develop
