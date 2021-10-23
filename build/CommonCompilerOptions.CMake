@@ -15,6 +15,7 @@ endif()
 
 print("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 set(_MSVC_RUNTIME_LIBRARY)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS}")
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
@@ -42,9 +43,9 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
   foreach(CompilerFlag ${CompilerFlags})
     string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
   endforeach()
-  
+
   set(_MSVC_RUNTIME_LIBRARY
-      -DCMAKE_POLICY_DEFAULT_CMP0091:STRING=NEW 
+      -DCMAKE_POLICY_DEFAULT_CMP0091:STRING=NEW
       -DCMAKE_MSVC_RUNTIME_LIBRARY:STRING=MultiThreaded$<$<CONFIG:Debug>:Debug>
     )
 endif()

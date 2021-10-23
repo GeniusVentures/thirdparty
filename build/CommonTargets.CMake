@@ -230,8 +230,6 @@ set(_FINDPACKAGE_SORALOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/soralog/includ
 ExternalProject_Add(sqlite3
   PREFIX sqlite3
   SOURCE_DIR "${THIRDPARTY_DIR}/sqlite3"
-  PATCH_COMMAND ${CMAKE_COMMAND} -E copy 
-        "${PROJECT_BUILD_FOLDER}/cmake.in/sqlite3-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/sqlite3
         ${_CMAKE_COMMON_BUILD_PARAMS}
