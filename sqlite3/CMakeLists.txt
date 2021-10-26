@@ -5,7 +5,17 @@ set(LIBRARY_NAME sqlite3)
 
 include_directories(${CMAKE_SOURCE_DIR})
 add_library(sqlite3 STATIC sqlite3.c sqlite3.h sqlite3ext.h)
-add_executable(sqlite sqlite3.c shell.c sqlite3.h sqlite3ext.h)
+
+set(sqlite_SRC
+  sqlite3.c
+  sqlite3.h
+  sqlite3ext.h
+  )
+if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "iOS")
+  set(sqlite_SRC ${sqlite_SRC} shell.c)
+endif()
+add_executable(sqlite ${sqlite_SRC})
+
 #set_target_properties(sqlite PROPERTIES OUTPUT_NAME sqlite3)
 
 add_definitions(-DSQLITE_ENABLE_RTREE)
@@ -64,4 +74,3 @@ install(
     NAMESPACE sqlite3::
     DESTINATION ${CONFIG_DESTINATION_DIR}
 )
-
