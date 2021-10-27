@@ -176,9 +176,6 @@ set(_grpc_EXTRA_PARAM
 set(_rocksdb_EXTRA_PARAM
     -DROCKSDB_LITE:BOOL=ON
 )
-set(_rocksdb_patch
-	 PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/rocksdb-patch/io_posix.cc" <SOURCE_DIR>/env/io_posix.cc
-)
 
 
 # --------------------------------------------------------
