@@ -46,7 +46,7 @@ math metaparse mpi program_options python random regex serialization signals2
 system test thread timer type_erasure wave"
 BOOTSTRAP_LIBS=""
 
-MIN_IOS_VERSION=11.0
+MIN_IOS_VERSION=13.0
 MIN_TVOS_VERSION=11.0
 MIN_MACOS_VERSION=10.12
 MIN_MACOS_SILICON_VERSION=11
