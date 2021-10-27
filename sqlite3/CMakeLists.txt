@@ -11,6 +11,7 @@ set(sqlite_SRC
   sqlite3.h
   sqlite3ext.h
   )
+message("Compiling SQLite for system: ${CMAKE_SYSTEM_NAME}")
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "iOS")
   set(sqlite_SRC ${sqlite_SRC} shell.c)
 endif()
