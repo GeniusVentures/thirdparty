@@ -12,7 +12,8 @@ set(sqlite_SRC
   sqlite3ext.h
   )
 message("Compiling SQLite for system: ${CMAKE_SYSTEM_NAME}")
-if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "iOS")
+if(NOT ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin" AND DEFINED IOS_PLATFORM))
+  # Do not include shell.c for iOS build
   set(sqlite_SRC ${sqlite_SRC} shell.c)
 endif()
 add_executable(sqlite ${sqlite_SRC})
