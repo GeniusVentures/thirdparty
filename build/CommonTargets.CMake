@@ -429,7 +429,6 @@ ExternalProject_Add(binaryen
         -DBUILD_TOOLS:BOOL=OFF
         -DENABLE_WERROR:BOOL=OFF
         ${_CMAKE_COMMON_BUILD_PARAMS}
-        ${_binaryen_patch}
 )
 
 

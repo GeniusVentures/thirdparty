@@ -202,12 +202,6 @@ set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
 
 # --------------------------------------------------------
-# Set config for patching binaryen
-set(_binaryen_patch
-	 PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/binaryen-patch/alloc.h" <SOURCE_DIR>/alloc.h
-)
-
-# --------------------------------------------------------
 # Set config for libp2p
 set(_libp2p_BUILD_EXAMPLES OFF)
 

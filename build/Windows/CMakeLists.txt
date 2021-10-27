@@ -114,11 +114,6 @@ set(_OPENSSL_CACHE_ARGS
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 
 # --------------------------------------------------------
-# Set binaryen Windows specific configurations
-set(_binaryen_patch
- PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/binaryen-patch/parser.h" <SOURCE_DIR>/src/emscripten-optimizer/parser.h)
-
-# --------------------------------------------------------
 # Set ed25519 OS specific configurations
 set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)
