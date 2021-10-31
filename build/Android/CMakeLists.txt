@@ -1,11 +1,6 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-# if on Linux system, cross compile the Android executables
-if (NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
-    message(FATAL_ERROR "${CMAKE_HOST_SYSTEM_NAME} host system name does not match Linux for Android cross compile - Please select the correct folder for configuring project")
-endif()
-
 project(ANDROID_SHARED_THIRD_PARTY)
 
 # --------------------------------------------------------
