@@ -9,10 +9,6 @@ endif()
 
 project(WINDOWS_SHARED_THIRD_PARTY)
 
-# --------------------------------------------------------
-# build common libraries by platforms
-include(../CommonCompilerOptions.CMake)
-
 # ------------------------------------------
 # Set Windows specific runtime options
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -29,6 +25,10 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
 # Enable cross-platform preprocessor syntax
 # https://docs.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview?view=msvc-160
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:preprocessor")
+
+# --------------------------------------------------------
+# build common libraries by platforms
+include(../CommonCompilerOptions.CMake)
 
 # ------------------------------------------
 # Set Windows specific protobuf options
