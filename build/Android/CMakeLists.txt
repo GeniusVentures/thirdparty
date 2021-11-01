@@ -100,7 +100,7 @@ set(_BOOST_CACHE_ARGS
    -DBoost_NO_SYSTEM_PATHS:BOOL=ON
    -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
    -DBOOST_LIBRARYDIR:PATH=${BOOST_LIBRARYDIR}
-   -DBOOST_MIN_VERSION:STRING="1.70.0"
+   -DBOOST_MIN_VERSION:STRING=1.70.0
    -DBoost_DIR:PATH=${Boost_DIR}
    -Dboost_headers_DIR:PATH=${boost_headers_DIR}
    -Dboost_random_DIR:PATH=${boost_random_DIR}

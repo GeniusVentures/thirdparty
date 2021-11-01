@@ -265,6 +265,7 @@ ExternalProject_Add(libp2p
         -DEXPOSE_MOCKS:BOOL=ON
         -DHUNTER_ENABLED:BOOL=OFF
         -DBUILD_EXAMPLES:BOOL=${_libp2p_BUILD_EXAMPLES}
+        -DEXAMPLES:BOOL=${_libp2p_BUILD_EXAMPLES}
         -DCMAKE_FIND_USE_PACKAGE_ROOT_PATH:BOOL=ON
         -DBoost_NO_SYSTEM_PATHS:BOOL=ON
         -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
@@ -287,7 +288,7 @@ ExternalProject_Add(libp2p
         -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
         -DMULTIPLE_OPTION:STRING=${MULTIPLE_OPTION}
         -DCMAKE_CXX_STANDARD:STRING=17
-  DEPENDS GTest grpc ${_PROTOBUF_TARGET} spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost openssl cares fmt yaml-cpp soralog
+  DEPENDS GTest grpc ${_PROTOBUF_TARGET} spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost openssl cares fmt yaml-cpp soralog SQLiteModernCpp
 )
 set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p")
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
