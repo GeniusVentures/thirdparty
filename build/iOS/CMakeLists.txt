@@ -29,7 +29,6 @@ include(../CommonCompilerOptions.CMake)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
 set(CMAKE_SYSTEM_NAME "iOS")
 set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
-    -DBoost_DIR:PATH=${Boost_DIR}
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
@@ -76,6 +75,7 @@ set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-1.72.0")
 set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-1.72.0")
 set(_Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
 set(_BOOST_CACHE_ARGS
+    -DBoost_DIR:PATH=${BOOST_ROOT}
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
     -Dboost_headers_DIR:PATH=${boost_headers_DIR}
     -Dboost_random_DIR:PATH=${boost_random_DIR}
