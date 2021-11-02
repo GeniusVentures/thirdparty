@@ -107,6 +107,7 @@
 [submodule "soralog"]
     path = soralog
     url = ../soralog
+    branch = c17
 [submodule "libp2p-sqlite-modern-cpp"]
     path = libp2p-sqlite-modern-cpp
     url = https://github.com/soramitsu/libp2p-sqlite-modern-cpp.git
