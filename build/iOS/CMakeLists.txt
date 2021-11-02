@@ -37,7 +37,7 @@ set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
     -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
     -DIOS_PLATFORM:STRING=${IOS_PLATFORM}
     -DIOS_ARCH:STRING=${IOS_ARCH}
-    -DENABLE_ARC:STRING="0"
+    -DENABLE_ARC:STRING=0
     -DENABLE_BITCODE:STRING=NO
     -DENABLE_VISIBILITY:STRING=${ENABLED_VISIBILITY}
     -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
@@ -188,7 +188,7 @@ set(tsl_hat_trie_patch
 
 # --------------------------------------------------------
 # Set config for libp2p
-set(_libp2p_BUILD_EXAMPLES ON)
+set(_libp2p_BUILD_EXAMPLES OFF)
 
 # --------------------------------------------------------
 # Set o iOS specific configurations
