@@ -75,14 +75,13 @@ set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-1.72.0")
 set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-1.72.0")
 set(_Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
 set(_BOOST_CACHE_ARGS
-    -DBoost_DIR:PATH=${BOOST_ROOT}
+    -DBoost_DIR:PATH=${BOOST_ROOT}/lib/cmake/Boost-1.72.0
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
     -Dboost_headers_DIR:PATH=${boost_headers_DIR}
     -Dboost_random_DIR:PATH=${boost_random_DIR}
     -Dboost_system_DIR:PATH=${boost_system_DIR}
     -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
     -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
-    -DBoost_DIR:PATH=${BOOST_ROOT}
     -DBoost_USE_MULTITHREADED:BOOL=ON
     -DBoost_USE_STATIC_RUNTIME:BOOL=OFF
     -DBoost_USE_STATIC_LIBS:BOOL=ON
@@ -92,11 +91,10 @@ set(_BOOST_CACHE_ARGS
 
 # --------------------------------------------------------
 # build OpenSSL
-print("${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${CMAKE_CURRENT_BINARY_DIR}/openssl")
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}/${iOS_ABI}")
 ExternalProject_Add(openssl
+    PREFIX openssl
     SOURCE_DIR  "${CMAKE_CURRENT_BINARY_DIR}/openssl"
-    PREFIX "${THIRDPARTY_DIR}/openssl"
     DOWNLOAD_COMMAND ""
     CONFIGURE_COMMAND  ""
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${CMAKE_CURRENT_BINARY_DIR}/openssl
