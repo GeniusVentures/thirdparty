@@ -1,3 +1,6 @@
+[submodule "boost"]
+	path = boost
+	url = https://github.com/boostorg/boost.git
 [submodule "libp2p"]
     path = libp2p
     url = ../libp2p.git
@@ -115,6 +118,3 @@
     path = ipfs-bitswap-cpp
     url = ../ipfs-bitswap-cpp.git
     branch = develop
-[submodule "boost"]
-	path = boost
-	url = https://github.com/boostorg/boost.git
