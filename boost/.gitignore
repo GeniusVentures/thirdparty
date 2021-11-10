@@ -1,8 +1,0 @@
-/build/
-/build_ndk_*/
-/build_out.txt
-/src/
-/prebuilt/
-/down/
-
-/.gradle/
