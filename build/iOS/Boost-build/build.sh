@@ -72,7 +72,7 @@ COMPILER="$XCODE_ROOT/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++"
 THREADS="-j$(sysctl -n hw.ncpu)"
 
 CURRENT_DIR=$(pwd)
-SRCDIR="$CURRENT_DIR/src"
+SRCDIR="$CURRENT_DIR"
 
 IOS_DEV_CMD="xcrun --sdk iphoneos"
 IOS_SIM_DEV_CMD="xcrun --sdk iphonesimulator"

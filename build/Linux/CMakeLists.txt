@@ -36,11 +36,7 @@ set(_BOOST_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NA
 
 ExternalProject_Add(Boost
     PREFIX boost
-    GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
-    GIT_TAG           "boost-1.72.0"
-    #GIT_SUBMODULES_RECURSE  TRUE
-    GIT_SHALLOW TRUE
-    SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"
+    SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
     CONFIGURE_COMMAND  ""
     PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
     BUILD_COMMAND <SOURCE_DIR>/b2 headers

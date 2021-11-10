@@ -48,11 +48,8 @@ endif()
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 
 ExternalProject_Add(Boost
-      PREFIX "${THIRDPARTY_DIR}/boost"
-      GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
-      GIT_TAG           "boost-1.72.0"
-      #GIT_SUBMODULES_RECURSE  TRUE
-      UPDATE_COMMAND ${CMAKE_COMMAND} -E copy ${THIRDPARTY_DIR}/build/cmake.in/boost-patch/system_category_win32.hpp ${THIRDPARTY_DIR}/boost/src/Boost/libs/system/include/boost/system/detail/system_category_win32.hpp
+      PREFIX boost
+      UPDATE_COMMAND ${CMAKE_COMMAND} -E copy ${THIRDPARTY_DIR}/build/cmake.in/boost-patch/system_category_win32.hpp ${THIRDPARTY_DIR}/boost/libs/system/include/boost/system/detail/system_category_win32.hpp
       PATCH_COMMAND ./bootstrap.bat ${VC_PLATFORMTOOLSET}
       CONFIGURE_COMMAND  ""
       BUILD_COMMAND ./b2.exe headers

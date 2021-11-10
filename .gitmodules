@@ -115,3 +115,6 @@
     path = ipfs-bitswap-cpp
     url = ../ipfs-bitswap-cpp.git
     branch = develop
+[submodule "boost"]
+	path = boost
+	url = https://github.com/boostorg/boost.git
