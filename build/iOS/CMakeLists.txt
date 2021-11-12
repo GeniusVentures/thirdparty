@@ -62,7 +62,7 @@ ExternalProject_Add(Boost
     DOWNLOAD_COMMAND ""
     CONFIGURE_COMMAND  ""
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${CMAKE_CURRENT_BINARY_DIR}/boost/Boost-build
-    BUILD_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/boost/Boost-build/build.sh -ios --boost-version 1.72.0 --build-dir ${BOOST_ROOT}
+    BUILD_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/boost/Boost-build/build.sh -ios --boost-version 1.72.0 --src-dir ${THIRDPARTY_DIR}/boost --build-dir ${BOOST_ROOT}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )

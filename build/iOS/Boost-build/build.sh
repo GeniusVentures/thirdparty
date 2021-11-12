@@ -505,6 +505,15 @@ parseArgs()
                 fi
                 ;;
 
+            --src-dir)
+                if [ -n "$2" ]; then
+                    SRCDIR=$2
+                    shift
+                else
+                    missingParameter "$1"
+                fi
+                ;;
+
             --build-dir)
                 if [ -n "$2" ]; then
                     BUILD_DIR=$2
@@ -1539,7 +1548,7 @@ EXTRA_MACOS_SILICON_FLAGS="$EXTRA_FLAGS $EXTRA_ARM_FLAGS -mmacosx-version-min=$M
 
 BOOST_VERSION2="${BOOST_VERSION//./_}"
 BOOST_TARBALL="$CURRENT_DIR/boost_$BOOST_VERSION2.tar.bz2"
-BOOST_SRC="$SRCDIR/boost_$BOOST_VERSION2"
+BOOST_SRC=$SRCDIR
 
 OUTPUT_DIR="$CURRENT_DIR/build/boost/$BOOST_VERSION"
 IOS_OUTPUT_DIR="$OUTPUT_DIR/ios/$BUILD_VARIANT"
