@@ -112,11 +112,11 @@ prepare_target_source_dirs()
   echo "  Logfile: ${LOG}"
 
   # Prepare source dir
-  SOURCEDIR="${CURRENTPATH}/src/${PLATFORM}-${ARCH}"
-  mkdir -p "${SOURCEDIR}"
-  tar zxf "${CURRENTPATH}/${OPENSSL_ARCHIVE_FILE_NAME}" -C "${SOURCEDIR}"
-  cd "${SOURCEDIR}/${OPENSSL_ARCHIVE_BASE_NAME}"
-  chmod u+x ./Configure
+ # SOURCEDIR="${CURRENTPATH}/src/${PLATFORM}-${ARCH}"
+ # mkdir -p "${SOURCEDIR}"
+ # tar zxf "${CURRENTPATH}/${OPENSSL_ARCHIVE_FILE_NAME}" -C "${SOURCEDIR}"
+ # cd "${SOURCEDIR}/${OPENSSL_ARCHIVE_BASE_NAME}"
+ # chmod u+x ./Configure
 }
 
 # Check for error status
@@ -456,38 +456,38 @@ echo "  Build location: ${CURRENTPATH}"
 echo
 
 # Download OpenSSL when not present
-OPENSSL_ARCHIVE_BASE_NAME="openssl-${VERSION}"
-OPENSSL_ARCHIVE_FILE_NAME="${OPENSSL_ARCHIVE_BASE_NAME}.tar.gz"
-if [ ! -e ${OPENSSL_ARCHIVE_FILE_NAME} ]; then
-  echo "Downloading ${OPENSSL_ARCHIVE_FILE_NAME}..."
-  OPENSSL_ARCHIVE_URL="https://www.openssl.org/source/${OPENSSL_ARCHIVE_FILE_NAME}"
-
-  # Check whether file exists here (this is the location of the latest version for each branch)
-  # -s be silent, -f return non-zero exit status on failure, -I get header (do not download)
-  curl ${CURL_OPTIONS} -sfI "${OPENSSL_ARCHIVE_URL}" > /dev/null
-
-  # If unsuccessful, try the archive
-  if [ $? -ne 0 ]; then
-    BRANCH=$(echo "${VERSION}" | grep -Eo '^[0-9]\.[0-9]\.[0-9]')
-    OPENSSL_ARCHIVE_URL="https://www.openssl.org/source/old/${BRANCH}/${OPENSSL_ARCHIVE_FILE_NAME}"
-
-    curl ${CURL_OPTIONS} -sfI "${OPENSSL_ARCHIVE_URL}" > /dev/null
-  fi
-
-  # Both attempts failed, so report the error
-  if [ $? -ne 0 ]; then
-    echo "An error occurred trying to find OpenSSL ${VERSION} on ${OPENSSL_ARCHIVE_URL}"
-    echo "Please verify that the version you are trying to build exists, check cURL's error message and/or your network connection."
-    exit 1
-  fi
-
-  # Archive was found, so proceed with download.
-  # -O Use server-specified filename for download
-  curl ${CURL_OPTIONS} -O "${OPENSSL_ARCHIVE_URL}"
-
-else
-  echo "Using ${OPENSSL_ARCHIVE_FILE_NAME}"
-fi
+#OPENSSL_ARCHIVE_BASE_NAME="openssl-${VERSION}"
+#OPENSSL_ARCHIVE_FILE_NAME="${OPENSSL_ARCHIVE_BASE_NAME}.tar.gz"
+#if [ ! -e ${OPENSSL_ARCHIVE_FILE_NAME} ]; then
+#  echo "Downloading ${OPENSSL_ARCHIVE_FILE_NAME}..."
+#  OPENSSL_ARCHIVE_URL="https://www.openssl.org/source/${OPENSSL_ARCHIVE_FILE_NAME}"
+#
+#  # Check whether file exists here (this is the location of the latest version for each branch)
+#  # -s be silent, -f return non-zero exit status on failure, -I get header (do not download)
+#  curl ${CURL_OPTIONS} -sfI "${OPENSSL_ARCHIVE_URL}" > /dev/null
+#
+#  # If unsuccessful, try the archive
+#  if [ $? -ne 0 ]; then
+#    BRANCH=$(echo "${VERSION}" | grep -Eo '^[0-9]\.[0-9]\.[0-9]')
+#    OPENSSL_ARCHIVE_URL="https://www.openssl.org/source/old/${BRANCH}/${OPENSSL_ARCHIVE_FILE_NAME}"
+#
+#    curl ${CURL_OPTIONS} -sfI "${OPENSSL_ARCHIVE_URL}" > /dev/null
+#  fi
+#
+#  # Both attempts failed, so report the error
+#  if [ $? -ne 0 ]; then
+#    echo "An error occurred trying to find OpenSSL ${VERSION} on ${OPENSSL_ARCHIVE_URL}"
+#    echo "Please verify that the version you are trying to build exists, check cURL's error message and/or your network connection."
+#    exit 1
+#  fi
+#
+#  # Archive was found, so proceed with download.
+#  # -O Use server-specified filename for download
+#  curl ${CURL_OPTIONS} -O "${OPENSSL_ARCHIVE_URL}"
+#
+#else
+#  echo "Using ${OPENSSL_ARCHIVE_FILE_NAME}"
+#fi
 
 # Set reference to custom configuration (OpenSSL 1.1.1)
 # See: https://github.com/openssl/openssl/commit/afce395cba521e395e6eecdaf9589105f61e4411

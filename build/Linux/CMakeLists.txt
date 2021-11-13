@@ -62,16 +62,11 @@ set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTE
 
 ExternalProject_Add(openssl
     PREFIX openssl
-    GIT_REPOSITORY "https://github.com/openssl/openssl.git"
-    GIT_TAG "OpenSSL_1_1_1g"
-    #GIT_SUBMODULES_RECURSE  TRUE
-    SOURCE_DIR  "${THIRDPARTY_DIR}/openssl/src"
+    SOURCE_DIR  "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND  <SOURCE_DIR>/config -fPIC --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
-    PATCH_COMMAND ""
     BUILD_COMMAND make
-    BUILD_IN_SOURCE  TRUE
-    INSTALL_COMMAND make install
-    UPDATE_COMMAND ""
+    BUILD_IN_SOURCE  FALSE
+    INSTALL_COMMAND make install_dev
 )
 set(_OPENSSL_CACHE_ARGS
         -DOPENSSL_USE_STATIC_LIBS:BOOL=ON

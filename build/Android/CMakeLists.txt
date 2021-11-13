@@ -130,9 +130,8 @@ ExternalProject_Add(openssl
 	GIT_SHALLOW TRUE
 	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
 	CONFIGURE_COMMAND  ""
-  PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${THIRDPARTY_DIR}/openssl/src
-	BUILD_COMMAND  <SOURCE_DIR>/build.sh --abi=${_abi} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${_openssl_BUILD_ROOT} --env_path=$ENV{PATH} --env_android_ndk=$ENV{ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
-	BUILD_IN_SOURCE  TRUE
+	BUILD_COMMAND  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --abi=${_abi} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${_openssl_BUILD_ROOT} --env_path=$ENV{PATH} --env_android_ndk=$ENV{ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
+	BUILD_IN_SOURCE  FALSE
 	UPDATE_COMMAND ""
 )
 
