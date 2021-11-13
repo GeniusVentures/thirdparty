@@ -220,6 +220,7 @@ ExternalProject_Add(soralog
         # Override CMAKE_CXX_FLAGS to apply updated preprocessor settings
         -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
         -DCMAKE_CXX_STANDARD:STRING=17
+        -DCMAKE_SYSTEM_VERSION="10.0.18362.0"
   DEPENDS fmt yaml-cpp
 )
 
@@ -281,6 +282,7 @@ ExternalProject_Add(libp2p
         -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
         -DSQLiteModernCpp_DIR:PATH=${_FINDPACKAGE_SQLITECPP_CONFIG_DIR}
         -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
+        -DCMAKE_SYSTEM_VERSION="10.0.18362.0"
         ${_BOOST_CACHE_ARGS}
         ${_OPENSSL_CACHE_ARGS}
         ${_CMAKE_COMMON_BUILD_PARAMS}
@@ -314,6 +316,7 @@ ExternalProject_Add(ipfs-lite-cpp
         -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
         -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
         -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
+        -DCMAKE_SYSTEM_VERSION="10.0.18362.0"
         -DTESTING:BOOL=${TESTING}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_BOOST_CACHE_ARGS}
@@ -343,6 +346,7 @@ ExternalProject_Add(ipfs-pubsub
         -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
         -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
         -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
+        -DCMAKE_SYSTEM_VERSION="10.0.18362.0"
         -DTESTING:BOOL=${TESTING}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_BOOST_CACHE_ARGS}
