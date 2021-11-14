@@ -1,37 +1,27 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Debug Build CI new_libp2p
+name: Release Build CI new_libp2p
 
 # Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches: [ new_libp2p ]
-  pull_request:
-    branches: [ new_libp2p ]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+# Triggers the workflow on push or pull request events and manually from the Actions tab
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   Windows:
-    runs-on: windows-latest        
+    runs-on: windows-latest
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
         with:
-          submodules: 'recursive'    
-      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1
-      
+          submodules: 'recursive'
+
       - name: Create Build Directory
-        run: cmake -E make_directory ${{github.workspace}}/.build          
+        run: cmake -E make_directory ${{github.workspace}}/.build
 
       - name: Configure CMake
         working-directory: ${{github.workspace}}/.build
-        run: cmake -S ../build/Windows/ -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_SYSTEM_VERSION="10.0.18362.0"
+        run: cmake -S ../build/Windows/ -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release
 
       - name: Compile
         working-directory: ${{github.workspace}}/.build
-        run: cmake --build . --config Debug
-
-  
+        run: cmake --build . --config Release

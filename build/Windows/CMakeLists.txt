@@ -48,16 +48,14 @@ endif()
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 
 ExternalProject_Add(Boost
-      PREFIX "${THIRDPARTY_DIR}/boost"
-      GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
-      GIT_TAG           "boost-1.72.0"
-      #GIT_SUBMODULES_RECURSE  TRUE
-      UPDATE_COMMAND ${CMAKE_COMMAND} -E copy ${THIRDPARTY_DIR}/build/cmake.in/boost-patch/system_category_win32.hpp ${THIRDPARTY_DIR}/boost/src/Boost/libs/system/include/boost/system/detail/system_category_win32.hpp
+      PREFIX boost
+      SOURCE_DIR  "${THIRDPARTY_DIR}/boost"
+      UPDATE_COMMAND ${CMAKE_COMMAND} -E copy ${THIRDPARTY_DIR}/build/cmake.in/boost-patch/system_category_win32.hpp ${THIRDPARTY_DIR}/boost/libs/system/include/boost/system/detail/system_category_win32.hpp
       PATCH_COMMAND ./bootstrap.bat ${VC_PLATFORMTOOLSET}
       CONFIGURE_COMMAND  ""
       BUILD_COMMAND ./b2.exe headers
       BUILD_IN_SOURCE  TRUE
-      INSTALL_COMMAND ./b2.exe toolset=${BOOST_TOOLSET} runtime-link=static cxxflags=${CMAKE_CXX_FLAGS}  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release,debug  link=static threading=multi   --stagedir=stage/x64  --build-dir=${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib install
+      INSTALL_COMMAND ./b2.exe toolset=${BOOST_TOOLSET} runtime-link=static cxxflags="-fPIC ${CMAKE_CXX_FLAGS}"  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release,debug  link=static threading=multi   --stagedir=stage/x64  --build-dir=${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib install
 )
 set(BOOST_LIB_CMAKE_DIR "${_BOOST_ROOT}/lib/cmake")
 set(_Boost_INCLUDE_DIR "${_BOOST_ROOT}/include/boost-1_72")
@@ -114,15 +112,14 @@ set(_OPENSSL_CACHE_ARGS
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 
 # --------------------------------------------------------
-# Set binaryen Windows specific configurations
-set(_binaryen_patch
- PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/binaryen-patch/parser.h" <SOURCE_DIR>/src/emscripten-optimizer/parser.h)
-
-# --------------------------------------------------------
 # Set ed25519 OS specific configurations
 set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM bcryptgen)
+
+# --------------------------------------------------------
+# Set config for libp2p
+set(_libp2p_BUILD_EXAMPLES ON)
 
 # --------------------------------------------------------
 # Allow multiple definitions

@@ -29,7 +29,6 @@ ABI_NAMES=$2
 BOOST_DIR=$3
 
 SAVED_PATH=$PATH
-export PATH=$BOOST_DIR/bin:$SAVED_PATH
 
 
 # release | debug
@@ -39,6 +38,10 @@ if [ -n "$4" ]; then
   if [ "$4" = "Debug" ] || [ "$4" = "debug" ]; then
     BUILD_VARIANT="debug"
   fi
+fi
+
+if [ -n "$5" ]; then
+  export ANDROID_NDK=$5
 fi
 
 # only build these libs
@@ -318,7 +321,8 @@ fi
 num_cores=$(grep -c ^processor /proc/cpuinfo)
 echo " cores available = " $num_cores
 
-
+# add bin folder to path
+export PATH=$BOOST_DIR/bin:$SAVED_PATH
 
 
 #-------------------------------------------
@@ -354,7 +358,7 @@ echo " cores available = " $num_cores
         # toolset=clang-$toolset_name     \
 
         {
-            ./b2 runtime-link=static binary-format=elf \
+            ./b2 cxxflags="-fPIC" runtime-link=static binary-format=elf \
                 address-model=$address_model \
                 architecture=$arch_for_abi \
                 abi=$abi    \

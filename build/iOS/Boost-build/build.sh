@@ -46,7 +46,7 @@ math metaparse mpi program_options python random regex serialization signals2
 system test thread timer type_erasure wave"
 BOOTSTRAP_LIBS=""
 
-MIN_IOS_VERSION=11.0
+MIN_IOS_VERSION=13.0
 MIN_TVOS_VERSION=11.0
 MIN_MACOS_VERSION=10.12
 MIN_MACOS_SILICON_VERSION=11
@@ -72,7 +72,7 @@ COMPILER="$XCODE_ROOT/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++"
 THREADS="-j$(sysctl -n hw.ncpu)"
 
 CURRENT_DIR=$(pwd)
-SRCDIR="$CURRENT_DIR/src"
+SRCDIR="$CURRENT_DIR"
 
 IOS_DEV_CMD="xcrun --sdk iphoneos"
 IOS_SIM_DEV_CMD="xcrun --sdk iphonesimulator"
@@ -505,6 +505,15 @@ parseArgs()
                 fi
                 ;;
 
+            --src-dir)
+                if [ -n "$2" ]; then
+                    SRCDIR=$2
+                    shift
+                else
+                    missingParameter "$1"
+                fi
+                ;;
+
             --build-dir)
                 if [ -n "$2" ]; then
                     BUILD_DIR=$2
@@ -850,7 +859,7 @@ buildBoost_iOS()
 
     echo Building Boost for iPhone
     # Install this one so we can copy the headers for the frameworks...
-    ./b2 "$THREADS" \
+    ./b2 cxxflags="-fPIC" "$THREADS" \
         --build-dir=iphone-build \
         --stagedir=iphone-build/stage \
         --prefix="$IOS_OUTPUT_DIR" \
@@ -861,7 +870,7 @@ buildBoost_iOS()
     # shellcheck disable=SC2181
     if [ $? != 0 ]; then echo "Error staging iPhone. Check log."; exit 1; fi
 
-    ./b2 "$THREADS" \
+    ./b2 cxxflags="-fPIC" "$THREADS" \
         --build-dir=iphone-build \
         --stagedir=iphone-build/stage \
         --prefix="$IOS_OUTPUT_DIR" \
@@ -935,7 +944,7 @@ buildBoost_macOS()
     mkdir -p "$MACOS_OUTPUT_DIR"
 
     echo building Boost for macOS
-    ./b2 "$THREADS" \
+    ./b2 cxxflags="-fPIC" "$THREADS" \
         --build-dir=macos-build \
         --stagedir=macos-build/stage \
         --prefix="$MACOS_OUTPUT_DIR" \
@@ -946,7 +955,7 @@ buildBoost_macOS()
     # shellcheck disable=SC2181
     if [ $? != 0 ]; then echo "Error staging macOS. Check log."; exit 1; fi
 
-    ./b2 "$THREADS" \
+    ./b2 cxxflags="-fPIC" "$THREADS" \
         --build-dir=macos-build \
         --stagedir=macos-build/stage \
         --prefix="$MACOS_OUTPUT_DIR" \
@@ -1539,7 +1548,7 @@ EXTRA_MACOS_SILICON_FLAGS="$EXTRA_FLAGS $EXTRA_ARM_FLAGS -mmacosx-version-min=$M
 
 BOOST_VERSION2="${BOOST_VERSION//./_}"
 BOOST_TARBALL="$CURRENT_DIR/boost_$BOOST_VERSION2.tar.bz2"
-BOOST_SRC="$SRCDIR/boost_$BOOST_VERSION2"
+BOOST_SRC=$SRCDIR
 
 OUTPUT_DIR="$CURRENT_DIR/build/boost/$BOOST_VERSION"
 IOS_OUTPUT_DIR="$OUTPUT_DIR/ios/$BUILD_VARIANT"

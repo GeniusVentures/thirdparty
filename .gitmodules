@@ -1,3 +1,6 @@
+[submodule "boost"]
+	path = boost
+	url = https://github.com/boostorg/boost.git
 [submodule "libp2p"]
     path = libp2p
     url = ../libp2p.git
@@ -87,11 +90,10 @@
     url = https://github.com/trustwallet/wallet-core.git
 [submodule "rocksdb"]
     path = rocksdb
-    url = https://github.com/facebook/rocksdb.git
-    branch = v6.17.3
+    url = ../rocksdb.git
 [submodule "sr25519-donna"]
     path = sr25519-donna
-    url = ../sr25519-donna
+    url = ../sr25519-donna.git
     branch = develop
 [submodule "fmt"]
     path = fmt
@@ -107,7 +109,8 @@
     branch = cares-1_17_2
 [submodule "soralog"]
     path = soralog
-    url = https://github.com/GeniusVentures/soralog
+    url = ../soralog
+    branch = c17
 [submodule "libp2p-sqlite-modern-cpp"]
     path = libp2p-sqlite-modern-cpp
     url = https://github.com/soramitsu/libp2p-sqlite-modern-cpp.git

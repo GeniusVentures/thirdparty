@@ -36,16 +36,12 @@ set(_BOOST_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NA
 
 ExternalProject_Add(Boost
     PREFIX boost
-    GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
-    GIT_TAG           "boost-1.72.0"
-    #GIT_SUBMODULES_RECURSE  TRUE
-    GIT_SHALLOW TRUE
-    SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"
+    SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
     CONFIGURE_COMMAND  ""
     PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
     BUILD_COMMAND <SOURCE_DIR>/b2 headers
     BUILD_IN_SOURCE  TRUE
-    INSTALL_COMMAND <SOURCE_DIR>/b2 runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
+    INSTALL_COMMAND <SOURCE_DIR>/b2 cxxflags="-fPIC" runtime-link=static link=static threading=multi  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
     UPDATE_COMMAND ""
 )
 
@@ -70,7 +66,7 @@ ExternalProject_Add(openssl
     GIT_TAG "OpenSSL_1_1_1g"
     #GIT_SUBMODULES_RECURSE  TRUE
     SOURCE_DIR  "${THIRDPARTY_DIR}/openssl/src"
-    CONFIGURE_COMMAND  <SOURCE_DIR>/config --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+    CONFIGURE_COMMAND  <SOURCE_DIR>/config -fPIC --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
     PATCH_COMMAND ""
     BUILD_COMMAND make
     BUILD_IN_SOURCE  TRUE
@@ -90,6 +86,10 @@ set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
+
+# --------------------------------------------------------
+# Set config for libp2p
+set(_libp2p_BUILD_EXAMPLES ON)
 
 # --------------------------------------------------------
 # Allow multiple definitions

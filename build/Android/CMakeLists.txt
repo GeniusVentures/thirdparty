@@ -1,11 +1,6 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-# if on Linux system, cross compile the Android executables
-if (NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
-    message(FATAL_ERROR "${CMAKE_HOST_SYSTEM_NAME} host system name does not match Linux for Android cross compile - Please select the correct folder for configuring project")
-endif()
-
 project(ANDROID_SHARED_THIRD_PARTY)
 
 # --------------------------------------------------------
@@ -62,14 +57,10 @@ set(BOOST_VERSION2 1_72_0)
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/Android/${ANDROID_ABI}")
 ExternalProject_Add( Boost
 	PREFIX boost
-	GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
-	GIT_TAG           "boost-1.72.0"
-	#GIT_SUBMODULES_RECURSE  TRUE
-	GIT_SHALLOW TRUE
-	SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"
+	SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
 	CONFIGURE_COMMAND  ""
-	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${THIRDPARTY_DIR}/boost/src
-	BUILD_COMMAND  <SOURCE_DIR>/build.sh "${_BOOST_ROOT}" ${ANDROID_ABI} "${THIRDPARTY_DIR}/boost/src" ${CMAKE_BUILD_TYPE}
+	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${THIRDPARTY_DIR}/boost
+	BUILD_COMMAND  <SOURCE_DIR>/build.sh "${_BOOST_ROOT}" ${ANDROID_ABI} "${THIRDPARTY_DIR}/boost" ${CMAKE_BUILD_TYPE} $ENV{ANDROID_NDK}
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )
@@ -105,7 +96,7 @@ set(_BOOST_CACHE_ARGS
    -DBoost_NO_SYSTEM_PATHS:BOOL=ON
    -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
    -DBOOST_LIBRARYDIR:PATH=${BOOST_LIBRARYDIR}
-   -DBOOST_MIN_VERSION:STRING="1.70.0"
+   -DBOOST_MIN_VERSION:STRING=1.70.0
    -DBoost_DIR:PATH=${Boost_DIR}
    -Dboost_headers_DIR:PATH=${boost_headers_DIR}
    -Dboost_random_DIR:PATH=${boost_random_DIR}
@@ -177,6 +168,7 @@ set(_rocksdb_EXTRA_PARAM
     -DROCKSDB_LITE:BOOL=ON
 )
 
+
 # --------------------------------------------------------
 # Build protobuf project from the git submodule for local executation of protoc.
 ExternalProject_Add(protobuf
@@ -201,10 +193,8 @@ set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
 
 # --------------------------------------------------------
-# Set config for patching binaryen
-set(_binaryen_patch
-	 PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/binaryen-patch/alloc.h" <SOURCE_DIR>/alloc.h
-)
+# Set config for libp2p
+set(_libp2p_BUILD_EXAMPLES OFF)
 
 # --------------------------------------------------------
 # Allow multiple definitions

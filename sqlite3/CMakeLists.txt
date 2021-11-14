@@ -5,8 +5,6 @@ set(LIBRARY_NAME sqlite3)
 
 include_directories(${CMAKE_SOURCE_DIR})
 add_library(sqlite3 STATIC sqlite3.c sqlite3.h sqlite3ext.h)
-add_executable(sqlite sqlite3.c shell.c sqlite3.h sqlite3ext.h)
-#set_target_properties(sqlite PROPERTIES OUTPUT_NAME sqlite3)
 
 add_definitions(-DSQLITE_ENABLE_RTREE)
 add_definitions(-DSQLITE_ENABLE_FTS4)
@@ -18,20 +16,29 @@ add_definitions(-DSQLITE_ENABLE_STAT4)
 # Uncomment this for single-threaded variant (faster)
 #add_definitions(-DSQLITE_THREADSAFE=0)
 
-if(WIN32)
-  add_custom_command(TARGET sqlite POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:sqlite> ${CMAKE_BINARY_DIR}/sqlite3.exe
-    DEPENDS sqlite
-  )
-  install(FILES ${CMAKE_BINARY_DIR}/sqlite3.exe DESTINATION bin)
-else()
-  include(FindThreads)
-  target_link_libraries(sqlite m ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
-  install(TARGETS sqlite RUNTIME DESTINATION bin)
-endif()
+message("Compiling SQLite for system: ${CMAKE_SYSTEM_NAME}")
+
 
 install(FILES sqlite3.h sqlite3ext.h DESTINATION include)
-install(TARGETS sqlite3 LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+
+if(NOT ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin" AND DEFINED IOS_PLATFORM))
+  add_executable(sqlite sqlite3.c sqlite3.h sqlite3ext.h shell.c)
+  #set_target_properties(sqlite PROPERTIES OUTPUT_NAME sqlite3)
+
+  if(WIN32)
+    add_custom_command(TARGET sqlite POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:sqlite> ${CMAKE_BINARY_DIR}/sqlite3.exe
+      DEPENDS sqlite
+    )
+    install(FILES ${CMAKE_BINARY_DIR}/sqlite3.exe DESTINATION bin)
+  else()
+    include(FindThreads)
+    target_link_libraries(sqlite m ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
+    install(TARGETS sqlite RUNTIME DESTINATION bin)
+  endif()
+
+  install(TARGETS sqlite3 LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+endif()
 
 include(GNUInstallDirs)
 
@@ -64,4 +71,3 @@ install(
     NAMESPACE sqlite3::
     DESTINATION ${CONFIG_DESTINATION_DIR}
 )
-

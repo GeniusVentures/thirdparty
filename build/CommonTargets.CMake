@@ -244,6 +244,7 @@ ExternalProject_Add(SQLiteModernCpp
   PREFIX SQLiteModernCpp
   SOURCE_DIR "${THIRDPARTY_DIR}/libp2p-sqlite-modern-cpp"
   CMAKE_CACHE_ARGS
+        -DHUNTER_ENABLED:BOOL=OFF
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/SQLiteModernCpp
         -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
         ${_CMAKE_COMMON_BUILD_PARAMS}
@@ -266,7 +267,8 @@ ExternalProject_Add(libp2p
         -DTESTING:BOOL=OFF
         -DEXPOSE_MOCKS:BOOL=ON
         -DHUNTER_ENABLED:BOOL=OFF
-        -DBUILD_EXAMPLES:BOOL=ON
+        -DBUILD_EXAMPLES:BOOL=${_libp2p_BUILD_EXAMPLES}
+        -DEXAMPLES:BOOL=${_libp2p_BUILD_EXAMPLES}
         -DCMAKE_FIND_USE_PACKAGE_ROOT_PATH:BOOL=ON
         -DBoost_NO_SYSTEM_PATHS:BOOL=ON
         -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
@@ -290,7 +292,7 @@ ExternalProject_Add(libp2p
         -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
         -DMULTIPLE_OPTION:STRING=${MULTIPLE_OPTION}
         -DCMAKE_CXX_STANDARD:STRING=17
-  DEPENDS GTest grpc ${_PROTOBUF_TARGET} spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost openssl cares fmt yaml-cpp soralog
+  DEPENDS GTest grpc ${_PROTOBUF_TARGET} spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost openssl cares fmt yaml-cpp soralog SQLiteModernCpp
 )
 set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p")
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
@@ -357,6 +359,28 @@ ExternalProject_Add(ipfs-pubsub
 )
 
 # --------------------------------------------------------
+# builds ipfs-bitswap-cpp
+#ExternalProject_Add(ipfs-bitswap-cpp
+#  PREFIX ipfs-bitswap-cpp
+#  SOURCE_DIR "${THIRDPARTY_DIR}/ipfs-bitswap-cpp"
+#  CMAKE_CACHE_ARGS
+#        -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
+#        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp
+#        -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
+#        -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
+#        -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
+#        -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+#        -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
+#        -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
+#        -DTESTING:BOOL=${TESTING}
+#        ${_CMAKE_COMMON_BUILD_PARAMS}
+#        ${_BOOST_CACHE_ARGS}
+#        ${_OPENSSL_CACHE_ARGS}
+#        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -std=c++17
+#  DEPENDS GTest spdlog libp2p Boost
+#)
+
+# --------------------------------------------------------
 # Builds ed25519
 ExternalProject_Add(ed25519
   PREFIX ed25519
@@ -413,7 +437,6 @@ ExternalProject_Add(binaryen
         -DBUILD_TOOLS:BOOL=OFF
         -DENABLE_WERROR:BOOL=OFF
         ${_CMAKE_COMMON_BUILD_PARAMS}
-        ${_binaryen_patch}
 )
 
 
