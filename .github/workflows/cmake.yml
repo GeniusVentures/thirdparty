@@ -23,7 +23,7 @@ jobs:
 
       - name: Configure CMake
         working-directory: ${{github.workspace}}/.build
-        run: cmake -S ../build/Windows/ -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_VERSION=10.0
+        run: cmake -S ../build/Windows/ -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_VERSION="10.0"
 
       - name: Compile
         working-directory: ${{github.workspace}}/.build
