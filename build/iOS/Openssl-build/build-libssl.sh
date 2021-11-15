@@ -147,9 +147,9 @@ run_configure()
   echo "  Configure..."
   set +e
   if [ "${LOG_VERBOSE}" == "verbose" ]; then
-    ./Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine | tee "${LOG}"
+    ../../../../../openssl/Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine | tee "${LOG}"
   else
-    (./Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine > "${LOG}" 2>&1) & spinner
+    (../../../../../openssl/Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine > "${LOG}" 2>&1) & spinner
   fi
 
   # Check for error status
@@ -175,7 +175,6 @@ finish_build_loop()
 {
   # Return to ${CURRENTPATH} and remove source dir
   cd "${CURRENTPATH}"
-  rm -r "${SOURCEDIR}"
 
   # Add references to library files to relevant arrays
   if [[ "${PLATFORM}" == iPhone* ]]; then
