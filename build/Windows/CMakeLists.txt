@@ -90,7 +90,7 @@ ExternalProject_Add(openssl
 	#GIT_SUBMODULES_RECURSE TRUE
 	SOURCE_DIR  "${THIRDPARTY_DIR}/openssl"
 	CONFIGURE_COMMAND perl ../../../../../openssl/Configure ${OPENSSL_CONFIG_MODE} enable-capieng no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
-	BUILD_COMMAND nmake
+	BUILD_COMMAND nmake build_lib
 	BUILD_IN_SOURCE  false
 	INSTALL_COMMAND nmake install_dev
 	)

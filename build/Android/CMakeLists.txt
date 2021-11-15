@@ -124,15 +124,13 @@ message("android abi is ${_abi}")
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Android/${ANDROID_ABI}")
 ExternalProject_Add(openssl
 	PREFIX openssl
-	GIT_REPOSITORY "https://github.com/openssl/openssl.git"
-	GIT_TAG "OpenSSL_1_1_1g"
-	#GIT_SUBMODULES_RECURSE  TRUE
 	GIT_SHALLOW TRUE
-	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
+	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
 	CONFIGURE_COMMAND  ""
 	BUILD_COMMAND  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --abi=${_abi} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${_openssl_BUILD_ROOT} --env_path=$ENV{PATH} --env_android_ndk=$ENV{ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
 	BUILD_IN_SOURCE  FALSE
 	UPDATE_COMMAND ""
+	INSTALL_COMMAND make install_dev
 )
 
 print("openssl ${_openssl_BUILD_ROOT}")
