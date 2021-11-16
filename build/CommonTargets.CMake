@@ -424,7 +424,7 @@ ExternalProject_Add(rapidjson
 # Builds binaryen
 ExternalProject_Add(binaryen
   PREFIX binaryen
-  URL https://github.com/Warchant/binaryen/archive/1.38.28-p0.zip
+  SOURCE_DIR "${THIRDPARTY_DIR}/binaryen"
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/binaryen
         -DBUILD_STATIC_LIB:BOOL=ON
