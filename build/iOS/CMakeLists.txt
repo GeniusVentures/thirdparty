@@ -187,6 +187,7 @@ set(tsl_hat_trie_patch
 # --------------------------------------------------------
 # Set config for libp2p
 set(_libp2p_BUILD_EXAMPLES OFF)
+set(_soralog_BUILD_EXAMPLES OFF)
 
 # --------------------------------------------------------
 # Set o iOS specific configurations

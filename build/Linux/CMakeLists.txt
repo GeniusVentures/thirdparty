@@ -90,6 +90,7 @@ set(_ED25519_RANDOM dev_urandom)
 # --------------------------------------------------------
 # Set config for libp2p
 set(_libp2p_BUILD_EXAMPLES ON)
+set(_soralog_BUILD_EXAMPLES ON)
 
 # --------------------------------------------------------
 # Allow multiple definitions

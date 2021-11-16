@@ -116,6 +116,7 @@ set(_ED25519_RANDOM bcryptgen)
 # --------------------------------------------------------
 # Set config for libp2p
 set(_libp2p_BUILD_EXAMPLES ON)
+set(_soralog_BUILD_EXAMPLES ON)
 
 # --------------------------------------------------------
 # Allow multiple definitions
