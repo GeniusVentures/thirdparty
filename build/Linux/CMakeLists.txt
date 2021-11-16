@@ -74,7 +74,7 @@ set(_OPENSSL_CACHE_ARGS
         -DOPENSSL_INCLUDE_DIR:PATH=${_openssl_BUILD_ROOT}/include
         -DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
     )
-set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
+set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/openssl/include)
 
 # --------------------------------------------------------
 # Set ed25519 OS specific configurations

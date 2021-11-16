@@ -134,7 +134,7 @@ ExternalProject_Add(openssl
 )
 
 print("openssl ${_openssl_BUILD_ROOT}")
-set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
+set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/openssl/include)
 set(_OPENSSL_CACHE_ARGS
 	  -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
 	  -DOPENSSL_ROOT_DIR:PATH=${_openssl_BUILD_ROOT}
