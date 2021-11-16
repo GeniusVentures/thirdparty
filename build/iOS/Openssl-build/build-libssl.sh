@@ -146,12 +146,10 @@ run_configure()
 {
   echo "  Configure..."
   set +e
-  CONFIGDIR=`dirname $0`/../../../openssl
-  REALCONFIGDIR=`realpath ${CONFIGDIR}`
   if [ "${LOG_VERBOSE}" == "verbose" ]; then
-    ${REALCONFIGDIR}/Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine | tee "${LOG}"
+    ${SRC_DIR}/Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine | tee "${LOG}"
   else
-    (${REALCONFIGDIR}/Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine > "${LOG}" 2>&1) & spinner
+    (${SRC_DIR}/Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine > "${LOG}" 2>&1) & spinner
   fi
 
   # Check for error status
@@ -240,6 +238,8 @@ LOG_VERBOSE=""
 PARALLEL=""
 TARGETS=""
 VERSION=""
+SRC_DIR=""
+BUILD_DIR=""
 
 # Process command line arguments
 for i in "$@"
@@ -316,6 +316,10 @@ case $i in
     ;;
   --version=*)
     VERSION="${i#*=}"
+    shift
+    ;;
+  --src-dir=*)
+    SRC_DIR="${i#*=}"
     shift
     ;;
   --build-dir=*)

@@ -97,8 +97,7 @@ ExternalProject_Add(openssl
     SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
     DOWNLOAD_COMMAND ""
     CONFIGURE_COMMAND  ""
-    #PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${CMAKE_CURRENT_BINARY_DIR}/openssl
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build-libssl.sh --version=1.1.1g --targets=ios64-cross-arm64 --build-dir=${_openssl_BUILD_ROOT}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build-libssl.sh --version=1.1.1g --targets=ios64-cross-arm64 --src-dir=${THIRDPARTY_DIR}/openssl --build-dir=${_openssl_BUILD_ROOT}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
