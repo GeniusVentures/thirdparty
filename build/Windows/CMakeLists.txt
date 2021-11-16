@@ -22,10 +22,6 @@ endif()
 # Enable c++ exceptions
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
 
-# Enable cross-platform preprocessor syntax
-# https://docs.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview?view=msvc-160
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:preprocessor")
-
 # --------------------------------------------------------
 # build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
