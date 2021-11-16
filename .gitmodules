@@ -124,3 +124,6 @@
 [submodule "libsecp256k1"]
 	path = libsecp256k1
 	url = https://github.com/soramitsu/soramitsu-libsecp256k1.git
+[submodule "xxhash"]
+	path = xxhash
+	url = https://github.com/hunter-packages/xxHash.git

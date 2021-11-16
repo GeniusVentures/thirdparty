@@ -47,6 +47,8 @@ endif()
 set(_PROTOBUF_PROTOC_EXEC "${PROTOC_EXECUTABLE}")
 print("PROTOBUF_PROTOC_EXECUTABLE: ${_PROTOBUF_PROTOC_EXEC}")
 
+# --------------------------------------------------------
+## Builds grpc
 ExternalProject_Add(grpc
   PREFIX grpc
   BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/build"
@@ -177,6 +179,8 @@ set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/incl
 
 #set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/include")
 
+# --------------------------------------------------------
+## Builds yaml-cpp
 ExternalProject_Add(yaml-cpp
   PREFIX yaml-cpp
   SOURCE_DIR "${THIRDPARTY_DIR}/yaml-cpp"
@@ -192,6 +196,8 @@ set(_FINDPACKAGE_YAMLCPP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/share/
 set(_FINDPACKAGE_YAMLCPP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/lib")
 set(_FINDPACKAGE_YAMLCPP_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/include")
 
+# --------------------------------------------------------
+## Builds cares
 ExternalProject_Add(cares
   PREFIX cares
   SOURCE_DIR "${THIRDPARTY_DIR}/c-ares"
@@ -206,6 +212,8 @@ set(_FINDPACKAGE_CARES_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/cares/lib/cmake/c
 set(_FINDPACKAGE_CARES_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/cares/lib")
 set(_FINDPACKAGE_CARES_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/cares/include")
 
+# --------------------------------------------------------
+## Builds soralog
 ExternalProject_Add(soralog
   PREFIX soralog
   SOURCE_DIR "${THIRDPARTY_DIR}/soralog"
@@ -225,6 +233,8 @@ set(_FINDPACKAGE_SORALOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/soralog/lib/cma
 set(_FINDPACKAGE_SORALOG_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/soralog/lib")
 set(_FINDPACKAGE_SORALOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/soralog/include")
 
+# --------------------------------------------------------
+## Builds sqlite3
 ExternalProject_Add(sqlite3
   PREFIX sqlite3
   SOURCE_DIR "${THIRDPARTY_DIR}/sqlite3"
@@ -237,6 +247,8 @@ set(_FINDPACKAGE_SQLITE3_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/lib/cma
 set(_FINDPACKAGE_SQLITE3_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/lib")
 set(_FINDPACKAGE_SQLITE3_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/include")
 
+# --------------------------------------------------------
+## Builds SQLiteModernCpp
 ExternalProject_Add(SQLiteModernCpp
   PREFIX SQLiteModernCpp
   SOURCE_DIR "${THIRDPARTY_DIR}/libp2p-sqlite-modern-cpp"
@@ -447,12 +459,11 @@ ExternalProject_Add(libsecp256k1
 
 # --------------------------------------------------------
 # Builds xxhash
-ExternalProject_Add( xxhash
+ExternalProject_Add(xxhash
     PREFIX xxhash
-    URL https://github.com/hunter-packages/xxHash/archive/0.6.5-p0.tar.gz
+    SOURCE_DIR "${THIRDPARTY_DIR}/xxhash"
     CMAKE_CACHE_ARGS
           -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/xxhash
-          -DSECP256K1_BUILD_TEST:BOOL=OFF
           ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
