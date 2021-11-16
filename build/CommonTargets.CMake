@@ -438,14 +438,11 @@ ExternalProject_Add(binaryen
 # Builds libsecp256k1
 ExternalProject_Add(libsecp256k1
     PREFIX libsecp256k1
-    URL https://github.com/soramitsu/soramitsu-libsecp256k1/archive/c7630e1bac638c0f16ee66d4dce7b5c49eecbaa5.zip
-    URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
+    SOURCE_DIR "${THIRDPARTY_DIR}/libsecp256k1"
     CMAKE_CACHE_ARGS
       -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/libsecp256k1
       -DSECP256K1_BUILD_TEST:BOOL=OFF
       ${_CMAKE_COMMON_BUILD_PARAMS}
-    PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-      "${PROJECT_BUILD_FOLDER}/cmake.in/libsecp256k1-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
 )
 
 # --------------------------------------------------------
