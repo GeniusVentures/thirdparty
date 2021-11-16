@@ -80,11 +80,11 @@ ExternalProject_Add(openssl
     PATCH_COMMAND ""
     BUILD_COMMAND make build_libs
     #BUILD_IN_SOURCE  TRUE
-    INSTALL_COMMAND make install_runtime_libs
+    INSTALL_COMMAND make install_dev
     UPDATE_COMMAND ""
 )
 set(OPENSSL_USE_STATIC_LIBS  ON)
-set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/openssl/include)
+set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 
 set(_OPENSSL_CACHE_ARGS
 	-DOPENSSL_USE_STATIC_LIBS:BOOL=ON

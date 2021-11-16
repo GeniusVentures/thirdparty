@@ -89,7 +89,7 @@ ExternalProject_Add(openssl
 	CONFIGURE_COMMAND perl ${THIRDPARTY_DIR}/openssl/Configure ${OPENSSL_CONFIG_MODE} enable-capieng no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
 	BUILD_COMMAND nmake build_libs
 	BUILD_IN_SOURCE  false
-	INSTALL_COMMAND nmake install_runtime_libs
+	INSTALL_COMMAND nmake install_dev
 	)
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     ExternalProject_Add_Step(openssl AddDebugSuffix
@@ -103,7 +103,7 @@ set(_OPENSSL_CACHE_ARGS
 		-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
         -DOPENSSL_MSVC_STATIC_RT:BOOL=ON
 		-DOPENSSL_ROOT_DIR:STRING=${_openssl_BUILD_ROOT}
-		-DOPENSSL_INCLUDE_DIR:PATH=${THIRDPARTY_DIR}/openssl/include
+		-DOPENSSL_INCLUDE_DIR:PATH=${_openssl_BUILD_ROOT}/include
 		-DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
 	)
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)

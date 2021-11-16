@@ -66,7 +66,7 @@ ExternalProject_Add(openssl
     CONFIGURE_COMMAND  <SOURCE_DIR>/config -fPIC --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
     BUILD_COMMAND make build_libs
     BUILD_IN_SOURCE  FALSE
-    INSTALL_COMMAND make install_runtime_libs
+    INSTALL_COMMAND make install_dev
 )
 set(_OPENSSL_CACHE_ARGS
         -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
@@ -74,7 +74,7 @@ set(_OPENSSL_CACHE_ARGS
         -DOPENSSL_INCLUDE_DIR:PATH=${_openssl_BUILD_ROOT}/include
         -DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
     )
-set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/openssl/include)
+set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 
 # --------------------------------------------------------
 # Set ed25519 OS specific configurations

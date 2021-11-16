@@ -130,11 +130,11 @@ ExternalProject_Add(openssl
 	BUILD_COMMAND  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --abi=${_abi} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${_openssl_BUILD_ROOT} --env_path=$ENV{PATH} --env_android_ndk=$ENV{ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
 	BUILD_IN_SOURCE  FALSE
 	UPDATE_COMMAND ""
-	INSTALL_COMMAND make install_runtime_libs
+	INSTALL_COMMAND make install_dev
 )
 
 print("openssl ${_openssl_BUILD_ROOT}")
-set(_OPENSSL_INCLUDE_DIR ${THIRDPARTY_DIR}/openssl/include)
+set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 set(_OPENSSL_CACHE_ARGS
 	  -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
 	  -DOPENSSL_ROOT_DIR:PATH=${_openssl_BUILD_ROOT}

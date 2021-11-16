@@ -161,9 +161,9 @@ run_make()
 {
   echo "  Make (using ${BUILD_THREADS} thread(s))..."
   if [ "${LOG_VERBOSE}" == "verbose" ]; then
-    make -j "${BUILD_THREADS}" | tee -a "${LOG}"
+    make -j "${BUILD_THREADS}" install_dev | tee -a "${LOG}"
   else
-    (make -j "${BUILD_THREADS}" >> "${LOG}" 2>&1) & spinner
+    (make -j "${BUILD_THREADS}" install_dev >> "${LOG}" 2>&1) & spinner
   fi
 
   # Check for error status
@@ -507,21 +507,21 @@ if [ "${CLEANUP}" == "true" ]; then
   if [ -d "${CURRENTPATH}/bin" ]; then
     rm -r "${CURRENTPATH}/bin"
   fi
-  if [ -d "${CURRENTPATH}/include/openssl" ]; then
-    rm -r "${CURRENTPATH}/include/openssl"
-  fi
+#  if [ -d "${CURRENTPATH}/include/openssl" ]; then
+#    rm -r "${CURRENTPATH}/include/openssl"
+#  fi
   if [ -d "${CURRENTPATH}/lib" ]; then
     rm -r "${CURRENTPATH}/lib"
   fi
-  if [ -d "${CURRENTPATH}/src" ]; then
-    rm -r "${CURRENTPATH}/src"
-  fi
+#  if [ -d "${CURRENTPATH}/src" ]; then
+#    rm -r "${CURRENTPATH}/src"
+# fi
 fi
 
 # (Re-)create target directories
 mkdir -p "${CURRENTPATH}/bin"
 mkdir -p "${CURRENTPATH}/lib"
-mkdir -p "${CURRENTPATH}/src"
+#mkdir -p "${CURRENTPATH}/src"
 
 # Init vars for library references
 INCLUDE_DIR=""
