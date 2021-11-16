@@ -78,9 +78,9 @@ ExternalProject_Add(openssl
 	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
 	CONFIGURE_COMMAND  <SOURCE_DIR>/config --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
     PATCH_COMMAND ""
-    BUILD_COMMAND make
+    BUILD_COMMAND make build_libs
     #BUILD_IN_SOURCE  TRUE
-    INSTALL_COMMAND make install_dev
+    INSTALL_COMMAND make install_runtime_libs
     UPDATE_COMMAND ""
 )
 set(OPENSSL_USE_STATIC_LIBS  ON)

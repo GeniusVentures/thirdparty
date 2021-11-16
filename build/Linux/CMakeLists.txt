@@ -64,9 +64,9 @@ ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR  "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND  <SOURCE_DIR>/config -fPIC --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
-    BUILD_COMMAND make
+    BUILD_COMMAND make build_libs
     BUILD_IN_SOURCE  FALSE
-    INSTALL_COMMAND make install_dev
+    INSTALL_COMMAND make install_runtime_libs
 )
 set(_OPENSSL_CACHE_ARGS
         -DOPENSSL_USE_STATIC_LIBS:BOOL=ON

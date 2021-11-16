@@ -146,10 +146,12 @@ run_configure()
 {
   echo "  Configure..."
   set +e
+  CONFIGDIR=`dirname $0`/../../../openssl
+  REALCONFIGDIR=`realpath ${CONFIGDIR}`
   if [ "${LOG_VERBOSE}" == "verbose" ]; then
-    ../../../../../openssl/Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine | tee "${LOG}"
+    ${REALCONFIGDIR}/Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine | tee "${LOG}"
   else
-    (../../../../../openssl/Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine > "${LOG}" 2>&1) & spinner
+    (${REALCONFIGDIR}/Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine > "${LOG}" 2>&1) & spinner
   fi
 
   # Check for error status

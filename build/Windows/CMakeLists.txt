@@ -85,14 +85,11 @@ endif()
 
 ExternalProject_Add(openssl
 	PREFIX openssl
-	#GIT_REPOSITORY "https://github.com/openssl/openssl.git"
-	#GIT_TAG "OpenSSL_1_1_1g"
-	#GIT_SUBMODULES_RECURSE TRUE
 	SOURCE_DIR  "${THIRDPARTY_DIR}/openssl"
-	CONFIGURE_COMMAND perl ../../../../../openssl/Configure ${OPENSSL_CONFIG_MODE} enable-capieng no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
-	BUILD_COMMAND nmake build_lib
+	CONFIGURE_COMMAND perl ${THIRDPARTY_DIR}/openssl/Configure ${OPENSSL_CONFIG_MODE} enable-capieng no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+	BUILD_COMMAND nmake build_libs
 	BUILD_IN_SOURCE  false
-	INSTALL_COMMAND nmake install_dev
+	INSTALL_COMMAND nmake install_runtime_libs
 	)
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     ExternalProject_Add_Step(openssl AddDebugSuffix
