@@ -366,25 +366,31 @@ ExternalProject_Add(ipfs-pubsub
 
 # --------------------------------------------------------
 # builds ipfs-bitswap-cpp
-#ExternalProject_Add(ipfs-bitswap-cpp
-#  PREFIX ipfs-bitswap-cpp
-#  SOURCE_DIR "${THIRDPARTY_DIR}/ipfs-bitswap-cpp"
-#  CMAKE_CACHE_ARGS
-#        -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
-#        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp
-#        -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
-#        -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
-#        -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
-#        -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
-#        -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
-#        -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
-#        -DTESTING:BOOL=${TESTING}
-#        ${_CMAKE_COMMON_BUILD_PARAMS}
-#        ${_BOOST_CACHE_ARGS}
-#        ${_OPENSSL_CACHE_ARGS}
-#        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -std=c++17
-#  DEPENDS GTest spdlog libp2p Boost
-#)
+ExternalProject_Add(ipfs-bitswap-cpp
+  PREFIX ipfs-bitswap-cpp
+  SOURCE_DIR "${THIRDPARTY_DIR}/ipfs-bitswap-cpp"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp
+        -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
+        -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
+        -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
+        -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
+        -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+        -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
+        -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
+        -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
+        -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
+        -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
+        -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
+        -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
+        -DTESTING:BOOL=${TESTING}
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+        ${_BOOST_CACHE_ARGS}
+        ${_OPENSSL_CACHE_ARGS}
+        -DCMAKE_CXX_STANDARD:STRING=17
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+  DEPENDS Microsoft.GSL spdlog libp2p Boost
+)
 
 # --------------------------------------------------------
 # Builds ed25519
