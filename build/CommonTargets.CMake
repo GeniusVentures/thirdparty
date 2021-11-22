@@ -439,20 +439,6 @@ ExternalProject_Add(rapidjson
 )
 
 # --------------------------------------------------------
-# Builds binaryen
-ExternalProject_Add(binaryen
-  PREFIX binaryen
-  SOURCE_DIR "${THIRDPARTY_DIR}/binaryen"
-  CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/binaryen
-        -DBUILD_STATIC_LIB:BOOL=ON
-        -DBUILD_TOOLS:BOOL=OFF
-        -DENABLE_WERROR:BOOL=OFF
-        ${_CMAKE_COMMON_BUILD_PARAMS}
-)
-
-
-# --------------------------------------------------------
 # Builds libsecp256k1
 ExternalProject_Add(libsecp256k1
     PREFIX libsecp256k1

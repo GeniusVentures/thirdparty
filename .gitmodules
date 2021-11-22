@@ -71,9 +71,6 @@
 [submodule "jsonrpc-lean"]
     path = jsonrpc-lean
     url = https://github.com/uskr/jsonrpc-lean
-[submodule "binaryen"]
-    path = binaryen
-    url = https://github.com/GeniusVentures/binaryen.git
 [submodule "gnostic"]
     path = gnostic
     url = https://github.com/googleapis/gnostic
