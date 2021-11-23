@@ -39,10 +39,8 @@ endif()
 
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add( Boost
-	PREFIX  "${THIRDPARTY_DIR}/boost"
-	GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
-	GIT_TAG           "boost-1.72.0"
-	#GIT_SUBMODULES_RECURSE  TRUE
+	PREFIX  boost
+  SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
 	CONFIGURE_COMMAND  ""
 	PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
 	BUILD_COMMAND <SOURCE_DIR>/b2 headers
@@ -76,15 +74,13 @@ set(_BOOST_CACHE_ARGS
 # build OpenSSL
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add(openssl
-    PREFIX "${THIRDPARTY_DIR}/openssl"
-    GIT_REPOSITORY "https://github.com/openssl/openssl.git"
-    GIT_TAG "OpenSSL_1_1_1g"
-    #GIT_SUBMODULES_RECURSE  TRUE
-    CONFIGURE_COMMAND  <SOURCE_DIR>/config --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+    PREFIX "${THIRDPARTY_DIR}/openssl/"
+	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
+	CONFIGURE_COMMAND  <SOURCE_DIR>/config --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
     PATCH_COMMAND ""
-    BUILD_COMMAND make
-    BUILD_IN_SOURCE  TRUE
-    INSTALL_COMMAND make install
+    BUILD_COMMAND make build_libs
+    #BUILD_IN_SOURCE  TRUE
+    INSTALL_COMMAND make install_dev
     UPDATE_COMMAND ""
 )
 set(OPENSSL_USE_STATIC_LIBS  ON)

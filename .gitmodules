@@ -1,3 +1,6 @@
+[submodule "boost"]
+	path = boost
+	url = https://github.com/boostorg/boost.git
 [submodule "libp2p"]
     path = libp2p
     url = ../libp2p.git
@@ -68,9 +71,6 @@
 [submodule "jsonrpc-lean"]
     path = jsonrpc-lean
     url = https://github.com/uskr/jsonrpc-lean
-[submodule "binaryen"]
-    path = binaryen
-    url = https://github.com/WebAssembly/binaryen
 [submodule "gnostic"]
     path = gnostic
     url = https://github.com/googleapis/gnostic
@@ -87,13 +87,40 @@
     url = https://github.com/trustwallet/wallet-core.git
 [submodule "rocksdb"]
     path = rocksdb
-    url = https://github.com/facebook/rocksdb.git
-    branch = v6.17.3
+    url = ../rocksdb.git
 [submodule "sr25519-donna"]
     path = sr25519-donna
-    url = ../sr25519-donna
+    url = ../sr25519-donna.git
     branch = develop
+[submodule "fmt"]
+    path = fmt
+    url = https://github.com/fmtlib/fmt.git
+    branch = 7.1.3
+[submodule "yaml-cpp"]
+    path = yaml-cpp
+    url = https://github.com/jbeder/yaml-cpp.git
+    branch = yaml-cpp-0.7.0
+[submodule "c-ares"]
+    path = c-ares
+    url = https://github.com/c-ares/c-ares.git
+    branch = cares-1_17_2
+[submodule "soralog"]
+    path = soralog
+    url = ../soralog
+    branch = c17
+[submodule "libp2p-sqlite-modern-cpp"]
+    path = libp2p-sqlite-modern-cpp
+    url = https://github.com/soramitsu/libp2p-sqlite-modern-cpp.git
 [submodule "ipfs-bitswap-cpp"]
     path = ipfs-bitswap-cpp
-    url = ../ipfs-bitswap-cpp
+    url = ../ipfs-bitswap-cpp.git
     branch = develop
+[submodule "openssl"]
+	path = openssl
+	url = https://github.com/openssl/openssl.git
+[submodule "libsecp256k1"]
+	path = libsecp256k1
+	url = https://github.com/GeniusVentures/soramitsu-libsecp256k1.git
+[submodule "xxhash"]
+	path = xxhash
+	url = https://github.com/hunter-packages/xxHash.git

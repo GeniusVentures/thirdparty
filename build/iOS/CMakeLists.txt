@@ -16,7 +16,7 @@ if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
-set(IOS_DEPLOYMENT_TARGET 12.0)
+set(IOS_DEPLOYMENT_TARGET 13.0)
 
 project(iOS_SHARED_THIRD_PARTY)
 
@@ -29,7 +29,6 @@ include(../CommonCompilerOptions.CMake)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
 set(CMAKE_SYSTEM_NAME "iOS")
 set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
-    -DBoost_DIR:PATH=${Boost_DIR}
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
@@ -38,7 +37,7 @@ set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
     -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
     -DIOS_PLATFORM:STRING=${IOS_PLATFORM}
     -DIOS_ARCH:STRING=${IOS_ARCH}
-    -DENABLE_ARC:STRING="0"
+    -DENABLE_ARC:STRING=0
     -DENABLE_BITCODE:STRING=NO
     -DENABLE_VISIBILITY:STRING=${ENABLED_VISIBILITY}
     -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
@@ -57,13 +56,13 @@ else()
     set(address_model 64)
 endif()
 set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/iOS/${iOS_ABI}")
-ExternalProject_Add( Boost
-    SOURCE_DIR  "${CMAKE_CURRENT_BINARY_DIR}/boost"
-    PREFIX  "${CMAKE_CURRENT_BINARY_DIR}/boost"
+ExternalProject_Add(Boost
+    PREFIX  boost
+    SOURCE_DIR  "${THIRDPARTY_DIR}/boost"
     DOWNLOAD_COMMAND ""
     CONFIGURE_COMMAND  ""
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build
-    BUILD_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build/build.sh -ios --boost-version 1.72.0 --build-dir ${BOOST_ROOT}
+    BUILD_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build/build.sh -ios --boost-version 1.72.0 --src-dir ${THIRDPARTY_DIR}/boost --build-dir ${BOOST_ROOT}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
@@ -76,13 +75,13 @@ set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-1.72.0")
 set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-1.72.0")
 set(_Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
 set(_BOOST_CACHE_ARGS
+    -DBoost_DIR:PATH=${BOOST_ROOT}/lib/cmake/Boost-1.72.0
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
     -Dboost_headers_DIR:PATH=${boost_headers_DIR}
     -Dboost_random_DIR:PATH=${boost_random_DIR}
     -Dboost_system_DIR:PATH=${boost_system_DIR}
     -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
     -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
-    -DBoost_DIR:PATH=${BOOST_ROOT}
     -DBoost_USE_MULTITHREADED:BOOL=ON
     -DBoost_USE_STATIC_RUNTIME:BOOL=OFF
     -DBoost_USE_STATIC_LIBS:BOOL=ON
@@ -92,19 +91,18 @@ set(_BOOST_CACHE_ARGS
 
 # --------------------------------------------------------
 # build OpenSSL
-print("${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${CMAKE_CURRENT_BINARY_DIR}/openssl")
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}/${iOS_ABI}")
 ExternalProject_Add(openssl
-    SOURCE_DIR  "${CMAKE_CURRENT_BINARY_DIR}/openssl"
-    PREFIX "${THIRDPARTY_DIR}/openssl"
+    PREFIX openssl
+    SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
     DOWNLOAD_COMMAND ""
     CONFIGURE_COMMAND  ""
-    PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${CMAKE_CURRENT_BINARY_DIR}/openssl
-    BUILD_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/openssl/build-libssl.sh --version=1.1.1g --targets=ios64-cross-arm64 --build-dir=${_openssl_BUILD_ROOT}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build-libssl.sh --version=1.1.1g --targets=ios64-cross-arm64 --src-dir=${THIRDPARTY_DIR}/openssl --build-dir=${_openssl_BUILD_ROOT}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
 
+print("openssl ${_openssl_BUILD_ROOT}")
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
@@ -188,7 +186,7 @@ set(tsl_hat_trie_patch
 
 # --------------------------------------------------------
 # Set config for libp2p
-set(_libp2p_BUILD_EXAMPLES ON)
+set(_libp2p_BUILD_EXAMPLES OFF)
 
 # --------------------------------------------------------
 # Set o iOS specific configurations

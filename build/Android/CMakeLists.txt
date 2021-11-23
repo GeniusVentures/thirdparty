@@ -1,11 +1,6 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-# if on Linux system, cross compile the Android executables
-if (NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
-    message(FATAL_ERROR "${CMAKE_HOST_SYSTEM_NAME} host system name does not match Linux for Android cross compile - Please select the correct folder for configuring project")
-endif()
-
 project(ANDROID_SHARED_THIRD_PARTY)
 
 # --------------------------------------------------------
@@ -62,14 +57,10 @@ set(BOOST_VERSION2 1_72_0)
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/Android/${ANDROID_ABI}")
 ExternalProject_Add( Boost
 	PREFIX boost
-	GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
-	GIT_TAG           "boost-1.72.0"
-	#GIT_SUBMODULES_RECURSE  TRUE
-	GIT_SHALLOW TRUE
-	SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"
+	SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
 	CONFIGURE_COMMAND  ""
-	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${THIRDPARTY_DIR}/boost/src
-	BUILD_COMMAND  <SOURCE_DIR>/build.sh "${_BOOST_ROOT}" ${ANDROID_ABI} "${THIRDPARTY_DIR}/boost/src" ${CMAKE_BUILD_TYPE} $ENV{ANDROID_NDK}
+	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${THIRDPARTY_DIR}/boost
+	BUILD_COMMAND  <SOURCE_DIR>/build.sh "${_BOOST_ROOT}" ${ANDROID_ABI} "${THIRDPARTY_DIR}/boost" ${CMAKE_BUILD_TYPE} $ENV{ANDROID_NDK}
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )
@@ -105,7 +96,7 @@ set(_BOOST_CACHE_ARGS
    -DBoost_NO_SYSTEM_PATHS:BOOL=ON
    -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
    -DBOOST_LIBRARYDIR:PATH=${BOOST_LIBRARYDIR}
-   -DBOOST_MIN_VERSION:STRING="1.70.0"
+   -DBOOST_MIN_VERSION:STRING=1.70.0
    -DBoost_DIR:PATH=${Boost_DIR}
    -Dboost_headers_DIR:PATH=${boost_headers_DIR}
    -Dboost_random_DIR:PATH=${boost_random_DIR}
@@ -133,16 +124,13 @@ message("android abi is ${_abi}")
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Android/${ANDROID_ABI}")
 ExternalProject_Add(openssl
 	PREFIX openssl
-	GIT_REPOSITORY "https://github.com/openssl/openssl.git"
-	GIT_TAG "OpenSSL_1_1_1g"
-	#GIT_SUBMODULES_RECURSE  TRUE
 	GIT_SHALLOW TRUE
-	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl/src"
+	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
 	CONFIGURE_COMMAND  ""
-  PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build ${THIRDPARTY_DIR}/openssl/src
-	BUILD_COMMAND  <SOURCE_DIR>/build.sh --abi=${_abi} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${_openssl_BUILD_ROOT} --env_path=$ENV{PATH} --env_android_ndk=$ENV{ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
-	BUILD_IN_SOURCE  TRUE
+	BUILD_COMMAND  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --abi=${_abi} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${_openssl_BUILD_ROOT} --env_path=$ENV{PATH} --env_android_ndk=$ENV{ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
+	BUILD_IN_SOURCE  FALSE
 	UPDATE_COMMAND ""
+	INSTALL_COMMAND make install_dev
 )
 
 print("openssl ${_openssl_BUILD_ROOT}")
@@ -176,9 +164,6 @@ set(_grpc_EXTRA_PARAM
 set(_rocksdb_EXTRA_PARAM
     -DROCKSDB_LITE:BOOL=ON
 )
-set(_rocksdb_patch
-	 PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/rocksdb-patch/io_posix.cc" <SOURCE_DIR>/env/io_posix.cc
-)
 
 
 # --------------------------------------------------------
@@ -203,12 +188,6 @@ set(_PROTOBUF_TARGET protobuf)
 set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
-
-# --------------------------------------------------------
-# Set config for patching binaryen
-set(_binaryen_patch
-	 PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/binaryen-patch/alloc.h" <SOURCE_DIR>/alloc.h
-)
 
 # --------------------------------------------------------
 # Set config for libp2p

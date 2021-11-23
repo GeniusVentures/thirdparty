@@ -47,6 +47,8 @@ endif()
 set(_PROTOBUF_PROTOC_EXEC "${PROTOC_EXECUTABLE}")
 print("PROTOBUF_PROTOC_EXECUTABLE: ${_PROTOBUF_PROTOC_EXEC}")
 
+# --------------------------------------------------------
+## Builds grpc
 ExternalProject_Add(grpc
   PREFIX grpc
   BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/build"
@@ -87,7 +89,6 @@ ExternalProject_Add(rocksdb
         -DFAIL_ON_WARNINGS:BOOL=OFF
         ${_rocksdb_EXTRA_PARAM}
         ${_CMAKE_COMMON_BUILD_PARAMS}
-  ${_rocksdb_patch}
 )
 set(_FINDPACKAGE_ROCKSDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/cmake/rocksdb")
 set(_FINDPACKAGE_ROCKSDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/include")
@@ -105,6 +106,22 @@ ExternalProject_Add(Microsoft.GSL
 set(_FINDPACKAGE_GSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/GSL/include")
 
 # --------------------------------------------------------
+ExternalProject_Add(fmt
+  PREFIX fmt
+  SOURCE_DIR "${THIRDPARTY_DIR}/fmt"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/fmt
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+        -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
+        -DBUILD_SHARED_LIBS:BOOL=OFF
+        -DFMT_TEST:BOOL=OFF
+)
+
+set(_FINDPACKAGE_FMT_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/lib/cmake/fmt")
+set(_FINDPACKAGE_FMT_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/lib")
+set(_FINDPACKAGE_FMT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/include")
+
+# --------------------------------------------------------
 # Builds spdlog v1.4.2
 ExternalProject_Add(spdlog
   PREFIX spdlog
@@ -112,7 +129,10 @@ ExternalProject_Add(spdlog
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/spdlog
         -DSPDLOG_BUILD_EXAMPLE:BOOL=OFF
+        -DSPDLOG_FMT_EXTERNAL:BOOL=ON
+        -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
         ${_CMAKE_COMMON_BUILD_PARAMS}
+  DEPENDS fmt
 )
 set(_FINDPACKAGE_SPDLOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/include")
 set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
@@ -160,6 +180,91 @@ set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/incl
 #set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/include")
 
 # --------------------------------------------------------
+## Builds yaml-cpp
+ExternalProject_Add(yaml-cpp
+  PREFIX yaml-cpp
+  SOURCE_DIR "${THIRDPARTY_DIR}/yaml-cpp"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp
+        -DBUILD_SHARED_LIBS:BOOL=OFF
+        -DYAML_BUILD_SHARED_LIBS:BOOL=OFF
+        -DYAML_MSVC_SHARED_RT:BOOL=OFF
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+)
+
+set(_FINDPACKAGE_YAMLCPP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/share/cmake/yaml-cpp")
+set(_FINDPACKAGE_YAMLCPP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/lib")
+set(_FINDPACKAGE_YAMLCPP_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/include")
+
+# --------------------------------------------------------
+## Builds cares
+ExternalProject_Add(cares
+  PREFIX cares
+  SOURCE_DIR "${THIRDPARTY_DIR}/c-ares"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/cares
+        -DCARES_STATIC:BOOL=ON
+        -DCARES_SHARED:BOOL=OFF
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+)
+
+set(_FINDPACKAGE_CARES_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/cares/lib/cmake/c-ares")
+set(_FINDPACKAGE_CARES_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/cares/lib")
+set(_FINDPACKAGE_CARES_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/cares/include")
+
+# --------------------------------------------------------
+## Builds soralog
+ExternalProject_Add(soralog
+  PREFIX soralog
+  SOURCE_DIR "${THIRDPARTY_DIR}/soralog"
+  CMAKE_CACHE_ARGS
+        -DHUNTER_ENABLED:BOOL=OFF
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/soralog
+        -DEXAMPLES:BOOL=OFF
+        -DTESTING:BOOL=OFF
+        -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
+        -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+        -DCMAKE_CXX_STANDARD:STRING=17
+  DEPENDS fmt yaml-cpp
+)
+
+set(_FINDPACKAGE_SORALOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/soralog/lib/cmake/soralog")
+set(_FINDPACKAGE_SORALOG_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/soralog/lib")
+set(_FINDPACKAGE_SORALOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/soralog/include")
+
+# --------------------------------------------------------
+## Builds sqlite3
+ExternalProject_Add(sqlite3
+  PREFIX sqlite3
+  SOURCE_DIR "${THIRDPARTY_DIR}/sqlite3"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/sqlite3
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+)
+
+set(_FINDPACKAGE_SQLITE3_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/lib/cmake/sqlite3")
+set(_FINDPACKAGE_SQLITE3_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/lib")
+set(_FINDPACKAGE_SQLITE3_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/include")
+
+# --------------------------------------------------------
+## Builds SQLiteModernCpp
+ExternalProject_Add(SQLiteModernCpp
+  PREFIX SQLiteModernCpp
+  SOURCE_DIR "${THIRDPARTY_DIR}/libp2p-sqlite-modern-cpp"
+  CMAKE_CACHE_ARGS
+        -DHUNTER_ENABLED:BOOL=OFF
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/SQLiteModernCpp
+        -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+  DEPENDS sqlite3
+)
+
+set(_FINDPACKAGE_SQLITECPP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/SQLiteModernCpp/lib/cmake/SQLiteModernCpp")
+set(_FINDPACKAGE_SQLITECPP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/SQLiteModernCpp/lib")
+set(_FINDPACKAGE_SQLITECPP_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/SQLiteModernCpp/include")
+
+# --------------------------------------------------------
 # Builds libp2p
 ExternalProject_Add(libp2p
   PREFIX libp2p
@@ -172,6 +277,7 @@ ExternalProject_Add(libp2p
         -DEXPOSE_MOCKS:BOOL=ON
         -DHUNTER_ENABLED:BOOL=OFF
         -DBUILD_EXAMPLES:BOOL=${_libp2p_BUILD_EXAMPLES}
+        -DEXAMPLES:BOOL=${_libp2p_BUILD_EXAMPLES}
         -DCMAKE_FIND_USE_PACKAGE_ROOT_PATH:BOOL=ON
         -DBoost_NO_SYSTEM_PATHS:BOOL=ON
         -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
@@ -181,18 +287,24 @@ ExternalProject_Add(libp2p
         -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
         -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
         -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
+        -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
+        -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
+        -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
+        -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
+        -DSQLiteModernCpp_DIR:PATH=${_FINDPACKAGE_SQLITECPP_CONFIG_DIR}
+        -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
         ${_BOOST_CACHE_ARGS}
         ${_OPENSSL_CACHE_ARGS}
         ${_CMAKE_COMMON_BUILD_PARAMS}
-        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_CARES_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_FMT_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_YAMLCPP_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SORALOG_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SQLITECPP_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SQLITE3_INCLUDE_DIR}
         -DFORCE_MULTILE:BOOL=${_FORCE_MULTILE}
         -DMULTIPLE_OPTION:STRING=${MULTIPLE_OPTION}
         -DCMAKE_CXX_STANDARD:STRING=17
-  DEPENDS GTest grpc ${_PROTOBUF_TARGET} spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost openssl
+  DEPENDS GTest grpc ${_PROTOBUF_TARGET} spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost openssl cares fmt yaml-cpp soralog SQLiteModernCpp
 )
 set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p")
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
-set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR    "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include")
+set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include")
 
 # --------------------------------------------------------
 # builds ipfs-lite-cpp
@@ -210,11 +322,16 @@ ExternalProject_Add(ipfs-lite-cpp
         -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
         -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
         -DRocksDB_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}
+        -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
+        -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
+        -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
+        -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
         -DTESTING:BOOL=${TESTING}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_BOOST_CACHE_ARGS}
         ${_OPENSSL_CACHE_ARGS}
-        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_ROCKSDB_INCLUDE_DIR}\ -std=c++17
+        -DCMAKE_CXX_STANDARD:STRING=17
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_ROCKSDB_INCLUDE_DIR}
   DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p grpc ${_PROTOBUF_TARGET} rocksdb Boost.DI
 )
 
@@ -234,35 +351,46 @@ ExternalProject_Add(ipfs-pubsub
         -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
         -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
         -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
+        -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
+        -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
+        -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
+        -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
         -DTESTING:BOOL=${TESTING}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_BOOST_CACHE_ARGS}
         ${_OPENSSL_CACHE_ARGS}
-        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ -std=c++17
+        -DCMAKE_CXX_STANDARD:STRING=17
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}
   DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p  Boost.DI
 )
 
 # --------------------------------------------------------
 # builds ipfs-bitswap-cpp
-#ExternalProject_Add(ipfs-bitswap-cpp
-#  PREFIX ipfs-bitswap-cpp
-#  SOURCE_DIR "${THIRDPARTY_DIR}/ipfs-bitswap-cpp"
-#  CMAKE_CACHE_ARGS
-#        -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
-#        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp
-#        -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
-#        -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
-#        -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
-#        -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
-#        -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
-#        -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
-#        -DTESTING:BOOL=${TESTING}
-#        ${_CMAKE_COMMON_BUILD_PARAMS}
-#        ${_BOOST_CACHE_ARGS}
-#        ${_OPENSSL_CACHE_ARGS}
-#        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -std=c++17
-#  DEPENDS GTest spdlog libp2p Boost
-#)
+ExternalProject_Add(ipfs-bitswap-cpp
+  PREFIX ipfs-bitswap-cpp
+  SOURCE_DIR "${THIRDPARTY_DIR}/ipfs-bitswap-cpp"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp
+        -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
+        -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
+        -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
+        -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
+        -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+        -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
+        -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
+        -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
+        -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
+        -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
+        -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
+        -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
+        -DTESTING:BOOL=${TESTING}
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+        ${_BOOST_CACHE_ARGS}
+        ${_OPENSSL_CACHE_ARGS}
+        -DCMAKE_CXX_STANDARD:STRING=17
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+  DEPENDS Microsoft.GSL spdlog libp2p Boost
+)
 
 # --------------------------------------------------------
 # Builds ed25519
@@ -311,42 +439,23 @@ ExternalProject_Add(rapidjson
 )
 
 # --------------------------------------------------------
-# Builds binaryen
-ExternalProject_Add(binaryen
-  PREFIX binaryen
-  URL https://github.com/Warchant/binaryen/archive/1.38.28-p0.zip
-  CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/binaryen
-        -DBUILD_STATIC_LIB:BOOL=ON
-        -DBUILD_TOOLS:BOOL=OFF
-        -DENABLE_WERROR:BOOL=OFF
-        ${_CMAKE_COMMON_BUILD_PARAMS}
-        ${_binaryen_patch}
-)
-
-
-# --------------------------------------------------------
 # Builds libsecp256k1
 ExternalProject_Add(libsecp256k1
     PREFIX libsecp256k1
-    URL https://github.com/soramitsu/soramitsu-libsecp256k1/archive/c7630e1bac638c0f16ee66d4dce7b5c49eecbaa5.zip
-    URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
+    SOURCE_DIR "${THIRDPARTY_DIR}/libsecp256k1"
     CMAKE_CACHE_ARGS
       -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/libsecp256k1
       -DSECP256K1_BUILD_TEST:BOOL=OFF
       ${_CMAKE_COMMON_BUILD_PARAMS}
-    PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-      "${PROJECT_BUILD_FOLDER}/cmake.in/libsecp256k1-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
 )
 
 # --------------------------------------------------------
 # Builds xxhash
-ExternalProject_Add( xxhash
+ExternalProject_Add(xxhash
     PREFIX xxhash
-    URL https://github.com/hunter-packages/xxHash/archive/0.6.5-p0.tar.gz
+    SOURCE_DIR "${THIRDPARTY_DIR}/xxhash"
     CMAKE_CACHE_ARGS
           -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/xxhash
-          -DSECP256K1_BUILD_TEST:BOOL=OFF
           ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 

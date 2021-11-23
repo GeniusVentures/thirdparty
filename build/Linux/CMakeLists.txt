@@ -9,6 +9,18 @@ endif()
 project(LINUX_SHARED_THIRD_PARTY)
 
 # --------------------------------------------------------
+# Set OS threading settings
+set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+set(CMAKE_HAVE_THREADS_LIBRARY ON)
+set(CMAKE_USE_WIN32_THREADS_INIT OFF)
+set(CMAKE_USE_PTHREADS_INIT ON)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+
+# --------------------------------------------------------
+# Set extra compiler flags
+set(EXTRA_CXX_FLAGS "-pthread")
+
+# --------------------------------------------------------
 # build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
@@ -24,11 +36,7 @@ set(_BOOST_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NA
 
 ExternalProject_Add(Boost
     PREFIX boost
-    GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
-    GIT_TAG           "boost-1.72.0"
-    #GIT_SUBMODULES_RECURSE  TRUE
-    GIT_SHALLOW TRUE
-    SOURCE_DIR    "${THIRDPARTY_DIR}/boost/src"
+    SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
     CONFIGURE_COMMAND  ""
     PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
     BUILD_COMMAND <SOURCE_DIR>/b2 headers
@@ -54,16 +62,11 @@ set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTE
 
 ExternalProject_Add(openssl
     PREFIX openssl
-    GIT_REPOSITORY "https://github.com/openssl/openssl.git"
-    GIT_TAG "OpenSSL_1_1_1g"
-    #GIT_SUBMODULES_RECURSE  TRUE
-    SOURCE_DIR  "${THIRDPARTY_DIR}/openssl/src"
+    SOURCE_DIR  "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND  <SOURCE_DIR>/config -fPIC --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
-    PATCH_COMMAND ""
-    BUILD_COMMAND make
-    BUILD_IN_SOURCE  TRUE
-    INSTALL_COMMAND make install
-    UPDATE_COMMAND ""
+    BUILD_COMMAND make build_libs
+    BUILD_IN_SOURCE  FALSE
+    INSTALL_COMMAND make install_dev
 )
 set(_OPENSSL_CACHE_ARGS
         -DOPENSSL_USE_STATIC_LIBS:BOOL=ON

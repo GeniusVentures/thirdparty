@@ -85,6 +85,6 @@ This is the repository for third party of SuperGenius
 ## Building
 ```
     ○ cd ./build/iOS
-    ○ cmake ../../build/iOS -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=[/path/to/GeniusTokens/thirdparty/build/iOS/iOS.cmake]
-    ○ make -j4
+    ○ cmake -S ../../build/iOS -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=[/path/to/GeniusTokens/thirdparty/build/iOS/iOS.cmake]
+    ○ make - j8
 ```

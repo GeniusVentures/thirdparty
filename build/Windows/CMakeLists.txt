@@ -9,12 +9,6 @@ endif()
 
 project(WINDOWS_SHARED_THIRD_PARTY)
 
-# --------------------------------------------------------
-# build common libraries by platforms
-include(../CommonCompilerOptions.CMake)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
-
 # ------------------------------------------
 # Set Windows specific runtime options
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -27,6 +21,10 @@ endif()
 # ------------------------------------------
 # Enable c++ exceptions
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+
+# --------------------------------------------------------
+# build common libraries by platforms
+include(../CommonCompilerOptions.CMake)
 
 # ------------------------------------------
 # Set Windows specific protobuf options
@@ -46,11 +44,9 @@ endif()
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 
 ExternalProject_Add(Boost
-      PREFIX "${THIRDPARTY_DIR}/boost"
-      GIT_REPOSITORY    "https://github.com/boostorg/boost.git"
-      GIT_TAG           "boost-1.72.0"
-      #GIT_SUBMODULES_RECURSE  TRUE
-      UPDATE_COMMAND ${CMAKE_COMMAND} -E copy ${THIRDPARTY_DIR}/build/cmake.in/boost-patch/system_category_win32.hpp ${THIRDPARTY_DIR}/boost/src/Boost/libs/system/include/boost/system/detail/system_category_win32.hpp
+      PREFIX boost
+      SOURCE_DIR  "${THIRDPARTY_DIR}/boost"
+      UPDATE_COMMAND ${CMAKE_COMMAND} -E copy ${THIRDPARTY_DIR}/build/cmake.in/boost-patch/system_category_win32.hpp ${THIRDPARTY_DIR}/boost/libs/system/include/boost/system/detail/system_category_win32.hpp
       PATCH_COMMAND ./bootstrap.bat ${VC_PLATFORMTOOLSET}
       CONFIGURE_COMMAND  ""
       BUILD_COMMAND ./b2.exe headers
@@ -85,14 +81,11 @@ endif()
 
 ExternalProject_Add(openssl
 	PREFIX openssl
-	GIT_REPOSITORY "https://github.com/openssl/openssl.git"
-	GIT_TAG "OpenSSL_1_1_1g"
-	#GIT_SUBMODULES_RECURSE TRUE
-	SOURCE_DIR  "${THIRDPARTY_DIR}/openssl/src"
-	CONFIGURE_COMMAND perl ./Configure ${OPENSSL_CONFIG_MODE} enable-capieng no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
-	BUILD_COMMAND nmake
-	BUILD_IN_SOURCE  TRUE
-	INSTALL_COMMAND nmake install
+	SOURCE_DIR  "${THIRDPARTY_DIR}/openssl"
+	CONFIGURE_COMMAND perl ${THIRDPARTY_DIR}/openssl/Configure ${OPENSSL_CONFIG_MODE} enable-capieng no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+	BUILD_COMMAND nmake build_libs
+	BUILD_IN_SOURCE  false
+	INSTALL_COMMAND nmake install_dev
 	)
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     ExternalProject_Add_Step(openssl AddDebugSuffix
@@ -110,11 +103,6 @@ set(_OPENSSL_CACHE_ARGS
 		-DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
 	)
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
-
-# --------------------------------------------------------
-# Set binaryen Windows specific configurations
-set(_binaryen_patch
- PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/binaryen-patch/parser.h" <SOURCE_DIR>/src/emscripten-optimizer/parser.h)
 
 # --------------------------------------------------------
 # Set ed25519 OS specific configurations
