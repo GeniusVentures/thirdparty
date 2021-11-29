@@ -23,10 +23,13 @@ include(../CommonCompilerOptions.CMake)
 
 # ------------------------------------------
 # Set OSX specific runtime options
+
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
 set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
    	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
+    -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
 )
 
 # ------------------------------------------
