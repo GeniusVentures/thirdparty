@@ -78,12 +78,11 @@ set(_BOOST_CACHE_ARGS
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add(openssl
     PREFIX "${THIRDPARTY_DIR}/openssl/"
-	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
-	CONFIGURE_COMMAND  <SOURCE_DIR>/config --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+	  SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
+	  CONFIGURE_COMMAND  ""
     PATCH_COMMAND ""
-    BUILD_COMMAND make build_libs
-    #BUILD_IN_SOURCE  TRUE
-    INSTALL_COMMAND make install_dev
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --build-dir=${_openssl_BUILD_ROOT} --src-dir=${THIRDPARTY_DIR}/openssl --config=${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/osx.conf
+    INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
 set(OPENSSL_USE_STATIC_LIBS  ON)
