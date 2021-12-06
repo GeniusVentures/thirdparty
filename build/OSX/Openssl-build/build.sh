@@ -4,6 +4,7 @@
 SRC_DIR="."
 BUILD_DIR="`pwd`/build"
 CONFIG=""
+MACOSX_DEPLOYMENT_TARGET=10.12
 
 # Process command line arguments
 for i in "$@"
@@ -19,6 +20,10 @@ case $i in
     ;;
   --config=*)
     CONFIG="--config=${i#*=}"
+    shift
+    ;;
+  --deployment-target=*)
+    MACOSX_DEPLOYMENT_TARGET="${i#*=}"
     shift
     ;;
   *)

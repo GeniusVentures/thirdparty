@@ -24,6 +24,7 @@ include(../CommonCompilerOptions.CMake)
 # ------------------------------------------
 # Set OSX specific runtime options
 
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12" CACHE STRING "Minimum OS X deployment version" FORCE)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
@@ -81,7 +82,7 @@ ExternalProject_Add(openssl
 	  SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
 	  CONFIGURE_COMMAND  ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --build-dir=${_openssl_BUILD_ROOT} --src-dir=${THIRDPARTY_DIR}/openssl --config=${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/osx.conf
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --build-dir=${_openssl_BUILD_ROOT} --src-dir=${THIRDPARTY_DIR}/openssl --config=${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/osx.conf --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
