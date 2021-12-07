@@ -110,6 +110,12 @@ jobs:
         with:
           submodules: 'recursive'
 
+      # Workaround for arm64 build 
+      - name: Ensure latest macOS SDK is used
+        run: |
+          sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
+          sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+        
       - name: Create Build Directory
         run: cmake -E make_directory ${{github.workspace}}/.build
 
