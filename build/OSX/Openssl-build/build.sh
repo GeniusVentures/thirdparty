@@ -66,5 +66,16 @@ lipo -create $LIB_X86_64_DIR/libssl.1.1.dylib $LIB_ARM64_DIR/libssl.1.1.dylib -o
 lipo -create $LIB_X86_64_DIR/libcrypto.1.1.dylib $LIB_ARM64_DIR/libcrypto.1.1.dylib -output $LIB_DIR/libcrypto.1.1.dylib
 lipo -create $LIB_X86_64_DIR/libssl.a $LIB_ARM64_DIR/libssl.a -output $LIB_DIR/libssl.a
 lipo -create $LIB_X86_64_DIR/libcrypto.a $LIB_ARM64_DIR/libcrypto.a -output $LIB_DIR/libcrypto.a
-ln -s $LIB_DIR/libssl.1.1.dylib $LIB_DIR/libssl.dylib
-ln -s $LIB_DIR/libcrypto.1.1.dylib $LIB_DIR/libcrypto.dylib
+if [ ! -f $LIB_DIR/libssl.dylib ]; then
+  ln -s $LIB_DIR/libssl.1.1.dylib $LIB_DIR/libssl.dylib
+fi
+
+if [ ! -f $LIB_DIR/libcrypto.dylib ]; then
+  ln -s $LIB_DIR/libcrypto.1.1.dylib $LIB_DIR/libcrypto.dylib
+fi
+
+# print fat library info
+lipo -info $LIB_DIR/libssl.1.1.dylib
+lipo -info $LIB_DIR/libssl.dylib
+lipo -info $LIB_DIR/libcrypto.1.1.dylib
+lipo -info $LIB_DIR/libcrypto.dylib
