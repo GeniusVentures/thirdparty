@@ -1,6 +1,10 @@
 This is the repository for third party of SuperGenius
 ===================================
 
+# CI/CD Status
+[![Release Build CI](https://github.com/GeniusVentures/thirdparty/actions/workflows/cmake.yml/badge.svg?branch=master)](https://github.com/GeniusVentures/thirdparty/actions/workflows/cmake.yml)
+[![Release Build CI](https://github.com/GeniusVentures/thirdparty/actions/workflows/cmake.yml/badge.svg?branch=develop)](https://github.com/GeniusVentures/thirdparty/actions/workflows/cmake.yml)
+
 # Build on Windows
 
 ## Preinstall
