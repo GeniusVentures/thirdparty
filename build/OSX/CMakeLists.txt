@@ -25,7 +25,7 @@ include(../CommonCompilerOptions.CMake)
 # Set OSX specific runtime options
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12" CACHE STRING "Minimum OS X deployment version" FORCE)
-set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
 set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
@@ -49,7 +49,7 @@ ExternalProject_Add( Boost
 	PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
 	BUILD_COMMAND <SOURCE_DIR>/b2 headers
 	BUILD_IN_SOURCE  TRUE
-	INSTALL_COMMAND <SOURCE_DIR>/b2 cxxflags="-std=c++17 -arch x86_64 -arch arm64" runtime-link=static link=static threading=multi  --build-type=minimal  --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=${address_model} architecture=combined  variant=release   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib  install
+	NSTALL_COMMAND <SOURCE_DIR>/b2 cxxflags="-std=c++17" runtime-link=static link=static threading=multi  --build-type=minimal  --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=${address_model} architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib  install
 	UPDATE_COMMAND ""
 )
 set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
@@ -80,10 +80,11 @@ set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTE
 ExternalProject_Add(openssl
     PREFIX "${THIRDPARTY_DIR}/openssl/"
 	  SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
-	  CONFIGURE_COMMAND  ""
+	  CONFIGURE_COMMAND  <SOURCE_DIR>/config --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --build-dir=${_openssl_BUILD_ROOT} --src-dir=${THIRDPARTY_DIR}/openssl --config=${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/osx.conf --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
-    INSTALL_COMMAND ""
+    BUILD_COMMAND make build_libs
+    #BUILD_IN_SOURCE  TRUE
+    INSTALL_COMMAND make install_dev
     UPDATE_COMMAND ""
 )
 set(OPENSSL_USE_STATIC_LIBS  ON)
