@@ -36,10 +36,6 @@ done
 INSTALL_DIR=$(cd "$BUILD_DIR/../../"; pwd)
 LIB_DIR="$INSTALL_DIR/lib"
 
-echo "INSTALL_DIR is $INSTALL_DIR"
-echo "BUILD_DIR is $BUILD_DIR"
-echo "LIB_DIR is $LIB_DIR"
-
 X86_64_DIR=$BUILD_DIR/x86_64
 if [ ! -d "$X86_64_DIR" ]; then
   mkdir -p "$X86_64_DIR"
@@ -56,7 +52,7 @@ fi
 
 cp $X86_64_DIR/lib*.dylib $LIB_DIR/x86_64
 cp $X86_64_DIR/lib*.a $LIB_DIR/x86_64
-cp $X86_64_DIR/include $INSTALL_DIR
+cp -R $X86_64_DIR/include $INSTALL_DIR/
 
 ARM64_DIR=$BUILD_DIR/arm64
 if [ ! -d "$ARM64_DIR" ]; then
