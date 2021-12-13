@@ -51,7 +51,7 @@ This is the repository for third party of SuperGenius
 ○ cd ./.build.Android.armeabi-v7a
 ○ cmake -S ../build/Android/ -DANDROID_ABI="armeabi-v7a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
 ○ make -j4
-```	
+```
 * arm64-v8a
 ```
 ○ mkdir .build.Android.arm64-v8a
