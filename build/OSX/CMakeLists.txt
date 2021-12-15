@@ -49,7 +49,7 @@ ExternalProject_Add( Boost
 	PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
 	BUILD_COMMAND <SOURCE_DIR>/b2 headers
 	BUILD_IN_SOURCE  TRUE
-	NSTALL_COMMAND <SOURCE_DIR>/b2 cxxflags="-std=c++17" runtime-link=static link=static threading=multi  --build-type=minimal  --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=${address_model} architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib  install
+	INSTALL_COMMAND <SOURCE_DIR>/b2 cxxflags="-std=c++17" runtime-link=static link=static threading=multi  --build-type=minimal  --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=${address_model} architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib  install
 	UPDATE_COMMAND ""
 )
 set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
