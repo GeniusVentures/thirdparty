@@ -3,9 +3,11 @@
 ############################################################
 
 # Ignore everything
-*
+/*
 
 # not these files ...
 !.gitignore
 !CMakeLists.txt
 !README.md
+!/Openssl-build/
+!/Boost-build/
