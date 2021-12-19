@@ -3,8 +3,6 @@
 # Init optional command line vars
 SRC_DIR="."
 BUILD_DIR="`pwd`/build"
-CONFIG=""
-CONFIG_DIR=""
 MACOSX_DEPLOYMENT_TARGET=10.12
 
 # Process command line arguments
@@ -17,10 +15,6 @@ case $i in
     ;;
   --build-dir=*)
     BUILD_DIR="${i#*=}"
-    shift
-    ;;
-  --config=*)
-    CONFIG="--config=${i#*=}"
     shift
     ;;
   --deployment-target=*)
