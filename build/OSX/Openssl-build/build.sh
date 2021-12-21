@@ -45,6 +45,7 @@ if [ ! -f "Makefile" ]; then
   $SRC_DIR/Configure darwin64-x86_64-cc shared --prefix=$X86_64_DIR --openssldir=$X86_64_DIR
 fi
 make build_libs
+make install_dev
 
 if [ ! -d "$LIB_DIR/x86_64" ]; then
   mkdir -p "$LIB_DIR/x86_64"

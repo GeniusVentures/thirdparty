@@ -42,7 +42,6 @@ else()
 endif()
 
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
-print("${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/build.sh --build-dir=${_BOOST_ROOT} --src-dir=${THIRDPARTY_DIR}/boost --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}")
 ExternalProject_Add( Boost
 	PREFIX  boost
   SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
@@ -78,7 +77,7 @@ set(_BOOST_CACHE_ARGS
 # build OpenSSL
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add(openssl
-    PREFIX "${THIRDPARTY_DIR}/openssl/"
+    PREFIX openssl
 	  SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
 	  CONFIGURE_COMMAND  ""
     PATCH_COMMAND ""
