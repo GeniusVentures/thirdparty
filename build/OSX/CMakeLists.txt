@@ -15,6 +15,8 @@ if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
+set(CMAKE_OSX_DEPLOYMENT_TARGET "12.1" CACHE STRING "Minimum OS X deployment version" FORCE)
+
 project(OSX_SHARED_THIRD_PARTY)
 
 # --------------------------------------------------------
@@ -24,14 +26,27 @@ include(../CommonCompilerOptions.CMake)
 # ------------------------------------------
 # Set OSX specific runtime options
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12" CACHE STRING "Minimum OS X deployment version" FORCE)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
+
+# Assuming that xcode 12.0 is installed you most probably have ios sdk 14.0 or later installed (tested on Big Sur)
+# if you don't set a deployment target it will be set the way you only get 64-bit builds
+if(NOT DEFINED DEPLOYMENT_TARGET AND XCODE_VERSION_INT VERSION_GREATER 12.0)
+  # Temporarily fix the arm64 issues in CMake install-combined by excluding arm64 for simulator builds (needed for Apple Silicon...)
+  set(CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*] "arm64")
+endif()
+
 set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
    	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
     -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+    -DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH:BOOL=YES
+    -DCMAKE_IOS_INSTALL_COMBINED:BOOL=TRUE
+    -DCMAKE_XCODE_ATTRIBUTE_VALID_ARCHS:STRING=${CMAKE_OSX_ARCHITECTURES}
+    -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
+    -D"CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*]":STRING="arm64"
 )
+#print("CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS: ${'CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*]'}")
 
 # ------------------------------------------
 # build boost
@@ -119,7 +134,7 @@ set(_ED25519_RANDOM dev_urandom)
 
 # --------------------------------------------------------
 # Set config for libp2p
-set(_libp2p_BUILD_EXAMPLES ON)
+set(_libp2p_BUILD_EXAMPLES OFF)
 
 # --------------------------------------------------------
 # Allow multiple definitions

@@ -34,7 +34,7 @@ echo "Bootstapping..."
 cd $SRC_DIR
 ./bootstrap.sh
 
-COMMOM_PARAMS="toolset=clang -a runtime-link=static link=static threading=multi --build-type=minimal --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem variant=release --stagedir=stage/x64"
+COMMOM_PARAMS="toolset=clang -a target-os=darwin runtime-link=static link=static threading=multi --build-type=minimal --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem variant=release --stagedir=stage/x64"
 
 X86_64_DIR=$BUILD_DIR/x86_64
 if [ ! -d "$X86_64_DIR" ]; then
@@ -42,7 +42,7 @@ if [ ! -d "$X86_64_DIR" ]; then
 fi
 
 cd $SRC_DIR
-./b2 cxxflags="-arch x86_64" $COMMOM_PARAMS --build-dir=$X86_64_DIR --prefix=$X86_64_DIR --libdir=$X86_64_DIR/lib install
+./b2 -j8 cxxflags="-arch x86_64" $COMMOM_PARAMS --build-dir=$X86_64_DIR --prefix=$X86_64_DIR --libdir=$X86_64_DIR/lib install
 
 if [ ! -d "$LIB_DIR" ]; then
   mkdir -p "$LIB_DIR"
@@ -56,7 +56,7 @@ if [ ! -d "$ARM64_DIR" ]; then
   mkdir -p $ARM64_DIR
 fi
 cd $SRC_DIR
-./b2 cxxflags="-stdlib=libc++ -arch arm64" $COMMOM_PARAMS --build-dir=$ARM64_DIR --prefix=$ARM64_DIR --libdir=$ARM64_DIR/lib install
+./b2 -j8 cxxflags="-stdlib=libc++ -arch arm64" $COMMOM_PARAMS architecture=arm --build-dir=$ARM64_DIR --prefix=$ARM64_DIR --libdir=$ARM64_DIR/lib install
 
 for lib in $X86_64_DIR/lib/*.a; do
   lipo -create $lib $ARM64_DIR/lib/$(basename $lib) -output $LIB_DIR/$(basename $lib);

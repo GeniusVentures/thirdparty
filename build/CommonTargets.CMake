@@ -370,6 +370,7 @@ ExternalProject_Add(ipfs-bitswap-cpp
   PREFIX ipfs-bitswap-cpp
   SOURCE_DIR "${THIRDPARTY_DIR}/ipfs-bitswap-cpp"
   CMAKE_CACHE_ARGS
+        -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp
         -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
         -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
