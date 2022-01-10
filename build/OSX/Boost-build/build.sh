@@ -30,11 +30,13 @@ done
 INSTALL_DIR=$BUILD_DIR
 LIB_DIR="$INSTALL_DIR/lib"
 
+MACOS_SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
+
 echo "Bootstapping..."
 cd $SRC_DIR
-./bootstrap.sh
+./bootstrap.sh cxxflags="-arch x86_64 -arch arm64" cflags="-arch x86_64 -arch arm64" linkflags="-arch x86_64 -arch arm64"
 
-COMMOM_PARAMS="toolset=clang -a target-os=darwin runtime-link=static link=static threading=multi --build-type=minimal --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem variant=release --stagedir=stage/x64"
+COMMOM_PARAMS="toolset=clang -a target-os=darwin address-model=64 binary-format=mach-o runtime-link=static link=static threading=multi --build-type=minimal --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem variant=release --stagedir=stage/x64"
 
 X86_64_DIR=$BUILD_DIR/x86_64
 if [ ! -d "$X86_64_DIR" ]; then
@@ -55,8 +57,13 @@ ARM64_DIR=$BUILD_DIR/arm64
 if [ ! -d "$ARM64_DIR" ]; then
   mkdir -p $ARM64_DIR
 fi
+
+echo "Bootstapping..."
 cd $SRC_DIR
-./b2 -j8 cxxflags="-stdlib=libc++ -arch arm64" $COMMOM_PARAMS architecture=arm --build-dir=$ARM64_DIR --prefix=$ARM64_DIR --libdir=$ARM64_DIR/lib install
+./bootstrap.sh cxxflags="-arch arm64" cflags="-arch arm64" linkflags="-arch arm64"
+
+cd $SRC_DIR
+./b2 -j8 cxxflags="-arch arm64 -stdlib=libc++ -isysroot $MACOS_SDK_PATH" cflags="-arch arm64" linkflags="-arch arm64" abi=aapcs -mmacosx-version-min=12.1 $COMMOM_PARAMS architecture=arm --build-dir=$ARM64_DIR --prefix=$ARM64_DIR --libdir=$ARM64_DIR/lib install
 
 for lib in $X86_64_DIR/lib/*.a; do
   lipo -create $lib $ARM64_DIR/lib/$(basename $lib) -output $LIB_DIR/$(basename $lib);
