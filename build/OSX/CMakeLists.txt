@@ -126,6 +126,11 @@ set(_grpc_EXTRA_PARAM
     -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
 )
 
+# --------------------------------------------------------
+# set config for rocksdb
+set(_rocksdb_EXTRA_PARAM
+  -DHAS_ARMV8_CRC:BOOL=ON)
+
 # ------------------------------------------
 # set config for ed25519 crypto
 set(_ED25519_EDIIMPL ref10)
