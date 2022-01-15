@@ -15,6 +15,8 @@ if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
+set(CMAKE_OSX_DEPLOYMENT_TARGET "12.1" CACHE STRING "Minimum OS X deployment version" FORCE)
+
 project(OSX_SHARED_THIRD_PARTY)
 
 # --------------------------------------------------------
@@ -23,11 +25,28 @@ include(../CommonCompilerOptions.CMake)
 
 # ------------------------------------------
 # Set OSX specific runtime options
+
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
+
+# Assuming that xcode 12.0 is installed you most probably have ios sdk 14.0 or later installed (tested on Big Sur)
+# if you don't set a deployment target it will be set the way you only get 64-bit builds
+if(NOT DEFINED DEPLOYMENT_TARGET AND XCODE_VERSION_INT VERSION_GREATER 12.0)
+  # Temporarily fix the arm64 issues in CMake install-combined by excluding arm64 for simulator builds (needed for Apple Silicon...)
+  set(CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*] "arm64")
+endif()
+
 set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
    	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
+    -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+    -DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH:BOOL=YES
+    -DCMAKE_IOS_INSTALL_COMBINED:BOOL=TRUE
+    -DCMAKE_XCODE_ATTRIBUTE_VALID_ARCHS:STRING=${CMAKE_OSX_ARCHITECTURES}
+    -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
+    -D"CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*]":STRING="arm64"
 )
+#print("CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS: ${'CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*]'}")
 
 # ------------------------------------------
 # build boost
@@ -42,10 +61,9 @@ ExternalProject_Add( Boost
 	PREFIX  boost
   SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
 	CONFIGURE_COMMAND  ""
-	PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
-	BUILD_COMMAND <SOURCE_DIR>/b2 headers
-	BUILD_IN_SOURCE  TRUE
-	INSTALL_COMMAND <SOURCE_DIR>/b2 cxxflags="-std=c++17" runtime-link=static link=static threading=multi  --build-type=minimal  --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  address-model=${address_model} architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=<SOURCE_DIR>${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib  install
+	PATCH_COMMAND ""
+ 	BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/build.sh --build-dir=${_BOOST_ROOT} --src-dir=${THIRDPARTY_DIR}/boost --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
+	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )
 set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
@@ -74,13 +92,12 @@ set(_BOOST_CACHE_ARGS
 # build OpenSSL
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add(openssl
-    PREFIX "${THIRDPARTY_DIR}/openssl/"
-	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
-	CONFIGURE_COMMAND  <SOURCE_DIR>/config --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+    PREFIX openssl
+	  SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
+	  CONFIGURE_COMMAND  ""
     PATCH_COMMAND ""
-    BUILD_COMMAND make build_libs
-    #BUILD_IN_SOURCE  TRUE
-    INSTALL_COMMAND make install_dev
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --build-dir=${_openssl_BUILD_ROOT} --src-dir=${THIRDPARTY_DIR}/openssl --config=${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/osx.conf --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
+    INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
 set(OPENSSL_USE_STATIC_LIBS  ON)
@@ -108,6 +125,11 @@ set(_grpc_EXTRA_PARAM
     -DgRPC_BUILD_GRPC_NODE_PLUGIN:BOOL=OFF
     -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
 )
+
+# --------------------------------------------------------
+# set config for rocksdb
+set(_rocksdb_EXTRA_PARAM
+  -DHAS_ARMV8_CRC:BOOL=ON)
 
 # ------------------------------------------
 # set config for ed25519 crypto
