@@ -462,7 +462,7 @@ ExternalProject_Add(kompute
       -DBUILD_SHARED_LIBS:BOOL=OFF
       ${_CMAKE_COMMON_BUILD_PARAMS}
       -DCMAKE_CXX_STANDARD:STRING=14
-
+      -DKOMPUTE_OPT_INSTALL:BOOL=ON
 )
 
 # --------------------------------------------------------
