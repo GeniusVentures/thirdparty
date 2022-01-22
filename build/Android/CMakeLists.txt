@@ -194,6 +194,12 @@ set(_ED25519_RANDOM dev_urandom)
 set(_libp2p_BUILD_EXAMPLES OFF)
 
 # --------------------------------------------------------
+# Set config for kompute
+set(_KOMPUTE_EXTRA_PARAM
+	-DKOMPUTE_OPT_ANDROID_BUILD:BOOL=ON
+)
+
+# --------------------------------------------------------
 # Allow multiple definitions
 set(FORCE_MULTILE OFF)
 

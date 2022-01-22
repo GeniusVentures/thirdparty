@@ -463,6 +463,8 @@ ExternalProject_Add(kompute
       ${_CMAKE_COMMON_BUILD_PARAMS}
       -DCMAKE_CXX_STANDARD:STRING=14
       -DKOMPUTE_OPT_INSTALL:BOOL=ON
+      ${_KOMPUTE_EXTRA_PARAM}
+    DEPENDS fmt
 )
 
 # --------------------------------------------------------
