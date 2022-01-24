@@ -451,6 +451,23 @@ ExternalProject_Add(libsecp256k1
 )
 
 # --------------------------------------------------------
+# Builds kompute
+ExternalProject_Add(kompute
+    PREFIX kompute
+    SOURCE_DIR "${THIRDPARTY_DIR}/kompute"
+    CMAKE_CACHE_ARGS
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/kompute
+      -DKOMPUTE_OPT_BUILD_TESTS:BOOL=OFF
+      -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
+      -DBUILD_SHARED_LIBS:BOOL=OFF
+      ${_CMAKE_COMMON_BUILD_PARAMS}
+      -DCMAKE_CXX_STANDARD:STRING=14
+      -DKOMPUTE_OPT_INSTALL:BOOL=ON
+      ${_KOMPUTE_EXTRA_PARAM}
+    DEPENDS fmt
+)
+
+# --------------------------------------------------------
 # Builds xxhash
 ExternalProject_Add(xxhash
     PREFIX xxhash
