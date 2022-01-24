@@ -126,7 +126,7 @@
 	url = https://github.com/hunter-packages/xxHash.git
 [submodule "kompute"]
 	path = kompute
-	url = git@github.com:KomputeProject/kompute.git
+	url = ../kompute.git
 [submodule "MoltenVK"]
 	path = MoltenVK
 	url = git@github.com:KhronosGroup/MoltenVK.git
