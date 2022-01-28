@@ -154,7 +154,7 @@ jobs:
       - name: Set env for Vulkan SDK
         id: env
         run: |
-          VULKAN_SDK=$GITHUB_WORKSPACE/../vulkansdk-macos-${{env.VulkanSDKVersion}}/macOS
+          VULKAN_SDK=$GITHUB_WORKSPACE/vulkansdk-macos-${{env.VulkanSDKVersion}}/macOS
           echo ::set-output name=VULKAN_SDK::$VULKAN_SDK
           echo "VK_LAYER_PATH=$VULKAN_SDK/etc/vulkan/explicit_layer.d" >> $GITHUB_ENV
           echo "VK_ICD_FILENAMES=$VULKAN_SDK/etc/vulkan/icd.d/MoltenVK_icd.json" >> $GITHUB_ENV
@@ -169,7 +169,10 @@ jobs:
         run: |
           wget --no-cookies -O ../vulkansdk-macos-${{env.VulkanSDKVersion}}.dmg https://sdk.lunarg.com/sdk/download/${{env.VulkanSDKVersion}}/mac/vulkansdk-macos-${{env.VulkanSDKVersion}}.dmg?u=
           hdiutil attach ../vulkansdk-macos-${{env.VulkanSDKVersion}}.dmg
-          cp -r /Volumes/vulkansdk-macos-${{env.VulkanSDKVersion}} $GITHUB_WORKSPACE/..
+          ls -la /Volumes/vulkansdk-macos-${{env.VulkanSDKVersion}}
+          cp -r /Volumes/vulkansdk-macos-${{env.VulkanSDKVersion}} $GITHUB_WORKSPACE
+          ls -la $GITHUB_WORKSPACE/vulkansdk-macos-${{env.VulkanSDKVersion}}
+          ls -la $VULKAN_SDK
           hdiutil detach /Volumes/vulkansdk-macos-${{env.VulkanSDKVersion}}
       
       - name: find_package(Vulkan)
