@@ -171,9 +171,18 @@ jobs:
           hdiutil attach ../vulkansdk-macos-${{env.VulkanSDKVersion}}.dmg
           cp -r /Volumes/vulkansdk-macos-${{env.VulkanSDKVersion}} $GITHUB_WORKSPACE/..
           hdiutil detach /Volumes/vulkansdk-macos-${{env.VulkanSDKVersion}}
+      
+      - name: find_package(Vulkan)
+        env:
+          VULKAN_SDK: ${{steps.env.outputs.VULKAN_SDK}}
+        run: |
+          echo "VULKAN_SDK: $VULKAN_SDK"
+          ls -la $VULKAN_SDK
+          cmake --find-package -DNAME=Vulkan -DCOMPILER_ID=GNU -DLANGUAGE=CXX -DMODE=LINK
         
       - name: Create Build Directory
-        run: cmake -E make_directory ${{github.workspace}}/.build
+        run: |
+          cmake -E make_directory ${{github.workspace}}/.build
 
       - name: Configure CMake
         working-directory: ${{github.workspace}}/.build
