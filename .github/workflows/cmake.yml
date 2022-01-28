@@ -5,7 +5,9 @@ name: Release Build CI
 # Controls when the workflow will run
 # Triggers the workflow on push or pull request events and manually from the Actions tab
 on: [push, pull_request, workflow_dispatch]
-
+env:
+  VulkanSDKVersion: 1.2.198.1
+  
 jobs:
   Windows:
     runs-on: windows-latest
@@ -134,20 +136,43 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-
+          
       # Workaround for arm64 build
       - name: Ensure latest macOS SDK is used
         run: |
           sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
           sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
-
+      
+      - name: Set env for Vulkan SDK
+        id: env
+        run: |
+          VULKAN_SDK=$GITHUB_WORKSPACE/../vulkansdk-macos-${{env.VulkanSDKVersion}}/macOS
+          echo ::set-output name=VULKAN_SDK::$VULKAN_SDK
+          echo "VK_LAYER_PATH=$VULKAN_SDK/etc/vulkan/explicit_layer.d" >> $GITHUB_ENV
+          echo "VK_ICD_FILENAMES=$VULKAN_SDK/etc/vulkan/icd.d/MoltenVK_icd.json" >> $GITHUB_ENV
+      - name: Cache
+        id: cache
+        uses: actions/cache@v1.1.2
+        with:
+          path: ${{steps.env.outputs.VULKAN_SDK}}
+          key: VulkanSdk${{env.VulkanSDKVersion}}ExtractedMacos
+      - name: Download & Extract Vulkan SDK
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          wget --no-cookies -O ../vulkansdk-macos-${{env.VulkanSDKVersion}}.dmg https://sdk.lunarg.com/sdk/download/${{env.VulkanSDKVersion}}/mac/vulkansdk-macos-${{env.VulkanSDKVersion}}.dmg?u=
+          hdiutil attach ../vulkansdk-macos-${{env.VulkanSDKVersion}}.dmg
+          cp -r /Volumes/vulkansdk-macos-${{env.VulkanSDKVersion}} $GITHUB_WORKSPACE/..
+          hdiutil detach /Volumes/vulkansdk-macos-${{env.VulkanSDKVersion}}
+        
       - name: Create Build Directory
         run: cmake -E make_directory ${{github.workspace}}/.build
 
       - name: Configure CMake
         working-directory: ${{github.workspace}}/.build
+        env:
+          VULKAN_SDK: ${{steps.env.outputs.VULKAN_SDK}}
         run: cmake -S ../build/OSX/ -DCMAKE_BUILD_TYPE=Release
-
+        
       - name: Compile
         working-directory: ${{github.workspace}}/.build
         run: make -j8
