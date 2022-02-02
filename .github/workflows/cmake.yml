@@ -7,7 +7,7 @@ name: Release Build CI
 on: [push, pull_request, workflow_dispatch]
 env:
   VulkanSDKVersion: 1.2.198.1
-  
+
 jobs:
   Windows:
     runs-on: windows-latest
@@ -19,17 +19,6 @@ jobs:
       - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1
         with:
           sdk-version: 19041
-
-      - name: Install Vulkan SDK
-        uses: humbletim/setup-vulkan-sdk@v1.0.3
-        with:
-          vulkan-version: ${{env.VulkanSDKVersion}}
-     
-      - name: Test Vulkan SDK Install
-        shell: bash
-        run: |
-          echo "Vulkan SDK Version=='$VULKAN_SDK_VERSION'"
-          echo "VULKAN_SDK=='$VULKAN_SDK'"
 
       - name: Create Build Directory
         run: cmake -E make_directory ${{github.workspace}}/.build
@@ -49,17 +38,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-
-      - name: Install Vulkan SDK
-        uses: humbletim/setup-vulkan-sdk@v1.0.3
-        with:
-          vulkan-version: ${{env.VulkanSDKVersion}}
-          
-      - name: Test Vulkan SDK Install
-        shell: bash
-        run: |
-          echo "Vulkan SDK Version=='$VULKAN_SDK_VERSION'"
-          echo "VULKAN_SDK=='$VULKAN_SDK'"
 
       - name: Create Build Directory
         run: cmake -E make_directory ${{github.workspace}}/.build
@@ -98,17 +76,6 @@ jobs:
           unzip ndk.zip
           rm ndk.zip
 
-      - name: Install Vulkan SDK
-        uses: humbletim/setup-vulkan-sdk@v1.0.3
-        with:
-          vulkan-version: ${{env.VulkanSDKVersion}}
-          
-      - name: Test Vulkan SDK Install
-        shell: bash
-        run: |
-          echo "Vulkan SDK Version=='$VULKAN_SDK_VERSION'"
-          echo "VULKAN_SDK=='$VULKAN_SDK'"
-
       - name: Create Build Directory
         run: cmake -E make_directory ${{github.workspace}}/.build
 
@@ -144,45 +111,13 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-          
+
       # Workaround for arm64 build
       - name: Ensure latest macOS SDK is used
         run: |
           sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
           sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
-      
-      - name: Set env for Vulkan SDK
-        id: env
-        run: |
-          VULKAN_SDK=$GITHUB_WORKSPACE/vulkansdk-macos-${{env.VulkanSDKVersion}}/macOS
-          echo ::set-output name=VULKAN_SDK::$VULKAN_SDK
-          echo "VK_LAYER_PATH=$VULKAN_SDK/etc/vulkan/explicit_layer.d" >> $GITHUB_ENV
-          echo "VK_ICD_FILENAMES=$VULKAN_SDK/etc/vulkan/icd.d/MoltenVK_icd.json" >> $GITHUB_ENV
-      - name: Cache
-        id: cache
-        uses: actions/cache@v1.1.2
-        with:
-          path: ${{steps.env.outputs.VULKAN_SDK}}
-          key: VulkanSdk${{env.VulkanSDKVersion}}ExtractedMacos
-      - name: Download & Extract Vulkan SDK
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          wget --no-cookies -O ../vulkansdk-macos-${{env.VulkanSDKVersion}}.dmg https://sdk.lunarg.com/sdk/download/${{env.VulkanSDKVersion}}/mac/vulkansdk-macos-${{env.VulkanSDKVersion}}.dmg?u=
-          hdiutil attach ../vulkansdk-macos-${{env.VulkanSDKVersion}}.dmg
-          ls -la /Volumes/vulkansdk-macos-${{env.VulkanSDKVersion}}
-          cp -r /Volumes/vulkansdk-macos-${{env.VulkanSDKVersion}} $GITHUB_WORKSPACE
-          ls -la $GITHUB_WORKSPACE/vulkansdk-macos-${{env.VulkanSDKVersion}}
-          ls -la $VULKAN_SDK
-          hdiutil detach /Volumes/vulkansdk-macos-${{env.VulkanSDKVersion}}
-      
-      - name: find_package(Vulkan)
-        env:
-          VULKAN_SDK: ${{steps.env.outputs.VULKAN_SDK}}
-        run: |
-          echo "VULKAN_SDK: $VULKAN_SDK"
-          ls -la $VULKAN_SDK
-          cmake --find-package -DNAME=Vulkan -DCOMPILER_ID=GNU -DLANGUAGE=CXX -DMODE=LINK
-        
+
       - name: Create Build Directory
         run: |
           cmake -E make_directory ${{github.workspace}}/.build
@@ -192,7 +127,7 @@ jobs:
         env:
           VULKAN_SDK: ${{steps.env.outputs.VULKAN_SDK}}
         run: cmake -S ../build/OSX/ -DCMAKE_BUILD_TYPE=Release
-        
+
       - name: Compile
         working-directory: ${{github.workspace}}/.build
         env:
