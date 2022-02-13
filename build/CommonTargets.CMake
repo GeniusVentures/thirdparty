@@ -450,62 +450,54 @@ ExternalProject_Add(libsecp256k1
       ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
-if (NOT APPLE)
-  if(NOT ANDROID)
-    # --------------------------------------------------------
-    # Builds Vulkan-Headers
-    ExternalProject_Add(Vulkan-Headers
-        PREFIX Vulkan-Headers
-        SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Headers"
-        CMAKE_CACHE_ARGS
-          -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers
-          ${_CMAKE_COMMON_BUILD_PARAMS}
-    )
-    set(_FINDPACKAGE_VULKAN_HEADERS_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers")
-    set(_FINDPACKAGE_VULKAN_INCLUDE_DIR "${_FINDPACKAGE_VULKAN_HEADERS_INSTALL_DIR}/include")
+# --------------------------------------------------------
+# Builds Vulkan-Headers
+ExternalProject_Add(Vulkan-Headers
+    PREFIX Vulkan-Headers
+    SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Headers"
+    CMAKE_CACHE_ARGS
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers
+      ${_CMAKE_COMMON_BUILD_PARAMS}
+)
+set(_FINDPACKAGE_VULKAN_HEADERS_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers")
+set(_FINDPACKAGE_VULKAN_INCLUDE_DIR "${_FINDPACKAGE_VULKAN_HEADERS_INSTALL_DIR}/include")
 
-    # --------------------------------------------------------
-    # Builds Vulkan-Loader
-    ExternalProject_Add(Vulkan-Loader
-        PREFIX Vulkan-Loader
-        SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Loader"
-        CMAKE_CACHE_ARGS
-          -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader
-          -DVULKAN_HEADERS_INSTALL_DIR:PATH=${_FINDPACKAGE_VULKAN_HEADERS_INSTALL_DIR}
-          -DBUILD_WSI_WAYLAND_SUPPORT:BOOL=OFF
-          -DBUILD_WSI_XCB_SUPPORT:BOOL=OFF
-          -DBUILD_WSI_XLIB_SUPPORT:BOOL=OFF
-          -DUSE_GAS:BOOL=OFF
-          ${_CMAKE_COMMON_BUILD_PARAMS}
-        DEPENDS Vulkan-Headers
-    )
-    set(_FINDPACKAGE_VULKAN_LOADER_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader")
-    set(_FINDPACKAGE_VULKAN_LIB_DIR "${_FINDPACKAGE_VULKAN_LOADER_INSTALL_DIR}/lib")
-  else()
-    # CMAKE_SYSROOT "${ANDROID_TOOLCHAIN_ROOT}/sysroot"
-    set(_FINDPACKAGE_VULKAN_INCLUDE_DIR {CMAKE_SYSROOT}/usr/include/vulkan)
-    set(_FINDPACKAGE_VULKAN_LIB_DIR {CMAKE_SYSROOT}/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL})
-  endif(NOT ANDROID)
-  
-  # --------------------------------------------------------
-  # Builds kompute
-  ExternalProject_Add(kompute
-      PREFIX kompute
-      SOURCE_DIR "${THIRDPARTY_DIR}/kompute"
-      CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/kompute
-        -DVulkan_INCLUDE_DIR:PATH=${_FINDPACKAGE_VULKAN_INCLUDE_DIR}
-        -DVulkan_LIBRARY:PATH=${_FINDPACKAGE_VULKAN_LIB_DIR}
-        -DKOMPUTE_OPT_BUILD_TESTS:BOOL=OFF
-        -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
-        -DBUILD_SHARED_LIBS:BOOL=OFF
-        ${_CMAKE_COMMON_BUILD_PARAMS}
-        -DCMAKE_CXX_STANDARD:STRING=14
-        -DKOMPUTE_OPT_INSTALL:BOOL=ON
-        ${_KOMPUTE_EXTRA_PARAM}
-      DEPENDS fmt Vulkan-Loader
-  )
-endif (NOT APPLE)
+# --------------------------------------------------------
+# Builds Vulkan-Loader
+ExternalProject_Add(Vulkan-Loader
+    PREFIX Vulkan-Loader
+    SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Loader"
+    CMAKE_CACHE_ARGS
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader
+      -DVULKAN_HEADERS_INSTALL_DIR:PATH=${_FINDPACKAGE_VULKAN_HEADERS_INSTALL_DIR}
+      -DBUILD_WSI_WAYLAND_SUPPORT:BOOL=OFF
+      -DBUILD_WSI_XCB_SUPPORT:BOOL=OFF
+      -DBUILD_WSI_XLIB_SUPPORT:BOOL=OFF
+      -DUSE_GAS:BOOL=OFF
+      ${_CMAKE_COMMON_BUILD_PARAMS}
+    DEPENDS Vulkan-Headers
+)
+set(_FINDPACKAGE_VULKAN_LOADER_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader")
+set(_FINDPACKAGE_VULKAN_LIB_DIR "${_FINDPACKAGE_VULKAN_LOADER_INSTALL_DIR}/lib")
+
+# --------------------------------------------------------
+# Builds kompute
+ExternalProject_Add(kompute
+    PREFIX kompute
+    SOURCE_DIR "${THIRDPARTY_DIR}/kompute"
+    CMAKE_CACHE_ARGS
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/kompute
+      -DVulkan_INCLUDE_DIR:PATH=${_FINDPACKAGE_VULKAN_INCLUDE_DIR}
+      -DVulkan_LIBRARY:PATH=${_FINDPACKAGE_VULKAN_LIB_DIR}
+      -DKOMPUTE_OPT_BUILD_TESTS:BOOL=OFF
+      -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
+      -DBUILD_SHARED_LIBS:BOOL=OFF
+      ${_CMAKE_COMMON_BUILD_PARAMS}
+      -DCMAKE_CXX_STANDARD:STRING=14
+      -DKOMPUTE_OPT_INSTALL:BOOL=ON
+      ${_KOMPUTE_EXTRA_PARAM}
+    DEPENDS fmt Vulkan-Loader
+)
 
 # --------------------------------------------------------
 # Builds xxhash
