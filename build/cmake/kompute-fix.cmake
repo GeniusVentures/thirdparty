@@ -5,7 +5,7 @@ get_filename_component(THIRD_PARTY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../
 set(_VULKAN_HEADERS_INCLUDE ${THIRD_PARTY_DIRECTORY}/Vulkan-Headers/include)
 if(ANDROID)
   # Use Android NDK builtin vulkan header
-  set(_VULKAN_HEADERS_INCLUDE {CMAKE_SYSROOT}/usr/include/vulkan)
+  set(_VULKAN_HEADERS_INCLUDE ${CMAKE_SYSROOT}/usr/include/vulkan)
 endif
 include_directories(${_VULKAN_HEADERS_INCLUDE})
 
