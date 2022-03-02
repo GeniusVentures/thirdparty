@@ -14,6 +14,7 @@ set(CMAKE_SYSTEM_NAME Android)
 set(CMAKE_SYSTEM_VERSION 28) # API level
 set(ANDROID_PLATFORM_LEVEL 28)
 set(ANDROID_NATIVE_API_LEVEL ${ANDROID_PLATFORM_LEVEL})
+set(ANDROID_PLATFORM ${ANDROID_PLATFORM_LEVEL})
 
 if(NOT CMAKE_ANDROID_NDK)
 	message(FATAL_ERROR "Cannot find Android NDK, make sure you pass -DCMAKE_ANDROID_NDK=[path_to_NDK]")
@@ -199,7 +200,7 @@ set(_libp2p_BUILD_EXAMPLES OFF)
 # Set config for kompute
 set(_KOMPUTE_EXTRA_PARAM
 	-DKOMPUTE_OPT_ANDROID_BUILD:BOOL=ON
-	-DCMAKE_ANDROID_STL_TYPE:STRING=stlport_static
+	-DCMAKE_ANDROID_STL_TYPE:STRING=c++_static
 )
 
 # --------------------------------------------------------
