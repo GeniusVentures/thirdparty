@@ -12,7 +12,8 @@ include(../CommonCompilerOptions.CMake)
 find_program(MAKE_EXE NAMES gmake nmake make)
 set(CMAKE_SYSTEM_NAME Android)
 set(CMAKE_SYSTEM_VERSION 28) # API level
-set(ANDROID_NATIVE_API_LEVEL 28)
+set(ANDROID_PLATFORM_LEVEL 28)
+set(ANDROID_NATIVE_API_LEVEL ${ANDROID_PLATFORM_LEVEL})
 
 if(NOT CMAKE_ANDROID_NDK)
 	message(FATAL_ERROR "Cannot find Android NDK, make sure you pass -DCMAKE_ANDROID_NDK=[path_to_NDK]")
@@ -25,8 +26,8 @@ set(CMAKE_ANDROID_NDK_VERSION_MINOR ${CMAKE_MATCH_2})
 
 print("Android NDK version: ${CMAKE_ANDROID_NDK_VERSION}.${CMAKE_ANDROID_NDK_VERSION_MINOR}")
 
-if (NOT CMAKE_ANDROID_NDK_VERSION EQUAL 21)
-  message(FATAL_ERROR "Android NDK LTS Version (r21e) stable long term support version required")
+if (NOT CMAKE_ANDROID_NDK_VERSION EQUAL 23)
+  message(FATAL_ERROR "Android NDK LTS Version (r23b) stable long term support version required")
 endif()
 
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_ANDROID_NDK}/build/cmake/android.toolchain.cmake")
@@ -44,6 +45,7 @@ set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
   -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
   -DCMAKE_ANDROID_NDK:PATH=${CMAKE_ANDROID_NDK}
 	-DANDROID_ABI:STRING=${ANDROID_ABI}
+	-DANDROID_PLATFORM_LEVEL:STRING=${ANDROID_PLATFORM_LEVEL}
 	-DANDROID_NATIVE_API_LEVEL:STRING=${ANDROID_NATIVE_API_LEVEL}
 	-DANDROID_TOOLCHAIN:STRING=${ANDROID_TOOLCHAIN}
 	-DANDROID_STL:STRING=c++_static
@@ -197,6 +199,7 @@ set(_libp2p_BUILD_EXAMPLES OFF)
 # Set config for kompute
 set(_KOMPUTE_EXTRA_PARAM
 	-DKOMPUTE_OPT_ANDROID_BUILD:BOOL=ON
+	-DCMAKE_ANDROID_STL_TYPE:STRING=stlport_static
 )
 
 # --------------------------------------------------------

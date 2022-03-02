@@ -8,11 +8,11 @@ This is the repository for third party of SuperGenius
 # Build on Windows
 
 ## Preinstall
-- CMake 
+- CMake
 - Visual Studio 2015, 2017 or 2019
 - Strawberry Perl (https://strawberryperl.com/)
 - Python >=3.5
-## Building	
+## Building
     ○ git submodule update --init --recursive
     ○ cd ./build
     ○ mkdir Release
@@ -26,25 +26,25 @@ This is the repository for third party of SuperGenius
 	○ cd ./build
 	○ mkdir Debug
 	○ cd Debug
-	○ cmake ../Windows -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug 
+	○ cmake ../Windows -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug
 	○ cmake --build . --config Debug
 # Build on Linux
 ## Preinstall
-- CMake 
+- CMake
 - Python >=3.5 (make sure /bin/python links to your python3 version, e.g. `ln -s /bin/python3.8 /bin/python`)
 ## Building
 	○ mkdir .build.Release
-	○ cd ./.build.Release	
+	○ cd ./.build.Release
 	○ cmake . -DCMAKE_BUILD_TYPE=Release
 	○ make
 # Build on Linux for Android cross compile
 ## Preinstall
-- CMake 
-- Android NDK Latest LTS Version (r21e) [(link)](https://developer.android.com/ndk/downloads#lts-downloads)
+- CMake
+- Android NDK Latest LTS Version (r23b) [(link)](https://developer.android.com/ndk/downloads#lts-downloads)
 ## Building
-	○ export ANDROID_NDK=/path/to/android-ndk-r21e
+	○ export ANDROID_NDK=/path/to/android-ndk-r23b
 	○ export ANDROID_TOOLCHAIN="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
-	○ export PATH="$ANDROID_TOOLCHAIN":"$PATH" 
+	○ export PATH="$ANDROID_TOOLCHAIN":"$PATH"
 * armeabi-v7a
 ```
 ○ mkdir .build.Android.armeabi-v7a
