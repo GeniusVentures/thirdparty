@@ -55,7 +55,7 @@ export PATH=$LOCAL_ANDROID_NDK:$LOCAL_ANDROID_TOOLCHAIN:$LOCAL_PATH
 export CC=clang
 CONFIGDIR=`dirname $0`/../../../openssl
 REALCONFIGDIR=`realpath ${CONFIGDIR}`
-OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure $ABI -D__ANDROID_API__=$ANDROID_NATIVE_API_LEVEL --prefix=$BUILD_DIR --openssldir=$BUILD_DIR"
+OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure $ABI --prefix=$BUILD_DIR --openssldir=$BUILD_DIR"
 
 echo "Building OpenSSL"
 echo $OPENSSL_CONFIGURE_CMD
@@ -66,4 +66,3 @@ which clang
 $OPENSSL_CONFIGURE_CMD
 
 make build_libs
-
