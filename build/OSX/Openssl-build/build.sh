@@ -3,8 +3,6 @@
 # Init optional command line vars
 SRC_DIR="."
 BUILD_DIR="`pwd`/build"
-CONFIG=""
-CONFIG_DIR=""
 MACOSX_DEPLOYMENT_TARGET=10.12
 
 # Process command line arguments
@@ -17,10 +15,6 @@ case $i in
     ;;
   --build-dir=*)
     BUILD_DIR="${i#*=}"
-    shift
-    ;;
-  --config=*)
-    CONFIG="--config=${i#*=}"
     shift
     ;;
   --deployment-target=*)
@@ -42,7 +36,7 @@ if [ ! -d "$X86_64_DIR" ]; then
 fi
 cd $X86_64_DIR
 if [ ! -f "Makefile" ]; then
-  $SRC_DIR/Configure darwin64-x86_64-cc shared --prefix=$X86_64_DIR --openssldir=$X86_64_DIR
+  $SRC_DIR/Configure darwin64-x86_64-cc no-asm shared --prefix=$X86_64_DIR --openssldir=$X86_64_DIR
 fi
 make build_libs
 make install_dev
@@ -51,10 +45,14 @@ if [ ! -d "$LIB_DIR/x86_64" ]; then
   mkdir -p "$LIB_DIR/x86_64"
 fi
 
+if [ ! -d "$LIB_DIR/pkgconfig" ]; then
+  mkdir -p "$LIB_DIR/pkgconfig"
+fi
+
 cp $X86_64_DIR/lib*.dylib $LIB_DIR/x86_64
 cp $X86_64_DIR/lib*.a $LIB_DIR/x86_64
 cp -R $X86_64_DIR/include $INSTALL_DIR/
-cp -R $X86_64_DIR/lib/cmake $LIB_DIR/
+cp -R $X86_64_DIR/*.pc $LIB_DIR/pkgconfig
 
 ARM64_DIR=$BUILD_DIR/arm64
 if [ ! -d "$ARM64_DIR" ]; then
@@ -62,7 +60,7 @@ if [ ! -d "$ARM64_DIR" ]; then
 fi
 cd $ARM64_DIR
 if [ ! -f "Makefile" ]; then
-  $SRC_DIR/Configure $CONFIG darwin64-arm64-cc no-asm --prefix=$ARM64_DIR --openssldir=$ARM64_DIR
+  $SRC_DIR/Configure darwin64-arm64-cc no-asm --prefix=$ARM64_DIR --openssldir=$ARM64_DIR
 fi
 
 if [ ! -d "$LIB_DIR/arm64" ]; then

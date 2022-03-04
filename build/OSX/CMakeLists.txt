@@ -96,7 +96,7 @@ ExternalProject_Add(openssl
 	  SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
 	  CONFIGURE_COMMAND  ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --build-dir=${_openssl_BUILD_ROOT} --src-dir=${THIRDPARTY_DIR}/openssl --config=${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/osx.conf --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --build-dir=${_openssl_BUILD_ROOT} --src-dir=${THIRDPARTY_DIR}/openssl --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
