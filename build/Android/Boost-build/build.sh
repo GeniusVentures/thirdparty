@@ -44,6 +44,13 @@ if [ -n "$5" ]; then
   export ANDROID_NDK=$5
 fi
 
+if [ -n "$6" ]; then
+  export ANDROID_TOOLCHAIN=$6
+fi
+
+export PATH=$ANDROID_NDK:$ANDROID_TOOLCHAIN:$SAVED_PATH
+echo "PATH: $PATH"
+
 # only build these libs
 WITH_LIBRARIES="--with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem  --with-log"
 
@@ -85,13 +92,13 @@ clang_triple_for_abi_name() {
     local abi_name=$1
 
     case "$abi_name" in
-        arm64-v8a)      echo "aarch64-linux-android21"
+        arm64-v8a)      echo "aarch64-linux-android23"
         ;;
-        armeabi-v7a)    echo "armv7a-linux-androideabi16"
+        armeabi-v7a)    echo "armv7a-linux-androideabi23"
         ;;
-        x86)            echo "i686-linux-android16"
+        x86)            echo "i686-linux-android23"
         ;;
-        x86_64)         echo "x86_64-linux-android21"
+        x86_64)         echo "x86_64-linux-android23"
         ;;
 
     esac

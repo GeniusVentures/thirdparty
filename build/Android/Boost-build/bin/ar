@@ -1,5 +1,5 @@
 #!/bin/sh
 
 #echo "in ar....${BFA_TOOL_TRIPLE_FOR_ABI}" 
-exec ${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/${BFA_TOOL_TRIPLE_FOR_ABI}-ar "$@"
+exec ${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar "$@"
 
