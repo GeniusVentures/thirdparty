@@ -8,26 +8,26 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   Windows:
-      runs-on: windows-2019
-      steps:
-        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-        - uses: actions/checkout@v2
-          with:
-            submodules: 'recursive'
-        - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1
-          with:
-            sdk-version: 19041
+    runs-on: windows-2019
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1
+        with:
+          sdk-version: 19041
 
-        - name: Create Build Directory
-          run: cmake -E make_directory ${{github.workspace}}/.build
+      - name: Create Build Directory
+        run: cmake -E make_directory ${{github.workspace}}/.build
 
-        - name: Configure CMake
-          working-directory: ${{github.workspace}}/.build
-          run: cmake -S ../build/Windows/ -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_VERSION="10.0"
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/.build
+        run: cmake -S ../build/Windows/ -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_VERSION="10.0"
 
-        - name: Compile
-          working-directory: ${{github.workspace}}/.build
-          run: cmake --build . --config Release
+      - name: Compile
+        working-directory: ${{github.workspace}}/.build
+        run: cmake --build . --config Release
 
   Linux:
       runs-on: ubuntu-latest
