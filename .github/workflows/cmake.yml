@@ -8,99 +8,102 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   Windows:
-    runs-on: windows-2019
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1
-        with:
-          sdk-version: 19041
+    if: ${{ false }}  # disable for now
+      runs-on: windows-2019
+      steps:
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        - uses: actions/checkout@v2
+          with:
+            submodules: 'recursive'
+        - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1
+          with:
+            sdk-version: 19041
 
-      - name: Create Build Directory
-        run: cmake -E make_directory ${{github.workspace}}/.build
+        - name: Create Build Directory
+          run: cmake -E make_directory ${{github.workspace}}/.build
 
-      - name: Configure CMake
-        working-directory: ${{github.workspace}}/.build
-        run: cmake -S ../build/Windows/ -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_VERSION="10.0"
+        - name: Configure CMake
+          working-directory: ${{github.workspace}}/.build
+          run: cmake -S ../build/Windows/ -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_VERSION="10.0"
 
-      - name: Compile
-        working-directory: ${{github.workspace}}/.build
-        run: cmake --build . --config Release
+        - name: Compile
+          working-directory: ${{github.workspace}}/.build
+          run: cmake --build . --config Release
 
   Linux:
-    runs-on: ubuntu-latest
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
+    if: ${{ false }}  # disable for now
+      runs-on: ubuntu-latest
+      steps:
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        - uses: actions/checkout@v2
+          with:
+            submodules: 'recursive'
 
-      - name: Create Build Directory
-        run: cmake -E make_directory ${{github.workspace}}/.build
+        - name: Create Build Directory
+          run: cmake -E make_directory ${{github.workspace}}/.build
 
-      - name: Configure CMake
-        working-directory: ${{github.workspace}}/.build
-        run: cmake -S ../build/Linux/ -DCMAKE_BUILD_TYPE=Release
+        - name: Configure CMake
+          working-directory: ${{github.workspace}}/.build
+          run: cmake -S ../build/Linux/ -DCMAKE_BUILD_TYPE=Release
 
-      - name: Compile
-        working-directory: ${{github.workspace}}/.build
-        run: make -j8
+        - name: Compile
+          working-directory: ${{github.workspace}}/.build
+          run: make -j8
 
   Android:
-    runs-on: ubuntu-latest
-    env:
-      ANDROID_NDK_HOME: ${{github.workspace}}/android-ndk/android-ndk-r23b
-      ANDROID_TOOLCHAIN: ${{github.workspace}}/android-ndk/android-ndk-r23b/toolchains/llvm/prebuilt/linux-x86_64/bin
-      NDK_URL: "https://dl.google.com/android/repository/android-ndk-r23b-linux.zip"
+    if: ${{ false }}  # disable for now
+      runs-on: ubuntu-latest
+      env:
+        ANDROID_NDK_HOME: ${{github.workspace}}/android-ndk/android-ndk-r23b
+        ANDROID_TOOLCHAIN: ${{github.workspace}}/android-ndk/android-ndk-r23b/toolchains/llvm/prebuilt/linux-x86_64/bin
+        NDK_URL: "https://dl.google.com/android/repository/android-ndk-r23b-linux.zip"
 
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
+      steps:
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        - uses: actions/checkout@v2
+          with:
+            submodules: 'recursive'
 
-      #- uses: nttld/setup-ndk@v1
-      #  id: setup-ndk
-      #  with:
-      #    ndk-version: r21e
+        #- uses: nttld/setup-ndk@v1
+        #  id: setup-ndk
+        #  with:
+        #    ndk-version: r21e
 
-      - name: Download Android NDK
-        run: |
-          mkdir "${{github.workspace}}/android-ndk"
-          cd "${{github.workspace}}/android-ndk"
-          curl -o ndk.zip ${{ env.NDK_URL }}
-          unzip ndk.zip
-          rm ndk.zip
+        - name: Download Android NDK
+          run: |
+            mkdir "${{github.workspace}}/android-ndk"
+            cd "${{github.workspace}}/android-ndk"
+            curl -o ndk.zip ${{ env.NDK_URL }}
+            unzip ndk.zip
+            rm ndk.zip
 
-      - name: Create Build Directory
-        run: cmake -E make_directory ${{github.workspace}}/.build
+        - name: Create Build Directory
+          run: cmake -E make_directory ${{github.workspace}}/.build
 
-      - name: Set PATH
-        run: echo "${{env.ANDROID_TOOLCHAIN}}" >> $GITHUB_PATH
+        - name: Set PATH
+          run: echo "${{env.ANDROID_TOOLCHAIN}}" >> $GITHUB_PATH
 
-      - name: Configure CMake
-        env:
-          CC: clang
+        - name: Configure CMake
+          env:
+            CC: clang
 
-        working-directory: ${{github.workspace}}/.build
-        run: |
-          export ANDROID_NDK=${{env.ANDROID_NDK_HOME}}
-          export ANDROID_NDK_HOME=${{env.ANDROID_NDK_HOME}}
-          export ANDROID_TOOLCHAIN=${{env.ANDROID_TOOLCHAIN}}
-          echo $PATH
-          export PATH=${{env.ANDROID_TOOLCHAIN}}:$PATH
-          echo $PATH
-          echo $CC
-          ls -la $ANDROID_TOOLCHAIN
-          echo "Check clang path:"
-          which clang
-          env
-          cmake -S ../build/Android/ -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-      - name: Compile
-        working-directory: ${{github.workspace}}/.build
-        run: make -j8
+          working-directory: ${{github.workspace}}/.build
+          run: |
+            export ANDROID_NDK=${{env.ANDROID_NDK_HOME}}
+            export ANDROID_NDK_HOME=${{env.ANDROID_NDK_HOME}}
+            export ANDROID_TOOLCHAIN=${{env.ANDROID_TOOLCHAIN}}
+            echo $PATH
+            export PATH=${{env.ANDROID_TOOLCHAIN}}:$PATH
+            echo $PATH
+            echo $CC
+            ls -la $ANDROID_TOOLCHAIN
+            echo "Check clang path:"
+            which clang
+            env
+            cmake -S ../build/Android/ -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+        - name: Compile
+          working-directory: ${{github.workspace}}/.build
+          run: make -j8
 
   MacOS:
     runs-on: macos-latest
@@ -129,30 +132,31 @@ jobs:
         run: make -j8
 
   iOS:
-    runs-on: macos-latest
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
+    if: ${{ false }}  # disable for now
+      runs-on: macos-latest
+      steps:
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        - uses: actions/checkout@v2
+          with:
+            submodules: 'recursive'
 
-      # Workaround for arm64 build
-      - name: Ensure latest macOS SDK is used
-        run: |
-          sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
-          sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+        # Workaround for arm64 build
+        - name: Ensure latest macOS SDK is used
+          run: |
+            sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
+            sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
 
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.5' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.5' # Version range or exact version of a Python version to use, using SemVer's version range syntax
 
-      - name: Create Build Directory
-        run: cmake -E make_directory ${{github.workspace}}/.build
+        - name: Create Build Directory
+          run: cmake -E make_directory ${{github.workspace}}/.build
 
-      - name: Configure CMake
-        working-directory: ${{github.workspace}}/.build
-        run: cmake -S ../build/iOS/ -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/build/iOS/iOS.cmake
+        - name: Configure CMake
+          working-directory: ${{github.workspace}}/.build
+          run: cmake -S ../build/iOS/ -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/build/iOS/iOS.cmake
 
-      - name: Compile
-        working-directory: ${{github.workspace}}/.build
-        run: make -j8
+        - name: Compile
+          working-directory: ${{github.workspace}}/.build
+          run: make -j8
