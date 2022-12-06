@@ -9,49 +9,49 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   Windows:
     if: ${{ false }}  # disable for now
-      runs-on: windows-2019
-      steps:
-        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-        - uses: actions/checkout@v2
-          with:
-            submodules: 'recursive'
-        - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1
-          with:
-            sdk-version: 19041
+    runs-on: windows-2019
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1
+        with:
+          sdk-version: 19041
 
-        - name: Create Build Directory
-          run: cmake -E make_directory ${{github.workspace}}/.build
+      - name: Create Build Directory
+        run: cmake -E make_directory ${{github.workspace}}/.build
 
-        - name: Configure CMake
-          working-directory: ${{github.workspace}}/.build
-          run: cmake -S ../build/Windows/ -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_VERSION="10.0"
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/.build
+        run: cmake -S ../build/Windows/ -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_VERSION="10.0"
 
-        - name: Compile
-          working-directory: ${{github.workspace}}/.build
-          run: cmake --build . --config Release
+      - name: Compile
+        working-directory: ${{github.workspace}}/.build
+        run: cmake --build . --config Release
 
   Linux:
     if: ${{ false }}  # disable for now
-      runs-on: ubuntu-latest
-      steps:
-        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-        - uses: actions/checkout@v2
-          with:
-            submodules: 'recursive'
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
 
-        - name: Create Build Directory
-          run: cmake -E make_directory ${{github.workspace}}/.build
+      - name: Create Build Directory
+        run: cmake -E make_directory ${{github.workspace}}/.build
 
-        - name: Configure CMake
-          working-directory: ${{github.workspace}}/.build
-          run: cmake -S ../build/Linux/ -DCMAKE_BUILD_TYPE=Release
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/.build
+        run: cmake -S ../build/Linux/ -DCMAKE_BUILD_TYPE=Release
 
-        - name: Compile
-          working-directory: ${{github.workspace}}/.build
-          run: make -j8
+      - name: Compile
+        working-directory: ${{github.workspace}}/.build
+        run: make -j8
 
   Android:
-    if: ${{ false }}  # disable for now
+      if: ${{ false }}  # disable for now
       runs-on: ubuntu-latest
       env:
         ANDROID_NDK_HOME: ${{github.workspace}}/android-ndk/android-ndk-r23b
@@ -133,30 +133,30 @@ jobs:
 
   iOS:
     if: ${{ false }}  # disable for now
-      runs-on: macos-latest
-      steps:
-        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-        - uses: actions/checkout@v2
-          with:
-            submodules: 'recursive'
+    runs-on: macos-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
 
-        # Workaround for arm64 build
-        - name: Ensure latest macOS SDK is used
-          run: |
-            sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
-            sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+      # Workaround for arm64 build
+      - name: Ensure latest macOS SDK is used
+        run: |
+          sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
+          sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
 
-        - uses: actions/setup-python@v2
-          with:
-            python-version: '3.5' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.5' # Version range or exact version of a Python version to use, using SemVer's version range syntax
 
-        - name: Create Build Directory
-          run: cmake -E make_directory ${{github.workspace}}/.build
+      - name: Create Build Directory
+        run: cmake -E make_directory ${{github.workspace}}/.build
 
-        - name: Configure CMake
-          working-directory: ${{github.workspace}}/.build
-          run: cmake -S ../build/iOS/ -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/build/iOS/iOS.cmake
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/.build
+        run: cmake -S ../build/iOS/ -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/build/iOS/iOS.cmake
 
-        - name: Compile
-          working-directory: ${{github.workspace}}/.build
-          run: make -j8
+      - name: Compile
+        working-directory: ${{github.workspace}}/.build
+        run: make -j8
