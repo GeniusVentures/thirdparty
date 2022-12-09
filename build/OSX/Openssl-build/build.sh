@@ -39,7 +39,6 @@ if [ ! -f "Makefile" ]; then
   $SRC_DIR/Configure darwin64-x86_64-cc no-asm shared --prefix=$X86_64_DIR --openssldir=$X86_64_DIR
 fi
 make build_libs
-make install_dev
 
 if [ ! -d "$LIB_DIR/x86_64" ]; then
   mkdir -p "$LIB_DIR/x86_64"
@@ -52,6 +51,7 @@ fi
 cp $X86_64_DIR/lib*.dylib $LIB_DIR/x86_64
 cp $X86_64_DIR/lib*.a $LIB_DIR/x86_64
 cp -R $X86_64_DIR/include $INSTALL_DIR/
+cp -R $SRC_DIR/include/openssl $INSTALL_DIR/include/
 cp -R $X86_64_DIR/*.pc $LIB_DIR/pkgconfig
 
 ARM64_DIR=$BUILD_DIR/arm64
