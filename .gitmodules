@@ -82,8 +82,8 @@
     path = delta-enabled-crdts
     url = ../delta-enabled-crdts.git
     branch = master
-[submodule "trustwallet/wallet-core"]
-    path = trustwallet/wallet-core
+[submodule "wallet-core"]
+    path = wallet-core
     url = https://github.com/trustwallet/wallet-core.git
 [submodule "rocksdb"]
     path = rocksdb
@@ -137,3 +137,6 @@
 [submodule "Vulkan-Loader"]
 	path = Vulkan-Loader
 	url = https://github.com/KhronosGroup/Vulkan-Loader.git
+[submodule "abseil"]
+	path = abseil-cpp
+	url = https://github.com/abseil/abseil-cpp.git

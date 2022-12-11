@@ -10,6 +10,21 @@ mark_as_advanced(JSON_FOR_MODERN_CXX_INCLUDE_DIR)
 set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
 
 # --------------------------------------------------------
+# Builds abseil/absl
+ExternalProject_Add(absl
+        PREFIX absl
+        SOURCE_DIR "${THIRDPARTY_DIR}/abseil-cpp"
+        CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/absl
+        -DCMAKE_CXX_STANDARD:STRING=17
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+)
+
+set(_FINDPACKAGE_ABSL_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/absl/lib/cmake/absl")
+set(_FINDPACKAGE_ABSL_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/absl/lib")
+set(_FINDPACKAGE_ABSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/absl/include")
+
+# --------------------------------------------------------
 # Builds GTest project from the git submodule.
 ExternalProject_Add(GTest
   PREFIX GTest
@@ -60,12 +75,13 @@ ExternalProject_Add(grpc
         -DgRPC_BUILD_TESTS:BOOL=OFF
         -DABSL_ENABLE_INSTALL:BOOL=ON
         -DgRPC_SSL_PROVIDER:STRING=package
-# TODO: compile abseil for OSX arm64;x86_64 combines library         -DgRPC_ABSL_PROVIDER:STRING=package
+        -DgRPC_ABSL_PROVIDER:STRING=package
+        -Dabsl_DIR:PATH=${_FINDPACKAGE_ABSL_CONFIG_DIR}
         ${_OPENSSL_CACHE_ARGS}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_grpc_EXTRA_PARAM}
   ${grpc_patch}
-  DEPENDS openssl # protobuf # zlib absl
+  DEPENDS openssl absl
 )
 
 # --------------------------------------------------------
@@ -487,6 +503,26 @@ ExternalProject_Add(xxhash
           -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/xxhash
           ${_CMAKE_COMMON_BUILD_PARAMS}
 )
+
+#ExternalProject_Add(wallet-core
+#    PREFIX wallet-core
+#    SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"
+#    CMAKE_CACHE_ARGS
+#    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/wallet-core
+#    -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
+#    -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+#    -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
+#    -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
+#    -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
+#    -DTESTING:BOOL=${TESTING}
+#    ${_CMAKE_COMMON_BUILD_PARAMS}
+#    ${_BOOST_CACHE_ARGS}
+#    ${_OPENSSL_CACHE_ARGS}
+#    ${_GRPC_CACHE_ARGS}
+#    -DCMAKE_CXX_STANDARD:STRING=17
+#    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+#    DEPENDS Boost grpc openssl
+#
 
 # --------------------------------------------------------
 # jsonrpc-lean
