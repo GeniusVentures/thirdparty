@@ -46,7 +46,7 @@ if (NOT DEFINED PROTOC_EXECUTABLE)
 endif()
 set(_PROTOBUF_PROTOC_EXEC "${PROTOC_EXECUTABLE}")
 print("PROTOBUF_PROTOC_EXECUTABLE: ${_PROTOBUF_PROTOC_EXEC}")
-
+print("CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 # --------------------------------------------------------
 ## Builds grpc
 ExternalProject_Add(grpc
@@ -60,6 +60,7 @@ ExternalProject_Add(grpc
         -DgRPC_BUILD_TESTS:BOOL=OFF
         -DABSL_ENABLE_INSTALL:BOOL=ON
         -DgRPC_SSL_PROVIDER:STRING=package
+# TODO: compile abseil for OSX arm64;x86_64 combines library         -DgRPC_ABSL_PROVIDER:STRING=package
         ${_OPENSSL_CACHE_ARGS}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_grpc_EXTRA_PARAM}
@@ -192,7 +193,7 @@ ExternalProject_Add(yaml-cpp
         ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
-set(_FINDPACKAGE_YAMLCPP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/share/cmake/yaml-cpp")
+set(_FINDPACKAGE_YAMLCPP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/lib/cmake/yaml-cpp")
 set(_FINDPACKAGE_YAMLCPP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/lib")
 set(_FINDPACKAGE_YAMLCPP_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/include")
 
