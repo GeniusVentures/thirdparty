@@ -4,11 +4,11 @@
 [submodule "libp2p"]
     path = libp2p
     url = ../libp2p.git
-    branch = develop
+    branch = master
 [submodule "ipfs-lite-cpp"]
     path = ipfs-lite-cpp
     url = ../ipfs-lite-cpp.git
-    branch = develop
+    branch = master
 [submodule "restclient-cpp"]
     path = restclient-cpp
     url = https://github.com/mrtazz/restclient-cpp.git
@@ -57,14 +57,14 @@
 [submodule "ipfs-pubsub"]
     path = ipfs-pubsub
     url = ../ipfs-pubsub.git
-    branch = develop
+    branch = master
 [submodule "GTest"]
     path = GTest
     url = https://github.com/google/googletest
 [submodule "ed25519"]
     path = ed25519
     url = ../ed25519.git
-    branch = develop
+    branch = master
 [submodule "rapidjson"]
     path = rapidjson
     url = https://github.com/Tencent/rapidjson
@@ -77,11 +77,11 @@
 [submodule "Parabeac-Core"]
     path = Parabeac-Core
     url = https://github.com/Parabeac/Parabeac-Core.git
-    branch = dev
+    branch = stable
 [submodule "delta-enabled-crdts"]
     path = delta-enabled-crdts
     url = ../delta-enabled-crdts.git
-    branch = develop
+    branch = master
 [submodule "trustwallet/wallet-core"]
     path = trustwallet/wallet-core
     url = https://github.com/trustwallet/wallet-core.git
@@ -91,7 +91,7 @@
 [submodule "sr25519-donna"]
     path = sr25519-donna
     url = ../sr25519-donna.git
-    branch = develop
+    branch = master
 [submodule "fmt"]
     path = fmt
     url = https://github.com/fmtlib/fmt.git
@@ -114,7 +114,7 @@
 [submodule "ipfs-bitswap-cpp"]
     path = ipfs-bitswap-cpp
     url = ../ipfs-bitswap-cpp.git
-    branch = develop
+    branch = master
 [submodule "openssl"]
 	path = openssl
 	url = https://github.com/openssl/openssl.git
