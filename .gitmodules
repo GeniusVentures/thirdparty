@@ -83,8 +83,8 @@
     url = ../delta-enabled-crdts.git
     branch = master
 [submodule "wallet-core"]
-    path = wallet-core
-    url = https://github.com/trustwallet/wallet-core.git
+	path = wallet-core
+	url = https://github.com/trustwallet/wallet-core.git
 [submodule "rocksdb"]
     path = rocksdb
     url = ../rocksdb.git
