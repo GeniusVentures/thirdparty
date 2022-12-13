@@ -32,7 +32,7 @@
 [submodule "grpc"]
     path = grpc
     url = https://github.com/grpc/grpc
-    branch = master
+    branch = v1.39.1
 [submodule "GSL"]
     path = GSL
     url = https://github.com/Microsoft/GSL
