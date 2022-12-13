@@ -45,7 +45,7 @@ ExternalProject_Add(Boost
     UPDATE_COMMAND ""
 )
 
-set(boost_DIR "${_BOOST_BUILD_ROOT}/lib/cmake/Boost-1.72.0")
+set(boost_DIR "${_BOOST_BUILD_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
 set(_Boost_INCLUDE_DIR "${_BOOST_BUILD_ROOT}/include")
 set(_BOOST_CACHE_ARGS
     -DBoost_DIR:PATH=${boost_DIR}

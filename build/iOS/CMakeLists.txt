@@ -62,20 +62,20 @@ ExternalProject_Add(Boost
     DOWNLOAD_COMMAND ""
     CONFIGURE_COMMAND  ""
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build
-    BUILD_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build/build.sh -ios --boost-version 1.72.0 --src-dir ${THIRDPARTY_DIR}/boost --build-dir ${BOOST_ROOT}
+    BUILD_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build/build.sh -ios --boost-version ${BOOST_VERSION} --src-dir ${THIRDPARTY_DIR}/boost --build-dir ${BOOST_ROOT}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
 
 print("boost dir ${BOOST_ROOT}")
-set(boost_headers_DIR "${BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
-set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-1.72.0")
-set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-1.72.0")
-set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-1.72.0")
-set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-1.72.0")
+set(boost_headers_DIR "${BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}")
+set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
+set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
+set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-${BOOST_VERSION}")
+set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-${BOOST_VERSION}")
 set(_Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
 set(_BOOST_CACHE_ARGS
-    -DBoost_DIR:PATH=${BOOST_ROOT}/lib/cmake/Boost-1.72.0
+    -DBoost_DIR:PATH=${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
     -Dboost_headers_DIR:PATH=${boost_headers_DIR}
     -Dboost_random_DIR:PATH=${boost_random_DIR}

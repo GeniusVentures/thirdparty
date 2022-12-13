@@ -68,8 +68,6 @@ ExternalProject_Add( Boost
 )
 
 
-# somehow this doesn't work on github CI/CD probably permission error - get_BOOST_version(BOOST_VERSION "${THIRDPARTY_DIR}/boost/boost/version.hpp")
-set(BOOST_VERSION "1.72.0")
 print("BOOST_VERSION: ${BOOST_VERSION}")
 set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}")
 set(boost_random_DIR "${_BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")

@@ -9,6 +9,10 @@ include(CheckCXXCompilerFlag)
 include(${PROJECT_BUILD_FOLDER}/cmake.in/functions.cmake)
 include(ExternalProject)
 
+
+# somehow this doesn't work on github CI/CD probably permission error - get_BOOST_version(BOOST_VERSION "${THIRDPARTY_DIR}/boost/boost/version.hpp")
+set(BOOST_VERSION "1.78.0")
+
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()

@@ -57,12 +57,12 @@ set(BOOST_LIB_CMAKE_DIR "${_BOOST_ROOT}/lib/cmake")
 set(_Boost_INCLUDE_DIR "${_BOOST_ROOT}/include/boost-1_72")
 
 set(_BOOST_CACHE_ARGS
-      -Dboost_headers_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_headers-1.72.0
-      -Dboost_random_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_random-1.72.0
-      -Dboost_system_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_system-1.72.0
-      -Dboost_filesystem_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_filesystem-1.72.0
-      -Dboost_program_options_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_program_options-1.72.0
-      -DBoost_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/Boost-1.72.0
+      -Dboost_headers_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_headers-${BOOST_VERSION}
+      -Dboost_random_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_random-${BOOST_VERSION}
+      -Dboost_system_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_system-${BOOST_VERSION}
+      -Dboost_filesystem_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_filesystem-${BOOST_VERSION}
+      -Dboost_program_options_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_program_options-${BOOST_VERSION}
+      -DBoost_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/Boost-${BOOST_VERSION}
       -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
       -DBoost_USE_MULTITHREADED:BOOL=ON
       -DBoost_USE_STATIC_RUNTIME:BOOL=ON

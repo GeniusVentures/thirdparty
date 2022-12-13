@@ -57,7 +57,7 @@ set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
 
 # --------------------------------------------------------
 # build boost
-set(BOOST_VERSION2 1_72_0)
+set(BOOST_VERSION2 1_78_0)
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/Android/${ANDROID_ABI}")
 ExternalProject_Add( Boost
 	PREFIX boost
@@ -74,14 +74,14 @@ set(Boost_USE_STATIC_LIBS  ON)
 set(BOOST_ROOT ${_BOOST_ROOT})
 set(_Boost_INCLUDE_DIR  ${BOOST_ROOT}/include)
 set(BOOST_LIBRARYDIR ${BOOST_ROOT}/lib)
-set(Boost_DIR "${BOOST_LIBRARYDIR}/cmake/Boost-1.72.0")
-set(boost_headers_DIR "${BOOST_LIBRARYDIR}/cmake/boost_headers-1.72.0")
-set(boost_random_DIR "${BOOST_LIBRARYDIR}/cmake/boost_random-1.72.0")
-set(boost_system_DIR "${BOOST_LIBRARYDIR}/cmake/boost_system-1.72.0")
-set(boost_filesystem_DIR "${BOOST_LIBRARYDIR}/cmake/boost_filesystem-1.72.0")
-set(boost_program_options_DIR "${BOOST_LIBRARYDIR}/cmake/boost_program_options-1.72.0")
-set(boost_date_time_DIR "${BOOST_LIBRARYDIR}/cmake/boost_date_time-1.72.0")
-set(boost_regex_DIR "${BOOST_LIBRARYDIR}/cmake/boost_regex-1.72.0")
+set(Boost_DIR "${BOOST_LIBRARYDIR}/cmake/Boost-${BOOST_VERSION}")
+set(boost_headers_DIR "${BOOST_LIBRARYDIR}/cmake/boost_headers-${BOOST_VERSION}")
+set(boost_random_DIR "${BOOST_LIBRARYDIR}/cmake/boost_random-${BOOST_VERSION}")
+set(boost_system_DIR "${BOOST_LIBRARYDIR}/cmake/boost_system-${BOOST_VERSION}")
+set(boost_filesystem_DIR "${BOOST_LIBRARYDIR}/cmake/boost_filesystem-${BOOST_VERSION}")
+set(boost_program_options_DIR "${BOOST_LIBRARYDIR}/cmake/boost_program_options-${BOOST_VERSION}")
+set(boost_date_time_DIR "${BOOST_LIBRARYDIR}/cmake/boost_date_time-${BOOST_VERSION}")
+set(boost_regex_DIR "${BOOST_LIBRARYDIR}/cmake/boost_regex-${BOOST_VERSION}")
 print("boost dir ${_BOOST_ROOT}")
 print("boost lib ${BOOST_LIBRARYDIR}")
 
