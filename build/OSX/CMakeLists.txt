@@ -69,6 +69,7 @@ ExternalProject_Add( Boost
 
 
 get_BOOST_version(BOOST_VERSION "${THIRDPARTY_DIR}/boost/boost/version.hpp")
+print("BOOST_VERSION: ${BOOST_VERSION}")
 set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}")
 set(boost_random_DIR "${_BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
 set(boost_system_DIR "${_BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
