@@ -66,13 +66,18 @@ ExternalProject_Add( Boost
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )
-set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-1.72.0")
-set(boost_random_DIR "${_BOOST_ROOT}/lib/cmake/boost_random-1.72.0")
-set(boost_system_DIR "${_BOOST_ROOT}/lib/cmake/boost_system-1.72.0")
-set(boost_filesystem_DIR "${_BOOST_ROOT}/lib/cmake/boost_filesystem-1.72.0")
-set(boost_program_options_DIR "${_BOOST_ROOT}/lib/cmake/boost_program_options-1.72.0")
-set(boost_DIR "${_BOOST_ROOT}/lib/cmake/Boost-1.72.0")
+
+
+get_BOOST_version(BOOST_VERSION "${THIRDPARTY_DIR}/boost/boost/version.hpp")
+set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}")
+set(boost_random_DIR "${_BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
+set(boost_system_DIR "${_BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
+set(boost_filesystem_DIR "${_BOOST_ROOT}/lib/cmake/boost_filesystem-${BOOST_VERSION}")
+set(boost_program_options_DIR "${_BOOST_ROOT}/lib/cmake/boost_program_options-${BOOST_VERSION}")
+set(boost_DIR "${_BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
+print("boost_DIR: ${boost_DIR}")
 set(_Boost_INCLUDE_DIR "${_BOOST_ROOT}/include")
+set(_FINDPACKAGE_BOOST_CONFIG_DIR ${boost_DIR})
 
 set(_BOOST_CACHE_ARGS
 	-Dboost_headers_DIR:PATH=${boost_headers_DIR}
@@ -81,6 +86,7 @@ set(_BOOST_CACHE_ARGS
 	-Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
 	-Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
 	-DBoost_DIR:PATH=${boost_DIR}
+	-DBOOST_ROOT:PATH=${_BOOST_ROOT}
 	-DBoost_USE_MULTITHREADED:BOOL=ON
 	-DBoost_USE_STATIC_RUNTIME:BOOL=ON
 	-DBoost_USE_STATIC_LIBS:BOOL=ON
