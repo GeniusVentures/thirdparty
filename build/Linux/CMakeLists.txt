@@ -77,6 +77,21 @@ set(_OPENSSL_CACHE_ARGS
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 
 # --------------------------------------------------------
+# set config for grpc
+set(_grpc_EXTRA_PARAM
+    -D_gRPC_PROTOBUF_PROTOC_EXECUTABLE:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/build/third_party/protobuf/protoc
+    -D_gRPC_CPP_PLUGIN:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/build/grpc_cpp_plugin
+	-DgRPC_SSL_PROVIDER:STRING=package
+    -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
+    -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
+    -DgRPC_BUILD_GRPC_PHP_PLUGIN:BOOL=OFF
+    -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN:BOOL=OFF
+    -DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=ON
+    -DgRPC_BUILD_GRPC_NODE_PLUGIN:BOOL=OFF
+    -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
+)
+
+# --------------------------------------------------------
 # Set ed25519 OS specific configurations
 set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)

@@ -76,13 +76,11 @@ ExternalProject_Add(grpc
         -DgRPC_BUILD_TESTS:BOOL=OFF
         -DABSL_ENABLE_INSTALL:BOOL=ON
         -DgRPC_SSL_PROVIDER:STRING=package
-        -DgRPC_ABSL_PROVIDER:STRING=package
-        -Dabsl_DIR:PATH=${_FINDPACKAGE_ABSL_CONFIG_DIR}
         -DCMAKE_CXX_STANDARD:STRING=17
         ${_OPENSSL_CACHE_ARGS}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_grpc_EXTRA_PARAM}
-  ${grpc_patch}
+        ${grpc_patch}
   DEPENDS openssl absl
 )
 
