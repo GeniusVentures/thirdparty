@@ -59,7 +59,7 @@ endif()
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add( Boost
 	PREFIX  boost
-  SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
+    SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
 	CONFIGURE_COMMAND  ""
 	PATCH_COMMAND ""
  	BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/build.sh --build-dir=${_BOOST_ROOT} --src-dir=${THIRDPARTY_DIR}/boost --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}

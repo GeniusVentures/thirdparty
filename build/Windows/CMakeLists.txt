@@ -20,7 +20,7 @@ endif()
 
 # ------------------------------------------
 # Enable c++ exceptions
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP")
 
 # --------------------------------------------------------
 # build common libraries by platforms
@@ -32,11 +32,16 @@ set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/cmake")
 
 # --------------------------------------------------------
 # Set Boost Windows specific configurations
-set(VC_PLATFORMTOOLSET "vc141")
+set(VC_PLATFORMTOOLSET "vc193")
 set(BOOST_TOOLSET "msvc-14.1")
 if(MSVC_VERSION AND MSVC_VERSION GREATER_EQUAL 1920) # v142 toolset
 	set(VC_PLATFORMTOOLSET "vc142")
 	set(BOOST_TOOLSET "msvc-14.2")
+endif()
+
+if(MSVC_VERSION AND MSVC_VERSION GREATER_EQUAL 1930) # v143 toolset
+	set(VC_PLATFORMTOOLSET "vc143")
+	set(BOOST_TOOLSET "msvc-14.3")
 endif()
 
 # --------------------------------------------------------
@@ -46,15 +51,16 @@ set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add(Boost
       PREFIX boost
       SOURCE_DIR  "${THIRDPARTY_DIR}/boost"
-      UPDATE_COMMAND ${CMAKE_COMMAND} -E copy ${THIRDPARTY_DIR}/build/cmake.in/boost-patch/system_category_win32.hpp ${THIRDPARTY_DIR}/boost/libs/system/include/boost/system/detail/system_category_win32.hpp
+      #UPDATE_COMMAND ${CMAKE_COMMAND} -E copy ${THIRDPARTY_DIR}/build/cmake.in/boost-patch/system_category_win32.hpp ${THIRDPARTY_DIR}/boost/libs/system/include/boost/system/detail/system_category_win32.hpp
       PATCH_COMMAND ./bootstrap.bat ${VC_PLATFORMTOOLSET}
       CONFIGURE_COMMAND  ""
       BUILD_COMMAND ./b2.exe headers
       BUILD_IN_SOURCE  TRUE
-      INSTALL_COMMAND ./b2.exe toolset=${BOOST_TOOLSET} runtime-link=static cxxflags="-fPIC ${CMAKE_CXX_FLAGS}"  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release,debug  link=static threading=multi   --stagedir=stage/x64  --build-dir=${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib install
+      INSTALL_COMMAND ./b2.exe toolset=${BOOST_TOOLSET} runtime-link=static cxxflags="${CMAKE_CXX_FLAGS}"  --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release,debug  link=static threading=multi   --stagedir=stage/x64  --build-dir=${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib install
 )
 set(BOOST_LIB_CMAKE_DIR "${_BOOST_ROOT}/lib/cmake")
-set(_Boost_INCLUDE_DIR "${_BOOST_ROOT}/include/boost-1_72")
+# not sure why this can't match the exaxt ${BOOST_VERSION} string of everything else.
+set(_Boost_INCLUDE_DIR "${_BOOST_ROOT}/include/boost-1_78")
 
 set(_BOOST_CACHE_ARGS
       -Dboost_headers_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_headers-${BOOST_VERSION}
@@ -131,8 +137,24 @@ set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM bcryptgen)
 
 # --------------------------------------------------------
-# Set config for libp2p
-set(_libp2p_BUILD_EXAMPLES ON)
+# Set config for libp2p/ifps modules
+set(_libp2p_BUILD_EXAMPLES OFF)
+# eliminates some warnings on windows
+set(libp2_EXTRA_PARAM
+	-D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN7
+)
+
+set(ipfs-lite-cpp_EXTRA_PARAM
+	-D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN7
+	)
+
+set(ipfs-pubsub_EXTRA_PARAM
+	-D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN7
+	)
+
+set(ipfs-bitswap-cpp_EXTRA_PARAM
+	-D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN7
+	)
 
 # --------------------------------------------------------
 # Allow multiple definitions
@@ -142,3 +164,9 @@ set(MULTIPLE_OPTION /FORCE:MULTIPLE)
 # --------------------------------------------------------
 # build common targets
 include(../CommonTargets.CMake)
+
+# for rocksdb windows needs > windows 8
+set(rocksdb_EXTRA_PARAM
+	-D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN8
+)
+
