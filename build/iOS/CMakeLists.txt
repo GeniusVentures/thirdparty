@@ -190,8 +190,8 @@ set(_libp2p_BUILD_EXAMPLES OFF)
 
 # --------------------------------------------------------
 # Set o iOS specific configurations
-set(grpc_patch
- PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/ssl_transport_security.cc" <SOURCE_DIR>/src/core/tsi/ssl_transport_security.cc)
+#set(grpc_patch
+# PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/ssl_transport_security.cc" <SOURCE_DIR>/src/core/tsi/ssl_transport_security.cc)
 
 # --------------------------------------------------------
 # Allow multiple definitions
