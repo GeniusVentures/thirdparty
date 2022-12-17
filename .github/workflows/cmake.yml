@@ -6,11 +6,12 @@ name: Release Build CI
 # Triggers the workflow on push or pull request events and manually from the Actions tab
 on: [push, pull_request, workflow_dispatch]
 
+env:
+  CMAKE_BUILD_PARALLEL_LEVEL: 8
+
 jobs:
   Windows:
     runs-on: windows-2022
-    env:
-      CMAKE_BUILD_PARALLEL_LEVEL: 8
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
@@ -60,7 +61,7 @@ jobs:
           run: make
 
   Android:
-      if: false
+      #if: false
       runs-on: ubuntu-latest
       env:
         ANDROID_NDK_HOME: ${{github.workspace}}/android-ndk/android-ndk-r23b
@@ -116,7 +117,7 @@ jobs:
           run: make
 
   MacOS:
-    if: false
+    #if: false
     env:
       MAKEFLAGS: "-j 8"
     runs-on: macos-latest
@@ -145,7 +146,7 @@ jobs:
         run: make
 
   iOS:
-    if: false
+    #if: false
     env:
       MAKEFLAGS: "-j 8"
     runs-on: macos-latest
