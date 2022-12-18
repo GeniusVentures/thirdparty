@@ -17,6 +17,8 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+set(CMAKE_MESSAGE_LOG_LEVEL "Warning" CACHE STRING "Quiets Down the build to just warnings/errors")
+
 print("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 set(_MSVC_RUNTIME_LIBRARY)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS}")

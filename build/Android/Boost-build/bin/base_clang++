@@ -9,6 +9,7 @@ else
 fi
 
 #echo " .... LINKER = " $LINKER
+#echo " .... PATH = " $PATH
 
 # Remove any -m32/-m64 from input parameters
 PARAMS=`echo "$@" | tr ' ' '\n' | grep -v -x -e -m32 | grep -v -x -e -m64 | tr '\n' ' '`

@@ -40,7 +40,6 @@ jobs:
         run: cmake --build . --config Release
 
   Linux:
-      if: false
       runs-on: ubuntu-latest
       env:
         MAKEFLAGS: "-j 8"

@@ -30,22 +30,23 @@ BOOST_DIR=$3
 
 SAVED_PATH=$PATH
 
+API_LEVEL=$4
 
 # release | debug
 
 BUILD_VARIANT="release"
-if [ -n "$4" ]; then
-  if [ "$4" = "Debug" ] || [ "$4" = "debug" ]; then
+if [ -n "$5" ]; then
+  if [ "$5" = "Debug" ] || [ "$5" = "debug" ]; then
     BUILD_VARIANT="debug"
   fi
 fi
 
-if [ -n "$5" ]; then
-  export ANDROID_NDK=$5
+if [ -n "$6" ]; then
+  export ANDROID_NDK=$6
 fi
 
-if [ -n "$6" ]; then
-  export ANDROID_TOOLCHAIN=$6
+if [ -n "$7" ]; then
+  export ANDROID_TOOLCHAIN=$7
 fi
 
 export PATH=$ANDROID_NDK:$ANDROID_TOOLCHAIN:$SAVED_PATH
@@ -92,13 +93,13 @@ clang_triple_for_abi_name() {
     local abi_name=$1
 
     case "$abi_name" in
-        arm64-v8a)      echo "aarch64-linux-android23"
+        arm64-v8a)      echo "aarch64-linux-android${API_LEVEL}"
         ;;
-        armeabi-v7a)    echo "armv7a-linux-androideabi23"
+        armeabi-v7a)    echo "armv7a-linux-androideabi${API_LEVEL}"
         ;;
-        x86)            echo "i686-linux-android23"
+        x86)            echo "i686-linux-android${API_LEVEL}"
         ;;
-        x86_64)         echo "x86_64-linux-android23"
+        x86_64)         echo "x86_64-linux-android${API_LEVEL}"
         ;;
 
     esac
@@ -319,7 +320,7 @@ then
   # Make the initial bootstrap
   echo "Performing boost bootstrap"
 
-  ./bootstrap.sh # 2>&1 | tee -a bootstrap.log
+  ./bootstrap.sh --with# 2>&1 | tee -a bootstrap.log
 fi
 
 #-------------------------------------------
