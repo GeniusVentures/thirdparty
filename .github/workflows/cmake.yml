@@ -62,7 +62,6 @@ jobs:
           run: make
 
   Android:
-      if: false
       runs-on: ubuntu-latest
       env:
         ANDROID_NDK_HOME: ${{github.workspace}}/android-ndk/android-ndk-r25b

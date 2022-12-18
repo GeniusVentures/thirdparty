@@ -9,7 +9,7 @@ include(../CommonCompilerOptions.CMake)
 
 # --------------------------------------------------------
 # Set Android cross compile specific options
-find_program(MAKE_EXE NAMES gmake nmake make)
+find_program(MAKE_EXE NAMES make)
 set(CMAKE_SYSTEM_NAME Android)
 set(CMAKE_SYSTEM_VERSION 28) # API level
 set(ANDROID_PLATFORM_LEVEL 28)
