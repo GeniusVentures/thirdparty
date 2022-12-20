@@ -21,6 +21,8 @@ jobs:
             git config --global core.eol lf
             echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
             echo "MAKEFLAGS=\"-j 8\"" >> $GITHUB_ENV
+            echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+            echo "ANDROID_NDK_HOM=$ANDROID_NDK_HOME" >> $GITHUB_ENV
 
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         - uses: actions/checkout@v3
