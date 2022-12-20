@@ -141,7 +141,7 @@
 [submodule "abseil-cpp"]
 	path = abseil-cpp
 	url = https://github.com/abseil/abseil-cpp.git
-[submodule "build/Android/Boost-for-Android/"]
-    url = https://github.com/GeniusVentures/Boost-for-Android.git
+[submodule "Boost-for-Android"]
+    url = ../Boost-for-Android.git
     path = build/Android/Boost-for-Android
 
