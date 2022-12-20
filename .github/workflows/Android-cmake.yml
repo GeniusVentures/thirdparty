@@ -26,8 +26,8 @@ jobs:
       steps:
         - name: Setup Git to make sure crlf -> lf
           run: |
-            git config --system core.autocrlf false
-            git config --system core.eol lf
+            git config --global core.autocrlf false
+            git config --global core.eol lf
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         - uses: actions/checkout@v2
           with:
