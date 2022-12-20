@@ -2,8 +2,14 @@ This is the repository for third party of SuperGenius
 ===================================
 
 # CI/CD Status
-[![Release Build CI](https://github.com/GeniusVentures/thirdparty/actions/workflows/cmake.yml/badge.svg?branch=master)](https://github.com/GeniusVentures/thirdparty/actions/workflows/cmake.yml)
-[![Develop Build CI](https://github.com/GeniusVentures/thirdparty/actions/workflows/cmake.yml/badge.svg?branch=develop)](https://github.com/GeniusVentures/thirdparty/actions/workflows/cmake.yml)
+|                                                                                                Master (Release)                                                                                                 | Develop  |
+|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|
+| [![WIndows Master](https://github.com/GeniusVentures/thirdparty/actions/workflows/Windows-cmake.yml/badge.svg?branch=master)](https://github.com/GeniusVentures/thirdparty/actions/workflows/Windows-cmake.yml) |[![Windows Develop](https://github.com/GeniusVentures/thirdparty/actions/workflows/Windows-cmake.yml/badge.svg?branch=develop)](https://github.com/GeniusVentures/thirdparty/actions/workflows/Windows-cmake.yml)
+|       [![OSX Master](https://github.com/GeniusVentures/thirdparty/actions/workflows/OSX-cmake.yml/badge.svg?branch=master)](https://github.com/GeniusVentures/thirdparty/actions/workflows/OSX-cmake.yml)       |[![OSX Develop](https://github.com/GeniusVentures/thirdparty/actions/workflows/OSX-cmake.yml/badge.svg?branch=develop)](https://github.com/GeniusVentures/thirdparty/actions/workflows/OSX-cmake.yml)
+|    [![Linux Master](https://github.com/GeniusVentures/thirdparty/actions/workflows/Linux-cmake.yml/badge.svg?branch=master)](https://github.com/GeniusVentures/thirdparty/actions/workflows/Linux-cmake.yml)    |[![Linux Develop](https://github.com/GeniusVentures/thirdparty/actions/workflows/Linux-cmake.yml/badge.svg?branch=develop)](https://github.com/GeniusVentures/thirdparty/actions/workflows/Linux-cmake.yml)
+|       [![iOS Master](https://github.com/GeniusVentures/thirdparty/actions/workflows/iOS-cmake.yml/badge.svg?branch=master)](https://github.com/GeniusVentures/thirdparty/actions/workflows/iOS-cmake.yml)       |[![iOS Develop](https://github.com/GeniusVentures/thirdparty/actions/workflows/iOS-cmake.yml/badge.svg?branch=develop)](https://github.com/GeniusVentures/thirdparty/actions/workflows/iOS-cmake.yml)
+| [![Android Master](https://github.com/GeniusVentures/thirdparty/actions/workflows/Andorid-cmake.yml/badge.svg?branch=master)](https://github.com/GeniusVentures/thirdparty/actions/workflows/Android-cmake.yml) |[![Android Develop](https://github.com/GeniusVentures/thirdparty/actions/workflows/Android-cmake.yml/badge.svg?branch=develop)](https://github.com/GeniusVentures/thirdparty/actions/workflows/Android-cmake.yml)
+
 
 # Build on Windows
 

@@ -1,0 +1,42 @@
+# This is a basic workflow to help you get started with Actions
+
+name: iOS Build
+
+# Controls when the workflow will run
+# Triggers the workflow on push or pull request events and manually from the Actions tab
+on: [push, pull_request, workflow_dispatch]
+
+env:
+  CMAKE_BUILD_PARALLEL_LEVEL: 8
+
+jobs:
+  iOS:
+    env:
+      MAKEFLAGS: "-j 8"
+    runs-on: macos-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      # Workaround for arm64 build
+      - name: Ensure latest macOS SDK is used
+        run: |
+          sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
+          sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.5' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+
+      - name: Create Build Directory
+        run: cmake -E make_directory ${{github.workspace}}/.build
+
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/.build
+        run: cmake -S ../build/iOS/ -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/build/iOS/iOS.cmake
+
+      - name: Compile
+        working-directory: ${{github.workspace}}/.build
+        run: make
