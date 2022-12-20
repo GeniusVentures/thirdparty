@@ -1,7 +1,7 @@
 [submodule "boost"]
     path = boost
     url = https://github.com/boostorg/boost.git
-    branch = boost-1.78.0
+    branch = boost-1.80.0
 [submodule "libp2p"]
     path = libp2p
     url = ../libp2p.git
@@ -141,3 +141,7 @@
 [submodule "abseil-cpp"]
 	path = abseil-cpp
 	url = https://github.com/abseil/abseil-cpp.git
+[submodule "build/Android/Boost-for-Android/"]
+    url = https://github.com/GeniusVentures/Boost-for-Android.git
+    path = build/Android/Boost-for-Android
+

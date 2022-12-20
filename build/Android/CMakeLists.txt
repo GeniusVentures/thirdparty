@@ -57,14 +57,13 @@ set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
 
 # --------------------------------------------------------
 # build boost
-set(BOOST_VERSION2 1_78_0)
-set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/Android/${ANDROID_ABI}")
+set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/Android")
 ExternalProject_Add( Boost
 	PREFIX boost
 	SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
 	CONFIGURE_COMMAND  ""
-	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${THIRDPARTY_DIR}/boost
-	BUILD_COMMAND  <SOURCE_DIR>/build.sh "${_BOOST_ROOT}" ${ANDROID_ABI} "${THIRDPARTY_DIR}/boost" "${ANDROID_PLATFORM_LEVEL}" ${CMAKE_BUILD_TYPE} $ENV{ANDROID_NDK} $ENV{ANDROID_TOOLCHAIN}
+	PATCH_COMMAND ""
+	BUILD_COMMAND  "${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh" "${CMAKE_ANDROID_NDK}" --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${_BOOST_ROOT}" --with-libraries="thread,program_options,system,date_time,regex,chrono,atomic,random,filesystem,log" --extra="--build-type=minimal"
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )

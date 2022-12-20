@@ -1,5 +1,0 @@
-#!/bin/sh
-
-#echo "in ranlib ....${BFA_TOOL_TRIPLE_FOR_ABI}" 
-exec ${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib "$@"
-

@@ -11,8 +11,15 @@ include(ExternalProject)
 
 
 # somehow this doesn't work on github CI/CD probably permission error - get_BOOST_version(BOOST_VERSION "${THIRDPARTY_DIR}/boost/boost/version.hpp")
-set(BOOST_VERSION "1.78.0")
+set(BOOST_MAJOR_VERSION "1" CACHE STRING "Boost Major Version")
+set(BOOST_MINOR_VERSION "80" CACHE STRING "Boost Minor Version")
+set(BOOST_PATCH_VERSION "0" CACHE STRING "Boost Patch Version")
+# convenience settings
+set(BOOST_VERSION "${BOOST_MAJOR_VERSION}.${BOOST_MINOR_VERSION}.${BOOST_PATCH_VERSION}")
+set(BOOST_VERSION_3U "${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}_${BOOST_PATCH_VERSION}")
+set(BOOST_VERSION_2U "${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}")
 
+print("")
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()

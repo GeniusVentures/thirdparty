@@ -33,7 +33,7 @@
 #
 #===============================================================================
 
-BOOST_VERSION=1.78.0
+BOOST_VERSION=1.80.0
 
 BOOST_LIBS="atomic chrono date_time filesystem log program_options random regex system thread"
 ALL_BOOST_LIBS_1_68="atomic chrono container context coroutine coroutine2

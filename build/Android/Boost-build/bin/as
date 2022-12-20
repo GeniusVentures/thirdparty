@@ -1,9 +1,0 @@
-#!/bin/sh
-
-#echo "in ar....${BFA_TOOL_TRIPLE_FOR_ABI}" 
-
-# echo "Assemble: ${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/${BFA_CLANG_TRIPLE_FOR_ABI}-clang++ -S $@"
-# Remove any -m32/-m64 from input parameters
-#PARAMS=`echo "$@" | tr ' ' '\n' | grep -v -x -e -m32 | grep -v -x -e -m64 | tr '\n' ' '`
-#exec ${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/${BFA_CLANG_TRIPLE_FOR_ABI}-clang++ -S $@
-
