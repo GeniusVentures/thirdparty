@@ -6,7 +6,8 @@ name: iOS Build
 # Triggers the workflow on push or pull request events and manually from the Actions tab
 on:
   push:
-    branches: [master, develop]
+    branches:
+      - master
   pull_request:
   workflow_dispatch:
 

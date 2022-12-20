@@ -6,10 +6,10 @@ name: Android Build
 # Triggers the workflow on push or pull request events and manually from the Actions tab
 on:
   push:
-    branches: [master, develop]
+    branches:
+      - master
   pull_request:
   workflow_dispatch:
-
 
 env:
   CMAKE_BUILD_PARALLEL_LEVEL: 8
@@ -72,7 +72,5 @@ jobs:
             cmake -S ../build/Android/ -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
         - name: Compile
           working-directory: ${{github.workspace}}/.build
-          run: |
-            make Boost
-            make
+          run: make
 
