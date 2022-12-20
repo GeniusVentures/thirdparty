@@ -8,6 +8,10 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - 'README.md'
+      - '.github/workflows/**'
+      - '.gitignore'
   pull_request:
   workflow_dispatch:
 

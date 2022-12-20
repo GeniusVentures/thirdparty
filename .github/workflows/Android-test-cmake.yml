@@ -13,16 +13,14 @@ env:
 jobs:
   Android:
       runs-on: ubuntu-latest
-      env:
-        ANDROID_TOOLCHAIN: ${{env.ANDROID_NDK_HOME}}/toolchains/llvm/prebuilt/linux-x86_64/bin
-        NDK_URL: "https://dl.google.com/android/repository/android-ndk-r25b-linux.zip"
-        MAKEFLAGS: "-j 8"
 
       steps:
         - name: Setup Git to make sure crlf -> lf
           run: |
             git config --global core.autocrlf false
             git config --global core.eol lf
+            echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
+            echo "MAKEFLAGS=\"-j 8\" >> $GITHUB_ENV
 
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         - uses: actions/checkout@v3
