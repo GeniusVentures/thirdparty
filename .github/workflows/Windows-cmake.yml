@@ -4,7 +4,12 @@ name: Windows Build
 
 # Controls when the workflow will run
 # Triggers the workflow on push or pull request events and manually from the Actions tab
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+  workflow_dispatch:
+
 
 env:
   CMAKE_BUILD_PARALLEL_LEVEL: 8
