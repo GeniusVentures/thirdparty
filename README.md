@@ -8,11 +8,16 @@ This is the repository for third party of SuperGenius
 | [![iOS Master](https://github.com/GeniusVentures/thirdparty/actions/workflows/iOS-cmake.yml/badge.svg?branch=master)](https://github.com/GeniusVentures/thirdparty/actions/workflows/iOS-cmake.yml)             | [![Android Master](https://github.com/GeniusVentures/thirdparty/actions/workflows/Android-cmake.yml/badge.svg?branch=master)](https://github.com/GeniusVentures/thirdparty/actions/workflows/Android-cmake.yml) ||
 
 
+### Speeding up the build tools
+Set two environment variables
+- CMAKE_BUILD_PARALLEL_LEVEL=8
+- MAKEFLAGS="-j8"
+
 # Build on Windows
 
 ## Preinstall
 - CMake
-- Visual Studio 2015, 2017 or 2019
+- Visual Studio 2015, 2017, 2019 or 2022
 - Strawberry Perl (https://strawberryperl.com/)
 - Python >=3.5
 ## Building
@@ -20,78 +25,88 @@ This is the repository for third party of SuperGenius
     ○ cd ./build
     ○ mkdir Release
     ○ cd Release
-    ○ cmake ../Windows -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release
+    ○ cmake ../Windows -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
     ○ cmake --build . --config Release
-
 ### Building for debugging
 	○ git pull
 	○ git submodule update --init --recursive
 	○ cd ./build
 	○ mkdir Debug
 	○ cd Debug
-	○ cmake ../Windows -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug
+	○ cmake ../Windows -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug
 	○ cmake --build . --config Debug
 # Build on Linux
 ## Preinstall
 - CMake
 - Python >=3.5 (make sure /bin/python links to your python3 version, e.g. `ln -s /bin/python3.8 /bin/python`)
+- clang
 ## Building
-	○ mkdir .build.Release
-	○ cd ./.build.Release
-	○ cmake . -DCMAKE_BUILD_TYPE=Release
+	○ cd ./build
+	○ mkdir Release
+	○ cd Release
+	○ cmake .. -DCMAKE_BUILD_TYPE=Release
 	○ make
 # Build on Linux for Android cross compile
 ## Preinstall
 - CMake
-- Android NDK Latest LTS Version (r23b) [(link)](https://developer.android.com/ndk/downloads#lts-downloads)
+- Android NDK Latest LTS Version (r25b) [(link)](https://developer.android.com/ndk/downloads#lts-downloads)
 ## Building
-	○ export ANDROID_NDK=/path/to/android-ndk-r23b
+	○ export ANDROID_NDK=/path/to/android-ndk-r25b
 	○ export ANDROID_TOOLCHAIN="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
 	○ export PATH="$ANDROID_TOOLCHAIN":"$PATH"
 * armeabi-v7a
 ```
-○ mkdir .build.Android.armeabi-v7a
-○ cd ./.build.Android.armeabi-v7a
-○ cmake -S ../build/Android/ -DANDROID_ABI="armeabi-v7a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-○ make -j4
+○ cd build/Android
+○ mkdir -P Release/armeabi-v7a
+○ cd Release/armeabi-v7a
+○ cmake ../../ -DANDROID_ABI="armeabi-v7a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+○ make
 ```
 * arm64-v8a
 ```
-○ mkdir .build.Android.arm64-v8a
-○ cd ./.build.Android.arm64-v8a
-○ cmake -S ../build/Android/ -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-○ make -j4
+○ cd build/Android
+○ mkdir -P Release/arm64-v8a
+○ cd Release/arm64-v8a
+○ cmake ../../ -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+○ make
 ```
 * x86
 ```
-○ mkdir .build.Android.x86
-○ cd ./.build.Android.x86
-○ cmake -S ../build/Android/ -DANDROID_ABI="x86" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-○ make -j4
+○ cd build/Android
+○ mkdir -P Release/x86
+○ cd Release/x86
+○ cmake ../../ -DANDROID_ABI="x86" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+○ make
 ```
 * x86_64
 ```
-○ mkdir .build.Android.x86_64
-○ cd ./.build.Android.x86_64
-○ cmake -S ../build/Android/ -DANDROID_ABI="x86_64" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-○ make -j4
+○ cd build/Android
+○ mkdir -P Release/x86_64
+○ cd Release/x86_64
+○ cmake ../../ -DANDROID_ABI="x86_64" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+○ make
 ```
-# Build on OSX
+# Build on OSX (Builds x86_64 & Arm64)
 ## Preinstall
    - CMake    
    - Python >=3.5
- ## Building
-    ○ cd ./build/OSX
-    ○ cmake . -DCMAKE_BUILD_TYPE=Release
-    ○ cmake --build . --config Release
+   - xCode Command line Tools & SDK
 
+ ## Building
+```
+○ cd Release
+○ cmake .. -DCMAKE_BUILD_TYPE=Release
+○ make
+```
 # Build for iOS
 ## Preinstall
   - CMake
+  - xCode Command line Tools & SDK 
 
 ## Building
 ```
-    ○ cd ./build/iOS
-    ○ cmake -S ../../build/iOS -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=[/path/to/GeniusTokens/thirdparty/build/iOS/iOS.cmake]
-    ○ make - j8
+○ cd build/iOS
+○ mkdir -p Release/
+○ cmake ../../ -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=../iOS.cmake
+○ make
 ```
