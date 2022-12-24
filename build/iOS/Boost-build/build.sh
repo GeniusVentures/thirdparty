@@ -859,7 +859,7 @@ buildBoost_iOS()
 
     echo Building Boost for iPhone
     # Install this one so we can copy the headers for the frameworks...
-    ./b2 cxxflags="-fPIC" "$THREADS" \
+    ./b2 cxxflags="-fPIC -fvisibility-inlines-hidden -std=c++17" "$THREADS" \
         --build-dir=iphone-build \
         --stagedir=iphone-build/stage \
         --prefix="$IOS_OUTPUT_DIR" \

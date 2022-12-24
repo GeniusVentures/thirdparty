@@ -45,7 +45,7 @@ ExternalProject_Add(Boost
     PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
     BUILD_COMMAND <SOURCE_DIR>/b2 headers
     BUILD_IN_SOURCE  TRUE
-    INSTALL_COMMAND <SOURCE_DIR>/b2 "cxxflags=-fPIC" runtime-link=static link=static toolset=clang threading=multi --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
+    INSTALL_COMMAND <SOURCE_DIR>/b2 "cxxflags=-fPIC -std=c++17 -fvisibility-inlines-hidden" runtime-link=static link=static toolset=clang threading=multi --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
     UPDATE_COMMAND ""
 )
 
@@ -54,7 +54,6 @@ set(_Boost_INCLUDE_DIR "${_BOOST_BUILD_ROOT}/include")
 set(_BOOST_CACHE_ARGS
     -DBoost_DIR:PATH=${boost_DIR}
     -DBoost_USE_MULTITHREADED:BOOL=ON
-    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
