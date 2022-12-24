@@ -859,22 +859,24 @@ buildBoost_iOS()
 
     echo Building Boost for iPhone
     # Install this one so we can copy the headers for the frameworks...
-    ./b2 cxxflags="-fPIC -fvisibility-inlines-hidden -std=c++17" "$THREADS" \
+    ./b2 cxxflags="-fPIC -std=c++17" "$THREADS" \
         --build-dir=iphone-build \
         --stagedir=iphone-build/stage \
         --prefix="$IOS_OUTPUT_DIR" \
         toolset="darwin-$COMPILER_VERSION~iphone" \
+        visibility=global \
         link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${IOS_OUTPUT_DIR}/ios-build.log" 2>&1
     # shellcheck disable=SC2181
     if [ $? != 0 ]; then echo "Error staging iPhone. Check log."; exit 1; fi
 
-    ./b2 cxxflags="-fPIC" "$THREADS" \
+    ./b2 cxxflags="-fPIC -std=c++17" "$THREADS" \
         --build-dir=iphone-build \
         --stagedir=iphone-build/stage \
         --prefix="$IOS_OUTPUT_DIR" \
         toolset="darwin-$COMPILER_VERSION~iphone" \
+        visibility=global \
         link=static \
         variant=${BUILD_VARIANT} \
         install >> "${IOS_OUTPUT_DIR}/ios-build.log" 2>&1
@@ -883,10 +885,11 @@ buildBoost_iOS()
     doneSection
 
     echo Building Boost for iPhoneSimulator
-    ./b2 "$THREADS"  \
+    ./b2 "$THREADS -fvisibility-inlines-hidden -std=c++17"  \
         --build-dir=iphonesim-build \
         --stagedir=iphonesim-build/stage \
         toolset="darwin-$COMPILER_VERSION~iphonesim" \
+        visibility=global \
         link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${IOS_OUTPUT_DIR}/ios-build.log" 2>&1
@@ -906,6 +909,7 @@ buildBoost_tvOS()
         --stagedir=appletv-build/stage \
         --prefix="$TVOS_OUTPUT_DIR" \
         toolset="darwin-$COMPILER_VERSION~appletv" \
+        visibility=global \
         link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${TVOS_OUTPUT_DIR}/tvos-build.log" 2>&1
@@ -917,6 +921,7 @@ buildBoost_tvOS()
         --stagedir=appletv-build/stage \
         --prefix="$TVOS_OUTPUT_DIR" \
         toolset="darwin-$COMPILER_VERSION~appletv" \
+        visibility=global \
         link=static \
         variant=${BUILD_VARIANT} \
         install >> "${TVOS_OUTPUT_DIR}/tvos-build.log" 2>&1
@@ -930,6 +935,7 @@ buildBoost_tvOS()
         --stagedir=appletvsim-build/stage \
         --prefix="$TVOS_OUTPUT_DIR" \
         toolset="darwin-$COMPILER_VERSION~appletvsim" \
+        visibility=global \
         link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${TVOS_OUTPUT_DIR}/tvos-build.log" 2>&1
@@ -949,6 +955,7 @@ buildBoost_macOS()
         --stagedir=macos-build/stage \
         --prefix="$MACOS_OUTPUT_DIR" \
         toolset="darwin-$COMPILER_VERSION~macos" \
+        visibility=global \
         link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${MACOS_OUTPUT_DIR}/macos-build.log" 2>&1
@@ -960,6 +967,7 @@ buildBoost_macOS()
         --stagedir=macos-build/stage \
         --prefix="$MACOS_OUTPUT_DIR" \
         toolset="darwin-$COMPILER_VERSION~macos" \
+        visibility=global \
         link=static \
         variant=${BUILD_VARIANT} \
         install >> "${MACOS_OUTPUT_DIR}/macos-build.log" 2>&1
@@ -980,6 +988,7 @@ buildBoost_macOS_silicon()
         --stagedir=macos-silicon-build/stage \
         --prefix="$MACOS_SILICON_OUTPUT_DIR" \
         toolset="darwin-$COMPILER_VERSION~macossilicon" \
+        visibility=global \
         link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${MACOS_SILICON_OUTPUT_DIR}/macos-silicon-build.log" 2>&1
@@ -991,6 +1000,7 @@ buildBoost_macOS_silicon()
         --stagedir=macos-silicon-build/stage \
         --prefix="$MACOS_SILICON_OUTPUT_DIR" \
         toolset="darwin-$COMPILER_VERSION~macossilicon" \
+        visibility=global \
         link=static \
         variant=${BUILD_VARIANT} \
         install >> "${MACOS_SILICON_OUTPUT_DIR}/macos-silicon-build.log" 2>&1
@@ -1010,6 +1020,7 @@ buildBoost_mac_catalyst()
         --stagedir=mac-catalyst-build/stage \
         --prefix="$MAC_CATALYST_OUTPUT_DIR" \
         toolset="darwin-$COMPILER_VERSION~maccatalyst" \
+        visibility=global \
         link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${MAC_CATALYST_OUTPUT_DIR}/mac-catalyst-build.log" 2>&1
@@ -1021,6 +1032,7 @@ buildBoost_mac_catalyst()
         --stagedir=mac-catalyst-build/stage \
         --prefix="$MAC_CATALYST_OUTPUT_DIR" \
         toolset="darwin-$COMPILER_VERSION~maccatalyst" \
+        visibility=global \
         link=static \
         variant=${BUILD_VARIANT} \
         install >> "${MAC_CATALYST_OUTPUT_DIR}/mac-catalyst-build.log" 2>&1

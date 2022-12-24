@@ -25,6 +25,7 @@ string(REGEX MATCH "Pkg\\.Revision = ([0-9]+)\\.([0-9]+)\\." NDK_VERSION_MATCH "
 set(CMAKE_ANDROID_NDK_VERSION ${CMAKE_MATCH_1})
 set(CMAKE_ANDROID_NDK_VERSION_MINOR ${CMAKE_MATCH_2})
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden -std=c++17")
 print("Android NDK version: ${CMAKE_ANDROID_NDK_VERSION}.${CMAKE_ANDROID_NDK_VERSION_MINOR}")
 
 if (NOT CMAKE_ANDROID_NDK_VERSION EQUAL 25)
@@ -63,7 +64,7 @@ ExternalProject_Add( Boost
 	SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
 	CONFIGURE_COMMAND  ""
 	PATCH_COMMAND ""
-	BUILD_COMMAND  "${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh" "${CMAKE_ANDROID_NDK}" --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${_BOOST_ROOT}" --with-libraries="thread,program_options,system,date_time,regex,chrono,atomic,random,filesystem,log" --extra="--build-type=minimal,runtime-link=static"
+	BUILD_COMMAND  "${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh" "${CMAKE_ANDROID_NDK}" --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${_BOOST_ROOT}" --with-libraries="thread,program_options,system,date_time,regex,chrono,atomic,random,filesystem,log" --extra="--build-type=minimal,runtime-link=static,visibility=global,cxxflags=-std=c++17"
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )
