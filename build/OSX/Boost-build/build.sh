@@ -43,7 +43,6 @@ cd $SRC_DIR
 
 COMMOM_PARAMS="toolset=clang -a target-os=darwin visibility=global address-model=64 binary-format=mach-o runtime-link=static link=static threading=multi --build-type=minimal --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem variant=release --stagedir=stage/x64"
 
-
 echo "building for X86_64..."
 cd $SRC_DIR
 ./b2 -j8 cxxflags="-arch x86_64 -std=c++17" $COMMOM_PARAMS --build-dir=$X86_64_DIR --prefix=$X86_64_DIR --libdir=$X86_64_DIR/lib install > $X86_64_DIR/boostbuild.log 2>&1 || (echo "Error in Building Boost!" && cat $X86_64_DIR/boostbuild.log)

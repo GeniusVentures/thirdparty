@@ -859,11 +859,7 @@ buildBoost_iOS()
 
     echo Building Boost for iPhone
     # Install this one so we can copy the headers for the frameworks...
-<<<<<<< HEAD
     ./b2 cxxflags="-fPIC -std=c++17" "$THREADS" \
-=======
-    ./b2 cxxflags="-fPIC -fvisibility-inlines-hidden -std=c++17" "$THREADS" \
->>>>>>> 9cfd92220... Adding visibility flags for Boost as warning without them when linking
         --build-dir=iphone-build \
         --stagedir=iphone-build/stage \
         --prefix="$IOS_OUTPUT_DIR" \
@@ -891,7 +887,7 @@ buildBoost_iOS()
     doneSection
 
     echo Building Boost for iPhoneSimulator
-    ./b2 "$THREADS -fvisibility-inlines-hidden -std=c++17"  \
+    ./b2 cxxflags="std=c++17" "$THREADS"  \
         --build-dir=iphonesim-build \
         --stagedir=iphonesim-build/stage \
         toolset="darwin-$COMPILER_VERSION~iphonesim" \
@@ -911,7 +907,7 @@ buildBoost_tvOS()
     mkdir -p "$TVOS_OUTPUT_DIR"
 
     echo Building Boost for AppleTV
-    ./b2 "$THREADS" \
+    ./b2 cxxflags="std=c++17" "$THREADS"  \
         --build-dir=appletv-build \
         --stagedir=appletv-build/stage \
         --prefix="$TVOS_OUTPUT_DIR" \
@@ -924,7 +920,7 @@ buildBoost_tvOS()
     # shellcheck disable=SC2181
     if [ $? != 0 ]; then echo "Error staging AppleTV. Check log."; exit 1; fi
 
-    ./b2 "$THREADS" \
+    ./b2 cxxflags="std=c++17" "$THREADS"  \
         --build-dir=appletv-build \
         --stagedir=appletv-build/stage \
         --prefix="$TVOS_OUTPUT_DIR" \
@@ -939,7 +935,7 @@ buildBoost_tvOS()
     doneSection
 
     echo "Building Boost for AppleTVSimulator"
-    ./b2 "$THREADS"  \
+    ./b2 cxxflags="std=c++17" "$THREADS"  \
         --build-dir=appletvsim-build \
         --stagedir=appletvsim-build/stage \
         --prefix="$TVOS_OUTPUT_DIR" \
