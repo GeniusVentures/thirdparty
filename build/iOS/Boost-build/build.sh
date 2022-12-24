@@ -859,7 +859,11 @@ buildBoost_iOS()
 
     echo Building Boost for iPhone
     # Install this one so we can copy the headers for the frameworks...
+<<<<<<< HEAD
     ./b2 cxxflags="-fPIC -std=c++17" "$THREADS" \
+=======
+    ./b2 cxxflags="-fPIC -fvisibility-inlines-hidden -std=c++17" "$THREADS" \
+>>>>>>> 9cfd92220... Adding visibility flags for Boost as warning without them when linking
         --build-dir=iphone-build \
         --stagedir=iphone-build/stage \
         --prefix="$IOS_OUTPUT_DIR" \
