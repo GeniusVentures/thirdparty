@@ -41,7 +41,7 @@ echo "Bootstapping..."
 cd $SRC_DIR
 ./bootstrap.sh cxxflags="-arch x86_64 -arch arm64" cflags="-arch x86_64 -arch arm64" linkflags="-arch x86_64 -arch arm64" > $X86_64_DIR/boostbuild.log 2>&1 || (echo "Error in Building Boost!" && cat $X86_64_DIR/boostbuild.log)
 
-COMMOM_PARAMS="toolset=clang -a target-os=darwin visiblity=global address-model=64 binary-format=mach-o runtime-link=static link=static threading=multi --build-type=minimal --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem variant=release --stagedir=stage/x64"
+COMMOM_PARAMS="toolset=clang -a target-os=darwin visibility=global address-model=64 binary-format=mach-o runtime-link=static link=static threading=multi --build-type=minimal --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem variant=release --stagedir=stage/x64"
 
 
 echo "building for X86_64..."
