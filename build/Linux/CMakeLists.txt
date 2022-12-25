@@ -33,6 +33,9 @@ endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
 # --------------------------------------------------------
 # build boost
 set(_BOOST_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
+set(Boost_NO_SYSTEM_PATHS  ON)
+set(Boost_USE_STATIC_LIBS  ON)
+set(Boost_USE_STATIC_RUNTIME ON)
 
 ExternalProject_Add(Boost
     PREFIX boost
@@ -55,6 +58,7 @@ set(_BOOST_CACHE_ARGS
     -DBoost_DIR:PATH=${boost_DIR}
     -DBoost_USE_MULTITHREADED:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
+    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
 )

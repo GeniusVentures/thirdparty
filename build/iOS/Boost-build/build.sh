@@ -866,6 +866,7 @@ buildBoost_iOS()
         toolset="darwin-$COMPILER_VERSION~iphone" \
         visibility=global \
         link=static \
+        runtime-link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${IOS_OUTPUT_DIR}/ios-build.log" 2>&1
     # shellcheck disable=SC2181
@@ -878,6 +879,7 @@ buildBoost_iOS()
         toolset="darwin-$COMPILER_VERSION~iphone" \
         visibility=global \
         link=static \
+        runtime-link=static \
         variant=${BUILD_VARIANT} \
         install >> "${IOS_OUTPUT_DIR}/ios-build.log" 2>&1
     # shellcheck disable=SC2181
@@ -891,6 +893,7 @@ buildBoost_iOS()
         toolset="darwin-$COMPILER_VERSION~iphonesim" \
         visibility=global \
         link=static \
+        runtime-link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${IOS_OUTPUT_DIR}/ios-build.log" 2>&1
     # shellcheck disable=SC2181
@@ -911,6 +914,7 @@ buildBoost_tvOS()
         toolset="darwin-$COMPILER_VERSION~appletv" \
         visibility=global \
         link=static \
+        runtime-link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${TVOS_OUTPUT_DIR}/tvos-build.log" 2>&1
     # shellcheck disable=SC2181
@@ -923,6 +927,7 @@ buildBoost_tvOS()
         toolset="darwin-$COMPILER_VERSION~appletv" \
         visibility=global \
         link=static \
+        runtime-link=static \
         variant=${BUILD_VARIANT} \
         install >> "${TVOS_OUTPUT_DIR}/tvos-build.log" 2>&1
     # shellcheck disable=SC2181
@@ -937,6 +942,7 @@ buildBoost_tvOS()
         toolset="darwin-$COMPILER_VERSION~appletvsim" \
         visibility=global \
         link=static \
+        runtime-link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${TVOS_OUTPUT_DIR}/tvos-build.log" 2>&1
     # shellcheck disable=SC2181
@@ -957,6 +963,7 @@ buildBoost_macOS()
         toolset="darwin-$COMPILER_VERSION~macos" \
         visibility=global \
         link=static \
+        runtime-link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${MACOS_OUTPUT_DIR}/macos-build.log" 2>&1
     # shellcheck disable=SC2181
@@ -969,6 +976,7 @@ buildBoost_macOS()
         toolset="darwin-$COMPILER_VERSION~macos" \
         visibility=global \
         link=static \
+        runtime-link=static \
         variant=${BUILD_VARIANT} \
         install >> "${MACOS_OUTPUT_DIR}/macos-build.log" 2>&1
     # shellcheck disable=SC2181
@@ -990,6 +998,7 @@ buildBoost_macOS_silicon()
         toolset="darwin-$COMPILER_VERSION~macossilicon" \
         visibility=global \
         link=static \
+        runtime-link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${MACOS_SILICON_OUTPUT_DIR}/macos-silicon-build.log" 2>&1
     # shellcheck disable=SC2181
@@ -1002,6 +1011,7 @@ buildBoost_macOS_silicon()
         toolset="darwin-$COMPILER_VERSION~macossilicon" \
         visibility=global \
         link=static \
+        runtime-link=static \
         variant=${BUILD_VARIANT} \
         install >> "${MACOS_SILICON_OUTPUT_DIR}/macos-silicon-build.log" 2>&1
     # shellcheck disable=SC2181
@@ -1021,6 +1031,7 @@ buildBoost_mac_catalyst()
         --prefix="$MAC_CATALYST_OUTPUT_DIR" \
         toolset="darwin-$COMPILER_VERSION~maccatalyst" \
         visibility=global \
+        runtime-link=static \
         link=static \
         variant=${BUILD_VARIANT} \
         stage >> "${MAC_CATALYST_OUTPUT_DIR}/mac-catalyst-build.log" 2>&1
@@ -1034,6 +1045,7 @@ buildBoost_mac_catalyst()
         toolset="darwin-$COMPILER_VERSION~maccatalyst" \
         visibility=global \
         link=static \
+        runtime-link=static \
         variant=${BUILD_VARIANT} \
         install >> "${MAC_CATALYST_OUTPUT_DIR}/mac-catalyst-build.log" 2>&1
     # shellcheck disable=SC2181

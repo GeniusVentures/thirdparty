@@ -47,6 +47,9 @@ endif()
 # --------------------------------------------------------
 # builds boost
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
+set(Boost_NO_SYSTEM_PATHS  ON)
+set(Boost_USE_STATIC_LIBS  ON)
+set(Boost_USE_STATIC_RUNTIME ON)
 
 ExternalProject_Add(Boost
       PREFIX boost
