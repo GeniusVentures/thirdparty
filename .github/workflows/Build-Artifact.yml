@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Android Test Build
+name: Build ThirdParty Release
 
 # Controls when the workflow will run
 # Triggers the workflow on push or pull request events and manually from the Actions tab
@@ -9,32 +9,33 @@ on:
 
 env:
   CMAKE_BUILD_PARALLEL_LEVEL: 8
+  MAKEFLAGS: "-j 8"
+  GITHUB_TOKEN: ${{ github.token }}
 
 jobs:
-  Android:
+  setup:
       runs-on: ubuntu-latest
+      outputs:
+        matrix: ${{ steps.matrix.outputs.value }}
+      steps:
+
+
+  cache_or_load_src:
+    fail-fast: true
+    strategy:
+      fail-fast: true
+      matrix:
 
       steps:
-        - name: Setup Git to make sure crlf -> lf
-          run: |
-            git config --global core.autocrlf false
-            git config --global core.eol lf
-            echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
-            echo "MAKEFLAGS=\"-j 8\"" >> $GITHUB_ENV
-            echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-            echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-
+        - name: Check out main third party without submodules
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-        - uses: actions/checkout@v3
+          uses: actions/checkout@v3
           with:
-            submodules: 'recursive'
-            path: '.'
+            path: '${{github.workspace}}'
 
-
-        # ndk is already installed in Ubuntu 22
-
-        - name: Create Build Directory
-          run: cmake -E make_directory ${{github.workspace}}/.build
+        - name: Load cached modules from other workflows
+          run: |
+            cmake -E make_directory ${{github.workspace}}/.build
 
         - name: Set PATH
           run: echo "${{env.ANDROID_TOOLCHAIN}}" >> $GITHUB_PATH
