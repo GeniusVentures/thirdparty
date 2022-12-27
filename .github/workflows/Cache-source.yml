@@ -29,14 +29,15 @@ jobs:
             content="${content//$'\n'/}"
             content="${content//$'\r'/}"
             # end of optional handling for multi line json
-            echo "matrix=\"$content\"" >> $GITHUB_OUTPUT
-
+            echo "matrix=$content" >> $GITHUB_OUTPUT
+            echo "matrix=$content"
+            
   cache_or_load_src:
     needs: setup
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-      matrix: ${{fromJson(needs.setup.outputs.matrix)}}
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
       - name: Echo information
         run: |
