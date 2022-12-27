@@ -24,6 +24,7 @@ jobs:
         - name: Set matrix of submodules
           id: set-matrix
           run: |
+            cd ${{github.workspace}}
             content=$(git submodule)
             jsonContent="{ \"include\": [  "
             first="true"
@@ -38,7 +39,6 @@ jobs:
             done <<<"$content"
             jsonContent+="] }"
             echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
-          working-directory: ${{github.workspace}}
           shell: bash
 
   cache_src:
@@ -60,9 +60,9 @@ jobs:
       - name: Git clone submodule source code
         if: steps.cache-source-directory.cache-hit != 'true'
         run: |
+          cd ${{github.workspace}}
           echo "Cloning source for ${{ matrix.name }}"
           git submodule update --init -- ${{ matrix.name }}
-        working-directory: ${{github.workspace}}
         shell: bash
 
       - name: Save the cache
