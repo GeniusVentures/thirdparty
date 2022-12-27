@@ -22,7 +22,7 @@ jobs:
           with:
             path: '${{github.workspace}}'
         - name: Set matrix of submodules
-        - id: set-matrix
+          id: set-matrix
           run: |
             content=$(echo '"include": {'; git submodule --quiet foreach 'echo { \"name\": \"$name\", \"shortsha\": \"`git rev-parse --short $sha1`\", \"repo_path\": \"$sm_path\" },' | sed '$ s/,$//g' ; echo '}')
             content="${content//'%'/}"
