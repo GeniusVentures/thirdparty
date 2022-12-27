@@ -24,23 +24,54 @@ jobs:
         - name: Set matrix of submodules
           id: set-matrix
           run: |
-            content=`git submodule | sed -E 's/-*([^ ]+) (.*)/{ "name": "\2", "longsha": "\1" },/' | sed '$ s/,$//g'`
-            content="${content//'%'/'%25'}"
-            content="${content//$'\n'/}"
-            content="${content//$'\r'/}"
-            content="{ \"include\": [ $content ] }"
-            # end of optional handling for multi line json
-            echo "matrix=$content" >> $GITHUB_OUTPUT
-            echo "matrix=$content"
+            content=$(git submodule)
+            jsonContent="{ \"include\": [  "
+            first="true"
+            while read longsha name; do
+              longsha="${longsha/'-'/}"
+              shortsha="${longsha:0:7}"
+              if [[ "$first" != "true" ]]; then
+                jsonContent+=","
+              fi
+              jsonContent+="{ \"name\": \"$name\", \"shortsha\": \"$shortsha\", \"longsha\": \"$slongsha\" }"
+              first="false"
+            done <<<"$content"
+            jsonContent+="] }"
+            echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
           working-directory: ${{github.workspace}}
+          shell: bash
 
-  cache_or_load_src:
+  cache_src:
     needs: setup
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
-      - name: Echo information
+      - name: Cache Source Files without .git
+        id: cache-source-directory
+        uses: actions/cache@v3
+        with:
+          path: |
+            "!${{ matrix.name }}/.git/**"
+            "${{ matrix.name }}/**"
+          key: ${{ matrix.name }}-${{ matrix.shortsha }}
+        working-directory: ${{github.workspace}}
+
+      - name: Git clone submodule source code
+        if: steps.cache-source-directory.cache-hit != 'true'
         run: |
-          echo "${{ matrix.name }}, ${{ matrix.longsha }}"
+          echo "Cloning source for ${{ matrix.name }}"
+          git submodule update --init -- "${{ matrix.name }}"
+        working-directory: ${{github.workspace}}
+
+      - name: Save the cache
+        if: steps.cache-source-director.cache-hit != 'true'
+        uses: actions/cache/save@v3
+        id: cache
+        with:
+          path: |
+            "!${{ matrix.name }}/.git/**"
+            "${{ matrix.name }}/**"
+          key: ${{ matrix.name }}-${{ matrix.shortsha }}
+        working-directory: ${{github.workspace}}
