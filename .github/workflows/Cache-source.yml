@@ -53,15 +53,15 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            "!${{github.workspace}}/${{ matrix.name }}/.git/**"
-            "${{github.workspace}}/${{ matrix.name }}/**"
+            !${{github.workspace}}/${{ matrix.name }}/.git/**
+            ${{github.workspace}}/${{ matrix.name }}/**
           key: ${{ matrix.name }}-${{ matrix.shortsha }}
 
       - name: Git clone submodule source code
         if: steps.cache-source-directory.cache-hit != 'true'
         run: |
           echo "Cloning source for ${{ matrix.name }}"
-          git submodule update --init -- "${{ matrix.name }}"
+          git submodule update --init -- ${{ matrix.name }}
         working-directory: ${{github.workspace}}
         shell: bash
 
@@ -71,6 +71,6 @@ jobs:
         id: cache
         with:
           path: |
-            "!${{github.workspace}}/${{ matrix.name }}/.git/**"
-            "${{github.workspace}}/${{ matrix.name }}/**"
+            !${{github.workspace}}/${{ matrix.name }}/.git/**
+            ${{github.workspace}}/${{ matrix.name }}/**
           key: ${{ matrix.name }}-${{ matrix.shortsha }}
