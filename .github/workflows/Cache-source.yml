@@ -24,12 +24,12 @@ jobs:
         - name: Set matrix of submodules
           id: set-matrix
           run: |
-            content=$(echo '{ "include": ['; git submodule --quiet foreach 'echo { \"name\": \"$name\", \"shortsha\": \"`git rev-parse --short $sha1`\", \"repo_path\": \"$sm_path\" },' | sed '$ s/,$//g' ; echo ']}')
-            content="${content//'%'/}"
+            content=`git submodule | sed -E 's/-*([^ ]+) (.*)/{ "name": "\2", "longsha": "\1" },/' | sed '$ s/,$//g'`
+            content="${content//'%'/'%25'}"
             content="${content//$'\n'/}"
             content="${content//$'\r'/}"
             # end of optional handling for multi line json
-            echo "matrix=$content" >> $GITHUB_OUTPUT
+            echo "matrix=\"{ \"include\": [ $content ] }\"" >> $GITHUB_OUTPUT
             echo "matrix=$content"
           working-directory: ${{github.workspace}}
 
@@ -42,4 +42,4 @@ jobs:
     steps:
       - name: Echo information
         run: |
-          echo "${matrix.name}, ${matrix.shortsha}, ${matrix.repo_path}"
+          echo "${matrix.name}, ${matrix.longsha}"
