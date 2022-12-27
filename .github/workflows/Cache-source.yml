@@ -28,8 +28,9 @@ jobs:
             content="${content//'%'/'%25'}"
             content="${content//$'\n'/}"
             content="${content//$'\r'/}"
+            content="{ \"include\": [ $content ] }"
             # end of optional handling for multi line json
-            echo "matrix=\"{ \"include\": [ $content ] }\"" >> $GITHUB_OUTPUT
+            echo "matrix=$content" >> $GITHUB_OUTPUT
             echo "matrix=$content"
           working-directory: ${{github.workspace}}
 
