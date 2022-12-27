@@ -43,4 +43,4 @@ jobs:
     steps:
       - name: Echo information
         run: |
-          echo "${matrix.name}, ${matrix.longsha}"
+          echo "${{ matrix.name }}, ${{ matrix.longsha }}"
