@@ -31,7 +31,8 @@ jobs:
             # end of optional handling for multi line json
             echo "matrix=$content" >> $GITHUB_OUTPUT
             echo "matrix=$content"
-            
+          working-directory: ${{github.workspace}}
+
   cache_or_load_src:
     needs: setup
     runs-on: ubuntu-latest
