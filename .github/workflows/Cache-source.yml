@@ -1,0 +1,43 @@
+# This is a workflow to cache the sources for all the builds
+
+name: Cache Source Files
+
+# Controls when the workflow will run
+# Triggers the workflow on push or pull request events and manually from the Actions tab
+on:
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+
+jobs:
+  setup:
+      runs-on: ubuntu-latest
+      outputs:
+        matrix: ${{ steps.set-matrix.outputs.matrix }}
+      steps:
+        - name: Check out main third party without submodules
+          # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        - uses: actions/checkout@v3
+          with:
+            path: '${{github.workspace}}'
+        - name: Set matrix of submodules
+        - id: set-matrix
+          run: |
+            content=$(echo '"include": {'; git submodule --quiet foreach 'echo { \"name\": \"$name\", \"shortsha\": \"`git rev-parse --short $sha1`\", \"repo_path\": \"$sm_path\" },' | sed '$ s/,$//g' ; echo '}')
+            content="${content//'%'/}"
+            content="${content//$'\n'/}"
+            content="${content//$'\r'/}"
+            # end of optional handling for multi line json
+            echo "::set-output name=matrix::$content"
+
+  cache_or_load_src:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix: ${{fromJson(needs.setup.outputs.matrix}}
+      steps:
+        - name: Echo information
+          run: |
+            echo "${matrix.name}, ${matrix.shortsha}, ${matrix.repo_path}"
