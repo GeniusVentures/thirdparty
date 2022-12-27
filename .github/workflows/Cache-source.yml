@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix: ${{fromJson(needs.setup.outputs.matrix}}
-      steps:
-        - name: Echo information
-          run: |
-            echo "${matrix.name}, ${matrix.shortsha}, ${matrix.repo_path}"
+    steps:
+      - name: Echo information
+        run: |
+          echo "${matrix.name}, ${matrix.shortsha}, ${matrix.repo_path}"
