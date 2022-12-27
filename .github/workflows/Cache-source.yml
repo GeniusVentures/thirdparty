@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-      matrix: ${{fromJson(needs.setup.set-matrix.outputs.matrix}}
+      matrix: ${{fromJson(needs.setup.set-matrix.outputs.matrix)}}
     steps:
       - name: Echo information
         run: |
