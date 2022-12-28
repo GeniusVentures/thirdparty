@@ -131,7 +131,7 @@
 	url = https://github.com/GeniusVentures/kompute.git
 [submodule "MoltenVK"]
 	path = MoltenVK
-	url = git@github.com:KhronosGroup/MoltenVK.git
+	url = https://github.com/KhronosGroup/MoltenVK.git
 [submodule "Vulkan-Headers"]
 	path = Vulkan-Headers
 	url = https://github.com/KhronosGroup/Vulkan-Headers.git
