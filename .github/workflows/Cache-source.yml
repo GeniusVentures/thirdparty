@@ -95,7 +95,7 @@ jobs:
         if: steps.cache-source-directory.outputs.cache-hit != 'true'
         run: |
           echo "Cloning source for ${{ matrix.name }}"
-          git submodule update --init -- ${{ matrix.name }}
+          git submodule update --init --recursive -- ${{ matrix.name }}
         shell: bash
         working-directory: ${{github.workspace}}
 
