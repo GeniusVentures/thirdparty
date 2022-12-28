@@ -32,15 +32,15 @@ jobs:
           with:
             path: '${{github.workspace}}'
 
-        - name: Save the main cache
-          if: steps.cache-source-directory.cache-hit != 'true'
-          uses: actions/cache/save@v3
-          id: cache
-          with:
-            path: |
-              !${{github.workspace}}/${{ matrix.name }}/.git/**
-              ${{github.workspace}}/${{ matrix.name }}/**
-            key: ${{ matrix.name }}-${{ matrix.shortsha }}
+#        - name: Save the main cache
+#          if: steps.cache-source-directory.cache-hit != 'true'
+#          uses: actions/cache/save@v3
+#          id: cache
+#          with:
+#            path: |
+#              !${{github.workspace}}/${{ matrix.name }}/.git/**
+#              ${{github.workspace}}/${{ matrix.name }}/**
+#            key: ${{ matrix.name }}-${{ matrix.shortsha }}
 
         - name: Set matrix of submodules
           id: set-matrix
@@ -79,7 +79,7 @@ jobs:
 
       - if: steps.cache-tp-source-directory.cache-hit != 'true'
         run: |
-          echo "Couldn't find cached thirdparty code, fatal error"
+          echo "Couldn't find cached thirdparty code, third-${{ github.sha }} fatal error!"
           exit 1
 
       - name: Cache Submodule Source Files without .git
