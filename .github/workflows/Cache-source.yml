@@ -11,20 +11,40 @@ env:
   GITHUB_TOKEN: ${{ github.token }}
 
 jobs:
-  setup:
+  cache-src:
       runs-on: ubuntu-latest
       outputs:
         matrix: ${{ steps.set-matrix.outputs.matrix }}
       steps:
+        - name: Cache main Source Files without .git
+          uses: actions/cache@v3
+          id: cache-source-directory
+          with:
+            path: |
+              !.git/**
+              ${{github.workspace}}/**
+            key: third-${{ github.sha }}
+
         - name: Check out main third party without submodules
+          if: steps.cache-source-directory.cache-hit != 'true'
           # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
           uses: actions/checkout@v3
           with:
             path: '${{github.workspace}}'
+
+        - name: Save the main cache
+          if: steps.cache-source-directory.cache-hit != 'true'
+          uses: actions/cache/save@v3
+          id: cache
+          with:
+            path: |
+              !${{github.workspace}}/${{ matrix.name }}/.git/**
+              ${{github.workspace}}/${{ matrix.name }}/**
+            key: ${{ matrix.name }}-${{ matrix.shortsha }}
+
         - name: Set matrix of submodules
           id: set-matrix
           run: |
-            cd ${{github.workspace}}
             content=$(git submodule)
             jsonContent="{ \"include\": [  "
             first="true"
@@ -40,6 +60,7 @@ jobs:
             jsonContent+="] }"
             echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
           shell: bash
+          workspace-directory: ${{github.workspace}}
 
   cache_src:
     needs: setup
@@ -48,29 +69,37 @@ jobs:
       fail-fast: true
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
+      - uses: actions/cache@v3
+        id: cache-source-directory
+        with:
+          path: |
+            !.git/**
+            ${{github.workspace}}/**
+          key: third-${{ github.sha }}
+
       - name: Cache Source Files without .git
         id: cache-source-directory
         uses: actions/cache@v3
         with:
           path: |
-            !${{github.workspace}}/${{ matrix.name }}/.git/**
+            !.git/**
             ${{github.workspace}}/${{ matrix.name }}/**
           key: ${{ matrix.name }}-${{ matrix.shortsha }}
 
       - name: Git clone submodule source code
         if: steps.cache-source-directory.cache-hit != 'true'
         run: |
-          cd ${{github.workspace}}
           echo "Cloning source for ${{ matrix.name }}"
           git submodule update --init -- ${{ matrix.name }}
         shell: bash
+        workspace-directory: ${{github.workspace}}
 
       - name: Save the cache
-        if: steps.cache-source-director.cache-hit != 'true'
+        if: steps.cache-source-directory.cache-hit != 'true'
         uses: actions/cache/save@v3
         id: cache
         with:
           path: |
-            !${{github.workspace}}/${{ matrix.name }}/.git/**
+            !.git/**
             ${{github.workspace}}/${{ matrix.name }}/**
           key: ${{ matrix.name }}-${{ matrix.shortsha }}
