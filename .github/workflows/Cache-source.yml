@@ -18,7 +18,7 @@ jobs:
       steps:
         - name: Cache main Source Files without .git
           uses: actions/cache@v3
-          id: cache-source-directory
+          id: cache-tp-source-directory
           with:
             path: |
               !.git/**
@@ -26,14 +26,14 @@ jobs:
             key: third-${{ github.sha }}
 
         - name: Check out main third party without submodules
-          if: steps.cache-source-directory.cache-hit != 'true'
+          if: steps.cache-tp-source-directory.cache-hit != 'true'
           # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
           uses: actions/checkout@v3
           with:
             path: '${{github.workspace}}'
 
         - name: Save the main cache
-          if: steps.cache-source-directory.cache-hit != 'true'
+          if: steps.cache-tp-source-directory.cache-hit != 'true'
           uses: actions/cache/save@v3
           id: cache
           with:
