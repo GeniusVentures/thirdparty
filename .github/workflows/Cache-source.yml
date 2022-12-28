@@ -18,7 +18,7 @@ jobs:
       steps:
         - name: Cache main Source Files without .git
           uses: actions/cache@v3
-          id: cache-tp-source-directory
+          id: cache-source-directory
           with:
             path: |
               !.git/**
@@ -26,14 +26,14 @@ jobs:
             key: third-${{ github.sha }}
 
         - name: Check out main third party without submodules
-          if: steps.cache-tp-source-directory.cache-hit != 'true'
+          if: steps.cache-source-directory.cache-hit != 'true'
           # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
           uses: actions/checkout@v3
           with:
             path: '${{github.workspace}}'
 
         - name: Save the main cache
-          if: steps.cache-tp-source-directory.cache-hit != 'true'
+          if: steps.cache-source-directory.cache-hit != 'true'
           uses: actions/cache/save@v3
           id: cache
           with:
@@ -70,14 +70,19 @@ jobs:
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
       - uses: actions/cache@v3
-        id: cache-source-directory
+        id: cache-tp-source-directory
         with:
           path: |
             !.git/**
             ${{github.workspace}}/**
           key: third-${{ github.sha }}
 
-      - name: Cache Source Files without .git
+      - if: steps.cache-tp-source-directory.cache-hit != 'true'
+        run: |
+          echo "Couldn't find cached thirdparty code, fatal error"
+          exit 1
+
+      - name: Cache Submodule Source Files without .git
         id: cache-source-directory
         uses: actions/cache@v3
         with:
