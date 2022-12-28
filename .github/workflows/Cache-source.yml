@@ -60,7 +60,7 @@ jobs:
             jsonContent+="] }"
             echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
           shell: bash
-          workspace-directory: ${{github.workspace}}
+          working-directory: ${{github.workspace}}
 
   cache_src:
     needs: setup
@@ -92,7 +92,7 @@ jobs:
           echo "Cloning source for ${{ matrix.name }}"
           git submodule update --init -- ${{ matrix.name }}
         shell: bash
-        workspace-directory: ${{github.workspace}}
+        working-directory: ${{github.workspace}}
 
       - name: Save the cache
         if: steps.cache-source-directory.cache-hit != 'true'
