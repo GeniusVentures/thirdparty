@@ -93,7 +93,7 @@ jobs:
     needs: [setup, cache_src]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/cache-multi
+      - uses: actions/cache-multi@v3.2.2
         id: cache-tp-source-directory
         with:
           path: |
@@ -116,7 +116,6 @@ jobs:
           pathsJsonContent="\"paths\": [\n "
           first="true"
           while read name shortsha; do
-          echo "====> $name, $shortsha"
           if [[ "$first" != "true" ]]; then
           keysJsonContent+=","
             pathsJsonContent+=","
@@ -130,6 +129,6 @@ jobs:
           echo "CACHE_MULTI_PARAMETERS=\"$fullJsonContent\"" >> $$GITHUB_OUTPUT
 
       - name: Load the source Cache(s) into the system
-        uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
+        uses: actions/cache-multi/restoremulti@v3.2.2
         with:
           ${{ fromJson(steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETERS) }}
