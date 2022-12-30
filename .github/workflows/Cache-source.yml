@@ -132,7 +132,7 @@ jobs:
 
       - name: Load the source Cache(s) into the system
         uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
-        inputs:
+        with:
           keys: |
             Boost.DI-c5287ee
           paths: |
