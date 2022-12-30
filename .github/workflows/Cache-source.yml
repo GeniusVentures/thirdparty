@@ -110,7 +110,7 @@ jobs:
         id: cache-multi-parameters
         run: |
           # now reload the json content into variables list
-          reloadcontent=$(echo "${{ needs.setup.outputs.matrix }}" | perl -pe "s/.*?(?:\{[ \t]*?\"name\":[ \t]*?\"(.+?)\".[ \t]*?\"shortsha\":[ \t]*?\"(.+?)\"(.*?)\}),*\]*[ \t]*\}*/\1 \2\n/g")
+          reloadcontent=$(echo '${{ needs.setup.outputs.matrix }}' | perl -pe "s/.*?(?:\{[ \t]*?\"name\":[ \t]*?\"(.+?)\".[ \t]*?\"shortsha\":[ \t]*?\"(.+?)\"(.*?)\}),*\]*[ \t]*\}*/\1 \2\n/g")
   
           keysJsonContent="\"keys\": [ "
           pathsJsonContent="\"paths\": [\n "
@@ -125,8 +125,9 @@ jobs:
           first="false"
           done <<<"$reloadcontent"
           fullJsonContent="{ $keysJsonContent ], $pathsJsonContent ] }"
-          
-          echo "CACHE_MULTI_PARAMETERS=\"$fullJsonContent\"" >> $GITHUB_OUTPUT
+
+          echo "CACHE_MULTI_PARAMETERS=\'$fullJsonContent\'"         
+          echo "CACHE_MULTI_PARAMETERS=\'$fullJsonContent\'" >> $GITHUB_OUTPUT
 
       - name: Load the source Cache(s) into the system
         uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
