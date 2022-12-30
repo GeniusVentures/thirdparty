@@ -114,7 +114,7 @@ jobs:
           reloadcontent=$(echo '${{ needs.setup.outputs.matrix }}' | perl -pe "s/.*?(?:\{[ \t]*?\"name\":[ \t]*?\"(.+?)\".[ \t]*?\"shortsha\":[ \t]*?\"(.+?)\"(.*?)\}),*\]*[ \t]*\}*/\1 \2\n/g")
   
           keysJsonContent="\"keys\": [ "
-          pathsJsonContent="\"paths\": [\n "
+          pathsJsonContent="\"paths\": [ "
           first="true"
           while read name shortsha; do
           if [[ "$first" != "true" ]]; then
