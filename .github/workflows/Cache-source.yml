@@ -32,16 +32,6 @@ jobs:
           with:
             path: '${{github.workspace}}'
 
-#        - name: Save the main cache
-#          if: steps.cache-source-directory.cache-hit != 'true'
-#          uses: actions/cache/save@v3
-#          id: cache
-#          with:
-#            path: |
-#              !${{github.workspace}}/${{ matrix.name }}/.git/**
-#              ${{github.workspace}}/${{ matrix.name }}/**
-#            key: ${{ matrix.name }}-${{ matrix.shortsha }}
-
         - name: Set matrix of submodules
           id: set-matrix
           run: |
@@ -99,12 +89,48 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}
 
-      - name: Save the cache
-        if: steps.cache-source-directory.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v3
-        id: cache
-        with:
-          path: |
-            !.git/**
-            ${{github.workspace}}/${{ matrix.name }}/**
-          key: ${{ matrix.name }}-${{ matrix.shortsha }}
+build_targets:
+  needs: [setup, cache_src]
+  runs-on: ubuntu-latest
+#  matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+  steps:
+    - uses: actions/cache-multi
+      id: cache-tp-source-directory
+      with:
+        path: |
+          !.git/**
+          ${{github.workspace}}/**
+        key: third-${{ github.sha }}
+
+    - if: steps.cache-tp-source-directory.outputs.cache-hit != 'true'
+      run: |
+        echo "Couldn't find cached thirdparty code, third-${{ github.sha }} fatal error!"
+        exit 1
+
+    - name: Create Inputs for src caches to load
+      id: cache-multi-parameters
+      run: |
+        # now reload the json content into variables list
+        reloadcontent=$(echo "${{ needs.setup.outputs.matrix }}" | perl -pe "s/.*?(?:\{[ \t]*?\"name\":[ \t]*?\"(.+?)\".[ \t]*?\"shortsha\":[ \t]*?\"(.+?)\"(.*?)\}),*\]*[ \t]*\}*/\1 \2\n/g")
+
+        keysJsonContent="\"keys\": [ "
+        pathsJsonContent="\"paths\": [\n "
+        first="true"
+        while read name shortsha; do
+        echo "====> $name, $shortsha"
+        if [[ "$first" != "true" ]]; then
+        keysJsonContent+=","
+          pathsJsonContent+=","
+        fi
+        keysJsonContent+="\"$name-$shortsha\""
+        pathsJsonContent+="[ \"!.git/**\", \"$name/**\" ]"
+        first="false"
+        done <<<"$reloadcontent"
+        fullJsonContent="{ $keysJsonContent ], $pathsJsonContent ] }"
+        
+        echo "CACHE_MULTI_PARAMETERS=\"$fullJsonContent\"" >> $$GITHUB_OUTPUT
+
+    - name: Load the source Cache(s) into the system
+      uses: actions/cache-multi/restoremulti
+      with:
+        ${{ fromJson(steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETERS) }}
