@@ -136,6 +136,6 @@ jobs:
           keys: |
             Boost.DI-c5287ee
           paths: |
-            "[ -!.git/**, Boost.DI/** ]"
+            "[ \"-!.git/**\", \"Boost.DI/**\" ]"
 
           #${{ fromJson(steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETERS) }}
