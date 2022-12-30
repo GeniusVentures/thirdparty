@@ -132,5 +132,4 @@ jobs:
 
       - name: Load the source Cache(s) into the system
         uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
-        with:
-          ${{ fromJson(steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETERS) }}
+        with: ${{ fromJson(steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETERS) }}
