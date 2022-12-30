@@ -91,7 +91,7 @@ jobs:
         working-directory: ${{github.workspace}}
 
   build_targets:
-    needs: [setup, cache_src]
+    needs: [setup]
     runs-on: ubuntu-latest
     steps:
       - uses: GeniusVentures/cache-multi@v3.2.2
