@@ -89,48 +89,47 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}
 
-build_targets:
-  needs: [setup, cache_src]
-  runs-on: ubuntu-latest
-#  matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
-  steps:
-    - uses: actions/cache-multi
-      id: cache-tp-source-directory
-      with:
-        path: |
-          !.git/**
-          ${{github.workspace}}/**
-        key: third-${{ github.sha }}
+  build_targets:
+    needs: [setup, cache_src]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/cache-multi
+        id: cache-tp-source-directory
+        with:
+          path: |
+            !.git/**
+            ${{github.workspace}}/**
+          key: third-${{ github.sha }}
 
-    - if: steps.cache-tp-source-directory.outputs.cache-hit != 'true'
-      run: |
-        echo "Couldn't find cached thirdparty code, third-${{ github.sha }} fatal error!"
-        exit 1
+      - if: steps.cache-tp-source-directory.outputs.cache-hit != 'true'
+        run: |
+          echo "Couldn't find cached thirdparty code, third-${{ github.sha }} fatal error!"
+          exit 1
 
-    - name: Create Inputs for src caches to load
-      id: cache-multi-parameters
-      run: |
-        # now reload the json content into variables list
-        reloadcontent=$(echo "${{ needs.setup.outputs.matrix }}" | perl -pe "s/.*?(?:\{[ \t]*?\"name\":[ \t]*?\"(.+?)\".[ \t]*?\"shortsha\":[ \t]*?\"(.+?)\"(.*?)\}),*\]*[ \t]*\}*/\1 \2\n/g")
+      - name: Create Inputs for src caches to load
+        id: cache-multi-parameters
+        run: |
+          # now reload the json content into variables list
+          reloadcontent=$(echo "${{ needs.setup.outputs.matrix }}" | perl -pe "s/.*?(?:\{[ \t]*?\"name\":[ \t]*?\"(.+?)\".[ \t]*?\"shortsha\":[ \t]*?\"(.+?)\"(.*?)\}),*\]*[ \t]*\}*/\1 \2\n/g")
+  
+          keysJsonContent="\"keys\": [ "
+          pathsJsonContent="\"paths\": [\n "
+          first="true"
+          while read name shortsha; do
+          echo "====> $name, $shortsha"
+          if [[ "$first" != "true" ]]; then
+          keysJsonContent+=","
+            pathsJsonContent+=","
+          fi
+          keysJsonContent+="\"$name-$shortsha\""
+          pathsJsonContent+="[ \"!.git/**\", \"$name/**\" ]"
+          first="false"
+          done <<<"$reloadcontent"
+          fullJsonContent="{ $keysJsonContent ], $pathsJsonContent ] }"
+          
+          echo "CACHE_MULTI_PARAMETERS=\"$fullJsonContent\"" >> $$GITHUB_OUTPUT
 
-        keysJsonContent="\"keys\": [ "
-        pathsJsonContent="\"paths\": [\n "
-        first="true"
-        while read name shortsha; do
-        echo "====> $name, $shortsha"
-        if [[ "$first" != "true" ]]; then
-        keysJsonContent+=","
-          pathsJsonContent+=","
-        fi
-        keysJsonContent+="\"$name-$shortsha\""
-        pathsJsonContent+="[ \"!.git/**\", \"$name/**\" ]"
-        first="false"
-        done <<<"$reloadcontent"
-        fullJsonContent="{ $keysJsonContent ], $pathsJsonContent ] }"
-        
-        echo "CACHE_MULTI_PARAMETERS=\"$fullJsonContent\"" >> $$GITHUB_OUTPUT
-
-    - name: Load the source Cache(s) into the system
-      uses: actions/cache-multi/restoremulti
-      with:
-        ${{ fromJson(steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETERS) }}
+      - name: Load the source Cache(s) into the system
+        uses: actions/cache-multi/restoremulti
+        with:
+          ${{ fromJson(steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETERS) }}
