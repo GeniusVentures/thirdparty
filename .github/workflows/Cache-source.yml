@@ -17,7 +17,7 @@ jobs:
         matrix: ${{ steps.set-matrix.outputs.matrix }}
       steps:
         - name: Cache main Source Files without .git
-          uses: actions/cache@v3
+          uses: GeniusVentures/cache-multi@v3.2.2
           id: cache-source-directory
           with:
             path: |
@@ -59,7 +59,7 @@ jobs:
       fail-fast: true
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
-      - uses: actions/cache@v3
+      - uses: GeniusVentures/cache-multi@v3.2.2
         id: cache-tp-source-directory
         with:
           path: |
@@ -74,7 +74,7 @@ jobs:
 
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
-        uses: actions/cache@v3
+        uses: GeniusVentures/cache-multi@v3.2.2
         with:
           path: |
             !.git/**
@@ -93,7 +93,7 @@ jobs:
     needs: [setup, cache_src]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/cache-multi@v3.2.2
+      - uses: GeniusVentures/cache-multi@v3.2.2
         id: cache-tp-source-directory
         with:
           path: |
@@ -129,6 +129,6 @@ jobs:
           echo "CACHE_MULTI_PARAMETERS=\"$fullJsonContent\"" >> $$GITHUB_OUTPUT
 
       - name: Load the source Cache(s) into the system
-        uses: actions/cache-multi/restoremulti@v3.2.2
+        uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
         with:
           ${{ fromJson(steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETERS) }}
