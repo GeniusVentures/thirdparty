@@ -30,7 +30,7 @@ jobs:
           # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
           uses: actions/checkout@v3
           with:
-            path: "thirdparty"
+            path: ${{github.workspace}}
 
         - name: Set matrix of submodules
           id: set-matrix
@@ -50,7 +50,7 @@ jobs:
             jsonContent+="] }"
             echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
           shell: bash
-          working-directory: "thirdparty"
+          working-directory: ${{github.workspace}}
 
   cache_src:
     needs: setup
@@ -88,13 +88,13 @@ jobs:
           echo "Cloning source for ${{ matrix.name }}"
           git submodule update --init --recursive -- ${{ matrix.name }}
         shell: bash
-        working-directory: "thirdparty"
+        working-directory: ${{github.workspace}}
 
   build_targets:
     needs: [setup]
     runs-on: ubuntu-latest
     steps:
-      - uses: GeniusVentures/cache-multi@develop
+      - uses: GeniusVentures/cache-multi/restore@v3.2.2
         id: cache-tp-source-directory
         with:
           path: |
@@ -137,10 +137,10 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
         shell: bash
-        working-directory: "thirdparty"
+        working-directory: ${{github.workspace}}
 
       - name: Load the source Cache(s) into the system
-        uses: GeniusVentures/cache-multi/restoremulti@develop
+        uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
         with:
           keys: ${{ env.CACHE_MULTI_PARAMETER_KEYS }}
           paths: ${{ env.CACHE_MULTI_PARAMETER_PATHS }}
