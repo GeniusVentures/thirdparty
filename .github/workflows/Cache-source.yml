@@ -23,14 +23,14 @@ jobs:
             path: |
               !.git/**
               ${{github.workspace}}/**
-            key: third-${{ github.sha }}
+            key: thirdparty-${{ github.sha }}
 
         - name: Check out main third party without submodules
           if: steps.cache-source-directory.outputs.cache-hit != 'true'
           # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
           uses: actions/checkout@v3
           with:
-            path: '${{github.workspace}}'
+            path: "thirdparty"
 
         - name: Set matrix of submodules
           id: set-matrix
@@ -50,7 +50,7 @@ jobs:
             jsonContent+="] }"
             echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
           shell: bash
-          working-directory: ${{github.workspace}}
+          working-directory: "thirdparty"
 
   cache_src:
     needs: setup
@@ -66,11 +66,11 @@ jobs:
           path: |
             !.git/**
             ${{github.workspace}}/**
-          key: third-${{ github.sha }}
+          key: thirdparty-${{ github.sha }}
 
       - if: steps.cache-tp-source-directory.outputs.cache-hit != 'true'
         run: |
-          echo "Couldn't find cached thirdparty code, third-${{ github.sha }} fatal error!"
+          echo "Couldn't find cached thirdparty code, thirdparty-${{ github.sha }} fatal error!"
           exit 1
 
       - name: Cache Submodule Source Files without .git
@@ -88,23 +88,23 @@ jobs:
           echo "Cloning source for ${{ matrix.name }}"
           git submodule update --init --recursive -- ${{ matrix.name }}
         shell: bash
-        working-directory: ${{github.workspace}}
+        working-directory: "thirdparty"
 
   build_targets:
     needs: [setup]
     runs-on: ubuntu-latest
     steps:
-      - uses: GeniusVentures/cache-multi@v3.2.2
+      - uses: GeniusVentures/cache-multi@develop
         id: cache-tp-source-directory
         with:
           path: |
             !.git/**
             ${{github.workspace}}/**
-          key: third-${{ github.sha }}
+          key: thirdparty-${{ github.sha }}
 
       - if: steps.cache-tp-source-directory.outputs.cache-hit != 'true'
         run: |
-          echo "Couldn't find cached thirdparty code, third-${{ github.sha }} fatal error!"
+          echo "Couldn't find cached thirdparty code, thirdparty-${{ github.sha }} fatal error!"
           exit 1
 
       - name: Create Inputs for src caches to load
@@ -112,30 +112,32 @@ jobs:
         run: |
           # now reload the json content into variables list
           reloadcontent=$(echo '${{ needs.setup.outputs.matrix }}' | perl -pe "s/.*?(?:\{[ \t]*?\"name\":[ \t]*?\"(.+?)\".[ \t]*?\"shortsha\":[ \t]*?\"(.+?)\"(.*?)\}),*\]*[ \t]*\}*/\1 \2\n/g")
-  
-          keysJsonContent="\"keys\": [ "
-          pathsJsonContent="\"paths\": [ "
+
+          keysJsonContent=""
+          pathsJsonContent=""
           first="true"
           while read name shortsha; do
-          if [[ "$first" != "true" ]]; then
-          keysJsonContent+=","
-            pathsJsonContent+=","
-          fi
-          keysJsonContent+="\"$name-$shortsha\""
-          pathsJsonContent+="[ \"!.git/**\", \"$name/**\" ]"
+            if [[ "$first" != "true" ]]; then
+              keysJsonContent+=$'\n'
+              pathsJsonContent+=$'\n'
+            fi
+            keysJsonContent+="$name-$shortsha"
+            pathsJsonContent+="[\"!.git/**\", \"$name/**\"]"
           first="false"
           done <<<"$reloadcontent"
-          fullJsonContent="{ $keysJsonContent ], $pathsJsonContent ] }"
+          keysJsonContent+=""
+          pathsJsonContent+=""
+          
+          echo "CACHE_MULTI_PARAMETER_KEYS=$keysJsonContent"
+          echo "CACHE_MULTI_PARAMETER_KEYS=$keysJsonContent" >> $GITHUB_OUTPUT
+          echo "CACHE_MULTI_PARAMETER_PATHS=$pathsJsonContent"
+          echo "CACHE_MULTI_PARAMETER_PATHS=$pathsJsonContent" >> $GITHUB_OUTPUT
 
-          echo "CACHE_MULTI_PARAMETERS=$fullJsonContent"      
-          echo "CACHE_MULTI_PARAMETERS=$fullJsonContent" >> $GITHUB_OUTPUT
+        shell: bash
+        working-directory: "thirdparty"
 
       - name: Load the source Cache(s) into the system
-        uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
+        uses: GeniusVentures/cache-multi/restoremulti@develop
         with:
-          keys: |
-            Boost.DI-c5287ee
-          paths: |
-            "[ \"-!.git/**\", \"Boost.DI/**\" ]"
-
-          #${{ fromJson(steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETERS) }}
+          keys: ${{steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_KEYS}}
+          paths: ${{steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_PATHS}}
