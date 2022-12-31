@@ -118,8 +118,8 @@ jobs:
           first="true"
           while read name shortsha; do
             if [[ "$first" != "true" ]]; then
-              keysJsonContent+="%0A"
-              pathsJsonContent+="%0A"
+              keysJsonContent+=$'\n'
+              pathsJsonContent+=$'\n'
             fi
             keysJsonContent+="$name-$shortsha"
             pathsJsonContent+="[\"!.git/**\", \"$name/**\"]"
@@ -128,10 +128,13 @@ jobs:
           keysJsonContent+=""
           pathsJsonContent+=""
           
-          echo "CACHE_MULTI_PARAMETER_KEYS=$keysJsonContent"
-          echo "CACHE_MULTI_PARAMETER_KEYS=$keysJsonContent" >> $GITHUB_OUTPUT
-          echo "CACHE_MULTI_PARAMETER_PATHS=$pathsJsonContent"
-          echo "CACHE_MULTI_PARAMETER_PATHS=$pathsJsonContent" >> $GITHUB_OUTPUT
+          echo "CACHE_MULTI_PARAMETER_KEYS<<EOF" >> $GITHUB_ENV
+          echo "$keysJsonContent" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          echo "CACHE_MULTI_PARAMETER_PATHS<<EOF" >> $GITHUB_ENV
+          echo "$pathsJsonContent" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
         shell: bash
         working-directory: "thirdparty"
@@ -139,5 +142,5 @@ jobs:
       - name: Load the source Cache(s) into the system
         uses: GeniusVentures/cache-multi/restoremulti@develop
         with:
-          keys: ${{steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_KEYS}}
-          paths: ${{steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_PATHS}}
+          keys: ${{ env.CACHE_MULTI_PARAMETER_KEYS }}
+          paths: ${{ env.CACHE_MULTI_PARAMETER_PATHS }}
