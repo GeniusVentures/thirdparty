@@ -118,8 +118,8 @@ jobs:
           first="true"
           while read name shortsha; do
             if [[ "$first" != "true" ]]; then
-              keysJsonContent+="\n"
-              pathsJsonContent+="\n"
+              keysJsonContent+="%0A"
+              pathsJsonContent+="%0A"
             fi
             keysJsonContent+="$name-$shortsha"
             pathsJsonContent+="[\"!.git/**\", \"$name/**\"]"
