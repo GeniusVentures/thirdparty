@@ -122,7 +122,7 @@ jobs:
               pathsJsonContent+=$'\n'
             fi
             keysJsonContent+="$name-$shortsha"
-            pathsJsonContent+="[\"!.git/**\", \"$name/**\"]"
+            pathsJsonContent+="[\"!.git/**\", \"${{github.workspace}}/$name/**\"]"
           first="false"
           done <<<"$reloadcontent"
           keysJsonContent+=""
