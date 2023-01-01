@@ -61,6 +61,7 @@ jobs:
     strategy:
       matrix:
         build-type: [ Release ]
+        library-names: [ Boost.DI, boost ]
         target-build-data:
           - target-os: linux
             runs-on: linux-latest
@@ -108,11 +109,6 @@ jobs:
                 arch: amd64
                 sdk: 10.0.22621.0
                 vsversion: 17
-        include:
-          - libname: Boost.DI
-            shortsha: 12345
-          - libname: boost
-            shortsha: 54321
 
     #    steps:
 #    - uses: GeniusVentures/cache-multi/restore@v3.2.2
@@ -169,18 +165,7 @@ jobs:
     steps:
       - name: dumping matrix for each run
         run: |
-          cat <<'EOF'
+          cat <<"EOF"
             matrix: ${{ toJson(matrix) }}
           EOF
-          #echo "Platform Target: ${{ matrix.target-build-data.name }}"
-          #echo "Platform Build Type: ${{ matrix.build-type }}"
-          #echo "GitHub Image: ${{ matrix.target-build-data.runs-on }}"
-          #echo "Library Source Directory/name: ${{ matrix.libname }}"
-          #echo "Library Source Short SHA: ${{ matrix.shortsha }}"
-          #cat <<'EOF'
-          #    Setup script:
-          #      ${{ matrix.target-build-data.setup-script }}' 
-          #EOF
-          #echo "Uses parameters: ${{ toJson(matrix.target-build-data.install-uses) }}"
-          #echo "include: ${{ toJson(matrix.include) }}"
           
