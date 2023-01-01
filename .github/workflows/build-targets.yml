@@ -44,7 +44,7 @@ jobs:
             if [[ "$first" != "true" ]]; then
               jsonContent+=","
             fi
-            jsonContent+="{ \"name\": \"$name\", \"shortsha\": \"$shortsha\", \"longsha\": \"$slongsha\" }"
+            jsonContent+="{ \"name\": \"$name\", \"shortsha\": \"$shortsha\", \"longsha\": \"$longsha\" }"
             first="false"
           done <<<"$content"
           jsonContent+="] }"
@@ -52,15 +52,118 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}
 
-        #${{ fromJson(needs.setup.outputs.matrix).include }}
+  cache-src:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    if: false
+    steps:
+      - uses: GeniusVentures/cache-multi@v3.2.2
+        id: cache-tp-source-directory
+        with:
+          path: |
+            !.git/**
+            ${{github.workspace}}/**
+          key: thirdparty-${{ github.sha }}
+
+      - if: steps.cache-tp-source-directory.outputs.cache-hit != 'true'
+        run: |
+          echo "Couldn't find cached thirdparty code, thirdparty-${{ github.sha }} fatal error!"
+          exit 1
+
+      - name: Cache Submodule Source Files without .git
+        id: cache-source-directory
+        uses: GeniusVentures/cache-multi@v3.2.2
+        with:
+          path: |
+            !.git/**
+            ${{github.workspace}}/${{ matrix.name }}/**
+          key: ${{ matrix.name }}-${{ matrix.shortsha }}
+
+      - name: Git clone submodule source code
+        if: steps.cache-source-directory.outputs.cache-hit != 'true'
+        run: |
+          echo "Cloning source for ${{ matrix.name }}"
+          git submodule update --init --recursive -- ${{ matrix.name }}
+        shell: bash
+        working-directory: ${{github.workspace}}
+
+  get-targets-matrix:
+    needs: [setup, cache-src]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: GeniusVentures/cache-multi/restore@v3.2.2
+        id: cache-tp-source-directory
+        with:
+          path: |
+            !.git/**
+            ${{github.workspace}}/**
+          key: thirdparty-${{ github.sha }}
+
+      - if: steps.cache-tp-source-directory.outputs.cache-hit != 'true'
+        run: |
+          echo "Couldn't find cached thirdparty code, thirdparty-${{ github.sha }} fatal error!"
+          exit 1
+
+      - name: Create Inputs for src caches to load
+        id: cache-multi-parameters
+        run: |
+          # now reload the json content into variables list
+          reloadcontent=$(echo '${{ needs.setup.outputs.matrix }}' | perl -pe "s/.*?(?:\{[ \t]*?\"name\":[ \t]*?\"(.+?)\".[ \t]*?\"shortsha\":[ \t]*?\"(.+?)\"(.*?)\}),*\]*[ \t]*\}*/\1 \2\n/g")
+
+          keysJsonContent=""
+          pathsJsonContent=""
+          first="true"
+          while read name shortsha; do
+            if [[ "$first" != "true" ]]; then
+              keysJsonContent+=$'\n'
+              pathsJsonContent+=$'\n'
+            fi
+            keysJsonContent+="$name-$shortsha"
+            pathsJsonContent+="[\"!.git/**\", \"${{github.workspace}}/$name/**\"]"
+          first="false"
+          done <<<"$reloadcontent"
+          keysJsonContent+=""
+          pathsJsonContent+=""
+          
+          echo "CACHE_MULTI_PARAMETER_KEYS<<EOF" >> $GITHUB_ENV
+          echo "$keysJsonContent" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          echo "CACHE_MULTI_PARAMETER_PATHS<<EOF" >> $GITHUB_ENV
+          echo "$pathsJsonContent" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+        shell: bash
+        working-directory: ${{github.workspace}}
+
+      - name: Load the source Cache(s) into the system
+        uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
+        with:
+          keys: ${{ env.CACHE_MULTI_PARAMETER_KEYS }}
+          paths: ${{ env.CACHE_MULTI_PARAMETER_PATHS }}
+
+      - name: build a list of targets that will be made with cmake
+        run: |
+          mkdir Release
+          cd Release
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          target-libs=$(find CMakeFiles -type d -name *.dir | sed -r "s/(.*\/)*(.*)(.dir)/- libname: \2\n/g")
+          echo "TARGET_LIBRARY_NAMES<<EOF" >> $GITHUB_ENV
+          echo "$target-libs" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        shell: bash
+        working-directory: ${{github.workspace}}/build/Linux
 
   build-targets-matrix:
-    needs: [ setup ]
+    needs: [ setup, get-targets-matrix ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         build-type: [ Release ]
-        library-names: ${{ fromJson(needs.setup.outputs.matrix).include }}
+        library-names: ${{ fromJson(needs.get-targets-matrix.env.TARGET_LIBRARY_NAMES }}
         target-build-data:
           - target-os: linux
             runs-on: linux-latest
