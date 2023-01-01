@@ -56,12 +56,12 @@ jobs:
         #${{ fromJson(needs.setup.outputs.matrix).include }}
 
   build-targets-matrix:
-    #needs: [ setup ]
+    needs: [ setup ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         build-type: [ Release ]
-        library-names: [ Boost.DI, boost ]
+        library-names: ${{ fromJson(needs.setup.outputs.matrix).include }}
         target-build-data:
           - target-os: linux
             runs-on: linux-latest
