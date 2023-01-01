@@ -169,15 +169,18 @@ jobs:
     steps:
       - name: dumping matrix for each run
         run: |
-          echo "Platform Target: ${{ matrix.target-build-data.name }}"
-          echo "Platform Build Type: ${{ matrix.build-type }}"
-          echo "GitHub Image: ${{ matrix.target-build-data.runs-on }}"
-          echo "Library Source Directory/name: ${{ matrix.name }}"
-          echo "Library Source Short SHA: ${{ matrix.shortsha }}"
           cat <<'EOF'
-              Setup script:
-                ${{ matrix.target-build-data.setup-script }}' 
+            matrix: ${{ toJson(matrix) }}
           EOF
-          echo "Uses parameters: ${{ toJson(matrix.target-build-data.install-uses) }}"
-          echo "include: ${{ toJson(matrix.include) }}"
+          #echo "Platform Target: ${{ matrix.target-build-data.name }}"
+          #echo "Platform Build Type: ${{ matrix.build-type }}"
+          #echo "GitHub Image: ${{ matrix.target-build-data.runs-on }}"
+          #echo "Library Source Directory/name: ${{ matrix.libname }}"
+          #echo "Library Source Short SHA: ${{ matrix.shortsha }}"
+          #cat <<'EOF'
+          #    Setup script:
+          #      ${{ matrix.target-build-data.setup-script }}' 
+          #EOF
+          #echo "Uses parameters: ${{ toJson(matrix.target-build-data.install-uses) }}"
+          #echo "include: ${{ toJson(matrix.include) }}"
           
