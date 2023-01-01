@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      CACHE_NAME_SHAS: $${{ steps.set-matrix.outputs.CACHE_NAME_SHAS }}
     steps:
       - name: Cache main Source Files without .git
         uses: GeniusVentures/cache-multi@v3.2.2
@@ -32,23 +33,67 @@ jobs:
         with:
           path: ${{github.workspace}}
 
-      - name: Set matrix of submodules
+      - name: Install gh cli extension actions-cache
+        run: |
+          gh extension install actions/gh-actions-cache
+          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
+          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }} >> $GITHUB_ENV
+
+      - name: Clean out old caches of thirdparty
+        run: |          
+          
+          echo "Fetching list of cache keys"
+          cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key "thirdparty-" | cut -f 1 )
+          
+          # Setting this to not fail the workflow while deleting cache keys. 
+          set +e
+          echo "Deleting caches..."
+          for cacheKey in $cacheKeys
+          do
+              gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+          done
+          echo "Done"
+        env:
+
+      - name: Set matrix of submodules that need updating
         id: set-matrix
         run: |
           content=$(git submodule)
-          jsonContent="{ \"include\": [  "
-          first="true"
-          while read longsha name; do
-            longsha="${longsha/'-'/}"
-            shortsha="${longsha:0:7}"
-            if [[ "$first" != "true" ]]; then
-              jsonContent+=","
+          jsonContent=""
+          cacheNames=""
+          while read longSHA name; do
+            longSHA="${longSHA/'-'/}"
+            shortSHA="${longSHA:0:7}"
+            # if not empty, then we need to append a comma
+            if [[ ! -z "$cacheNames" ]]; then
+              $cacheNames+=","
             fi
-            jsonContent+="{ \"name\": \"$name\", \"shortsha\": \"$shortsha\", \"longsha\": \"$longsha\" }"
-            first="false"
+            $cacheNames+="$name,$shortSHA"
+            # check if cache key exists, if so, we don't need to update this source
+            cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key $name-shortSHA | cut -f 1 )
+            if [ ! -z "$cacheKeys"]; then
+              # delete previous caches
+              cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key "$name-" | cut -f 1 )
+              # Setting this to not fail the workflow while deleting cache keys. 
+              set +e
+              echo "Deleting caches..."
+              for cacheKey in $cacheKeys
+              do
+                  gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+              done
+          
+              if [[ -z "$jsonContent" ]]; then
+                jsonContent="{ \"include\": [  "
+              elif
+                jsonContent+=","
+              fi
+              jsonContent+="{ \"name\": \"$name\", \"shortSHA\": \"shortSHA\", \"longSHA\": \"$longSHA\" }"
+            fi
           done <<<"$content"
           jsonContent+="] }"
           echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
+          echo "CACHE_NAMES_SHA=$cacheNames" >> $GITHUB_OUTPUT
         shell: bash
         working-directory: ${{github.workspace}}
 
@@ -79,7 +124,7 @@ jobs:
           path: |
             !.git/**
             ${{github.workspace}}/${{ matrix.name }}/**
-          key: ${{ matrix.name }}-${{ matrix.shortsha }}
+          key: ${{ matrix.name }}-${{ matrix.shortSHA }}
 
       - name: Git clone submodule source code
         if: steps.cache-source-directory.outputs.cache-hit != 'true'
@@ -106,33 +151,38 @@ jobs:
           echo "Couldn't find cached thirdparty code, thirdparty-${{ github.sha }} fatal error!"
           exit 1
 
+      - name: Install gh cli extension actions-cache
+        run: |
+          gh extension install actions/gh-actions-cache
+          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
+          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }} >> $GITHUB_ENV
+
       - name: Create Inputs for src caches to load
         id: cache-multi-parameters
         run: |
           # now reload the json content into variables list
-          reloadcontent=$(echo '${{ needs.setup.outputs.matrix }}' | perl -pe "s/.*?(?:\{[ \t]*?\"name\":[ \t]*?\"(.+?)\".[ \t]*?\"shortsha\":[ \t]*?\"(.+?)\"(.*?)\}),*\]*[ \t]*\}*/\1 \2\n/g")
+          cacheNameSHAS=( $(echo "${{ needs.setup.outputs.CACHE_NAME_SHAS }}" | tr ',' '\n'))
 
-          keysJsonContent=""
-          pathsJsonContent=""
-          first="true"
-          while read name shortsha; do
-            if [[ "$first" != "true" ]]; then
-              keysJsonContent+=$'\n'
-              pathsJsonContent+=$'\n'
+          keysContent=""
+          pathsContent=""
+          for ((i=0; i < ${#cacheNameSHAS[@]}; i+=2)); do
+            name=${cacheNameSHAS[$i]}
+            shortSHA=${cacheNameSHAS[$i+1]}
+            if [[ ! -z "$keysContent" ]]; then
+              keysContent+=$'\n'
+              pathsContent+=$'\n'
             fi
-            keysJsonContent+="$name-$shortsha"
-            pathsJsonContent+="[\"!.git/**\", \"${{github.workspace}}/$name/**\"]"
-          first="false"
-          done <<<"$reloadcontent"
-          keysJsonContent+=""
-          pathsJsonContent+=""
+            keysContent+="$name-$shortSHA"
+            pathsContent+="[\"!.git/**\", \"${{github.workspace}}/$name/**\"]"
+          done
           
           echo "CACHE_MULTI_PARAMETER_KEYS<<EOF" >> $GITHUB_ENV
-          echo "$keysJsonContent" >> $GITHUB_ENV
+          echo "$keysContent" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
           echo "CACHE_MULTI_PARAMETER_PATHS<<EOF" >> $GITHUB_ENV
-          echo "$pathsJsonContent" >> $GITHUB_ENV
+          echo "$pathsContent" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
         shell: bash
@@ -165,8 +215,7 @@ jobs:
     strategy:
       matrix:
         build-type: [ Release ]
-        library-names:
-          ${{ needs.get-targets-matrix.env.TARGET_LIBRARY_NAMES }}
+        library-names: ${{ needs.get-targets-matrix.env.TARGET_LIBRARY_NAMES }}
         target-build-data:
           - target-os: linux
             runs-on: linux-latest
