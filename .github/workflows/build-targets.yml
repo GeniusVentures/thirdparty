@@ -1,0 +1,173 @@
+# This is a workflow to cache the sources for all the builds
+
+name: Cache Source Files
+
+# Controls when the workflow will run
+# Triggers the workflow on push or pull request events and manually from the Actions tab
+on:
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Cache main Source Files without .git
+        uses: GeniusVentures/cache-multi@v3.2.2
+        id: cache-source-directory
+        with:
+          path: |
+            !.git/**
+            ${{github.workspace}}/**
+          key: thirdparty-${{ github.sha }}
+
+      - name: Check out main third party without submodules
+        if: steps.cache-source-directory.outputs.cache-hit != 'true'
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        uses: actions/checkout@v3
+        with:
+          path: "thirdparty"
+
+      - name: Set matrix of submodules
+        id: set-matrix
+        run: |
+          content=$(git submodule)
+          jsonContent="{ \"include\": [  "
+          first="true"
+          while read longsha name; do
+            longsha="${longsha/'-'/}"
+            shortsha="${longsha:0:7}"
+            if [[ "$first" != "true" ]]; then
+              jsonContent+=","
+            fi
+            jsonContent+="{ \"name\": \"$name\", \"shortsha\": \"$shortsha\", \"longsha\": \"$slongsha\" }"
+            first="false"
+          done <<<"$content"
+          jsonContent+="] }"
+          echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
+        shell: bash
+        working-directory: "thirdparty"
+
+  build-targets-matrix:
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    outputs:
+      matrix:
+        build-type: [ Release ]
+        include: ${{ fromJson(needs.setup.outputs.matrix).include }}
+#        target-build-data:
+#          - name: linux
+#            runs-on: linux-latest
+#            setup-script: |
+#              echo "Setup for Linux Build"
+#          - name: android
+#            runs-on: linux-latest
+#            setup-script: |
+#              echo "Setup for Android Build"
+#              git config --global core.autocrlf false
+#              git config --global core.eol lf
+#              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
+#              echo "MAKEFLAGS=\"-j 8\"" >> $GITHUB_ENV
+#              echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+#              echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+#            arch: |
+#              arm64-v8a
+#              x86_64
+#              x86
+#              armeabi-v7a
+#          - name: osx
+#            runs-on: macos-latest
+#            setup-script: |
+#              echo "Setup for OSX Build"
+#              sudo xcode-select --switch \"$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep \"Xcode_[\.0-9]*app\" | sort -V | tail -1)/Contents/Developer\"
+#              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*\", \"\", \"\"]"
+#          - name: ios
+#            runs-on: macos-latest
+#            setup-script: |
+#              echo "Setup for iOS Build"
+#              sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
+#              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+#            install-uses:
+#              uses: actions/setup-python@v2
+#              with:
+#                python-version: '3.5'
+#          - name: windows
+#            runs-on: windows2022
+#            setup-script: |
+#              echo "Setup for Windows Build"
+#            install-uses:
+#              name: Configure build for Windows 10 x64
+#              uses: ilammy/msvc-dev-cmd@v1
+#              with:
+#                arch: amd64
+#                sdk: 10.0.22621.0
+#                vsversion: 17
+      steps:
+      - uses: GeniusVentures/cache-multi/restore@v3.2.2
+        id: cache-tp-source-directory
+        with:
+          path: |
+            !.git/**
+            ${{github.workspace}}/**
+          key: thirdparty-${{ github.sha }}
+
+      - if: steps.cache-tp-source-directory.outputs.cache-hit != 'true'
+        run: |
+          echo "Couldn't find cached thirdparty code, thirdparty-${{ github.sha }} fatal error!"
+          exit 1
+
+      - name: Create Inputs for src caches to load
+        id: cache-multi-parameters
+        run: |
+          # now reload the json content into variables list
+          reloadcontent=$(echo '${{ needs.setup.outputs.matrix }}' | perl -pe "s/.*?(?:\{[ \t]*?\"name\":[ \t]*?\"(.+?)\".[ \t]*?\"shortsha\":[ \t]*?\"(.+?)\"(.*?)\}),*\]*[ \t]*\}*/\1 \2\n/g")
+
+          keysJsonContent=""
+          pathsJsonContent=""
+          first="true"
+          while read name shortsha; do
+            if [[ "$first" != "true" ]]; then
+              keysJsonContent+=$'\n'
+              pathsJsonContent+=$'\n'
+            fi
+            keysJsonContent+="$name-$shortsha"
+            pathsJsonContent+="[\"!.git/**\", \"${{github.workspace}}/$name/**\"]"
+          first="false"
+          done <<<"$reloadcontent"
+          keysJsonContent+=""
+          pathsJsonContent+=""
+
+          echo "CACHE_MULTI_PARAMETER_KEYS<<EOF" >> $GITHUB_ENV
+          echo "$keysJsonContent" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          echo "CACHE_MULTI_PARAMETER_PATHS<<EOF" >> $GITHUB_ENV
+          echo "$pathsJsonContent" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+        shell: bash
+        working-directory: ${{github.workspace}}
+
+      - name: Load the source Cache(s) into the system
+        uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
+        with:
+          keys: ${{ env.CACHE_MULTI_PARAMETER_KEYS }}
+          paths: ${{ env.CACHE_MULTI_PARAMETER_PATHS }}
+
+  output-targets-matrix:
+    needs: [ build-targets-matrix ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: dumping matrix for each run
+        run: |
+          echo "Platform Target: ${{ needs.build-targets-matrix.matrix.target-build-data.name }}"
+          echo "Platform Build Type: ${{ needs.build-targets-matrix.matrix.build-type }}"
+          echo "GitHub Image: ${{ needs.build-targets-matrix.matrix.target-build-data }}"
+          echo "Library Source Directory/name: ${{ needs.build-targets-matrix.matrix.name }}"
+          echo "Library Source Short SHA: ${{ needs.build-targets-matrix.matrix.shortsha }}"
+          echo "Setup script: ${{ needs.build-targets-matrix.matrix.target-build-data.setup-script }}"
+          echo "Uses parameters: ${{ needs.build-targets-matrix.matrix.target-build-data.install-uses }}"
