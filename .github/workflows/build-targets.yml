@@ -163,7 +163,7 @@ jobs:
     strategy:
       matrix:
         build-type: [ Release ]
-        library-names: ${{ fromJson(needs.get-targets-matrix.env.TARGET_LIBRARY_NAMES }}
+        library-names: ${{ needs.get-targets-matrix.env.TARGET_LIBRARY_NAMES }}
         target-build-data:
           - target-os: linux
             runs-on: linux-latest
