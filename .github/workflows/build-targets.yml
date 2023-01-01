@@ -149,9 +149,12 @@ jobs:
           mkdir Release
           cd Release
           cmake .. -DCMAKE_BUILD_TYPE=Release
-          target-libs=$(find CMakeFiles -type d -name *.dir | sed -r "s/(.*\/)*(.*)(.dir)/- libname: \2\n/g")
+          targetlib_array=()
+          while IFS= read -r line; do
+            targetlib_array+=( "$line" )
+          done < <( find CMakeFiles -type d -name *.dir | sed -r "s/(.*\/)*(.*)(.dir)/- libname: \2/g" )
           echo "TARGET_LIBRARY_NAMES<<EOF" >> $GITHUB_ENV
-          echo "$target-libs" >> $GITHUB_ENV
+          printf '%s\n' "${targetlib_array[@]}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
         shell: bash
         working-directory: ${{github.workspace}}/build/Linux
@@ -162,7 +165,8 @@ jobs:
     strategy:
       matrix:
         build-type: [ Release ]
-        library-names: ${{ needs.get-targets-matrix.env.TARGET_LIBRARY_NAMES }}
+        library-names:
+          ${{ needs.get-targets-matrix.env.TARGET_LIBRARY_NAMES }}
         target-build-data:
           - target-os: linux
             runs-on: linux-latest
