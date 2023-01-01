@@ -61,11 +61,6 @@ jobs:
     strategy:
       matrix:
         build-type: [ Release ]
-        include:
-          - libname: Boost.di
-            shortsha: 12345
-          - libname: boost
-            shortsha: 54321
         target-build-data:
           - target-os: linux
             runs-on: linux-latest
@@ -113,7 +108,13 @@ jobs:
                 arch: amd64
                 sdk: 10.0.22621.0
                 vsversion: 17
-#    steps:
+        include:
+          - libname: Boost.DI
+            shortsha: 12345
+          - libname: boost
+            shortsha: 54321
+
+    #    steps:
 #    - uses: GeniusVentures/cache-multi/restore@v3.2.2
 #      id: cache-tp-source-directory
 #      with:
