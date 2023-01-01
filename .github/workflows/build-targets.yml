@@ -59,7 +59,7 @@ jobs:
     strategy:
       matrix:
         build-type: [ Release ]
-        include: [ { name: Boost.di, shortsha: 12345 }]
+        include: [ { name: Boost.di, shortsha: 12345 }, { name: boost, shortsha: 54321 }]
         #${{ fromJson(needs.setup.outputs.matrix).include }}
         target-build-data:
           - name: linux
@@ -165,9 +165,10 @@ jobs:
         run: |
           echo "Platform Target: ${{ matrix.target-build-data.name }}"
           echo "Platform Build Type: ${{ matrix.build-type }}"
-          echo "GitHub Image: ${{ matrix.target-build-data.runs_on }}"
+          echo "GitHub Image: ${{ matrix.target-build-data.runs-on }}"
           echo "Library Source Directory/name: ${{ matrix.name }}"
           echo "Library Source Short SHA: ${{ matrix.shortsha }}"
-          echo "Setup script: ${{ matrix.target-build-data.setup-script }}"
-          echo "Uses parameters: ${{ matrix.target-build-data.install-uses }}"
+          echo "Setup script: '${{ matrix.target-build-data.setup-script }}'"
+          echo "Uses parameters: ${{ toJson(matrix.target-build-data.install-uses) }}"
+          echo "include: ${{ toJson(matrix.include) }}"
           
