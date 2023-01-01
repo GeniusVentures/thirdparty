@@ -12,7 +12,6 @@ env:
 
 jobs:
   setup:
-    if: false
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
