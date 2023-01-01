@@ -11,8 +11,8 @@ env:
   GITHUB_TOKEN: ${{ github.token }}
 
 jobs:
-  if: false
   setup:
+    if: false
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
