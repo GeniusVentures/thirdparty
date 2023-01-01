@@ -164,11 +164,11 @@ jobs:
       - name: dumping matrix for each run
         run: |
           echo "This Matrix Data: ${{ strategy.matrix }}"
-          echo "Platform Target: ${{ build-targets-matrix.matrix.target-build-data.name }}"
-          echo "Platform Build Type: ${{ needs.build-targets-matrix.matrix.build-type }}"
-          echo "GitHub Image: ${{ needs.build-targets-matrix.matrix.target-build-data }}"
-          echo "Library Source Directory/name: ${{ needs.build-targets-matrix.matrix.name }}"
-          echo "Library Source Short SHA: ${{ needs.build-targets-matrix.matrix.shortsha }}"
-          echo "Setup script: ${{ needs.build-targets-matrix.matrix.target-build-data.setup-script }}"
-          echo "Uses parameters: ${{ needs.build-targets-matrix.matrix.target-build-data.install-uses }}"
+          #echo "Platform Target: ${{ strategy.matrix.target-build-data.name }}"
+          #echo "Platform Build Type: ${{ strategy.matrix.build-type }}"
+          #echo "GitHub Image: ${{ strategy.matrix.target-build-data }}"
+          #echo "Library Source Directory/name: ${{ strategy.matrix.name }}"
+          #echo "Library Source Short SHA: ${{ strategy.matrix.shortsha }}"
+          #echo "Setup script: ${{ strategy.matrix.target-build-data.setup-script }}"
+          #echo "Uses parameters: ${{ strategy.matrix.target-build-data.install-uses }}"
           
