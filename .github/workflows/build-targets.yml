@@ -161,7 +161,8 @@ jobs:
     steps:
       - name: dumping matrix for each run
         run: |
-          echo "Platform Target: ${{ needs.build-targets-matrix.matrix.target-build-data.name }}"
+          echo "This Matrix Data: ${{ build-targets-matrix.strategy.matrix }}"
+          echo "Platform Target: ${{ build-targets-matrix.matrix.target-build-data.name }}"
           echo "Platform Build Type: ${{ needs.build-targets-matrix.matrix.build-type }}"
           echo "GitHub Image: ${{ needs.build-targets-matrix.matrix.target-build-data }}"
           echo "Library Source Directory/name: ${{ needs.build-targets-matrix.matrix.name }}"
