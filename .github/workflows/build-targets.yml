@@ -59,14 +59,14 @@ jobs:
     strategy:
       matrix:
         build-type: [ Release ]
-        include: [ { name: Boost.di, shortsha: 12345 }, { name: boost, shortsha: 54321 }]
+        include: [ {libname: Boost.di, shortsha: 12345}, {libname: boost, shortsha: 54321} ]
         #${{ fromJson(needs.setup.outputs.matrix).include }}
         target-build-data:
-          - name: linux
+          - target-os: linux
             runs-on: linux-latest
             setup-script: |
               echo "Setup for Linux Build"
-          - name: android
+          - target-os: android
             runs-on: linux-latest
             setup-script: |
               echo "Setup for Android Build"
@@ -81,13 +81,13 @@ jobs:
               x86_64
               x86
               armeabi-v7a
-          - name: osx
+          - target-os: osx
             runs-on: macos-latest
             setup-script: |
               echo "Setup for OSX Build"
               sudo xcode-select --switch \"$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep \"Xcode_[\.0-9]*app\" | sort -V | tail -1)/Contents/Developer\"
               sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*\", \"\", \"\"]"
-          - name: ios
+          - target-os: ios
             runs-on: macos-latest
             setup-script: |
               echo "Setup for iOS Build"
@@ -97,7 +97,7 @@ jobs:
               uses: actions/setup-python@v2
               with:
                 python-version: '3.5'
-          - name: windows
+          - target-os: windows
             runs-on: windows2022
             setup-script: |
               echo "Setup for Windows Build"
