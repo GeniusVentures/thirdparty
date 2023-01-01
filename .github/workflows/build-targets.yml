@@ -11,6 +11,7 @@ env:
   GITHUB_TOKEN: ${{ github.token }}
 
 jobs:
+  if: false
   setup:
     runs-on: ubuntu-latest
     outputs:
@@ -53,12 +54,13 @@ jobs:
         working-directory: ${{github.workspace}}
 
   build-targets-matrix:
-    needs: [ setup ]
+    #needs: [ setup ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         build-type: [ Release ]
-        include: ${{ fromJson(needs.setup.outputs.matrix).include }}
+        include: [ { name: Boost.di, shortsha: 12345 }]
+        #${{ fromJson(needs.setup.outputs.matrix).include }}
         target-build-data:
           - name: linux
             runs-on: linux-latest
@@ -161,7 +163,7 @@ jobs:
     steps:
       - name: dumping matrix for each run
         run: |
-          echo "This Matrix Data: ${{ build-targets-matrix.strategy.matrix }}"
+          echo "This Matrix Data: ${{ jobs.build-targets-matrix.strategy.matrix }}"
           echo "Platform Target: ${{ build-targets-matrix.matrix.target-build-data.name }}"
           echo "Platform Build Type: ${{ needs.build-targets-matrix.matrix.build-type }}"
           echo "GitHub Image: ${{ needs.build-targets-matrix.matrix.target-build-data }}"
