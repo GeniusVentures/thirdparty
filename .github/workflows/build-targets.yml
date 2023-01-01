@@ -53,14 +53,19 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}
 
+        #${{ fromJson(needs.setup.outputs.matrix).include }}
+
   build-targets-matrix:
     #needs: [ setup ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         build-type: [ Release ]
-        include: [ {libname: Boost.di, shortsha: 12345}, {libname: boost, shortsha: 54321} ]
-        #${{ fromJson(needs.setup.outputs.matrix).include }}
+        include:
+          - libname: Boost.di
+            shortsha: 12345
+          - libname: boost
+            shortsha: 54321
         target-build-data:
           - target-os: linux
             runs-on: linux-latest
