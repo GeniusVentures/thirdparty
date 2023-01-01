@@ -54,7 +54,6 @@ jobs:
               gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
           done
           echo "Done"
-        env:
 
       - name: Set matrix of submodules that need updating
         id: set-matrix
