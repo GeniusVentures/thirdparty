@@ -168,7 +168,9 @@ jobs:
           echo "GitHub Image: ${{ matrix.target-build-data.runs-on }}"
           echo "Library Source Directory/name: ${{ matrix.name }}"
           echo "Library Source Short SHA: ${{ matrix.shortsha }}"
-          echo "Setup script:"<<<EOF ${{ matrix.target-build-data.setup-script }} EOF
+          echo <<EOF Setup script: 
+            ${{ matrix.target-build-data.setup-script }} 
+          EOF
           echo "Uses parameters: ${{ toJson(matrix.target-build-data.install-uses) }}"
           echo "include: ${{ toJson(matrix.include) }}"
           
