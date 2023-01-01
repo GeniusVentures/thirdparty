@@ -1,6 +1,6 @@
 # This is a workflow to cache the sources for all the builds
 
-name: Cache Source Files
+name: Build Matrix of Libraries
 
 # Controls when the workflow will run
 # Triggers the workflow on push or pull request events and manually from the Actions tab
