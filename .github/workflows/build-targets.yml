@@ -59,7 +59,8 @@ jobs:
         id: set-matrix
         run: |
           content=$(git submodule)
-          jsonContent=""
+          jsonContent="jsonContent="{ \"include\": [  "
+          toCacheCount=0
           cacheNameSHAS=""
           while read longSHA name; do
             longSHA="${longSHA/'-'/}"
@@ -82,12 +83,12 @@ jobs:
                   gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
               done
           
-              if [[ -z "$jsonContent" ]]; then
-                jsonContent="{ \"include\": [  "
-              else
+              if (( toCacheCount++ > 0 )); then
                 jsonContent+=","
               fi
+              toCacheCount++
               jsonContent+="{ \"name\": \"$name\", \"shortSHA\": \"$shortSHA\", \"longSHA\": \"$longSHA\" }"
+              
             fi
           done <<<"$content"
           jsonContent+="] }"
