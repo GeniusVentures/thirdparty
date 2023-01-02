@@ -94,7 +94,7 @@ jobs:
           jsonContent+="] }"
           echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
           echo "CACHE_NAMES_SHA=$cacheNameSHAS" >> $GITHUB_OUTPUT
-        sHell: bash
+        shell: bash
         working-directory: ${{github.workspace}}
 
   cache-src:
