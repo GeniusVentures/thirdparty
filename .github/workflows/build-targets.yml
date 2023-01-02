@@ -44,16 +44,18 @@ jobs:
         run: |          
           
           echo "Fetching list of cache keys"
-          cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key "thirdparty-" | cut -f 1 )
+          cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key "thirdparty-" | cut -f 1 | sed '/thirdparty-/!d' )
           
           # Setting this to not fail the workflow while deleting cache keys. 
           set +e
-          echo "Deleting caches..."
-          for cacheKey in $cacheKeys
-          do
-              gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
-          done
-          echo "Done"
+          if [[ -z "$cacheKeys" ]]
+            echo "Deleting caches..."
+            for cacheKey in $cacheKeys
+            do
+                gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+            done
+            echo "Done"
+          fi
 
       - name: Set matrix of submodules that need updating
         id: set-matrix
@@ -71,17 +73,19 @@ jobs:
             fi
             cacheNameSHAS+="$name,$shortSHA"
             # check if cache key exists, if so, we don't need to update this source
-            cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key $name-$shortSHA | cut -f 1 )
+            cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key $name-$shortSHA | cut -f 1 | sed "/$name-$shortSHA/"'!d')
             if [ -z "$cacheKeys" ]; then
               # delete previous caches
-              cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key "$name-" | cut -f 1 )
+              cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key "$name-" | cut -f 1 | sed "/$name-/"'!d')
               # Setting this to not fail the workflow while deleting cache keys. 
               set +e
-              echo "Deleting caches..."
-              for cacheKey in $cacheKeys
-              do
-                  gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
-              done
+              if [[ -z "$cacheKeys" ]]
+                echo "Deleting caches..."
+                for cacheKey in $cacheKeys
+                do
+                    gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+                done
+              fi
           
               if (( $toCacheCount > 0 )); then
                 jsonContent+=","
@@ -136,6 +140,7 @@ jobs:
 
   get-targets-matrix:
     needs: [setup, cache-src]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result,'failure') }}
     runs-on: ubuntu-latest
     steps:
       - uses: GeniusVentures/cache-multi/restore@v3.2.2
