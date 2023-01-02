@@ -118,7 +118,7 @@ jobs:
   cache-src:
     needs: setup
     runs-on: ubuntu-latest
-    if: ${{ needs.setup.outputs.matrix.length > 0 }}
+    if: ${{ (fromJson(needs.setup.outputs.matrix).include.length > 0) }}
     strategy:
       fail-fast: true
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}

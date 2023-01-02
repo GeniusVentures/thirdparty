@@ -1,0 +1,24 @@
+
+name: test needs functionality with if
+
+# Controls when the workflow will run
+# Triggers the workflow on push or pull request events and manually from the Actions tab
+on:
+  workflow_dispatch:
+
+setup-test:
+  runs-on: ubuntu-latest
+  outputs:
+    matrix: ${{ steps.set-matrix.outputs.matrix }}
+  steps:
+    id: set-matrix
+    run: |
+      echo "matrix={ \"include\": [ { \"any\": \"12345"\" } ]" >> $GITHUB_OUTPUT
+
+cache-src-test:
+  needs: setup-test
+  runs-on: ubuntu-latest
+  if: ${{ (fromJson(needs.setup-test.outputs.matrix).include.length > 0) }}
+  steps:
+    run: |
+      echo "Results: ${{ needs.setup-test.outputs.matrix }}"
