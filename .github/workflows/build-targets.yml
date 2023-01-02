@@ -18,15 +18,6 @@ jobs:
       CACHE_NAME_SHAS: ${{ steps.set-matrix.outputs.CACHE_NAME_SHAS }}
       HAS_MATRIX_VALUES: ${{ steps.set-matrix.outputs.HAS_MATRIX_VALUES }}
     steps:
-      - name: Cache main Source Files without .git
-        uses: GeniusVentures/cache-multi@v3.2.2
-        id: cache-source-directory
-        with:
-          path: |
-            !.git/**
-            ${{github.workspace}}/**
-          key: thirdparty-${{ github.sha }}
-
       - name: Check out main third party without submodules
         if: steps.cache-source-directory.outputs.cache-hit != 'true'
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -42,21 +33,40 @@ jobs:
           echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
 
       - name: Clean out old caches of thirdparty
-        run: |          
-          
-          echo "Fetching list of cache keys"
+        id: tp-clean-out
+        run: |
+          echo "Fetching list of cache keys to check if any old ones need deleting"
           cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key "thirdparty-" | cut -f 1 | sed '/thirdparty-/!d' )
-          
-          # Setting this to not fail the workflow while deleting cache keys. 
+          fullNameSHA="$thirdparty-${{ github.sha }}"
+
+          foundThirdPartyCurrent='false'
+          # Setting this to not fail the workflow while deleting cache keys.
           set +e
           if [[ ! -z "$cacheKeys" ]]; then
-            echo "Deleting caches..."
             for cacheKey in $cacheKeys
             do
+              if [[ "$cachKey" == "$fullNameSHA" ]]; then
+                echo "Found Previous cache $fullNameSHA"
+                foundThirdPartyCurrent='true'
+              elif [[ ${#cachekey} == ${#fullNameSHA} ]]; then
+                echo "Deleting cache $cacheKey"
                 gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+              fi
             done
             echo "Done"
           fi
+
+          echo "FOUND_THIRD_PARTY_CURRENT='$foundThirdPartyCurrent'" >> $GITHUB_ENV
+
+      - name: Cache main Source Files without .git, if not already cached
+        if: ${{ always() && !env.FOUND_THIRD_PARTY_CURRENT }}
+        uses: GeniusVentures/cache-multi@v3.2.2
+        id: cache-source-directory
+        with:
+          path: |
+            !.git/**
+            ${{github.workspace}}/**
+          key: thirdparty-${{ github.sha }}
 
       - name: Set matrix of submodules that need updating
         id: set-matrix
@@ -74,32 +84,28 @@ jobs:
               cacheNameSHAS+=","
             fi
             cacheNameSHAS+="$name,$shortSHA"
+            fullNameSHA="$name-$shortSHA"
 
             needCacheRepo="true"
             if [[ -z "$cacheEmpty" ]]; then
-              # check if cache key exists, if so, we don't need to update this source
-              foundCachedRepo=$(gh actions-cache list -R $REPO -B $BRANCH --key \"$name-$shortSHA\" | cut -f 1 | sed ":$name-$shortSHA:"'!d')
-              if [[ -z "$foundCachedRepo" ]]; then
-                needCacheRepo=""
-                echo "Found $name cached Repo for SHA: $shortSHA"
-                cacheEmpty="true"
-                # delete previous caches
-                oldCaches=$(gh actions-cache list -R $REPO -B $BRANCH --key \"$name-\" | cut -f 1 | sed ":$name-:"'!d')
-                # Setting this to not fail the workflow while deleting cache keys.
-                set +e
-                if [[ ! -z "$oldCaches" ]]; then
-                  echo "Deleting caches..."
-                  for cacheKey in $oldCaches
-                  do
-                    gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
-                  done
-                fi
-              else
-                needCacheRepo="false"
+              foundCachedRepos=$(gh actions-cache list -R $REPO -B $BRANCH --key "$name-" | cut -f 1 | sed ":$name-:"'!d')
+              set +e
+              if [[ ! -z "$foundCachedRepos" ]]; then
+                for cacheKey in $foundCachedRepos
+                do
+                  if [[ "$cacheKey" == "$fullNameSHA" ]]; then
+                    echo "Found existing cache for $fullNameSHA..."
+                    needCacheRepo="false"
+                  # make sure the string lenght match, as the --key will match least amount of prefix, so boost- will match boost-for-mobile
+                  elif [[ ${#cachekey} == ${#fullNameSHA} ]]; then
+                    echo "Deleting old cache $cacheKey..."
+                    # gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+                  fi
+                done
               fi
             fi
 
-            if  [[ ! -z "$needCacheRepo" ]]; then
+            if  [[ "$needCacheRepo" == "true" ]]; then
               if (( $toCacheCount > 0 )); then
                jsonContent+=","
               fi
@@ -107,6 +113,7 @@ jobs:
               jsonContent+="{ \"name\": \"$name\", \"shortSHA\": \"$shortSHA\", \"longSHA\": \"$longSHA\" }"
 
             fi
+
           done <<<"$content"
           echo "$cacheNameSHAS"
           jsonContent+="] }"
