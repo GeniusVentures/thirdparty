@@ -39,7 +39,7 @@ jobs:
           cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key "thirdparty-" | cut -f 1 | sed '/thirdparty-/!d' )
           fullNameSHA="$thirdparty-${{ github.sha }}"
 
-          foundThirdPartyCurrent='false'
+          foundThirdPartyCurrent=false
           # Setting this to not fail the workflow while deleting cache keys.
           set +e
           if [[ ! -z "$cacheKeys" ]]; then
@@ -47,7 +47,7 @@ jobs:
             do
               if [[ "$cachKey" == "$fullNameSHA" ]]; then
                 echo "Found Previous cache $fullNameSHA"
-                foundThirdPartyCurrent='true'
+                foundThirdPartyCurrent=true
               elif [[ ${#cachekey} == ${#fullNameSHA} ]]; then
                 echo "Deleting cache $cacheKey"
                 gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
@@ -56,7 +56,7 @@ jobs:
             echo "Done"
           fi
 
-          echo "FOUND_THIRD_PARTY_CURRENT='$foundThirdPartyCurrent'" >> $GITHUB_ENV
+          echo "FOUND_THIRD_PARTY_CURRENT=$foundThirdPartyCurrent" >> $GITHUB_ENV
 
       - name: Cache main Source Files without .git, if not already cached
         if: ${{ always() && !env.FOUND_THIRD_PARTY_CURRENT }}
@@ -117,15 +117,15 @@ jobs:
           done <<<"$content"
           echo "$cacheNameSHAS"
           if (( $toCacheCount == 0 )); then
-            jsonContent+="{ \"HAS_MATRIX_VALUES\": \"'false'\" }"
+            jsonContent+="{ \"HAS_MATRIX_VALUES\": false }"
           fi
           jsonContent+="] }"
           echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
           echo "CACHE_NAME_SHAS=$cacheNameSHAS" >> $GITHUB_OUTPUT
           if (( $toCacheCount > 0 )); then
-            echo "HAS_MATRIX_VALUES='true'" >> $GITHUB_OUTPUT
+            echo "HAS_MATRIX_VALUES=true" >> $GITHUB_OUTPUT
           else
-            echo "HAS_MATRIX_VALUES='false'" >> $GITHUB_OUTPUT
+            echo "HAS_MATRIX_VALUES=false" >> $GITHUB_OUTPUT
           fi
           echo "Found $toCacheCount new source repos to cache!"
         shell: bash
