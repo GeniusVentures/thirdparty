@@ -138,7 +138,7 @@ jobs:
       fail-fast: true
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
-      - if: !(needs.setup.outputs.HAS_MATRIX_VALUES)
+      - if: (!needs.setup.outputs.HAS_MATRIX_VALUES)
         name: No Caches to Build!
         run: |
           echo "No Caches to build, successful cache-src job"
@@ -153,13 +153,13 @@ jobs:
             ${{github.workspace}}/**
           key: thirdparty-${{ github.sha }}
 
-      - if: needs.setup.outputs.HAS_MATRIX_VALUES) && (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
+      - if: (needs.setup.outputs.HAS_MATRIX_VALUES && (steps.cache-tp-source-directory.outputs.cache-hit != 'true'))
         run: |
           echo "Couldn't find cached thirdparty code, thirdparty-${{ github.sha }} fatal error!"
           exit 1
 
 
-      - if: needs.setup.outputs.HAS_MATRIX_VALUES
+      - if: (needs.setup.outputs.HAS_MATRIX_VALUES)
         name: Cache Submodule Source Files without .git
         id: cache-source-directory
         uses: GeniusVentures/cache-multi@v3.2.2
@@ -169,7 +169,7 @@ jobs:
             ${{github.workspace}}/${{ matrix.name }}/**
           key: ${{ matrix.name }}-${{ matrix.shortSHA }}
 
-      - if: (needs.setup.outputs.HAS_MATRIX_VALUES) && (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
+      - if: (needs.setup.outputs.HAS_MATRIX_VALUES && (steps.cache-tp-source-directory.outputs.cache-hit != 'true'))
         name: Git clone submodule source code
         run: |
           echo "Cloning source for ${{ matrix.name }}"
