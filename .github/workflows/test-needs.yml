@@ -6,19 +6,22 @@ name: test needs functionality with if
 on:
   workflow_dispatch:
 
-setup-test:
-  runs-on: ubuntu-latest
-  outputs:
-    matrix: ${{ steps.set-matrix.outputs.matrix }}
-  steps:
-    id: set-matrix
-    run: |
-      echo "matrix={ \"include\": [ { \"any\": \"12345"\" } ]" >> $GITHUB_OUTPUT
+jobs:
+  setup-test:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set the Matrix Output
+        id: set-matrix
+        run: |
+          echo "matrix={ \"include\": [ { \"any\": \"12345"\" } ]}" >> $GITHUB_OUTPUT
 
-cache-src-test:
-  needs: setup-test
-  runs-on: ubuntu-latest
-  if: ${{ (fromJson(needs.setup-test.outputs.matrix).include.length > 0) }}
-  steps:
-    run: |
-      echo "Results: ${{ needs.setup-test.outputs.matrix }}"
+  cache-src-test:
+    needs: setup-test
+    runs-on: ubuntu-latest
+    if: ${{ always() && (fromJson(needs.setup-test.outputs.matrix).include.length > 0) }}
+    steps:
+      - name: Output the passed matrix
+        run: |
+          echo "Results: ${{ needs.setup-test.outputs.matrix }}"
