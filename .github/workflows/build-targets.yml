@@ -69,32 +69,36 @@ jobs:
             longSHA="${longSHA/'-'/}"
             shortSHA="${longSHA:0:7}"
             # if not empty, then we need to append a comma
-            if [[ ! -z "cacheNameSHAS" ]]; then
+            if [[ ! -z "$cacheNameSHAS" ]]; then
               cacheNameSHAS+=","
             fi
             cacheNameSHAS+="$name,$shortSHA"
 
+            needCacheRepo="true"
             if [[ -z "$cacheEmpty" ]]; then
-              echo "Cache was not empty, so checking individual source repo caches"
               # check if cache key exists, if so, we don't need to update this source
-              cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key \"$name-$shortSHA\" | cut -f 1 | sed ":$name-$shortSHA:"'!d')
-              if [[ -z "$cacheKeys" ]]; then
+              foundCachedRepo=$(gh actions-cache list -R $REPO -B $BRANCH --key \"$name-$shortSHA\" | cut -f 1 | sed ":$name-$shortSHA:"'!d')
+              if [[ -z "$foundCachedRepo" ]]; then
+                needCacheRepo=""
+                echo "Found $name cached Repo for SHA: $shortSHA"
                 cacheEmpty="true"
                 # delete previous caches
-                cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key \"$name-\" | cut -f 1 | sed ":$name-:"'!d')
+                oldCaches=$(gh actions-cache list -R $REPO -B $BRANCH --key \"$name-\" | cut -f 1 | sed ":$name-:"'!d')
                 # Setting this to not fail the workflow while deleting cache keys.
                 set +e
-                if [[ ! -z "$cacheKeys" ]]; then
+                if [[ ! -z "$oldCaches" ]]; then
                   echo "Deleting caches..."
-                  for cacheKey in $cacheKeys
+                  for cacheKey in $oldCaches
                   do
                     gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
                   done
                 fi
+              else
+                needCacheRepo="false"
               fi
             fi
 
-            if  [[ ! -z "$cacheEmpty" ]]; then
+            if  [[ ! -z "$needCacheRepo" ]]; then
               if (( $toCacheCount > 0 )); then
                jsonContent+=","
               fi
@@ -106,7 +110,7 @@ jobs:
           echo "$cacheNameSHAS"
           jsonContent+="] }"
           echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
-          echo "CACHE_NAMES_SHA=$cacheNameSHAS" >> $GITHUB_OUTPUT
+          echo "CACHE_NAME_SHAS=$cacheNameSHAS" >> $GITHUB_OUTPUT
           echo "Found $toCacheCount new source repos to cache!"
         shell: bash
         working-directory: ${{github.workspace}}
