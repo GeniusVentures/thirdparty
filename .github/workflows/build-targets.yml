@@ -117,7 +117,7 @@ jobs:
           done <<<"$content"
           echo "$cacheNameSHAS"
           if (( $toCacheCount == 0 )); then
-            jsonContent+="\"HAS_MATRIX_VALUES\": \"'false'\""
+            jsonContent+="{ \"HAS_MATRIX_VALUES\": \"'false'\" }"
           fi
           jsonContent+="] }"
           echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
