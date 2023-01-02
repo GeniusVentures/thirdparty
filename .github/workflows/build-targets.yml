@@ -90,7 +90,7 @@ jobs:
               if (( $toCacheCount > 0 )); then
                 jsonContent+=","
               fi
-              toCacheCount++
+              toCacheCount+=1
               jsonContent+="{ \"name\": \"$name\", \"shortSHA\": \"$shortSHA\", \"longSHA\": \"$longSHA\" }"
               
             fi
@@ -98,6 +98,7 @@ jobs:
           jsonContent+="] }"
           echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
           echo "CACHE_NAMES_SHA=$cacheNameSHAS" >> $GITHUB_OUTPUT
+          echo "Found $toCacheCount new source repos to cache!"
         shell: bash
         working-directory: ${{github.workspace}}
 
