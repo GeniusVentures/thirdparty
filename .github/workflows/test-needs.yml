@@ -15,7 +15,7 @@ jobs:
       - name: Set the Matrix Output
         id: set-matrix
         run: |
-          echo "matrix={ \"include\": [ { \"any\": \"12345"\" } ]}" >> $GITHUB_OUTPUT
+          echo "matrix={ \"include\": [ { \"any\": \"12345\" } ]}" >> $GITHUB_OUTPUT
 
   cache-src-test:
     needs: setup-test
