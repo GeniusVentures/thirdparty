@@ -64,6 +64,7 @@ jobs:
           jsonContent="{ \"include\": [  "
           toCacheCount=0
           cacheNameSHAS=""
+          cacheEmpty=$(gh actions-cache list -R $REPO -B $BRANCH --limit 1 | sed -e '/There are no Actions caches/!d' )
           while read longSHA name version; do
             longSHA="${longSHA/'-'/}"
             shortSHA="${longSHA:0:7}"
@@ -72,33 +73,37 @@ jobs:
               cacheNameSHAS+=","
             fi
             cacheNameSHAS+="$name,$shortSHA"
-            echo "Testing name \"$name-$shortSHA\""
-            # check if cache key exists, if so, we don't need to update this source
-            cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key \"$name-$shortSHA\" | cut -f 1 | sed ":$name-$shortSHA:"'!d')
-            echo "$cacheKeys"
-            if [[ -z "$cacheKeys" ]]; then
-              # delete previous caches
-              cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key \"$name-\" | cut -f 1 | sed ":$name-:"'!d')
-              echo "$cacheKeys"
-              # Setting this to not fail the workflow while deleting cache keys.
-              set +e
-              if [[ ! -z "$cacheKeys" ]]; then
-                echo "Deleting caches..."
-                for cacheKey in $cacheKeys
-                do
-                  gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
-                done
-              fi
 
-              if (( $toCacheCount > 0 )); then
-                jsonContent+=","
+            if [[ -z "$cacheEmpty" ]]; then
+              echo "Cache was not empty, so checking individual source repo caches"
+              # check if cache key exists, if so, we don't need to update this source
+              cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key \"$name-$shortSHA\" | cut -f 1 | sed ":$name-$shortSHA:"'!d')
+              if [[ -z "$cacheKeys" ]]; then
+                cacheEmpty="true"
+                # delete previous caches
+                cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key \"$name-\" | cut -f 1 | sed ":$name-:"'!d')
+                # Setting this to not fail the workflow while deleting cache keys.
+                set +e
+                if [[ ! -z "$cacheKeys" ]]; then
+                  echo "Deleting caches..."
+                  for cacheKey in $cacheKeys
+                  do
+                    gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+                  done
+                fi
               fi
-              toCacheCount+=1
+            fi
+
+            if  [[ ! -z "$cacheEmpty" ]]; then
+              if (( $toCacheCount > 0 )); then
+               jsonContent+=","
+              fi
+              (( toCacheCount+=1 ))
               jsonContent+="{ \"name\": \"$name\", \"shortSHA\": \"$shortSHA\", \"longSHA\": \"$longSHA\" }"
 
             fi
-
           done <<<"$content"
+          echo "$cacheNameSHAS"
           jsonContent+="] }"
           echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
           echo "CACHE_NAMES_SHA=$cacheNameSHAS" >> $GITHUB_OUTPUT
@@ -109,6 +114,7 @@ jobs:
   cache-src:
     needs: setup
     runs-on: ubuntu-latest
+    if: ${{ needs.setup.outputs.matrix.length > 0 }}
     strategy:
       fail-fast: true
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
