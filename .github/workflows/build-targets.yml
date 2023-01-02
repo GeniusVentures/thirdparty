@@ -15,7 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-      CACHE_NAME_SHAS: $${{ steps.set-matrix.outputs.CACHE_NAME_SHAS }}
+      CACHE_NAME_SHAS: ${{ steps.set-matrix.outputs.CACHE_NAME_SHAS }}
+      HAS_MATRIX_VALUES: ${{ steps.set-matrix.outputs.HAS_MATRIX_VALUES }}
     steps:
       - name: Cache main Source Files without .git
         uses: GeniusVentures/cache-multi@v3.2.2
@@ -111,6 +112,11 @@ jobs:
           jsonContent+="] }"
           echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
           echo "CACHE_NAME_SHAS=$cacheNameSHAS" >> $GITHUB_OUTPUT
+          if (( $toCacheCount > 0 )); then
+            echo "HAS_MATRIX_VALUES='true'" >> $GITHUB_OUTPUT
+          else
+            echo "HAS_MATRIX_VALUES='false'" >> $GITHUB_OUTPUT
+          fi
           echo "Found $toCacheCount new source repos to cache!"
         shell: bash
         working-directory: ${{github.workspace}}
@@ -118,7 +124,7 @@ jobs:
   cache-src:
     needs: setup
     runs-on: ubuntu-latest
-    if: ${{ (fromJson(needs.setup.outputs.matrix).include.length > 0) }}
+    if: ${{ always() && (needs.setup.outputs.HAS_MATRIX_VALUES }}
     strategy:
       fail-fast: true
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}

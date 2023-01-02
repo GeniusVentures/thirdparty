@@ -11,17 +11,20 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has-matrix: ${{ steps.set-matrix.outputs.has-matrix }}
     steps:
       - name: Set the Matrix Output
         id: set-matrix
         run: |
           echo "matrix={ \"include\": [ { \"any\": \"12345\" } ]}" >> $GITHUB_OUTPUT
+          echo "has-matrix='true'" >> $GITHUB_OUTPUT
 
   cache-src-test:
     needs: setup-test
     runs-on: ubuntu-latest
-    if: ${{ always() && (fromJson(needs.setup-test.outputs.matrix).include.length > 0) }}
+    if: ${{ always() && (needs.setup-test.outputs.has-matrix) }}
     steps:
       - name: Output the passed matrix
         run: |
-          echo "Results: ${{ needs.setup-test.outputs.matrix }}"
+          echo "Results: ${{ needs.setup-test.outputs.has-matrix }}"
+          echo "include length: ${ fromJSON(needs.setup-test.outputs}.include.length }"
