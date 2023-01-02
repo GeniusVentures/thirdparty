@@ -84,7 +84,7 @@ jobs:
           
               if [[ -z "$jsonContent" ]]; then
                 jsonContent="{ \"include\": [  "
-              elif
+              else
                 jsonContent+=","
               fi
               jsonContent+="{ \"name\": \"$name\", \"shortSHA\": \"shortSHA\", \"longSHA\": \"$longSHA\" }"
