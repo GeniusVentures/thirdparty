@@ -116,6 +116,9 @@ jobs:
 
           done <<<"$content"
           echo "$cacheNameSHAS"
+          if (( $toCacheCount == 0 )); then
+            jsonContent+="\"HAS_MATRIX_VALUES\": \"'false'\""
+          fi
           jsonContent+="] }"
           echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
           echo "CACHE_NAME_SHAS=$cacheNameSHAS" >> $GITHUB_OUTPUT
@@ -131,12 +134,18 @@ jobs:
   cache-src:
     needs: setup
     runs-on: ubuntu-latest
-    if: ${{ always() && (needs.setup.outputs.HAS_MATRIX_VALUES) }}
     strategy:
       fail-fast: true
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
-      - uses: GeniusVentures/cache-multi@v3.2.2
+      - if: !(needs.setup.outputs.HAS_MATRIX_VALUES)
+        name: No Caches to Build!
+        run: |
+          echo "No Caches to build, successful cache-src job"
+
+      - if: needs.setup.outputs.HAS_MATRIX_VALUES
+        name: Cache Third Party Director
+        uses: GeniusVentures/cache-multi/restore@v3.2.2
         id: cache-tp-source-directory
         with:
           path: |
@@ -144,12 +153,14 @@ jobs:
             ${{github.workspace}}/**
           key: thirdparty-${{ github.sha }}
 
-      - if: steps.cache-tp-source-directory.outputs.cache-hit != 'true'
+      - if: needs.setup.outputs.HAS_MATRIX_VALUES) && (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
         run: |
           echo "Couldn't find cached thirdparty code, thirdparty-${{ github.sha }} fatal error!"
           exit 1
 
-      - name: Cache Submodule Source Files without .git
+
+      - if: needs.setup.outputs.HAS_MATRIX_VALUES
+        name: Cache Submodule Source Files without .git
         id: cache-source-directory
         uses: GeniusVentures/cache-multi@v3.2.2
         with:
@@ -158,8 +169,8 @@ jobs:
             ${{github.workspace}}/${{ matrix.name }}/**
           key: ${{ matrix.name }}-${{ matrix.shortSHA }}
 
-      - name: Git clone submodule source code
-        if: steps.cache-source-directory.outputs.cache-hit != 'true'
+      - if: (needs.setup.outputs.HAS_MATRIX_VALUES) && (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
+        name: Git clone submodule source code
         run: |
           echo "Cloning source for ${{ matrix.name }}"
           git submodule update --init --recursive -- ${{ matrix.name }}
@@ -168,7 +179,6 @@ jobs:
 
   get-targets-matrix:
     needs: [setup, cache-src]
-    if: ${{ always() && !cancelled() && !contains(needs.*.result,'failure') }}
     runs-on: ubuntu-latest
     steps:
       - uses: GeniusVentures/cache-multi/restore@v3.2.2
