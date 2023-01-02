@@ -38,7 +38,7 @@ jobs:
           gh extension install actions/gh-actions-cache
           echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
           echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
-          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }} >> $GITHUB_ENV
+          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
 
       - name: Clean out old caches of thirdparty
         run: |          
@@ -155,7 +155,7 @@ jobs:
           gh extension install actions/gh-actions-cache
           echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
           echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
-          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }} >> $GITHUB_ENV
+          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
 
       - name: Create Inputs for src caches to load
         id: cache-multi-parameters
