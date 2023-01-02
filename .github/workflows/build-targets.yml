@@ -124,7 +124,7 @@ jobs:
   cache-src:
     needs: setup
     runs-on: ubuntu-latest
-    if: ${{ always() && (needs.setup.outputs.HAS_MATRIX_VALUES }}
+    if: ${{ always() && (needs.setup.outputs.HAS_MATRIX_VALUES) }}
     strategy:
       fail-fast: true
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
