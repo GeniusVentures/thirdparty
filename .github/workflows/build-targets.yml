@@ -56,10 +56,10 @@ jobs:
             echo "Done"
           fi
 
-          echo "FOUND_THIRD_PARTY_CURRENT=$foundThirdPartyCurrent" >> $GITHUB_ENV
+          echo "FOUND_THIRD_PARTY_CURRENT=$foundThirdPartyCurrent" >> $GITHUB_OUTPUT
 
       - name: Cache main Source Files without .git, if not already cached
-        if: ( env.FOUND_THIRD_PARTY_CURRENT == 'false' )
+        if: ( steps.output.FOUND_THIRD_PARTY_CURRENT == 'false' )
         uses: GeniusVentures/cache-multi@v3.2.2
         id: cache-source-directory
         with:
@@ -180,6 +180,10 @@ jobs:
   get-targets-matrix:
     needs: [setup, cache-src]
     runs-on: ubuntu-latest
+    outputs:
+      TARGET_LIBRARY_NAMES: ${{ steps.make-target-list.output.TARGET_LIBRARY_NAMES }}
+      CACHE_MULTI_PARAMETER_KEYS: $${ steps.cache-multi-parameters.CACHE_MULTI_PARAMETER_KEYS }}
+      CACHE_MULTI_PARAMETER_PATHS: $${ steps.cache-multi-parameters.CACHE_MULTI_PARAMETER_PATHS }}
     steps:
       - uses: GeniusVentures/cache-multi/restore@v3.2.2
         id: cache-tp-source-directory
@@ -205,28 +209,28 @@ jobs:
         id: cache-multi-parameters
         run: |
           # now reload the json content into variables list
-          cacheNameSHAS=( $(echo "${{ needs.setup.outputs.CACHE_NAME_SHAS }}" | tr ',' '\n'))
+          cacheNameSHAS=( ${{ needs.setup.outputs.CACHE_NAME_SHAS }} )
 
-          keysContent=""
-          pathsContent=""
+          keysContent="[ "
+          pathsContent="[ "
+          first='true'
           for ((i=0; i < ${#cacheNameSHAS[@]}; i+=2)); do
             name=${cacheNameSHAS[$i]}
             shortSHA=${cacheNameSHAS[$i+1]}
-            if [[ ! -z "$keysContent" ]]; then
-              keysContent+=$'\n'
-              pathsContent+=$'\n'
+            if [[ "$first" != "true" ]]; then
+              keysContent+=", "
+              pathsContent+=", "
             fi
-            keysContent+="$name-$shortSHA"
-            pathsContent+="[\"!.git/**\", \"${{github.workspace}}/$name/**\"]"
+            first='false'
+            keysContent+="\\\"$name-$shortSHA\\\""
+            pathsContent+="[\"!.git/**\", \"$name/**\"]"
           done
-          
-          echo "CACHE_MULTI_PARAMETER_KEYS<<EOF" >> $GITHUB_ENV
-          echo "$keysContent" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
 
-          echo "CACHE_MULTI_PARAMETER_PATHS<<EOF" >> $GITHUB_ENV
-          echo "$pathsContent" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          keysContent+=" ]"
+          echo "CACHE_MULTI_PARAMETER_KEYS=$keysContent" >> $GITHUB_OUTPUT
+
+          pathsContent+=" ]"
+          echo "CACHE_MULTI_PARAMETER_PATHS=$pathsContent" >> $GITHUB_OUTPUT
 
         shell: bash
         working-directory: ${{github.workspace}}
@@ -234,21 +238,18 @@ jobs:
       - name: Load the source Cache(s) into the system
         uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
         with:
-          keys: ${{ env.CACHE_MULTI_PARAMETER_KEYS }}
-          paths: ${{ env.CACHE_MULTI_PARAMETER_PATHS }}
+          keys: ${{ outputs.CACHE_MULTI_PARAMETER_KEYS }}
+          paths: ${{ outputs.CACHE_MULTI_PARAMETER_PATHS }}
 
       - name: build a list of targets that will be made with cmake
+        id: make-target-list
         run: |
           mkdir Release
           cd Release
           cmake .. -DCMAKE_BUILD_TYPE=Release
-          targetlib_array=()
-          while IFS= read -r line; do
-            targetlib_array+=( "$line" )
-          done < <( find CMakeFiles -type d -name *.dir | sed -r "s/(.*\/)*(.*)(.dir)/- libname: \2/g" )
-          echo "TARGET_LIBRARY_NAMES<<EOF" >> $GITHUB_ENV
-          printf '%s\n' "${targetlib_array[@]}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          targetLibs=$( find CMakeFiles -type d -name *.dir | sed -r "s/(.*\/)*(.*)(.dir)/\2/g" )
+          targetLibs="[ ${targetLibs//$'\n'/','} ]"
+          echo "TARGET_LIBRARY_NAMES=$targetLibs" >> $GITHUB_OUTPUT
         shell: bash
         working-directory: ${{github.workspace}}/build/Linux
 
@@ -258,7 +259,7 @@ jobs:
     strategy:
       matrix:
         build-type: [ Release ]
-        library-names: ${{ env.TARGET_LIBRARY_NAMES }}
+        library-names: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
         target-build-data:
           - target-os: linux
             runs-on: linux-latest
