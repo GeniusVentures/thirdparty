@@ -44,19 +44,7 @@ jobs:
       - name: Check build library
         uses: GeniusVentures/cache-multi/restoremulti@develop
         with:
-          keys:
-          - "abseil-cpp-522606b"
-          - "Boost.DI-c5287ee"
-          - "boost-32da69a"
-          paths:
-          -
-            - "abseil-cpp/**"
-            - "!.git/**"
-          -
-            - "Boost.DI/**"
-            - "!.git/**"
-          -
-            - "boost/**"
-            - "!.git/**"
+          keys: [ 'abseil-cpp-522606b', 'Boost.DI-c5287ee', 'boost-32da69a' ]
+          paths: [ [ 'abseil-cpp/**', '!.git/**' ], [ 'Boost.DI/**', '!.git/**' ], [ 'boost/**', '!.git/**' ] ]
 #          keys: ${{ fromJson(needs.setup-test.outputs.TARGET_KEYS) }}
 #          paths: ${{ fromJson(needs.setup-test.outputs.TARGET_PATHS) }}
