@@ -12,14 +12,14 @@ jobs:
     outputs:
       has-matrix: ${{ steps.set-matrix.outputs.has-matrix }}
       TARGET_LIBRARY_NAMES: ${{ steps.set-targets-list.outputs.TARGET_LIBRARY_NAMES }}
-      TARGET_KEYS: ${{ steps.set-targets-list.outputs.TARGET_LIBRARY_NAMES }}
-      TARGET_PATHS: ${{ steps.set-targets-list.outputs.TARGET_LIBRARY_NAMES }}
+      TARGET_KEYS: ${{ steps.set-matrix.outputs.TARGET_KEYS }}
+      TARGET_PATHS: ${{ steps.set-matrix.outputs.TARGET_PATHS }}
     steps:
       - name: Set the keys/paths to try and restore
         id: set-matrix
         run: |
           echo "TARGET_KEYS=[ \"abseil-cpp-522606b\", \"Boost.DI-c5287ee\", \"boost-32da69a\" ]" >> $GITHUB_OUTPUT
-          echo "TARGET_PATHS='[ \"[ \\\"abseil-cpp/**\\\", \\\""'!'".git/**\\\"]\", \"[ \\\"Boost.DI/**\\\", \\\""'!'".git/**\\\"]\", \"[ \\\"boost/**\\\", \\\""'!'".git/**\\\"]\" ]'" >> $GITHUB_OUTPUT
+          echo "TARGET_PATHS=[ [ \"abseil-cpp/**\", \""'!'".git/**\"], [ \"Boost.DI/**\", \""'!'".git/**\"], [ \"boost/**\", \""'!'".git/**\"] ]" >> $GITHUB_OUTPUT
           echo "has-matrix='true'" >> $GITHUB_OUTPUT
 
       - name: Build the targets list
@@ -44,7 +44,5 @@ jobs:
       - name: Check build library
         uses: GeniusVentures/cache-multi/restoremulti@develop
         with:
-          keys: [ 'abseil-cpp-522606b', 'Boost.DI-c5287ee', 'boost-32da69a' ]
-          paths: [ [ 'abseil-cpp/**', '!.git/**' ], [ 'Boost.DI/**', '!.git/**' ], [ 'boost/**', '!.git/**' ] ]
-#          keys: ${{ fromJson(needs.setup-test.outputs.TARGET_KEYS) }}
-#          paths: ${{ fromJson(needs.setup-test.outputs.TARGET_PATHS) }}
+          keys: ${{ needs.setup-test.outputs.TARGET_KEYS }}
+          paths: ${{ needs.setup-test.outputs.TARGET_PATHS }}
