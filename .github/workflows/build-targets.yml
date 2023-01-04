@@ -31,7 +31,7 @@ jobs:
           echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
           echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
 
-      - name: Clean out old caches of thirdparty
+      - name: Find cache and Clean out old caches of thirdparty
         id: tp-clean-out
         run: |
           echo "Fetching list of cache keys to check if any old ones need deleting"
@@ -58,7 +58,7 @@ jobs:
           echo "FOUND_THIRD_PARTY_CURRENT=$foundThirdPartyCurrent" >> $GITHUB_OUTPUT
 
       - name: Cache main Source Files without .git, if not already cached
-        if: ( steps.output.FOUND_THIRD_PARTY_CURRENT == 'false' )
+        if: ( steps.tp-clean-out.outputs.FOUND_THIRD_PARTY_CURRENT == 'false' )
         uses: GeniusVentures/cache-multi@v3.2.2
         id: cache-source-directory
         with:
