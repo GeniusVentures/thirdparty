@@ -19,7 +19,7 @@ jobs:
         id: set-matrix
         run: |
           echo "TARGET_KEYS=[ \"abseil-cpp-522606b\", \"Boost.DI-c5287ee\", \"boost-32da69a\" ]" >> $GITHUB_OUTPUT
-          echo "TARGET_PATHS=[ [ \"abseil-cpp/**\", \""'!'".git/**\"], [ \"Boost.DI/**\", \""'!'".git/**\"], [ \"boost/**\", \""'!'".git/**\"] ]" >> $GITHUB_OUTPUT
+          echo "TARGET_PATHS=[ [ \""'!'".git/**\", \"abseil-cpp/**\"], [ \""'!'".git/**\", \"Boost.DI/**\" ], [ \""'!'".git/**\", \"boost/**\"] ]" >> $GITHUB_OUTPUT
           echo "has-matrix='true'" >> $GITHUB_OUTPUT
 
       - name: Build the targets list
