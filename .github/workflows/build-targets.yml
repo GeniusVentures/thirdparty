@@ -238,8 +238,8 @@ jobs:
       - name: Load the source Cache(s) into the system
         uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
         with:
-          keys: ${{ outputs.CACHE_MULTI_PARAMETER_KEYS }}
-          paths: ${{ outputs.CACHE_MULTI_PARAMETER_PATHS }}
+          keys: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_KEYS }}
+          paths: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_PATHS }}
 
       - name: build a list of targets that will be made with cmake
         id: make-target-list
