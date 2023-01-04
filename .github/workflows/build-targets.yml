@@ -19,11 +19,10 @@ jobs:
       HAS_MATRIX_VALUES: ${{ steps.set-matrix.outputs.HAS_MATRIX_VALUES }}
     steps:
       - name: Check out main third party without submodules
-        if: steps.cache-source-directory.outputs.cache-hit != 'true'
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         uses: actions/checkout@v3
         with:
-          path: ${{github.workspace}}
+          path: .
 
       - name: Install gh cli extension actions-cache
         run: |
@@ -65,7 +64,7 @@ jobs:
         with:
           path: |
             !.git/**
-            ${{github.workspace}}/**
+            ./**
           key: thirdparty-${{ github.sha }}
 
       - name: Set matrix of submodules that need updating
@@ -150,7 +149,7 @@ jobs:
         with:
           path: |
             !.git/**
-            ${{github.workspace}}/**
+            ./**
           key: thirdparty-${{ github.sha }}
 
       - if: ((needs.setup.outputs.HAS_MATRIX_VALUES == 'true') && (steps.cache-tp-source-directory.outputs.cache-hit != 'true'))
@@ -166,7 +165,7 @@ jobs:
         with:
           path: |
             !.git/**
-            ${{github.workspace}}/${{ matrix.name }}/**
+            ./${{ matrix.name }}/**
           key: ${{ matrix.name }}-${{ matrix.shortSHA }}
 
       - if: ((needs.setup.outputs.HAS_MATRIX_VALUES == 'true') && (steps.cache-tp-source-directory.outputs.cache-hit != 'true'))
@@ -190,7 +189,7 @@ jobs:
         with:
           path: |
             !.git/**
-            ${{github.workspace}}/**
+            ./**
           key: thirdparty-${{ github.sha }}
 
       - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
