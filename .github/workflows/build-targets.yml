@@ -132,7 +132,7 @@ jobs:
 
   cache-src:
     needs: setup
-    if: (needs.setup.outputs.HAS_MATRIX_VALUES != 'false')
+    if: (always() && (needs.setup.outputs.HAS_MATRIX_VALUES != 'false'))
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
