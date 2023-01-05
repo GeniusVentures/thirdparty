@@ -264,6 +264,10 @@ jobs:
 
   build-targets-matrix:
     needs: [ setup, get-targets-matrix ]
+    if: |
+      always() &&
+      needs.setup.result == 'success' &&
+      (needs.get-targets-matrix.result == 'success' || needs.get-targets-matrix.result == 'skipped')
     runs-on: ubuntu-latest
     strategy:
       matrix:
