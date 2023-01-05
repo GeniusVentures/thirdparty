@@ -208,8 +208,10 @@ jobs:
         id: cache-multi-parameters
         run: |
           # now reload the json content into variables list
-          cacheNameSHAS=( ${{ needs.setup.outputs.CACHE_NAME_SHAS }} )
-
+          cacheNameSHAS=()
+          IFS="," read -a cacheNameSHAS <<< "${{ needs.setup.outputs.CACHE_NAME_SHAS }}" )
+          unset IFS
+          
           keysContent="[ "
           pathsContent="[ "
           first='true'
