@@ -132,11 +132,11 @@ jobs:
 
   cache-src:
     needs: setup
-    if: (always() && (needs.setup.outputs.HAS_MATRIX_VALUES != 'false'))
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    if: (always() && (needs.setup.outputs.HAS_MATRIX_VALUES != 'false'))
     steps:
       - name: Cache Third Party Director
         uses: GeniusVentures/cache-multi/restore@v3.2.2
