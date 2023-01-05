@@ -132,11 +132,11 @@ jobs:
 
   cache-src:
     needs: setup
+    if: (always() && (needs.setup.outputs.HAS_MATRIX_VALUES != 'false'))
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
-    if: (always() && (needs.setup.outputs.HAS_MATRIX_VALUES != 'false'))
     steps:
       - name: Cache Third Party Director
         uses: GeniusVentures/cache-multi/restore@v3.2.2
@@ -172,6 +172,10 @@ jobs:
 
   get-targets-matrix:
     needs: [setup, cache-src]
+    if: |
+      always() &&
+      needs.setup.result == 'success' &&
+      (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped')
     runs-on: ubuntu-latest
     outputs:
       TARGET_LIBRARY_NAMES: ${{ steps.make-target-list.output.TARGET_LIBRARY_NAMES }}
