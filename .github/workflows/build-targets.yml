@@ -248,7 +248,15 @@ jobs:
           cd Release
           cmake .. -DCMAKE_BUILD_TYPE=Release
           targetLibs=$( find CMakeFiles -type d -name *.dir | sed -r "s/(.*\/)*(.*)(.dir)/\2/g" )
-          targetLibs="[ ${targetLibs//$'\n'/','} ]"
+          targetLibsJson=""
+          for targetLib in targetLibs; do
+            if [[ -z $targetLibsJson ]]; then
+              targetLibsJson+="[ "
+            else
+              targetLibsJson+=", "
+            fi
+            targetLibsJson+="{ \"libraryName\": \"$targetLib\" }"
+          done
           echo "TARGET_LIBRARY_NAMES=$targetLibs" >> $GITHUB_OUTPUT
         shell: bash
         working-directory: ${{github.workspace}}/build/Linux
@@ -259,7 +267,7 @@ jobs:
     strategy:
       matrix:
         build-type: [ Release ]
-        library-names: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
+        libraries: ${{ fromJSON(needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES) }}
         target-build-data:
           - target-os: linux
             runs-on: linux-latest

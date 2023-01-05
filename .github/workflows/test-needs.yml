@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include: ${{ fromJson(needs.setup-test.outputs.TARGET_LIBRARY_NAMES) }}
+        libraries: ${{ fromJson(needs.setup-test.outputs.TARGET_LIBRARY_NAMES) }}
     steps:
       - name: Output the passed matrix
         id: cache-me
