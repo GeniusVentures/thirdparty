@@ -223,7 +223,7 @@ jobs:
             fi
             first='false'
             keysContent+="\"$name-$shortSHA\""
-            pathsContent+="[\"!.git/**\", \"$name/**\"]"
+            pathsContent+="[\"!.git/**\", \"./$name/**\"]"
           done
 
           keysContent+=" ]"
