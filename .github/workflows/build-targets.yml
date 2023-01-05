@@ -162,7 +162,7 @@ jobs:
             ./${{ matrix.name }}/**
           key: ${{ matrix.name }}-${{ matrix.shortSHA }}
 
-      - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
+      - if: (steps.cache-source-directory.outputs.cache-hit != 'true')
         name: Git clone submodule source code
         run: |
           echo "Cloning source for ${{ matrix.name }}"
