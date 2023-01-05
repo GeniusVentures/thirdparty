@@ -209,7 +209,8 @@ jobs:
         run: |
           # now reload the json content into variables list
           cacheNameSHAS=()
-          IFS="," read -a cacheNameSHAS <<< "${{ needs.setup.outputs.CACHE_NAME_SHAS }}" )
+          IFS="," 
+          read -a cacheNameSHAS <<< "${{ needs.setup.outputs.CACHE_NAME_SHAS }}"
           unset IFS
           
           keysContent="[ "
