@@ -26,6 +26,14 @@ jobs:
 
       - name: Install gh cli extension actions-cache
         run: |
+          type -p gh >/dev/null || {
+            type -p curl >/dev/null || sudo apt install curl -y
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install gh -y
+          }
           gh extension install actions/gh-actions-cache
           echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
           echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
@@ -195,8 +203,20 @@ jobs:
           echo "Couldn't find cached thirdparty code, thirdparty-${{ github.sha }} fatal error!"
           exit 1
 
-      - name: Install gh cli extension actions-cache
+      - name: Install gh, cli extension actions-cache and jq
         run: |
+          type -p gh >/dev/null || {
+            type -p curl >/dev/null || sudo apt install curl -y >/dev/null
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg >/dev/null 2>&1
+            sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg >/dev/null
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt-get update >/dev/null 2>&1
+            sudo apt-get install gh -y >/dev/null 2>&1 
+          }
+          type -p jq >/dev/null || {
+            sudo apt-get install jq -y >/dev/null 2>&1 
+          }
+
           gh extension install actions/gh-actions-cache
           echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
           echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
@@ -248,6 +268,7 @@ jobs:
           cd Release
           cmake .. -DCMAKE_BUILD_TYPE=Release
           targetLibs=$( find CMakeFiles -type d -name *.dir | sed -r "s/(.*\/)*(.*)(.dir)/\2/g" )
+          # grab the libraries that are already built
           targetLibsJson=""
           for targetLib in $targetLibs; do
             if [[ -z $targetLibsJson ]]; then
@@ -262,13 +283,13 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}/build/Linux
 
+
   build-targets-matrix:
     needs: [ setup, get-targets-matrix ]
     if: |
       always() &&
       needs.setup.result == 'success' &&
       (needs.get-targets-matrix.result == 'success' || needs.get-targets-matrix.result == 'skipped')
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         build-type: [ Release ]
@@ -321,62 +342,31 @@ jobs:
                 sdk: 10.0.22621.0
                 vsversion: 17
 
-    #    steps:
-#    - uses: GeniusVentures/cache-multi/restore@v3.2.2
-#      id: cache-tp-source-directory
-#      with:
-#        path: |
-#          !.git/**
-#          ${{github.workspace}}/**
-#        key: thirdparty-${{ github.sha }}
-#
-#    - if: steps.cache-tp-source-directory.outputs.cache-hit != 'true'
-#      run: |
-#        echo "Couldn't find cached thirdparty code, thirdparty-${{ github.sha }} fatal error!"
-#        exit 1
-#
-#    - name: Create Inputs for src caches to load
-#      id: cache-multi-parameters
-#      run: |
-#        # now reload the json content into variables list
-#        reloadcontent=$(echo '${{ needs.setup.outputs.matrix }}' | perl -pe "s/.*?(?:\{[ \t]*?\"name\":[ \t]*?\"(.+?)\".[ \t]*?\"shortsha\":[ \t]*?\"(.+?)\"(.*?)\}),*\]*[ \t]*\}*/\1 \2\n/g")
-#
-#        keysJsonContent=""
-#        pathsJsonContent=""
-#        first="true"
-#        while read name shortsha; do
-#          if [[ "$first" != "true" ]]; then
-#            keysJsonContent+=$'\n'
-#            pathsJsonContent+=$'\n'
-#          fi
-#          keysJsonContent+="$name-$shortsha"
-#          pathsJsonContent+="[\"!.git/**\", \"${{github.workspace}}/$name/**\"]"
-#        first="false"
-#        done <<<"$reloadcontent"
-#        keysJsonContent+=""
-#        pathsJsonContent+=""
-#
-#        echo "CACHE_MULTI_PARAMETER_KEYS<<EOF" >> $GITHUB_ENV
-#        echo "$keysJsonContent" >> $GITHUB_ENV
-#        echo "EOF" >> $GITHUB_ENV
-#
-#        echo "CACHE_MULTI_PARAMETER_PATHS<<EOF" >> $GITHUB_ENV
-#        echo "$pathsJsonContent" >> $GITHUB_ENV
-#        echo "EOF" >> $GITHUB_ENV
-#
-#      shell: bash
-#      working-directory: ${{github.workspace}}
-#
-#    - name: Load the source Cache(s) into the system
-#      uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
-#      with:
-#        keys: ${{ env.CACHE_MULTI_PARAMETER_KEYS }}
-#        paths: ${{ env.CACHE_MULTI_PARAMETER_PATHS }}
+    runs-on: ${{ strategy.matrix.target-build-data.runs-on }}
 
     steps:
+#      - name: Restore thirdparty base directory and code
+#        uses: GeniusVentures/cache-multi/restore@v3.2.2
+#        id: cache-tp-source-directory
+#        with:
+#          path: |
+#            !.git/**
+#            ${{github.workspace}}/**
+#        key: thirdparty-${{ github.sha }}
+#
+#      - name: Load the source Cache(s) into the system
+#        uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
+#        with:
+#          keys: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}
+#          paths: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+#
+#      - name: Build artifacts
       - name: dumping matrix for each run
         run: |
           cat <<"EOF"
             matrix: ${{ toJson(matrix) }}
           EOF
+        shell: bash
+
+
           
