@@ -407,19 +407,19 @@ jobs:
         run: |
           ${{ matrix.target-build-data.setup-script }} 
         working-directory: ${{ github.workspace }}
-        shell: ${{ matrix.target-build-data.shell }}
+#        shell: ${{ matrix.target-build-data.shell }}
 
       - name: Build artifact
         run: |
           ${{ matrix.target-build-data.cmake-script }}
         working-directory: ${{ github.workspace }}
-        shell: ${{ matrix.target-build-data.shell }}
+#        shell: ${{ matrix.target-build-data.shell }}
 
       - name: Create tar for artifact
         run: |
           tar --posix --use-compress-program zstdmt -cf ../lib-${{ matrix.target-build-data.libraries.libraryName }}.tzst
         working-directory: ${{ github.workspace }}/build/${{ matrix.target-os}}/Release/${{ matrix.target-build-data.libraries.libraryName }}
-        shell: ${{ matrix.target-build-data.shell }}
+#        shell: ${{ matrix.target-build-data.shell }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
