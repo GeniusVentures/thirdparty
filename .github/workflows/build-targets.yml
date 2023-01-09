@@ -377,7 +377,7 @@ jobs:
           path: |
             !.git/**
             ${{github.workspace}}/**
-        key: thirdparty-${{ github.sha }}
+          key: thirdparty-${{ github.sha }}
 
       - name: Load the source Cache(s) into the system
         uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
