@@ -394,7 +394,7 @@ jobs:
           cat <<"EOF"
             matrix: "${{ toJson(matrix) }} uses: ${{ matrix.target-build-data.install-uses.uses }}"
           EOF
-        shell: ${{ matrix.target-build-data.shell }}
+#        shell: ${{ matrix.target-build-data.shell }}
 
 #      - if: matrix.target-build-data.install-uses
 #        name: ${{ matrix.target-build-data.install-uses.name || "Executing uses step" }}
