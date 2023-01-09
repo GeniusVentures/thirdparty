@@ -399,7 +399,7 @@ jobs:
 
       - if: matrix.target-build-data.install-uses
         name: ${{ matrix.target-build-data.install-uses.name || "Executing uses step" }}
-        uses: ${{ matrix.target-build-data.install-uses.uses || "" }}
+        uses: ${{ matrix.target-build-data.install-uses.uses || "/dev/null" }}
         with: ${{ fromJSON(matrix.target-build-data.install-uses.with || {} ) }}
 
 
