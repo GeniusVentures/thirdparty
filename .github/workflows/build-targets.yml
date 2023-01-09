@@ -189,8 +189,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       TARGET_LIBRARY_NAMES: ${{ steps.make-target-list.outputs.TARGET_LIBRARY_NAMES }}
-      CACHE_MULTI_PARAMETER_KEYS: $${ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_KEYS }}
-      CACHE_MULTI_PARAMETER_PATHS: $${ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+      CACHE_MULTI_PARAMETER_KEYS: ${ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_KEYS }}
+      CACHE_MULTI_PARAMETER_PATHS: ${ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_PATHS }}
     steps:
       - uses: GeniusVentures/cache-multi/restore@v3.2.2
         id: cache-tp-source-directory
@@ -405,7 +405,7 @@ jobs:
 
       - name: Build artifact
         run: |
-          $$ {{ matrix.target-build-data.cmake-script }}
+          ${{ matrix.target-build-data.cmake-script }}
 
       - name: Create tar for artifact
         run: |
