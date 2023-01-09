@@ -330,7 +330,7 @@ jobs:
               cd build/$TARGET_OS
               mkdir Release
               cd Release
-              cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
               echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
               make $LIBRARY_NAME
           - target-os: iOS
@@ -349,7 +349,7 @@ jobs:
               cd build/$TARGET_OS
               mkdir Release
               cd Release
-              cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/build/iOS/iOS.cmake
+              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=$WORKSPACE/build/iOS/iOS.cmake
               echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
               make $LIBRARY_NAME
 
@@ -368,10 +368,11 @@ jobs:
     runs-on: ${{ matrix.target-build-data.runs-on }}
 
     env:
-      TARGET_OS: ${{ matrix.target-os }}
+      TARGET_OS: ${{ matrix.target-build-data.target-os }}
       BUILD_TYPE: ${{ matrix.build-type }}
       LIBRARY_NAME: ${{ matrix.libraries.libraryName }}
       LIBRARY_VERSION: xxxx
+      WORKSPACE: ${{github.workspace}}
 
     steps:
       - name: Restore thirdparty base directory and code
@@ -396,10 +397,10 @@ jobs:
           EOF
 #        shell: ${{ matrix.target-build-data.shell }}
 
-#      - if: matrix.target-build-data.install-uses
-#        name: ${{ matrix.target-build-data.install-uses.name || "Executing uses step" }}
-#        uses: ${{ matrix.target-build-data.install-uses.uses }}
-#        with: ${{ matrix.target-build-data.install-uses.with }}
+      - if: matrix.target-build-data.install-uses
+        name: ${{ matrix.target-build-data.install-uses.name || "Executing uses step" }}
+        uses: ${{ matrix.target-build-data.install-uses.uses || "" }}
+        with: ${{ fromJSON(matrix.target-build-data.install-uses.with || {} ) }}
 
 
       - if: matrix.target-build-data.setup-script
