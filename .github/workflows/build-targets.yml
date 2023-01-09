@@ -323,12 +323,12 @@ jobs:
               sudo xcode-select --switch \"$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep \"Xcode_[\.0-9]*app\" | sort -V | tail -1)/Contents/Developer\"
               sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*\", \"\", \"\"]"
             cmake-script: |
-              cd ${{ github.workspace }}/build/${{ target-os }}
+              cd ${{ github.workspace }}/build/$TARGET_OS
               mkdir Release
               cd Release
-              cmake .. -DCMAKE_BUILD_TYPE=${{ build-type }}
-              echo "Compiling ${{ target-os }} version of ${{ libraries.libraryName }}
-              make ${{ libraries.libraryName }}
+              cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+              echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
+              make $LIBRARY_NAME
           - target-os: iOS
             runs-on: macos-latest
             setup-script: |
@@ -340,12 +340,12 @@ jobs:
               with:
                 python-version: '3.5'
             cmake-script: |
-              cd ${{ github.workspace }}/build/${{ target-os }}
+              cd ${{ github.workspace }}/build/$TARGET_OS
               mkdir Release
               cd Release
-              cmake -S -DCMAKE_BUILD_TYPE=${{ build-type }} -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/build/iOS/iOS.cmake
-              echo "Compiling ${{ target-os }} version of ${{ libraries.libraryName }}
-              make ${{ libraries.libraryName }}
+              cmake -S -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/build/iOS/iOS.cmake
+              echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
+              make $LIBRARY_NAME
 
     #          - target-os: Windows
 #            runs-on: windows2022
@@ -360,6 +360,12 @@ jobs:
 #                vsversion: 17
 
     runs-on: ${{ matrix.target-build-data.runs-on }}
+
+    env:
+      TARGET_OS: ${{ matrix.target-os }}
+      BUILD_TYPE: ${{ matrix.build-type }}
+      LIBRARY_NAME: ${{ matrix.libraries.libraryName }}
+      LIBRARY_VERSION: xxxx
 
     steps:
 #      - name: Restore thirdparty base directory and code
@@ -382,10 +388,11 @@ jobs:
 #        uses: ${{ matrix.target-build-data.install-uses.uses }}
 #        with: ${{ matrix.target-build-data.install-uses.with }}
 
+
       - if: matrix.target-build-data.setup-script
         name: "Executing Setup Script"
         run: |
-          ${{ maxtrix.target-build-data.setup-script }} 
+          ${{ matrix.target-build-data.setup-script }} 
 
       - name: Build artifact
         run: |
@@ -399,7 +406,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: lib-${{ matrix.target-build-data.libraries.libraryName }}-xxxx.tzst
+          name: lib-${{ matrix.target-build-data.libraries.libraryName }}-${{ env.LIBRARY_VERSION }}.tzst
           path: ${{ github.workspace }}/build/${{ matrix.target-os}}/Release/lib-${{ matrix.target-build-data.libraries.libraryName }}.tzst
 
 #      - name: dumping matrix for each run
