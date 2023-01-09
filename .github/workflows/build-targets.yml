@@ -320,8 +320,9 @@ jobs:
             runs-on: macos-latest
             setup-script: |
               echo "Setup for OSX Build"
-              sudo xcode-select --switch \"$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep \"Xcode_[\.0-9]*app\" | sort -V | tail -1)/Contents/Developer\"
-              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*\", \"\", \"\"]"
+              find /Applications/Xcode* -maxdepth 0 -ls
+              sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
+              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
             cmake-script: |
               cd ${{ github.workspace }}/build/$TARGET_OS
               mkdir Release
@@ -333,7 +334,8 @@ jobs:
             runs-on: macos-latest
             setup-script: |
               echo "Setup for iOS Build"
-              sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
+              find /Applications/Xcode* -maxdepth 0 -ls
+              sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
               sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
             install-uses:
               uses: actions/setup-python@v2
@@ -368,21 +370,28 @@ jobs:
       LIBRARY_VERSION: xxxx
 
     steps:
-#      - name: Restore thirdparty base directory and code
-#        uses: GeniusVentures/cache-multi/restore@v3.2.2
-#        id: cache-tp-source-directory
-#        with:
-#          path: |
-#            !.git/**
-#            ${{github.workspace}}/**
-#        key: thirdparty-${{ github.sha }}
-#
-#      - name: Load the source Cache(s) into the system
-#        uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
-#        with:
-#          keys: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}
-#          paths: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
-#
+      - name: Restore thirdparty base directory and code
+        uses: GeniusVentures/cache-multi/restore@v3.2.2
+        id: cache-tp-source-directory
+        with:
+          path: |
+            !.git/**
+            ${{github.workspace}}/**
+        key: thirdparty-${{ github.sha }}
+
+      - name: Load the source Cache(s) into the system
+        uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
+        with:
+          keys: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}
+          paths: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+
+      - name: dumping matrix for each run
+        run: |
+          cat <<"EOF"
+            matrix: ${{ toJson(matrix) + "uses:" + matrix.target-build-data.install-uses.uses }}
+          EOF
+        shell: bash
+
 #      - if: matrix.target-build-data.install-uses
 #        name: ${{ matrix.target-build-data.install-uses.name || "Executing uses step" }}
 #        uses: ${{ matrix.target-build-data.install-uses.uses }}
