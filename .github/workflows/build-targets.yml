@@ -299,10 +299,12 @@ jobs:
         target-build-data:
 #          - target-os: Linux
 #            runs-on: linux-latest
+#            shell: bash
 #            setup-script: |
 #              echo "Setup for Linux Build"
 #          - target-os: Android
 #            runs-on: linux-latest
+#            shell: bash
 #            setup-script: |
 #              echo "Setup for Android Build"
 #              git config --global core.autocrlf false
@@ -318,13 +320,14 @@ jobs:
 #              armeabi-v7a
           - target-os: OSX
             runs-on: macos-latest
+            shell: bash
             setup-script: |
               echo "Setup for OSX Build"
               find /Applications/Xcode* -maxdepth 0 -ls
               sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
               sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
             cmake-script: |
-              cd ${{ github.workspace }}/build/$TARGET_OS
+              cd build/$TARGET_OS
               mkdir Release
               cd Release
               cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
@@ -332,6 +335,7 @@ jobs:
               make $LIBRARY_NAME
           - target-os: iOS
             runs-on: macos-latest
+            shell: bash
             setup-script: |
               echo "Setup for iOS Build"
               find /Applications/Xcode* -maxdepth 0 -ls
@@ -342,7 +346,7 @@ jobs:
               with:
                 python-version: '3.5'
             cmake-script: |
-              cd ${{ github.workspace }}/build/$TARGET_OS
+              cd build/$TARGET_OS
               mkdir Release
               cd Release
               cmake -S -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/build/iOS/iOS.cmake
@@ -376,7 +380,7 @@ jobs:
         with:
           path: |
             !.git/**
-            ${{github.workspace}}/**
+            ./**
           key: thirdparty-${{ github.sha }}
 
       - name: Load the source Cache(s) into the system
@@ -390,7 +394,7 @@ jobs:
           cat <<"EOF"
             matrix: "${{ toJson(matrix) }} uses: ${{ matrix.target-build-data.install-uses.uses }}"
           EOF
-        shell: bash
+        shell: ${{ matrix.target-build-data.shell }}
 
 #      - if: matrix.target-build-data.install-uses
 #        name: ${{ matrix.target-build-data.install-uses.name || "Executing uses step" }}
@@ -402,15 +406,20 @@ jobs:
         name: "Executing Setup Script"
         run: |
           ${{ matrix.target-build-data.setup-script }} 
+        working-directory: ${{ github.workspace }}
+        shell: ${{ matrix.target-build-data.shell }}
 
       - name: Build artifact
         run: |
           ${{ matrix.target-build-data.cmake-script }}
+        working-directory: ${{ github.workspace }}
+        shell: ${{ matrix.target-build-data.shell }}
 
       - name: Create tar for artifact
         run: |
           tar --posix --use-compress-program zstdmt -cf ../lib-${{ matrix.target-build-data.libraries.libraryName }}.tzst
         working-directory: ${{ github.workspace }}/build/${{ matrix.target-os}}/Release/${{ matrix.target-build-data.libraries.libraryName }}
+        shell: ${{ matrix.target-build-data.shell }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
