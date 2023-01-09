@@ -388,7 +388,7 @@ jobs:
       - name: dumping matrix for each run
         run: |
           cat <<"EOF"
-            matrix: ${{ toJson(matrix) + "uses:" + matrix.target-build-data.install-uses.uses }}
+            matrix: "${{ toJson(matrix) }} uses: ${{ matrix.target-build-data.install-uses.uses }}"
           EOF
         shell: bash
 
