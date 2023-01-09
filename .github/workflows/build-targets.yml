@@ -382,8 +382,8 @@ jobs:
 #        uses: ${{ matrix.target-build-data.install-uses.uses }}
 #        with: ${{ matrix.target-build-data.install-uses.with }}
 
-      - name: "Executing Setup Script"
-      - if: matrix.target-build-data.setup-script != ''
+      - if: matrix.target-build-data.setup-script
+        name: "Executing Setup Script"
         run: |
           ${{ maxtrix.target-build-data.setup-script }} 
 
