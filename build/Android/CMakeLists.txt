@@ -139,6 +139,11 @@ elseif(ANDROID_ABI STREQUAL "x86_64")
 	set(_abi android-x86_64)
 endif()
 message("android abi is ${_abi}")
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	set(OPENSSL_VARIANT "--debug")
+else()
+	set(OPENSSL_VARIANT "")
+endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Android/${ANDROID_ABI}")
 ExternalProject_Add(openssl
@@ -146,7 +151,7 @@ ExternalProject_Add(openssl
 	GIT_SHALLOW TRUE
 	SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
 	CONFIGURE_COMMAND  ""
-	BUILD_COMMAND  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --abi=${_abi} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${_openssl_BUILD_ROOT} --env_path=$ENV{PATH} --env_android_ndk=$ENV{ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
+	BUILD_COMMAND  ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT}--abi=${_abi} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${_openssl_BUILD_ROOT} --env_path=$ENV{PATH} --env_android_ndk=$ENV{ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
 	BUILD_IN_SOURCE  FALSE
 	UPDATE_COMMAND ""
 	INSTALL_COMMAND make install_dev

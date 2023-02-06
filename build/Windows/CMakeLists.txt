@@ -50,6 +50,11 @@ set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 set(Boost_NO_SYSTEM_PATHS  ON)
 set(Boost_USE_STATIC_LIBS  ON)
 set(Boost_USE_STATIC_RUNTIME ON)
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	set(BOOST_VARIANT "debug")
+else()
+	set(BOOST_VARIANT "release")
+endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
 ExternalProject_Add(Boost
       PREFIX boost
@@ -64,7 +69,7 @@ ExternalProject_Add(Boost
       CONFIGURE_COMMAND ""
       BUILD_COMMAND ./b2.exe headers
 	  BUILD_IN_SOURCE  TRUE
-      INSTALL_COMMAND ./b2.exe toolset=${BOOST_TOOLSET} runtime-link=static visibility=global --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release,debug  link=static threading=multi   --stagedir=stage/x64  --build-dir=${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib install
+      INSTALL_COMMAND ./b2.exe toolset=${BOOST_TOOLSET} runtime-link=static visibility=global --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=${BOOST_VARIANT}  link=static threading=multi   --stagedir=stage/x64  --build-dir=${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib install
 )
 set(BOOST_LIB_CMAKE_DIR "${_BOOST_ROOT}/lib/cmake")
 # not sure why this can't match the exaxt ${BOOST_VERSION} string of everything else.

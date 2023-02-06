@@ -52,6 +52,7 @@ echo_help()
   echo "Usage: $0 [options...]"
   echo "Generic options"
   echo "     --branch=BRANCH               Select OpenSSL branch to build. The script will determine and download the latest release for that branch"
+  echo "     --debug                       Build with symbols and Debug variant"
   echo "     --cleanup                     Clean up build directories (bin, include/openssl, lib, src) before starting build"
   echo "     --ec-nistp-64-gcc-128         Enable configure option enable-ec_nistp_64_gcc_128 for 64 bit builds"
   echo " -h, --help                        Print help (this message)"
@@ -147,9 +148,9 @@ run_configure()
   echo "  Configure..."
   set +e
   if [ "${LOG_VERBOSE}" == "verbose" ]; then
-    ${SRC_DIR}/Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine | tee "${LOG}"
+    ${SRC_DIR}/Configure ${DEBUG_FLAGS} ${LOCAL_CONFIG_OPTIONS} no-tests no-engine | tee "${LOG}"
   else
-    (${SRC_DIR}/Configure ${LOCAL_CONFIG_OPTIONS} no-tests no-engine > "${LOG}" 2>&1) & spinner
+    (${SRC_DIR}/Configure ${DEBUG_FLAGS} ${LOCAL_CONFIG_OPTIONS} no-tests no-engine > "${LOG}" 2>&1) & spinner
   fi
 
   # Check for error status
@@ -240,6 +241,7 @@ TARGETS=""
 VERSION=""
 SRC_DIR=""
 BUILD_DIR=""
+DEBUG_FLAGS=""
 
 # Process command line arguments
 for i in "$@"
@@ -324,6 +326,10 @@ case $i in
     ;;
   --build-dir=*)
     BUILD_DIR="${i#*=}"
+    shift
+    ;;
+  --debug)
+    DEBUG_FLAGS="-g"
     shift
     ;;
   *)

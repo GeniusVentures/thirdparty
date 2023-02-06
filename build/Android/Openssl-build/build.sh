@@ -43,6 +43,10 @@ case $i in
     LOCAL_ANDROID_TOOLCHAIN="${i#*=}"
     shift
     ;;
+  --debug)
+    DEBUG_FLAGS="-g"
+    shift
+    ;;
   *)
     echo "Unknown argument: ${i}"
     ;;
@@ -55,7 +59,7 @@ export PATH=$LOCAL_ANDROID_NDK:$LOCAL_ANDROID_TOOLCHAIN:$LOCAL_PATH
 export CC=clang
 CONFIGDIR=`dirname $0`/../../../openssl
 REALCONFIGDIR=`realpath ${CONFIGDIR}`
-OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure no-asm no-shared $ABI --prefix=$BUILD_DIR --openssldir=$BUILD_DIR"
+OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure $DEBUG_FLAGS no-asm no-shared $ABI --prefix=$BUILD_DIR --openssldir=$BUILD_DIR"
 
 echo "Building OpenSSL"
 echo $OPENSSL_CONFIGURE_CMD

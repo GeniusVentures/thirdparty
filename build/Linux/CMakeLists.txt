@@ -36,6 +36,11 @@ set(_BOOST_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NA
 set(Boost_NO_SYSTEM_PATHS  ON)
 set(Boost_USE_STATIC_LIBS  ON)
 set(Boost_USE_STATIC_RUNTIME ON)
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    set(BOOST_VARIANT "debug")
+else()
+    set(BOOST_VARIANT "release")
+endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
 ExternalProject_Add(Boost
     PREFIX boost
@@ -48,7 +53,7 @@ ExternalProject_Add(Boost
     PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
     BUILD_COMMAND <SOURCE_DIR>/b2 headers
     BUILD_IN_SOURCE  TRUE
-    INSTALL_COMMAND <SOURCE_DIR>/b2 "cxxflags=-fPIC -std=c++17" visibility=global runtime-link=static link=static toolset=clang threading=multi --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=release   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
+    INSTALL_COMMAND <SOURCE_DIR>/b2 "cxxflags=-fPIC -std=c++17" visibility=global runtime-link=static link=static toolset=clang threading=multi --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=${BOOST_VARIANT}   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
     UPDATE_COMMAND ""
 )
 
@@ -66,11 +71,16 @@ set(_BOOST_CACHE_ARGS
 # --------------------------------------------------------
 # build openssl
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(OPENSSL_VARIANT "-d")
+else()
+    set(OPENSSL_VARIANT "")
+endif()
 
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR  "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND  <SOURCE_DIR>/config -fPIC --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+    CONFIGURE_COMMAND  <SOURCE_DIR>/config ${OPENSSL_VARIANT} -fPIC --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
     BUILD_COMMAND make build_libs
     BUILD_IN_SOURCE  FALSE
     INSTALL_COMMAND make install_dev

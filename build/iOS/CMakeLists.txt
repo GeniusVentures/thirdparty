@@ -59,6 +59,11 @@ set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/iOS/${iOS_ABI}")
 set(Boost_NO_SYSTEM_PATHS  ON)
 set(Boost_USE_STATIC_LIBS  ON)
 set(Boost_USE_STATIC_RUNTIME ON)
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    set(BUILD_VARIANT "--debug")
+else()
+    set(BUILD_VARIANT "")
+endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
 ExternalProject_Add(Boost
     PREFIX  boost
@@ -66,7 +71,7 @@ ExternalProject_Add(Boost
     DOWNLOAD_COMMAND ""
     CONFIGURE_COMMAND  ""
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build
-    BUILD_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build/build.sh -ios --boost-version ${BOOST_VERSION} --src-dir ${THIRDPARTY_DIR}/boost --build-dir ${BOOST_ROOT}
+    BUILD_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build/build.sh -ios --boost-version ${BOOST_VERSION} ${BUILD_VARIANT} --src-dir ${THIRDPARTY_DIR}/boost --build-dir ${BOOST_ROOT}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
@@ -101,7 +106,7 @@ ExternalProject_Add(openssl
     SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
     DOWNLOAD_COMMAND ""
     CONFIGURE_COMMAND  ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build-libssl.sh --version=1.1.1g --targets=ios64-cross-arm64 --src-dir=${THIRDPARTY_DIR}/openssl --build-dir=${_openssl_BUILD_ROOT}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build-libssl.sh ${BUILD_VARIANT} --version=1.1.1g --targets=ios64-cross-arm64 --src-dir=${THIRDPARTY_DIR}/openssl --build-dir=${_openssl_BUILD_ROOT}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )

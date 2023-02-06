@@ -4,6 +4,7 @@
 SRC_DIR="."
 BUILD_DIR="`pwd`/build"
 MACOSX_DEPLOYMENT_TARGET=10.12
+DEBUG_FLAGS=""
 
 # Process command line arguments
 for i in "$@"
@@ -21,6 +22,10 @@ case $i in
     MACOSX_DEPLOYMENT_TARGET="${i#*=}"
     shift
     ;;
+  --debug)
+    DEBUG_FLAGS="-g -O3"
+    shift
+    ;;
   *)
     echo "Unknown argument: ${i}"
     ;;
@@ -30,13 +35,14 @@ done
 INSTALL_DIR=$BUILD_DIR
 LIB_DIR="$INSTALL_DIR/lib"
 
+if [ "Debug"]
 X86_64_DIR=$BUILD_DIR/x86_64
 if [ ! -d "$X86_64_DIR" ]; then
   mkdir -p "$X86_64_DIR"
 fi
 cd $X86_64_DIR
 if [ ! -f "Makefile" ]; then
-  $SRC_DIR/Configure darwin64-x86_64-cc no-asm shared --prefix=$X86_64_DIR --openssldir=$X86_64_DIR
+  $SRC_DIR/Configure $DEBUG_FLAGS darwin64-x86_64-cc no-asm shared --prefix=$X86_64_DIR --openssldir=$X86_64_DIR
 fi
 make build_libs
 
@@ -60,7 +66,7 @@ if [ ! -d "$ARM64_DIR" ]; then
 fi
 cd $ARM64_DIR
 if [ ! -f "Makefile" ]; then
-  $SRC_DIR/Configure darwin64-arm64-cc no-asm --prefix=$ARM64_DIR --openssldir=$ARM64_DIR
+  $SRC_DIR/Configure $DEBUG_FLAGS darwin64-arm64-cc no-asm --prefix=$ARM64_DIR --openssldir=$ARM64_DIR
 fi
 
 if [ ! -d "$LIB_DIR/arm64" ]; then
