@@ -30,6 +30,12 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
 
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	set(BUILD_VARIANT "--debug")
+else()
+	set(BUILD_VARIANT "")
+endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+
 # Assuming that xcode 12.0 is installed you most probably have ios sdk 14.0 or later installed (tested on Big Sur)
 # if you don't set a deployment target it will be set the way you only get 64-bit builds
 if(NOT DEFINED DEPLOYMENT_TARGET AND XCODE_VERSION_INT VERSION_GREATER 12.0)
@@ -62,7 +68,7 @@ ExternalProject_Add( Boost
     SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
 	CONFIGURE_COMMAND  ""
 	PATCH_COMMAND ""
- 	BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/build.sh --build-dir=${_BOOST_ROOT} --src-dir=${THIRDPARTY_DIR}/boost --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
+ 	BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/build.sh ${BUILD_VARIANT} --build-dir=${_BOOST_ROOT} --src-dir=${THIRDPARTY_DIR}/boost --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )
@@ -103,7 +109,7 @@ ExternalProject_Add(openssl
 	  SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
 	  CONFIGURE_COMMAND  ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh --build-dir=${_openssl_BUILD_ROOT} --src-dir=${THIRDPARTY_DIR}/openssl --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh ${BUILD_VARIANT} --build-dir=${_openssl_BUILD_ROOT} --src-dir=${THIRDPARTY_DIR}/openssl --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )

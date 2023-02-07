@@ -23,7 +23,7 @@ case $i in
     shift
     ;;
   --debug)
-    DEBUG_FLAGS="-g -O3"
+    DEBUG_FLAGS="-g"
     shift
     ;;
   *)
@@ -35,7 +35,6 @@ done
 INSTALL_DIR=$BUILD_DIR
 LIB_DIR="$INSTALL_DIR/lib"
 
-if [ "Debug"]
 X86_64_DIR=$BUILD_DIR/x86_64
 if [ ! -d "$X86_64_DIR" ]; then
   mkdir -p "$X86_64_DIR"
