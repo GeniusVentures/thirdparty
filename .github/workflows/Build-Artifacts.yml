@@ -34,13 +34,13 @@ jobs:
   build-artifacts:
     strategy:
       matrix:
-        libraries: ${{ fromJSON(input.libraries) }}
+        libraries: ${{ fromJSON(inputs.libraries) }}
 
     runs-on: ${{ env.TARGET_BUILD_DATA.runs-on }}
 
     env:
       TARGET_OS: ${{ env.TARGET_BUILD_DATA.target-os }}
-      BUILD_TYPE: ${{ input.build-type }}
+      BUILD_TYPE: ${{ inputs.build-type }}
       LIBRARY_NAME: ${{ matrix.libraries }}
       LIBRARY_VERSION: xxxx
       WORKSPACE: ${{ github.workspace }}
@@ -59,16 +59,16 @@ jobs:
       - name: Load the source Cache(s) into the system
         uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
         with:
-          keys: ${{ input.CACHE_MULTI_PARAMETER_KEYS }}
-          paths: ${{ input.CACHE_MULTI_PARAMETER_PATHS }}
+          keys: ${{ inputs.CACHE_MULTI_PARAMETER_KEYS }}
+          paths: ${{ inputs.CACHE_MULTI_PARAMETER_PATHS }}
 
       - name: dumping matrix for each run
         run: |
           cat <<"EOF"
             build-data: ${{ inputs.target-build-data }}
             matrix: ${{ toJson(matrix) }}
-            uses: ${{ matrix.target-build-data.install-uses.uses || '/dev/null' }}
-            with: ${{ fromJSON(matrix.target-build-data.install-uses.with || '{}' ) }}
+            uses: ${{ env.TARGET_BUILD_DATA.install-uses.uses || '/dev/null' }}
+            with: ${{ fromJSON(env.TARGET_BUILD_DATA.install-uses.with || '{}' ) }}
           EOF
       #        shell: ${{ matrix.target-build-data.shell }}Í
 
