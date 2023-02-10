@@ -29,16 +29,16 @@ env:
   MAKEFLAGS: "-j 8"
   GITHUB_TOKEN: ${{ github.token }}
 
-vars:
-  TARGET_BUILD_DATA: $${{ fromJSON(inputs.target-build-data) }}
-
 jobs:
   build-artifacts:
     strategy:
       matrix:
         libraries: ${{ fromJSON(inputs.libraries) }}
 
-    runs-on: ${{ vars.TARGET_BUILD_DATA.runs-on }}
+    runs-on: ${{ fromJSON(inputs.target-build-data).runs-on }}
+
+    target_build_data:
+      ${{ fromJSON(inputs.target-build-data) }}
 
     steps:
       - name: Restore thirdparty base directory and code
@@ -61,8 +61,8 @@ jobs:
           cat <<"EOF"
             build-data: ${{ inputs.target-build-data }}
             matrix: ${{ toJson(matrix) }}
-            uses: ${{ vars.TARGET_BUILD_DATA.install-uses.uses || '/dev/null' }}
-            with: ${{ fromJSON(vars.TARGET_BUILD_DATA.install-uses.with || '{}' ) }}
+            uses: ${{ jobs.build-artifacts.target_build_data.install-uses.uses || '/dev/null' }}
+            with: ${{ fromJSON(jobs.build-artifacts.target_build_data.install-uses.with || '{}' ) }}
           EOF
       #        shell: ${{ matrix.target-build-data.shell }}Í
 
