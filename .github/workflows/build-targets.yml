@@ -297,27 +297,27 @@ jobs:
         build-type: [ Release ]
         libraries: ${{ fromJSON(needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES) }}
         target-build-data:
-#          - target-os: Linux
-#            runs-on: linux-latest
-#            shell: bash
-#            setup-script: |
-#              echo "Setup for Linux Build"
-#          - target-os: Android
-#            runs-on: linux-latest
-#            shell: bash
-#            setup-script: |
-#              echo "Setup for Android Build"
-#              git config --global core.autocrlf false
-#              git config --global core.eol lf
-#              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
-#              echo "MAKEFLAGS=\"-j 8\"" >> $GITHUB_ENV
-#              echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-#              echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-#            arch: |
-#              arm64-v8a
-#              x86_64
-#              x86
-#              armeabi-v7a
+          - target-os: Linux
+            runs-on: linux-latest
+            shell: bash
+            setup-script: |
+              echo "Setup for Linux Build"
+          - target-os: Android
+            runs-on: linux-latest
+            shell: bash
+            setup-script: |
+              echo "Setup for Android Build"
+              git config --global core.autocrlf false
+              git config --global core.eol lf
+              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
+              echo "MAKEFLAGS=\"-j 8\"" >> $GITHUB_ENV
+              echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+              echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+            arch: |
+              arm64-v8a
+              x86_64
+              x86
+              armeabi-v7a
           - target-os: OSX
             runs-on: macos-latest
             shell: bash
@@ -353,17 +353,17 @@ jobs:
               echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
               make $LIBRARY_NAME
 
-    #          - target-os: Windows
-#            runs-on: windows2022
-#            setup-script: |
-#              echo "Setup for Windows Build"
-#            install-uses:
-#              name: Configure build for Windows 10 x64
-#              uses: ilammy/msvc-dev-cmd@v1
-#              with:
-#                arch: amd64
-#                sdk: 10.0.22621.0
-#                vsversion: 17
+          - target-os: Windows
+            runs-on: windows2022
+            setup-script: |
+              echo "Setup for Windows Build"
+            install-uses:
+              name: Configure build for Windows 10 x64
+              uses: ilammy/msvc-dev-cmd@v1
+              with:
+                arch: amd64
+                sdk: 10.0.22621.0
+                vsversion: 17
 
     runs-on: ${{ matrix.target-build-data.runs-on }}
 
@@ -393,40 +393,42 @@ jobs:
       - name: dumping matrix for each run
         run: |
           cat <<"EOF"
-            matrix: "${{ toJson(matrix) }} uses: ${{ matrix.target-build-data.install-uses.uses }}"
+            matrix: ${{ toJson(matrix) }}
+            uses: ${{ matrix.target-build-data.install-uses.uses || "/dev/null" }}
+            with: ${{ fromJSON(matrix.target-build-data.install-uses.with || {} ) }}
           EOF
 #        shell: ${{ matrix.target-build-data.shell }}
 
-      - if: matrix.target-build-data.install-uses
-        name: ${{ matrix.target-build-data.install-uses.name || "Executing uses step" }}
-        uses: ${{ matrix.target-build-data.install-uses.uses || "/dev/null" }}
-        with: ${{ fromJSON(matrix.target-build-data.install-uses.with || {} ) }}
+#      - if: matrix.target-build-data.install-uses
+#        name: ${{ matrix.target-build-data.install-uses.name || "Executing uses step" }}
+#        uses: ${{ matrix.target-build-data.install-uses.uses || "/dev/null" }}
+#        with: ${{ fromJSON(matrix.target-build-data.install-uses.with || {} ) }}
 
 
-      - if: matrix.target-build-data.setup-script
-        name: "Executing Setup Script"
-        run: |
-          ${{ matrix.target-build-data.setup-script }} 
-        working-directory: ${{ github.workspace }}
+#      - if: matrix.target-build-data.setup-script
+#       name: "Executing Setup Script"
+#        run: |
+#          ${{ matrix.target-build-data.setup-script }}
+#        working-directory: ${{ github.workspace }}
 #        shell: ${{ matrix.target-build-data.shell }}
 
-      - name: Build artifact
-        run: |
-          ${{ matrix.target-build-data.cmake-script }}
-        working-directory: ${{ github.workspace }}
+#      - name: Build artifact
+#        run: |
+#          ${{ matrix.target-build-data.cmake-script }}
+#        working-directory: ${{ github.workspace }}
 #        shell: ${{ matrix.target-build-data.shell }}
 
-      - name: Create tar for artifact
-        run: |
-          tar --posix --use-compress-program zstdmt -cf ../lib-${{ matrix.target-build-data.libraries.libraryName }}.tzst
-        working-directory: ${{ github.workspace }}/build/${{ matrix.target-os}}/Release/${{ matrix.target-build-data.libraries.libraryName }}
+#      - name: Create tar for artifact
+#        run: |
+#         tar --posix --use-compress-program zstdmt -cf ../lib-${{ matrix.target-build-data.libraries.libraryName }}.tzst
+#        working-directory: ${{ github.workspace }}/build/${{ matrix.target-os}}/Release/${{ matrix.target-build-data.libraries.libraryName }}
 #        shell: ${{ matrix.target-build-data.shell }}
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: lib-${{ matrix.target-build-data.libraries.libraryName }}-${{ env.LIBRARY_VERSION }}.tzst
-          path: ${{ github.workspace }}/build/${{ matrix.target-os}}/Release/lib-${{ matrix.target-build-data.libraries.libraryName }}.tzst
+#      - name: Upload artifact
+#        uses: actions/upload-artifact@v3
+#        with:
+#         name: lib-${{ matrix.target-build-data.libraries.libraryName }}-${{ env.LIBRARY_VERSION }}.tzst
+#          path: ${{ github.workspace }}/build/${{ matrix.target-os}}/Release/lib-${{ matrix.target-build-data.libraries.libraryName }}.tzst
 
 #      - name: dumping matrix for each run
 #        run: |
