@@ -38,14 +38,6 @@ jobs:
 
     runs-on: ${{ env.TARGET_BUILD_DATA.runs-on }}
 
-    env:
-      TARGET_OS: ${{ env.TARGET_BUILD_DATA.target-os }}
-      BUILD_TYPE: ${{ inputs.build-type }}
-      LIBRARY_NAME: ${{ matrix.libraries }}
-      LIBRARY_VERSION: xxxx
-      WORKSPACE: ${{ github.workspace }}
-
-
     steps:
       - name: Restore thirdparty base directory and code
         uses: GeniusVentures/cache-multi/restore@v3.2.2
