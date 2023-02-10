@@ -30,7 +30,7 @@ env:
   TARGET_BUILD_DATA: $${{ fromJSON(inputs.target-build-data) }}
 
 jobs:
-  build-targets:
+  build-artifacts:
     strategy:
       matrix:
         libraries: ${{ fromJSON(input.libraries) }}
