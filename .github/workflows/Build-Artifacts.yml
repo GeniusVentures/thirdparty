@@ -37,8 +37,8 @@ jobs:
 
     runs-on: ${{ fromJSON(inputs.target-build-data).runs-on }}
 
-    target_build_data:
-      ${{ fromJSON(inputs.target-build-data) }}
+    env:
+      target-build-data: ${{ fromJSON(inputs.target-build-data) }}
 
     steps:
       - name: Restore thirdparty base directory and code
@@ -61,8 +61,8 @@ jobs:
           cat <<"EOF"
             build-data: ${{ inputs.target-build-data }}
             matrix: ${{ toJson(matrix) }}
-            uses: ${{ jobs.build-artifacts.target_build_data.install-uses.uses || '/dev/null' }}
-            with: ${{ fromJSON(jobs.build-artifacts.target_build_data.install-uses.with || '{}' ) }}
+            uses: ${{ env.target_build_data.install-uses.uses || '/dev/null' }}
+            with: ${{ fromJSON(env.target_build_data.install-uses.with || '{}' ) }}
           EOF
       #        shell: ${{ matrix.target-build-data.shell }}Í
 
