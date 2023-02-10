@@ -293,7 +293,7 @@ jobs:
       (needs.get-targets-matrix.result == 'success' || needs.get-targets-matrix.result == 'skipped')
     strategy:
       matrix:
-        build-type: [ Release, Debug]
+        build-type: [ Release, Debug ]
         target-build-data:
           - target-os: Linux
             runs-on: linux-latest
@@ -362,13 +362,13 @@ jobs:
                 arch: amd64
                 sdk: 10.0.22621.0
                 vsversion: 17
-      uses: ./.github/workflows/Build-Artifacts.yml
-      with:
-        build-type: ${{ matrix.build-type }}
-        target-build-data: ${{ toJson(matrix.target-build-data) }}
-        libraries: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
-        CACHE_MULTI_PARAMETER_KEYS: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_KEYS }}
-        CACHE_MULTI_PARAMETER_PATHS: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_PATHS }}
-      inherit: true
+    uses: ./.github/workflows/Build-Artifacts.yml
+    with:
+      build-type: ${{ matrix.build-type }}
+      target-build-data: ${{ toJson(matrix.target-build-data) }}
+      libraries: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
+      CACHE_MULTI_PARAMETER_KEYS: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_KEYS }}
+      CACHE_MULTI_PARAMETER_PATHS: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+    inherit: true
 
           
