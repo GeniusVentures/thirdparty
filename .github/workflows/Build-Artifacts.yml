@@ -28,6 +28,8 @@ env:
   CMAKE_BUILD_PARALLEL_LEVEL: 8
   MAKEFLAGS: "-j 8"
   GITHUB_TOKEN: ${{ github.token }}
+
+vars:
   TARGET_BUILD_DATA: $${{ fromJSON(inputs.target-build-data) }}
 
 jobs:
@@ -36,7 +38,7 @@ jobs:
       matrix:
         libraries: ${{ fromJSON(inputs.libraries) }}
 
-    runs-on: ${{ env.TARGET_BUILD_DATA.runs-on }}
+    runs-on: ${{ vars.TARGET_BUILD_DATA.runs-on }}
 
     steps:
       - name: Restore thirdparty base directory and code
@@ -59,8 +61,8 @@ jobs:
           cat <<"EOF"
             build-data: ${{ inputs.target-build-data }}
             matrix: ${{ toJson(matrix) }}
-            uses: ${{ env.TARGET_BUILD_DATA.install-uses.uses || '/dev/null' }}
-            with: ${{ fromJSON(env.TARGET_BUILD_DATA.install-uses.with || '{}' ) }}
+            uses: ${{ vars.TARGET_BUILD_DATA.install-uses.uses || '/dev/null' }}
+            with: ${{ fromJSON(vars.TARGET_BUILD_DATA.install-uses.with || '{}' ) }}
           EOF
       #        shell: ${{ matrix.target-build-data.shell }}Í
 
