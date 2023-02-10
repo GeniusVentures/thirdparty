@@ -367,8 +367,8 @@ jobs:
       build-type: ${{ matrix.build-type }}
       target-build-data: ${{ toJson(matrix.target-build-data) }}
       libraries: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
-      CACHE_MULTI_PARAMETER_KEYS: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_KEYS }}
-      CACHE_MULTI_PARAMETER_PATHS: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_PATHS }}
-    inherit: true
+      CACHE_MULTI_PARAMETER_KEYS: ${{ needs.needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}
+      CACHE_MULTI_PARAMETER_PATHS: ${{ needs.needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+    secrets: inherit
 
           
