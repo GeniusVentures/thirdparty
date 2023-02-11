@@ -34,11 +34,9 @@ jobs:
     strategy:
       matrix:
         libraries: ${{ fromJSON(inputs.libraries) }}
+        target-build-data: ${{ fromJSON(inputs.target-build-data) }}
 
-    runs-on: ${{ fromJSON(inputs.target-build-data).runs-on }}
-
-    env:
-      target-build-data: ${{ fromJSON(inputs.target-build-data) }}
+    runs-on: ${{ matrix.target=build-data.runs-on }}
 
     steps:
       - name: Restore thirdparty base directory and code
@@ -61,8 +59,8 @@ jobs:
           cat <<"EOF"
             build-data: ${{ inputs.target-build-data }}
             matrix: ${{ toJson(matrix) }}
-            uses: ${{ env.target_build_data.install-uses.uses || '/dev/null' }}
-            with: ${{ fromJSON(env.target_build_data.install-uses.with || '{}' ) }}
+            uses: ${{ matrix.target_build_data.install-uses.uses || '/dev/null' }}
+            with: ${{ matrix.target_build_data.install-uses.with || '' }}
           EOF
       #        shell: ${{ matrix.target-build-data.shell }}Í
 
