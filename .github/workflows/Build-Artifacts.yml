@@ -43,7 +43,7 @@ jobs:
         run: |
           cat <<"EOF"
            ${{ toJson(inputs) }}
-         EOF
+          EOF
 
 #
 #    runs-on: ${{ matrix.target-build-data.runs-on }}#        matrix: ${{ toJson(matrix) }}
