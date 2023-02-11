@@ -35,11 +35,20 @@ jobs:
       matrix:
         libraries: ${{ fromJSON(inputs.libraries) }}
         include: ${{ fromJSON(inputs.target-build-data) }}
-#
-#    runs-on: ${{ matrix.target-build-data.runs-on }}
+
     runs-on: ubuntu-latest
 
     steps:
+      - name: dumping matrix for each run
+        run: |
+          cat <<"EOF"
+           ${{ toJson(inputs) }}
+         EOF
+
+#
+#    runs-on: ${{ matrix.target-build-data.runs-on }}#        matrix: ${{ toJson(matrix) }}
+#        uses: ${{ matrix.target_build_data.install-uses.uses || '/dev/null' }}
+#        with: ${{ matrix.target_build_data.install-uses.with || '' }}
 #    - name: Restore thirdparty base directory and code
 #      uses: GeniusVentures/cache-multi/restore@v3.2.2
 #      id: cache-tp-source-directory
@@ -54,16 +63,6 @@ jobs:
 #      with:
 #        keys: ${{ inputs.CACHE_MULTI_PARAMETER_KEYS }}
 #        paths: ${{ inputs.CACHE_MULTI_PARAMETER_PATHS }}
-
-      - name: dumping matrix for each run
-#        matrix: ${{ toJson(matrix) }}
-#        uses: ${{ matrix.target_build_data.install-uses.uses || '/dev/null' }}
-#        with: ${{ matrix.target_build_data.install-uses.with || '' }}
-        run: |
-          cat <<"EOF"
-           ${{ toJson(inputs) }}
-         EOF
-      #        shell: ${{ matrix.target-build-data.shell }}Í
 
 #      - if: matrix.target-build-data.install-uses
 #        name: ${{ matrix.target-build-data.install-uses.name || "Executing uses step" }}
