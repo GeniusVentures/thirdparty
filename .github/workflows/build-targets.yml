@@ -296,12 +296,12 @@ jobs:
         build-type: [ Release, Debug ]
         target-build-data:
           - target-os: Linux
-            runs-on: linux-latest
+            runs-on: ubuntu-latest
             shell: bash
             setup-script: |
               echo "Setup for Linux Build"
           - target-os: Android
-            runs-on: linux-latest
+            runs-on: ubuntu-latest
             shell: bash
             setup-script: |
               echo "Setup for Android Build"
@@ -352,7 +352,7 @@ jobs:
               make $LIBRARY_NAME
 
           - target-os: Windows
-            runs-on: windows2022
+            runs-on: windows-2022
             setup-script: |
               echo "Setup for Windows Build"
             install-uses:

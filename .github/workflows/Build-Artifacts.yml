@@ -37,7 +37,7 @@ jobs:
 #        include: ${{ fromJSON(inputs.target-build-data) }}
 #
 #    runs-on: ${{ matrix.target-build-data.runs-on }}
-  runs-on: Linux
+  runs-on: ubuntu-latest
 
   steps:
 #    - name: Restore thirdparty base directory and code
