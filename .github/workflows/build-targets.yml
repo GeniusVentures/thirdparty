@@ -366,7 +366,7 @@ jobs:
     uses: ./.github/workflows/Build-Artifacts.yml
     with:
       build-type: ${{ matrix.build-type }}
-      target-build-data: ${{ toJson(matrix.target-build-data) }}
+      target-build-data: ${{ toJson(format('[ {0} ]', matrix.target-build-data)) }}
       libraries: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
       CACHE_MULTI_PARAMETER_KEYS: ${{ needs.needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}
       CACHE_MULTI_PARAMETER_PATHS: ${{ needs.needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
