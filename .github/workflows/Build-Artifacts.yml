@@ -36,7 +36,7 @@ jobs:
         libraries: ${{ fromJSON(inputs.libraries) }}
         target-build-data: ${{ fromJSON(inputs.target-build-data) }}
 
-    runs-on: ${{ matrix.target=build-data.runs-on }}
+    runs-on: ${{ matrix.target-build-data.runs-on }}
 
     steps:
       - name: Restore thirdparty base directory and code
