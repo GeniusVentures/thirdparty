@@ -33,7 +33,7 @@ jobs:
   build-artifacts:
     strategy:
       matrix:
-        libraries: ${{ fromJSON(inputs.libraries) }}
+#        libraries: ${{ fromJSON(inputs.libraries) }}
         include: ${{ fromJSON(inputs.target-build-data) }}
 
     runs-on: ubuntu-latest
@@ -42,7 +42,8 @@ jobs:
       - name: dumping matrix for each run
         run: |
           cat <<"EOF"
-           ${{ toJson(inputs) }}
+           inputs: ${{ toJson(inputs) }}
+           matrix: ${{ toJson(matrix) }}
           EOF
 
 #
