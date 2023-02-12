@@ -291,7 +291,9 @@ jobs:
       always() &&
       needs.setup.result == 'success' &&
       (needs.get-targets-matrix.result == 'success' || needs.get-targets-matrix.result == 'skipped')
+    continue-on-error: true
     strategy:
+      fail-fast: false
       matrix:
         build-type: [ Release, Debug ]
         target-build-data:
@@ -363,7 +365,6 @@ jobs:
                 sdk: 10.0.22621.0
                 vsversion: 17
 
-    continue-on-error: true
     uses: ./.github/workflows/Build-Artifacts.yml
     with:
       build-type: ${{ matrix.build-type }}
