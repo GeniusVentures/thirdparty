@@ -32,8 +32,8 @@ env:
 jobs:
   build-artifacts:
     strategy:
+      fail-fast: false
       matrix:
-        fail-fast: false
         include: ${{ fromJSON(inputs.target-build-data) }}
 
     runs-on: ${{ matrix.runs-on }}
@@ -45,7 +45,7 @@ jobs:
            inputs: ${{ toJson(inputs) }}
            matrix: ${{ toJson(matrix) }}
           EOF
-                
+
 #        libraries: ${{ fromJSON(inputs.libraries) }}
 #
 #    runs-on: ${{ matrix.target-build-data.runs-on }}#        matrix: ${{ toJson(matrix) }}
