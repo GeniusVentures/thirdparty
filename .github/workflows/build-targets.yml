@@ -291,7 +291,6 @@ jobs:
       always() &&
       needs.setup.result == 'success' &&
       (needs.get-targets-matrix.result == 'success' || needs.get-targets-matrix.result == 'skipped')
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
