@@ -371,5 +371,6 @@ jobs:
       CACHE_MULTI_PARAMETER_KEYS: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}
       CACHE_MULTI_PARAMETER_PATHS: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
     secrets: inherit
+    continue-on-error: true
 
           
