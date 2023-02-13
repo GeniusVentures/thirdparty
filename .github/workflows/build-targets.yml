@@ -366,7 +366,7 @@ jobs:
                 sdk: 10.0.22621.0
                 vsversion: 17
 
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.target-build-data.runs-on }}
     steps:
       - name: dumping matrix for each run
         run: |
