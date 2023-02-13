@@ -370,18 +370,16 @@ jobs:
     steps:
       - name: dumping matrix for each run
         run: |
-          cat <<"EOF"
-           matrix: ${{ toJson(matrix) }}
-           keys: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}
-           paths: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
-          EOF
+           echo "matrix: ${{ toJson(matrix) }}"
+           echo "keys: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}"
+           echo "paths: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}"
 
       - name: Install configuration
         uses: ChristopherHX/conditional@main
         with:
           if: ${{ matrix.install-uses }}
           step: |
-            uses: ${{ matrix.install-uses.uses || '' }}
+            uses: ${{ matrix.install-uses.uses || 'dev/null@main' }}
             with: ${{ matrix.install-uses.with || fromJSON('{}') }}
 
 #    uses: ./.github/workflows/Build-Artifacts.yml
