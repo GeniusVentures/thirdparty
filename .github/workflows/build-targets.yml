@@ -294,29 +294,31 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        build-type: [ Release, Debug ]
+        build-type: [ Release]
+#        build-type: [ Release, Debug ]
+#        include: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
         target-build-data:
-          - target-os: Linux
-            runs-on: ubuntu-latest
-            shell: bash
-            setup-script: |
-              echo "Setup for Linux Build"
-          - target-os: Android
-            runs-on: ubuntu-latest
-            shell: bash
-            setup-script: |
-              echo "Setup for Android Build"
-              git config --global core.autocrlf false
-              git config --global core.eol lf
-              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
-              echo "MAKEFLAGS=\"-j 8\"" >> $GITHUB_ENV
-              echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-              echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-            arch: |
-              arm64-v8a
-              x86_64
-              x86
-              armeabi-v7a
+#          - target-os: Linux
+#            runs-on: ubuntu-latest
+#            shell: bash
+#            setup-script: |
+#              echo "Setup for Linux Build"
+#          - target-os: Android
+#            runs-on: ubuntu-latest
+#            shell: bash
+#            setup-script: |
+#              echo "Setup for Android Build"
+#              git config --global core.autocrlf false
+#              git config --global core.eol lf
+#              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
+#              echo "MAKEFLAGS=\"-j 8\"" >> $GITHUB_ENV
+#              echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+#              echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+#            arch: |
+#              arm64-v8a
+#              x86_64
+#              x86
+#              armeabi-v7a
           - target-os: OSX
             runs-on: macos-latest
             shell: bash
@@ -332,25 +334,25 @@ jobs:
               cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
               echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
               make $LIBRARY_NAME
-          - target-os: iOS
-            runs-on: macos-latest
-            shell: bash
-            setup-script: |
-              echo "Setup for iOS Build"
-              find /Applications/Xcode* -maxdepth 0 -ls
-              sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
-              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
-            install-uses:
-              uses: actions/setup-python@v2
-              with:
-                python-version: '3.5'
-            cmake-script: |
-              cd build/$TARGET_OS
-              mkdir Release
-              cd Release
-              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=$WORKSPACE/build/iOS/iOS.cmake
-              echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
-              make $LIBRARY_NAME
+#          - target-os: iOS
+#            runs-on: macos-latest
+#            shell: bash
+#            setup-script: |
+#              echo "Setup for iOS Build"
+#              find /Applications/Xcode* -maxdepth 0 -ls
+#              sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
+#              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+#            install-uses:
+#              uses: actions/setup-python@v2
+#              with:
+#                python-version: '3.5'
+#            cmake-script: |
+#              cd build/$TARGET_OS
+#              mkdir Release
+#              cd Release
+#              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=$WORKSPACE/build/iOS/iOS.cmake
+#              echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
+#              make $LIBRARY_NAME
 
           - target-os: Windows
             runs-on: windows-2022
@@ -364,12 +366,26 @@ jobs:
                 sdk: 10.0.22621.0
                 vsversion: 17
 
-    uses: ./.github/workflows/Build-Artifacts.yml
-    with:
-      build-type: ${{ matrix.build-type }}
-      target-build-data: ${{ format('[ {0} ]', toJson(matrix.target-build-data)) }}
-      libraries: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
-      CACHE_MULTI_PARAMETER_KEYS: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}
-      CACHE_MULTI_PARAMETER_PATHS: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
-    secrets: inherit
+    steps:
+      - name: dumping matrix for each run
+        run: |
+          cat <<"EOF"
+           matrix: ${{ toJson(matrix) }}
+           keys: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}
+           paths: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+          EOF
+
+      - name: Install configuration
+        if: ${{ matrix.install-uses }}
+        uses: ${{ matrix.install-uses.uses || ''}}
+        with: ${{ matrix.install-uses.with || {} }}
+
+#    uses: ./.github/workflows/Build-Artifacts.yml
+#    with:
+#      build-type: ${{ matrix.build-type }}
+#      target-build-data: ${{ format('[ {0} ]', toJson(matrix.target-build-data)) }}
+#      libraries: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
+#      CACHE_MULTI_PARAMETER_KEYS: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}
+#      CACHE_MULTI_PARAMETER_PATHS: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+#    secrets: inherit
 
