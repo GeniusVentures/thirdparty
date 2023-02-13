@@ -379,8 +379,8 @@ jobs:
         with:
           if: ${{ matrix.install-uses }}
           step: |
-            uses: ${{ matrix.install-uses.uses || 'dev/null@main' }}
-            with: ${{ matrix.install-uses.with || fromJSON('{}') }}
+            uses: ${{ matrix.install-uses.uses }}
+            with: ${{ toJSON(matrix.install-uses.with) }}
 
 #    uses: ./.github/workflows/Build-Artifacts.yml
 #    with:
