@@ -377,8 +377,9 @@ jobs:
 
       - name: Install configuration
         if: ${{ matrix.install-uses }}
-        uses: ${{ matrix.install-uses.uses || 'dev/null'}}
-        with: ${{ matrix.install-uses.with || {} }}
+        uses: ${{ matrix.install-uses.uses || './.github/workflows/echo.yml'}}
+        with:
+          ${{ matrix.install-uses.with || fromJSON('{ "echo-val": "No Installation Configuration" }') }}
 
 #    uses: ./.github/workflows/Build-Artifacts.yml
 #    with:
