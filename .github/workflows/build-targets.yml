@@ -376,9 +376,12 @@ jobs:
           EOF
 
       - name: Install configuration
-        if: ${{ always() && matrix.install-uses }}
-        uses: ${{ format('{0}', matrix.install-uses.uses || './.github/workflows/echo.yml') }}
-        with: ${{ matrix.install-uses.with || fromJSON('{}') }}
+        uses: ChristopherHX/conditional
+        with:
+          if: ${{ matrix.install-uses }}
+          step: |
+            uses: ${{ matrix.install-uses.uses || '' }}
+            with: ${{ matrix.install-uses.with || fromJSON('{}') }}
 
 #    uses: ./.github/workflows/Build-Artifacts.yml
 #    with:
