@@ -10,7 +10,7 @@ on:
     inputs:
       echo-val:
         type: string
-        required: true
+        required: false
 
 jobs:
   echo:
@@ -18,6 +18,6 @@ jobs:
       - name: Echo a String to console
         run: |
           cat <<"EOF"
-           ${{ inputs.echo-val }}
+           ${{ inputs.echo-val || '' }}
           EOF
 
