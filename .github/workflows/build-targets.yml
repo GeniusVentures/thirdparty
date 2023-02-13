@@ -376,7 +376,7 @@ jobs:
           EOF
 
       - name: Install configuration
-        uses: ChristopherHX/conditional
+        uses: ChristopherHX/conditional@main
         with:
           if: ${{ matrix.install-uses }}
           step: |
