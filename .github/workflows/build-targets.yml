@@ -377,7 +377,7 @@ jobs:
 
       - name: Install configuration
         if: ${{ matrix.install-uses }}
-        uses: ${{ matrix.install-uses.uses || ''}}
+        uses: ${{ matrix.install-uses.uses || '/dev/null'}}
         with: ${{ matrix.install-uses.with || {} }}
 
 #    uses: ./.github/workflows/Build-Artifacts.yml
