@@ -44,7 +44,6 @@ jobs:
       - name: Install configuration
         uses: ChristopherHX/conditional@main
         with:
-          path: "testing"
           if: ${{ matrix.target-build-data.install-uses != null }}
           step: |
             uses: ${{ matrix.target-build-data.install-uses.uses || '' }}
