@@ -377,7 +377,7 @@ jobs:
       - name: Install configuration
         uses: ChristopherHX/conditional@main
         with:
-          if: ${{ matrix.install-uses }}
+          if: ${{ matrix.install-uses != '' }}
           step: |
             uses: ${{ matrix.install-uses.uses }}
             with: ${{ toJSON(matrix.install-uses.with) }}
