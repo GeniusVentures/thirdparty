@@ -47,6 +47,6 @@ jobs:
           path: "testing"
           if: ${{ matrix.target-build-data.install-uses != null }}
           step: |
-            uses: ${{ (matrix.target-build-data.install-uses.uses || '' }}
+            uses: ${{ matrix.target-build-data.install-uses.uses || '' }}
             with: ${{ (matrix.target-build-data.install-uses.with && toJSON(matrix.target-build-data.install-uses.with)) || '{}' }}
 
