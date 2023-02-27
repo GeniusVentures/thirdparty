@@ -51,7 +51,8 @@ jobs:
         run: |
           echo "Fetching list of cache keys to check if any old ones need deleting"
           cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" | jq ".actions_caches[].key")
-          shortSHA="${${{ github.sha }}:0:7}"
+          longSHA="${{ github.sha }}"
+          shortSHA="${longSHA:0:7}"
           tpCacheNameSHA="\nthirdparty-$shortSHA"
 
           notMatched="$(comm -3 <(echo -e "$tpCacheNameSHA") <(echo -e "$cachesList" | sort))"
@@ -236,7 +237,7 @@ jobs:
           key: ${{ matrix.cache_name }}
 
   build-targets-matrix:
-    needs: [ setup ]
+    needs: [ setup, cache-src ]
 
     strategy:
       fail-fast: false
