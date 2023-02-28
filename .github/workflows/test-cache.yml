@@ -47,15 +47,15 @@ jobs:
       - name: Find cache and Clean out old caches of thirdparty
         id: tp-check
         run: |
-          echo "Fetching list of cache keys to check if any old ones need deleting"
+          echo "Fetching list of thirdparty cache keys to check if any old ones need deleting"
           cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" | jq -r ".actions_caches[].key")
           longSHA="${{ github.sha }}"
           shortSHA="${longSHA:0:7}"
           tpCacheNameSHA="thirdparty-$shortSHA"
 
           notMatched="$(comm -3 <(echo -e "\n$tpCacheNameSHA") <(echo -e "$cachesList" | sort))"
-          oldCaches="$(comm  -13 <(echo -e "\n$tpCacheNameSHA") <(echo -e "$notMatched"))"
-          notCached="$(comm -12 <(echo -e "\n$tpCacheNameSHA") <(echo -e "$notMatched"))"
+          oldCaches="$(comm  -13 <(echo -e "\n$tpCacheNameSHA") <(echo -e "$notMatched" | sort))"
+          notCached="$(comm -12 <(echo -e "\n$tpCacheNameSHA") <(echo -e "$notMatched" | sort))"
 
           echo -e "notMatched: $notMatched"
           echo -e "oldCaches: $oldCaches"
@@ -89,6 +89,7 @@ jobs:
       - name: Set matrix of src submodules that need updating
         id: set-cache-matrix
         run: |
+          echo "Fetching list of cache keys to check if any old ones need deleting"
           namesAndHashes=""
           while read -r mode stage longsha location; do
             shortSHA="${longsha:0:7}"
@@ -96,12 +97,11 @@ jobs:
             namesAndHashes+="$cacheName\n"
           done <<< $(git ls-tree HEAD | grep "160000 commit")
 
-          namesAndHashes=$(echo -e "$namesAndHashes" | sort)
-          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="source/" | jq -r ".actions_caches[].key" | sort)
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="source/" | jq -r ".actions_caches[].key")
 
-          notMatched="$(comm -3 <(echo -e "$namesAndHashes") <(echo -e "$cachesList"))"
-          oldCaches="$(comm -13 <(echo -e "$namesAndHashes") <(echo -e "$notMatched"))"
-          notCached="$(comm -12 <(echo -e "$namesAndHashes") <(echo -e "$notMatched"))"
+          notMatched="$(comm -3 <(echo -e "$namesAndHashes" | sort) <(echo -e "$cachesList" | sort))"
+          oldCaches="$(comm -13 <(echo -e "$namesAndHashes | sort") <(echo -e "$notMatched" | sort))"
+          notCached="$(comm -12 <(echo -e "$namesAndHashes | sort") <(echo -e "$notMatched" | sort))"
 
           # matrixJson = matrix of source code to cache, that isn't already cached
           matrixJson="[ "
