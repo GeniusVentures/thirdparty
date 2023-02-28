@@ -101,7 +101,7 @@ jobs:
              hashToName["$shortSHA"]="$location"
            done <<< $(git ls-tree HEAD | grep "160000 commit")
 
-           namesAndHashes="$(echo -en "$namesAndHashes" | sort)"
+           cacheNames="$(echo -en "$cacheNames" | sort)"
            cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="s/" | jq -r ".actions_caches[].key" | sort)
 
            notMatched="$(comm -3 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$cachesList"))"
