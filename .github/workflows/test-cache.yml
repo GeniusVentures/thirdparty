@@ -166,7 +166,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-      matrix: ${{ fromJson(needs.setup-src-cache.outputs.CACHE_MATRIX) }}
+      matrix:
+        include: ${{ fromJson(needs.setup-src-cache.outputs.CACHE_MATRIX) }}
     steps:
       - name: Cache Third Party Director
         uses: GeniusVentures/cache-multi/restore@v3.2.2
@@ -361,11 +362,11 @@ jobs:
     steps:
       - name: dumping matrix for each run
         run: |
-          echo "matrix: ${{ toJson(matrix) }}"
-          echo "cmakeNames: ${{ needs.create-targets-matrix.TARGET_NAMES }}"
-          echo "targetSHAs: ${{ needs.create-targets-matrix.TARGET_SHAS }}"
-          echo "buildDirs: ${{ needs.create-targets-matrix.TARGET_DIRECTORIES }}"
-          echo "targetRepoName: ${{ needs.create-targets-matrix.TARGET_REPO_NAME }}"          
+          echo -e "matrix: ${{ toJson(matrix) }}"
+          echo -e "cmakeNames: ${{ needs.create-targets-matrix.TARGET_NAMES }}"
+          echo -e "targetSHAs: ${{ needs.create-targets-matrix.TARGET_SHAS }}"
+          echo -e "buildDirs: ${{ needs.create-targets-matrix.TARGET_DIRECTORIES }}"
+          echo -e "targetRepoName: ${{ needs.create-targets-matrix.TARGET_REPO_NAME }}"          
 
       - name: Install configuration
         uses: ChristopherHX/conditional@main
