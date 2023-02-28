@@ -13,17 +13,15 @@ env:
   CMAKE_BUILD_PARALLEL_LEVEL: 8
 
 jobs:
-  setup:
+  setup-src-cache:
     runs-on: ubuntu-latest
     outputs:
       THIRD_PARTY_CACHE_NAME_KEY: ${{ steps.tp-check.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
       FOUND_THIRD_PARTY_CURRENT: ${{ steps.tp-check.outputs.FOUND_THIRD_PARTY_CURRENT }}
       CACHE_MATRIX: ${{ steps.set-cache-matrix.outputs.CACHE_MATRIX }}
       NEEDS_CACHE: ${{ steps.set-cache-matrix.outputs.NEEDS_CACHE }}
-      TARGET_NAMES: ${{ steps.create-target-info.outputs.TARGET_NAMES }}
-      TARGET_SHAS: ${{ steps.create-target-info.outputs.TARGET_SHAS }}
-      TARGET_DIRECTORIES: ${{ steps.create-target-info.outputs.TARGET_DIRECTORIES }}
-      TARGET_REPO_NAME: ${{ steps.create-target-info.outputs.TARGET_REPO_NAME }}
+      CACHE_MULTI_PARAMETER_NAME_KEYS: ${{ steps.set-cache-matrix.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
+      CACHE_MULTI_PARAMETER_PATHS: ${{ steps.set-cache-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
     steps:
       - name: Check out main third party without submodules
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -43,7 +41,7 @@ jobs:
           }
           gh extension install actions/gh-actions-cache
           echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
-          echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
 
       - name: Find cache and Clean out old caches of thirdparty
@@ -100,6 +98,7 @@ jobs:
           oldCaches="$(comm -1 -3 <(echo -e "$namesAndHashes" | sort) <(echo -e "$notMatched" | sort))"
           notCached="$(comm -1 -2 <(echo -e "$namesAndHashes" | sort) <(echo -e "$notMatched" | sort))"
           
+          # matrixJson = matrix of source code to cache, that isn't already cached
           matrixJson="[ "
           first=true
           # Set the field separator to new line
@@ -124,87 +123,42 @@ jobs:
           echo "CACHE_MATRIX=$matrixJson" >> $GITHUB_OUTPUT
           if [[ "$notCached" != "" ]]; then
             echo "NEEDS_CACHE=true" >> $GITHUB_OUTPUT
-            #echo "Found $notCached new source repos to cache!"
           else
             echo "NEEDS_CACHE=false" >> $GITHUB_OUTPUT
           fi
-          
-#          cacheNameKeysContext="[ "
-#          cachePathsContent="[ "
-#          first='true'
-#          for cacheNameAndHash in namesAndHashes; do
-#            nLength=$(( ${#cacheNameAndHash}-15 ))
-#            name="${cacheNameAndHash:7:$nLength}"
-#            if [[ "$first" != "true" ]]; then
-#              cacheNameKeysContext+=", "
-#              cachePathsContent+=", "
-#            fi
-#            first='false'
-#            cacheNameKeyContext+="\"$cacheNameAndHash\""
-#            cachePathsContent+="[\"!./$name/.git/**\", \"./$name/**\"]"
-#          done
-#
-#          cacheNameKeysContent+=" ]"
-#          echo "CACHE_MULTI_PARAMETER_NAME_KEYS=$cacheNameKeysContent" >> $GITHUB_OUTPUT
-#
-#          cachePathsContent+=" ]"
-#          echo "CACHE_MULTI_PARAMETER_PATHS=$cachePathsContent" >> $GITHUB_OUTPUT
+  
+          cacheNameKeysContext="[ "
+          cachePathsContent="[ "
+          first='true'
+          for cacheNameAndHash in namesAndHashes; do
+            # remove first 7 characters 'source/' and last 8 short-sha for name
+            nLength=$(( ${#cacheNameAndHash}-15 ))
+            name="${cacheNameAndHash:7:$nLength}"
+            if [[ "$first" != "true" ]]; then
+              cacheNameKeysContext+=", "
+              cachePathsContent+=", "
+            fi
+            first='false'
+            cacheNameKeyContext+="\"$cacheNameAndHash\""
+            cachePathsContent+="[\"!./$name/.git/**\", \"./$name/**\"]"
+          done
 
-        shell: bash
-        working-directory: ${{github.workspace}}
+          cacheNameKeysContent+=" ]"
+          echo "CACHE_MULTI_PARAMETER_NAME_KEYS=$cacheNameKeysContent" >> $GITHUB_OUTPUT
 
-      - name: Create base target library names for target cache to create
-        id: create-target-info
-        run: |
-          pushd build/Linux >/dev/null
-          if [[ ! -d Release ]]; then
-          mkdir Release
-          fi
-
-          cd Release
-          if [[ ! -d CMakeFiles ]]; then
-          cmake .. -DCMAKE_BUILD_TYPE=Release
-          fi
-          cd CMakeFiles
-          cMakeNamesDirsAndRepoNames="$(grep -m2 -R --include "build.make" -e "make_directory.*thirdparty/[^/]*$" -e ".*-complete:.*-build" * |
-          sed -E -n 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2,/p; s/.*thirdparty\/([^ ]*)$/\1|/p' |
-            tr -d '\n' |
-            tr '|' '\n')"
-          popd >/dev/null
-
-          # Initialize the variables
-          cMakeNames=""
-          buildDirectoryNames=""
-          repoNames=""
-          shortSHAs=""
-          gitSubmodules=
-          #echo -e "$gitSubmodules" 1>&2
-          while IFS=',' read -r cmakeName buildDir repoName; do
-          
-            # Append the fields to the appropriate array
-            cMakeNames+="$cmakeName\n"
-            buildDirectoryNames+="$buildDir\n"
-            repoNames+="$repoName\n"
-            longSHA=$(git submodule--helper list | grep -m1 -Fw "$repoName" | cut -d ' ' -f 2)
-            shortSHAs+="${longSHA:0:7}\n"
-
-          done <<< "$cMakeNamesDirsAndRepoNames"
-
-          echo "TARGET_NAMES=$cMakeNames" >>$GITHUB_OUTPUT
-          echo "TARGET_SHAS=$shortSHAs" >>$GITHUB_OUTPUT
-          echo "TARGET_DIRECTORIES=$buildDirectoryNames" >>$GITHUB_OUTPUT
-          echo "TARGET_REPO_NAME=$repoNames" >>$GITHUB_OUTPUT
+          cachePathsContent+=" ]"
+          echo "CACHE_MULTI_PARAMETER_PATHS=$cachePathsContent" >> $GITHUB_OUTPUT
 
         shell: bash
         working-directory: ${{github.workspace}}
 
   cache-src:
-    needs: setup
-    if: (always() && (needs.setup.outputs.NEEDS_CACHE != 'false'))
+    needs: setup-src-cache
+    if: (always() && (needs.setup-src-cache.outputs.NEEDS_CACHE != 'false'))
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-      matrix: ${{ fromJson(needs.setup.outputs.CACHE_MATRIX) }}
+      matrix: ${{ fromJson(needs.setup-src-cache.outputs.CACHE_MATRIX) }}
     steps:
       - name: Cache Third Party Director
         uses: GeniusVentures/cache-multi/restore@v3.2.2
@@ -213,11 +167,11 @@ jobs:
           path: |
             !.git/**
             ./**
-          key: ${{ needs.setup.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
+          key: ${{ needs.setusetup-src-cachep.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
 
       - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
         run: |
-          echo "Couldn't find cached thirdparty code, ${{ needs.setup.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
+          echo "Couldn't find cached thirdparty code, ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
           exit 1
 
       - name: Git clone submodule source code
@@ -236,8 +190,83 @@ jobs:
             ./${{ matrix.name }}/**
           key: ${{ matrix.cache_name }}
 
+  create-targets-matrix:
+    runs-on: ubuntu-latest
+    needs: [ setup-cache-src, cache-src ]
+    outputs:
+      TARGET_NAMES: ${{ steps.create-target-info.outputs.TARGET_NAMES }}
+      TARGET_SHAS: ${{ steps.create-target-info.outputs.TARGET_SHAS }}
+      TARGET_DIRECTORIES: ${{ steps.create-target-info.outputs.TARGET_DIRECTORIES }}
+      TARGET_REPO_NAME: ${{ steps.create-target-info.outputs.TARGET_REPO_NAME }}
+    steps:
+      - name: Cache Third Party Director
+        uses: GeniusVentures/cache-multi/restore@v3.2.2
+        id: cache-tp-source-directory
+        with:
+          path: |
+            !.git/**
+            ./**
+          key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
+
+      - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
+        run: |
+          echo "Couldn't find cached thirdparty code, ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
+          exit 1
+
+      - name: Cache Submodule Source Files without .git
+        id: cache-source-directory
+        uses: GeniusVentures/cache-multi@v3.2.2
+        with:
+          key: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_KEY_NAMES }}
+          path: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+
+      - name: Create base target library names for target cache to create
+        id: create-target-info
+        run: |
+          pushd build/Linux >/dev/null
+          if [[ ! -d Release ]]; then
+          mkdir Release
+          fi
+          
+          cd Release
+          if [[ ! -d CMakeFiles ]]; then
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          fi
+          cd CMakeFiles
+          cMakeNamesDirsAndRepoNames="$(grep -m2 -R --include "build.make" -e "make_directory.*thirdparty/[^/]*$" -e ".*-complete:.*-build" * |
+          sed -E -n 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2,/p; s/.*thirdparty\/([^ ]*)$/\1|/p' |
+            tr -d '\n' |
+            tr '|' '\n')"
+          popd >/dev/null
+          
+          # Initialize the variables
+          cMakeNames=""
+          buildDirectoryNames=""
+          repoNames=""
+          shortSHAs=""
+          gitSubmodules=
+          #echo -e "$gitSubmodules" 1>&2
+          while IFS=',' read -r cmakeName buildDir repoName; do
+          
+            # Append the fields to the appropriate array
+            cMakeNames+="$cmakeName\n"
+            buildDirectoryNames+="$buildDir\n"
+            repoNames+="$repoName\n"
+            longSHA=$(git submodule--helper list | grep -m1 -Fw "$repoName" | cut -d ' ' -f 2)
+            shortSHAs+="${longSHA:0:7}\n"
+          
+          done <<< "$cMakeNamesDirsAndRepoNames"
+          
+          echo "TARGET_NAMES=$cMakeNames" >>$GITHUB_OUTPUT
+          echo "TARGET_SHAS=$shortSHAs" >>$GITHUB_OUTPUT
+          echo "TARGET_DIRECTORIES=$buildDirectoryNames" >>$GITHUB_OUTPUT
+          echo "TARGET_REPO_NAME=$repoNames" >>$GITHUB_OUTPUT
+
+        shell: bash
+        working-directory: ${{github.workspace}}
+
   build-targets-matrix:
-    needs: [ setup, cache-src ]
+    needs: [ setup-src-cache, create-targets-matrix ]
 
     strategy:
       fail-fast: false
@@ -317,10 +346,10 @@ jobs:
       - name: dumping matrix for each run
         run: |
           echo "matrix: ${{ toJson(matrix) }}"
-          echo "cmakeNames: ${{ needs.setup.outputs.TARGET_NAMES }}"
-          echo "targetSHAs: ${{ needs.setup.outputs.TARGET_SHAS }}"
-          echo "buildDirs: ${{ needs.setup.outputs.TARGET_DIRECTORIES }}"
-          echo "targetRepoName: ${{ needs.setup.outputs.TARGET_REPO_NAME }}"          
+          echo "cmakeNames: ${{ needs.create-targets-matrix.TARGET_NAMES }}"
+          echo "targetSHAs: ${{ needs.create-targets-matrix.TARGET_SHAS }}"
+          echo "buildDirs: ${{ needs.create-targets-matrix.TARGET_DIRECTORIES }}"
+          echo "targetRepoName: ${{ needs.create-targets-matrix.TARGET_REPO_NAME }}"          
 
       - name: Install configuration
         uses: ChristopherHX/conditional@main
@@ -330,17 +359,30 @@ jobs:
             uses: ${{ matrix.target-build-data.install-uses.uses || '' }}
             with: ${{ (matrix.target-build-data.install-uses.with && toJSON(matrix.target-build-data.install-uses.with)) || '{}' }}
 
+#      - name: Cache Third Party Directory
+#        uses: GeniusVentures/cache-multi/restore@v3.2.2
+#        id: cache-tp-source-directory
+#        with:
+#          path: |
+#            !.git/**
+#            ./**
+#          key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
+#
+#      - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
+#        run: |
+#          echo "Couldn't find cached thirdparty code, ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
+#          exit 1
+#
+#      - name: Cache Submodule Source Files without .git
+#        id: cache-source-directory
+#        uses: GeniusVentures/cache-multi@v3.2.2
+#        with:
+#          key: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_KEY_NAMES }}
+#          path: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+#
+#
 #      - name: Get libraries to build libraries
 #        run: |
 #          # build array of library names
-#          baseNames=(${{ fromJSON(needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS) }})
-#          Array3=(`echo ${Array1[@]} ${Array2[@]} | tr ' ' '\n' | sort | uniq -u `)
-#    uses: ./.github/workflows/Build-Artifacts.yml
-#    with:
-#      build-type: ${{ matrix.build-type }}
-#      target-build-data: ${{ format('[ {0} ]', toJson(matrix.target-build-data)) }}
-#      libraries: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
-#      CACHE_MULTI_PARAMETER_KEYS: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}
-#      CACHE_MULTI_PARAMETER_PATHS: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
-#    secrets: inherit
+
 
