@@ -48,15 +48,19 @@ jobs:
         id: tp-check
         run: |
           echo "Fetching list of cache keys to check if any old ones need deleting"
-          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" | jq ".actions_caches[].key")
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" | jq -r ".actions_caches[].key")
           longSHA="${{ github.sha }}"
           shortSHA="${longSHA:0:7}"
-          tpCacheNameSHA="\nthirdparty-$shortSHA"
+          tpCacheNameSHA="thirdparty-$shortSHA"
 
-          notMatched="$(comm -3 <(echo -e "$tpCacheNameSHA") <(echo -e "$cachesList" | sort))"
-          oldCaches="$(comm  -13 <(echo -e "$tpCacheNameSHA") <(echo -e "$notMatched"))"
-          notCached="$(comm -12 <(echo -e "$tpCacheNameSHA") <(echo -e "$notMatched"))"
+          notMatched="$(comm -3 <(echo -e "$\ntpCacheNameSHA") <(echo -e "$cachesList" | sort))"
+          oldCaches="$(comm  -13 <(echo -e "$\ntpCacheNameSHA") <(echo -e "$notMatched"))"
+          notCached="$(comm -12 <(echo -e "$\ntpCacheNameSHA") <(echo -e "$notMatched"))"
 
+          echo -e "notMatched: $notMatched"
+          echo -e "oldCaches: $oldCaches"
+          echo -e "notCached: $notCached"
+          
           foundThirdPartyCurrent="true"
           if [[ $notCached == "$tpCacheNameSHA" ]]; then
             foundThirdPartyCurrent="false"
