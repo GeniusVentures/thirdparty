@@ -90,18 +90,19 @@ jobs:
         id: set-cache-matrix
         run: |
           namesAndHashes=""
-          while read -r mode longsha stage location; do
+          while read -r mode stage longsha location; do
             shortSHA="${longsha:0:7}"
             cacheName="source/$location-$shortSHA"
             namesAndHashes+="$cacheName\n"
-          done <<< $(git submodule--helper list)
-          
-          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="source/" | jq -r ".actions_caches[].key")
-          
-          notMatched="$(comm -3 <(echo -e "$namesAndHashes" | sort) <(echo -e "$cachesList" | sort))"
-          oldCaches="$(comm -1 -3 <(echo -e "$namesAndHashes" | sort) <(echo -e "$notMatched" | sort))"
-          notCached="$(comm -1 -2 <(echo -e "$namesAndHashes" | sort) <(echo -e "$notMatched" | sort))"
-          
+          done <<< $(git ls-tree HEAD | grep "160000 commit")
+
+          namesAndHashes=$(echo -e "$namesAndHashes" | sort)
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="source/" | jq -r ".actions_caches[].key" | sort)
+
+          notMatched="$(comm -3 <(echo -e "$namesAndHashes") <(echo -e "$cachesList"))"
+          oldCaches="$(comm -13 <(echo -e "$namesAndHashes") <(echo -e "$notMatched"))"
+          notCached="$(comm -12 <(echo -e "$namesAndHashes") <(echo -e "$notMatched"))"
+
           # matrixJson = matrix of source code to cache, that isn't already cached
           matrixJson="[ "
           first=true
@@ -117,24 +118,24 @@ jobs:
             first=false
           done
           matrixJson+=" ]"
-          
+
           # delete old caches
           for oldCache in $oldCaches; do
             echo "Deleting old cache $oldCache"
             gh actions-cache delete $oldCache -R $REPO -B $BRANCH --confirm
           done
-          
+
           echo "CACHE_MATRIX=$matrixJson" >> $GITHUB_OUTPUT
           if [[ "$notCached" != "" ]]; then
             echo "NEEDS_CACHE=true" >> $GITHUB_OUTPUT
           else
             echo "NEEDS_CACHE=false" >> $GITHUB_OUTPUT
           fi
-  
+
           cacheNameKeysContext="[ "
           cachePathsContent="[ "
           first='true'
-          for cacheNameAndHash in namesAndHashes; do
+          for cacheNameAndHash in $namesAndHashes; do
             # remove first 7 characters 'source/' and last 8 short-sha for name
             nLength=$(( ${#cacheNameAndHash}-15 ))
             name="${cacheNameAndHash:7:$nLength}"
