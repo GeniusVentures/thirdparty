@@ -53,9 +53,9 @@ jobs:
           shortSHA="${longSHA:0:7}"
           tpCacheNameSHA="thirdparty-$shortSHA"
 
-          notMatched="$(comm -3 <(echo -e "$\ntpCacheNameSHA") <(echo -e "$cachesList" | sort))"
-          oldCaches="$(comm  -13 <(echo -e "$\ntpCacheNameSHA") <(echo -e "$notMatched"))"
-          notCached="$(comm -12 <(echo -e "$\ntpCacheNameSHA") <(echo -e "$notMatched"))"
+          notMatched="$(comm -3 <(echo -e "\n$tpCacheNameSHA") <(echo -e "$cachesList" | sort))"
+          oldCaches="$(comm  -13 <(echo -e "\n$tpCacheNameSHA") <(echo -e "$notMatched"))"
+          notCached="$(comm -12 <(echo -e "\n$tpCacheNameSHA") <(echo -e "$notMatched"))"
 
           echo -e "notMatched: $notMatched"
           echo -e "oldCaches: $oldCaches"
