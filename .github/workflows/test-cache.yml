@@ -92,19 +92,21 @@ jobs:
         id: set-cache-matrix
         run: |
           echo "Fetching list of cache keys to check if any old ones need deleting"
-           namesAndHashes=""
+           cacheNames=""
+           declare -A hashToName
            while read -r mode stage longsha location; do
              shortSHA="${longsha:0:7}"
-             cacheName="source/$location-$shortSHA"
-             namesAndHashes+="$cacheName\n"
+             nameHash="$(echo -n "$location" | cksum | cut -f1 -d' ' | cut -c1-4)"
+             cacheNames+="s/$nameHash$shortSHA\n"
+             hashToName["$shortSHA"]="$location"
            done <<< $(git ls-tree HEAD | grep "160000 commit")
 
            namesAndHashes="$(echo -en "$namesAndHashes" | sort)"
-           cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="source/" | jq -r ".actions_caches[].key" | sort)
+           cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="s/" | jq -r ".actions_caches[].key" | sort)
 
-           notMatched="$(comm -3 --output-delimiter="" <(echo -en "$namesAndHashes") <(echo -en "$cachesList"))"
-           oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$namesAndHashes") <(echo -en "$notMatched"))"
-           notCached="$(comm -12 --output-delimiter="" <(echo -en "$namesAndHashes") <(echo -en "$notMatched"))"
+           notMatched="$(comm -3 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$cachesList"))"
+           oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$notMatched"))"
+           notCached="$(comm -12 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$notMatched"))"
 
            # matrixJson = matrix of source code to cache, that isn't already cached
            matrixJson="[ "
@@ -112,8 +114,8 @@ jobs:
            # Set the field separator to new line
            IFS=$'\n'
            for toCache in $notCached; do
-             nLength=$(( ${#toCache}-15 ))
-             name="${toCache:7:$nLength}"
+             shortSHA="${toCache:6:7}"
+             name="${hashToName[$shortSHA]}"
              if [[ "$first" != "true" ]]; then
                matrixJson+=", "
              fi
@@ -138,16 +140,15 @@ jobs:
            cacheNameKeysContent="[ "
            cachePathsContent="[ "
            first='true'
-           for cacheNameAndHash in $namesAndHashes; do
-             # remove first 7 characters 'source/' and last 8 '-' + short-sha for name
-             nLength=$(( ${#cacheNameAndHash}-15 ))
-             name="${cacheNameAndHash:7:$nLength}"
+           for cacheName in $cacheNames; do
+             shortSHA="${toCache:6:7}"
+             name="${hashToName[$shortSHA]}"
              if [[ "$first" != "true" ]]; then
                cacheNameKeysContent+=", "
                cachePathsContent+=", "
              fi
              first='false'
-             cacheNameKeysContent+="\"$cacheNameAndHash\""
+             cacheNameKeysContent+="\"$cacheName\""
              cachePathsContent+="[\"!./$name/.git/**\", \"./$name/**\"]"
            done
 
@@ -257,15 +258,15 @@ jobs:
           buildDirectoryNames=""
           repoNames=""
           shortSHAs=""
-          gitSubmodules=
-          #echo -e "$gitSubmodules" 1>&2
+          gitSubmodules="$(git ls-tree HEAD | grep "160000 commit")"
+          
           while IFS=',' read -r cmakeName buildDir repoName; do
           
             # Append the fields to the appropriate array
             cMakeNames+="$cmakeName\n"
             buildDirectoryNames+="$buildDir\n"
             repoNames+="$repoName\n"
-            longSHA=$(git submodule--helper list | grep -m1 -Fw "$repoName" | cut -d ' ' -f 2)
+            longSHA="$(echo -e "$gitSubmodules" | grep -m1 "$repoName" | cut -d ' ' -f 3)"
             shortSHAs+="${longSHA:0:7}\n"
           
           done <<< "$cMakeNamesDirsAndRepoNames"
