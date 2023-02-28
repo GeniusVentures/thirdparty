@@ -48,15 +48,15 @@ jobs:
         id: tp-check
         run: |
           echo "Fetching list of thirdparty cache keys to check if any old ones need deleting"
-          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" | jq -r ".actions_caches[].key")
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" | jq -r ".actions_caches[].key" | sort)
           longSHA="${{ github.sha }}"
           shortSHA="${longSHA:0:7}"
           tpCacheNameSHA="thirdparty-$shortSHA"
-
-          notMatched="$(comm -3 <(echo -e "\n$tpCacheNameSHA") <(echo -e "$cachesList" | sort))"
-          oldCaches="$(comm  -13 <(echo -e "\n$tpCacheNameSHA") <(echo -e "$notMatched" | sort))"
-          notCached="$(comm -12 <(echo -e "\n$tpCacheNameSHA") <(echo -e "$notMatched" | sort))"
-
+          
+          notMatched="$(comm -3 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$cachesList"))"
+          oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$notMatched"))"
+          notCached="$(comm -12 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$notMatched"))"
+          
           echo -e "notMatched: $notMatched"
           echo -e "oldCaches: $oldCaches"
           echo -e "notCached: $notCached"
@@ -65,16 +65,18 @@ jobs:
           if [[ $notCached == "$tpCacheNameSHA" ]]; then
             foundThirdPartyCurrent="false"
           fi
-
+          
           #Set the field separator to new line
           IFS=$'\n'
           for oldCache in $oldCaches; do
-              echo -e "Deleting old cache $oldCache"
-              gh actions-cache delete $oldCache -R $REPO -B $BRANCH --confirm
+            echo -e "Deleting old cache $oldCache"
+            gh actions-cache delete $oldCache -R $REPO -B $BRANCH --confirm
           done
-
+          
           echo "FOUND_THIRD_PARTY_CURRENT=$foundThirdPartyCurrent" >> $GITHUB_OUTPUT
           echo "THIRD_PARTY_CACHE_NAME_KEY=$tpCacheNameSHA" >> $GITHUB_OUTPUT
+        shell: bash
+        working-directory: ${{github.workspace}}
 
       - name: Cache main Source Files without .git, if not already cached
         if: ( steps.tp-check.outputs.FOUND_THIRD_PARTY_CURRENT == 'false' )
@@ -90,76 +92,77 @@ jobs:
         id: set-cache-matrix
         run: |
           echo "Fetching list of cache keys to check if any old ones need deleting"
-          namesAndHashes=""
-          while read -r mode stage longsha location; do
-            shortSHA="${longsha:0:7}"
-            cacheName="source/$location-$shortSHA"
-            namesAndHashes+="$cacheName\n"
-          done <<< $(git ls-tree HEAD | grep "160000 commit")
+           namesAndHashes=""
+           while read -r mode stage longsha location; do
+             shortSHA="${longsha:0:7}"
+             cacheName="source/$location-$shortSHA"
+             namesAndHashes+="$cacheName\n"
+           done <<< $(git ls-tree HEAD | grep "160000 commit")
 
-          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="source/" | jq -r ".actions_caches[].key")
+           namesAndHashes="$(echo -en "$namesAndHashes" | sort)"
+           cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="source/" | jq -r ".actions_caches[].key" | sort)
 
-          notMatched="$(comm -3 <(echo -e "$namesAndHashes" | sort) <(echo -e "$cachesList" | sort))"
-          oldCaches="$(comm -13 <(echo -e "$namesAndHashes | sort") <(echo -e "$notMatched" | sort))"
-          notCached="$(comm -12 <(echo -e "$namesAndHashes | sort") <(echo -e "$notMatched" | sort))"
+           notMatched="$(comm -3 --output-delimiter="" <(echo -en "$namesAndHashes") <(echo -en "$cachesList"))"
+           oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$namesAndHashes") <(echo -en "$notMatched"))"
+           notCached="$(comm -12 --output-delimiter="" <(echo -en "$namesAndHashes") <(echo -en "$notMatched"))"
 
-          # matrixJson = matrix of source code to cache, that isn't already cached
-          matrixJson="[ "
-          first=true
-          # Set the field separator to new line
-          IFS=$'\n'
-          for toCache in $notCached; do
-            nLength=$(( ${#toCache}-15 ))
-            name="${toCache:7:$nLength}"
-            matrixJson+="{ \"name\":  \"$name\", \"cache-name\": \"$toCache\" }"
-            if [[ "$first" != "true" ]]; then
-              matrixJson+=", "
-            fi
-            first=false
-          done
-          matrixJson+=" ]"
+           # matrixJson = matrix of source code to cache, that isn't already cached
+           matrixJson="[ "
+           first=true
+           # Set the field separator to new line
+           IFS=$'\n'
+           for toCache in $notCached; do
+             nLength=$(( ${#toCache}-15 ))
+             name="${toCache:7:$nLength}"
+             matrixJson+="{ \"name\":  \"$name\", \"cache-name\": \"$toCache\" }"
+             if [[ "$first" != "true" ]]; then
+               matrixJson+=", "
+             fi
+             first=false
+           done
+           matrixJson+=" ]"
 
-          # delete old caches
-          for oldCache in $oldCaches; do
-            echo "Deleting old cache $oldCache"
-            gh actions-cache delete $oldCache -R $REPO -B $BRANCH --confirm
-          done
+           # delete old caches
+           for oldCache in $oldCaches; do
+             echo "Deleting old cache $oldCache"
+             gh actions-cache delete $oldCache -R $REPO -B $BRANCH --confirm
+           done
 
-          echo "CACHE_MATRIX=$matrixJson" >> $GITHUB_OUTPUT
-          if [[ "$notCached" != "" ]]; then
-            echo "NEEDS_CACHE=true" >> $GITHUB_OUTPUT
-          else
-            echo "NEEDS_CACHE=false" >> $GITHUB_OUTPUT
-          fi
+           echo "CACHE_MATRIX=$matrixJson" >> $GITHUB_OUTPUT
+           if [[ "$notCached" != "" ]]; then
+             echo "NEEDS_CACHE=true" >> $GITHUB_OUTPUT
+           else
+             echo "NEEDS_CACHE=false" >> $GITHUB_OUTPUT
+           fi
 
-          cacheNameKeysContext="[ "
-          cachePathsContent="[ "
-          first='true'
-          for cacheNameAndHash in $namesAndHashes; do
-            # remove first 7 characters 'source/' and last 8 short-sha for name
-            nLength=$(( ${#cacheNameAndHash}-15 ))
-            name="${cacheNameAndHash:7:$nLength}"
-            if [[ "$first" != "true" ]]; then
-              cacheNameKeysContext+=", "
-              cachePathsContent+=", "
-            fi
-            first='false'
-            cacheNameKeyContext+="\"$cacheNameAndHash\""
-            cachePathsContent+="[\"!./$name/.git/**\", \"./$name/**\"]"
-          done
+           cacheNameKeysContent="[ "
+           cachePathsContent="[ "
+           first='true'
+           for cacheNameAndHash in $namesAndHashes; do
+             # remove first 7 characters 'source/' and last 8 '-' + short-sha for name
+             nLength=$(( ${#cacheNameAndHash}-15 ))
+             name="${cacheNameAndHash:7:$nLength}"
+             if [[ "$first" != "true" ]]; then
+               cacheNameKeysContent+=", "
+               cachePathsContent+=", "
+             fi
+             first='false'
+             cacheNameKeysContent+="\"$cacheNameAndHash\""
+             cachePathsContent+="[\"!./$name/.git/**\", \"./$name/**\"]"
+           done
 
-          cacheNameKeysContent+=" ]"
-          echo "CACHE_MULTI_PARAMETER_NAME_KEYS=$cacheNameKeysContent" >> $GITHUB_OUTPUT
+           cacheNameKeysContent+=" ]"
+           echo "CACHE_MULTI_PARAMETER_NAME_KEYS=$cacheNameKeysContent" >> $GITHUB_OUTPUT
 
-          cachePathsContent+=" ]"
-          echo "CACHE_MULTI_PARAMETER_PATHS=$cachePathsContent" >> $GITHUB_OUTPUT
+           cachePathsContent+=" ]"
+           echo "CACHE_MULTI_PARAMETER_PATHS=$cachePathsContent" >> $GITHUB_OUTPUT
 
         shell: bash
         working-directory: ${{github.workspace}}
 
   cache-src:
     needs: setup-src-cache
-    if: (always() && (needs.setup-src-cache.outputs.NEEDS_CACHE != 'false'))
+    if: (needs.setup-src-cache.outputs.NEEDS_CACHE == 'true')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -196,8 +199,12 @@ jobs:
           key: ${{ matrix.cache_name }}
 
   create-targets-matrix:
-    runs-on: ubuntu-latest
     needs: [ setup-src-cache, cache-src ]
+    if: |
+      always() &&
+      needs.setup-src-cache.result == 'success' &&
+      (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped')
+    runs-on: ubuntu-latest
     outputs:
       TARGET_NAMES: ${{ steps.create-target-info.outputs.TARGET_NAMES }}
       TARGET_SHAS: ${{ steps.create-target-info.outputs.TARGET_SHAS }}
@@ -272,7 +279,11 @@ jobs:
 
   build-targets-matrix:
     needs: [ setup-src-cache, cache-src, create-targets-matrix ]
-
+    if: |
+      always() &&
+      needs.setup-src-cache.result == 'success' &&
+      needs.create-targets-matrix.result == 'success' && 
+      (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
