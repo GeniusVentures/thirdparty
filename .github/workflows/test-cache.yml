@@ -173,10 +173,10 @@ jobs:
         uses: GeniusVentures/cache-multi/restore@v3.2.2
         id: cache-tp-source-directory
         with:
+          key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
           path: |
             !.git/**
             ./**
-          key: ${{ needs.setusetup-src-cachep.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
 
       - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
         run: |
@@ -194,10 +194,10 @@ jobs:
         id: cache-source-directory
         uses: GeniusVentures/cache-multi@v3.2.2
         with:
+          key: ${{ matrix.cache_name }}
           path: |
             !./${{ matrix.name }}/.git/**
             ./${{ matrix.name }}/**
-          key: ${{ matrix.cache_name }}
 
   create-targets-matrix:
     needs: [ setup-src-cache, cache-src ]
