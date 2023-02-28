@@ -114,11 +114,11 @@ jobs:
            for toCache in $notCached; do
              nLength=$(( ${#toCache}-15 ))
              name="${toCache:7:$nLength}"
-             matrixJson+="{ \"name\":  \"$name\", \"cache-name\": \"$toCache\" }"
              if [[ "$first" != "true" ]]; then
                matrixJson+=", "
              fi
              first=false
+             matrixJson+="{ \"name\":  \"$name\", \"cache-name\": \"$toCache\" }"
            done
            matrixJson+=" ]"
 
