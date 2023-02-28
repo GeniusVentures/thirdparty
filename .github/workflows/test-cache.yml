@@ -83,10 +83,10 @@ jobs:
         uses: GeniusVentures/cache-multi@v3.2.2
         id: cache-source-directory
         with:
+          key: ${{ steps.tp-check.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
           path: |
             !.git/**
             ./**
-          key: ${{ steps.tp-check.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
 
       - name: Set matrix of src submodules that need updating
         id: set-cache-matrix
@@ -194,7 +194,7 @@ jobs:
         id: cache-source-directory
         uses: GeniusVentures/cache-multi@v3.2.2
         with:
-          key: ${{ matrix.cache_name }}
+          key: ${{ matrix.cache-name }}
           path: |
             !./${{ matrix.name }}/.git/**
             ./${{ matrix.name }}/**
