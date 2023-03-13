@@ -232,7 +232,7 @@ jobs:
 
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
-        uses: GeniusVentures/cache-multi@v3.2.3
+        uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
         with:
           multi-key: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
           path: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
