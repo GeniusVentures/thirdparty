@@ -235,7 +235,7 @@ jobs:
         uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
         with:
           multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
-          path: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+          paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
 
       - name: Create base target library names for target cache to create
         id: create-target-info
