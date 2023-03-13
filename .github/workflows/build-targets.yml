@@ -54,11 +54,11 @@ jobs:
           if [[ ! -z "$cacheKeys" ]]; then
             for cacheKey in $cacheKeys
             do
-              if [[ "$cachKey" == "$fullNameSHA" ]]; then
+              if [[ "$cacheKey" == "$fullNameSHA" ]]; then
                 echo "Found Previous cache $fullNameSHA"
                 foundThirdPartyCurrent=true
               elif [[ ${#cachekey} == ${#fullNameSHA} ]]; then
-                echo "Deleting cache $cacheKey"
+                echo "Deleting old cache $cacheKey"
                 gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
               fi
             done
@@ -80,12 +80,20 @@ jobs:
       - name: Set matrix of submodules that need updating
         id: set-matrix
         run: |
-          content=$(git submodule)
-          jsonContent="{ \"include\": [  "
-          toCacheCount=0
-          cacheNameSHAS=""
-          cacheEmpty=$(gh actions-cache list -R $REPO -B $BRANCH --limit 1 | sed -e '/There are no Actions caches/!d' )
-          while read longSHA name version; do
+          namesAndHashes=""          
+          while read -r hash name version; do
+            shortSHA="${hash:0:7}"
+            namesAndHashes+="source/$name-$shortSHA\n"
+          done <<< $(git submodule)
+
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --key "source/" --paginate repos/GeniusVentures/thirdparty/actions/caches | jq ".actions_caches[].key")
+
+          notCached="$(echo "$namesAndHashes\n" "$cachesList" | sort | uniq -u)"
+          oldCaches="$(echo "$namesAndHashes\n" "$notCached" | sort | uniq -D | uniq)"
+          isCached="$(echo "$cachesList\n" "$notCached" | sort | unitq -D | uniq)"
+          # delete old caches
+          while read oldCaches oldCacheName; do
+            $(gh
             longSHA="${longSHA/'-'/}"
             shortSHA="${longSHA:0:7}"
             # if not empty, then we need to append a comma
@@ -105,7 +113,7 @@ jobs:
                   if [[ "$cacheKey" == "$fullNameSHA" ]]; then
                     echo "Found existing cache for $fullNameSHA..."
                     needCacheRepo="false"
-                  # make sure the string lenght match, as the --key will match least amount of prefix, so boost- will match boost-for-mobile
+                  # make sure the string length match, as the --key will match least amount of prefix, so boost- will match boost-for-mobile
                   elif [[ ${#cachekey} == ${#fullNameSHA} ]]; then
                     echo "Deleting old cache $cacheKey..."
                     # gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
@@ -189,10 +197,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       TARGET_LIBRARY_NAMES: ${{ steps.make-target-list.outputs.TARGET_LIBRARY_NAMES }}
-      CACHE_MULTI_PARAMETER_KEYS: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_KEYS }}
+      CACHE_MULTI_PARAMETER_NAME_KEYS: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
       CACHE_MULTI_PARAMETER_PATHS: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_PATHS }}
     steps:
-      - uses: GeniusVentures/cache-multi/restore@v3.2.2
+      - uses: GeniusVentures/cache-multi/restore@v3.2.3
         id: cache-tp-source-directory
         with:
           path: |
@@ -233,26 +241,26 @@ jobs:
           read -a cacheNameSHAS <<< "${{ needs.setup.outputs.CACHE_NAME_SHAS }}"
           unset IFS
           
-          keysContent="[ "
-          pathsContent="[ "
+          cacheNameKeysContext="[ "
+          cachePathsContent="[ "
           first='true'
           for ((i=0; i < ${#cacheNameSHAS[@]}; i+=2)); do
             name=${cacheNameSHAS[$i]}
             shortSHA=${cacheNameSHAS[$i+1]}
             if [[ "$first" != "true" ]]; then
-              keysContent+=", "
-              pathsContent+=", "
+              cacheNameKeysContext+=", "
+              cachePathsContent+=", "
             fi
             first='false'
-            keysContent+="\"$name-$shortSHA\""
-            pathsContent+="[\"!./$name/.git/**\", \"./$name/**\"]"
+            cacheNameKeyContext+="\"$name-$shortSHA\""
+            cachePathsContent+="[\"!./$name/.git/**\", \"./$name/**\"]"
           done
-
-          keysContent+=" ]"
-          echo "CACHE_MULTI_PARAMETER_KEYS=$keysContent" >> $GITHUB_OUTPUT
-
-          pathsContent+=" ]"
-          echo "CACHE_MULTI_PARAMETER_PATHS=$pathsContent" >> $GITHUB_OUTPUT
+          
+          cacheNameKeysContent+=" ]"
+          echo "CACHE_MULTI_PARAMETER_NAME_KEYS=$cacheNameKeysContent" >> $GITHUB_OUTPUT
+          
+          cachePathsContent+=" ]"
+          echo "CACHE_MULTI_PARAMETER_PATHS=$cachePathsContent" >> $GITHUB_OUTPUT
 
         shell: bash
         working-directory: ${{github.workspace}}
@@ -260,24 +268,42 @@ jobs:
       - name: Load the source Cache(s) into the system
         uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
         with:
-          keys: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_KEYS }}
+          keys: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
           paths: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_PATHS }}
 
-      - name: build a list of targets that will be made with cmake
+      - name: build a list of all possible targets that will be made with cmake
         id: make-target-list
         run: |
           mkdir Release
           cd Release
           cmake .. -DCMAKE_BUILD_TYPE=Release
-          targetLibs=$( find CMakeFiles -type d -name *.dir | sed -r "s/(.*\/)*(.*)(.dir)/\2/g" )
-          # grab the libraries that are already built
+          cd CMakeFiles
+          cMakeNamesAndDirs=$(grep -r ".*-complete:.*-build" * | sed -r "s/(.*)\.dir.*-complete: (.*)?\/src.*/\1,\2/")
+          cMakeNamesAndDirs=${cMakeNamesAndDirs//$'\n'/|}
+          cd ..
+          
+          # extract cMake names and directories
+          cMakeNames=()
+          directoryNames=()
+          while IFS= read -r -d '|' line; do
+            # Split the line into fields using the comma as the delimiter
+            IFS=","; read -r field0 field1 <<< "$line"
+          
+            # Append the fields to the appropriate string
+            cMakeNames+="${field0}"
+            directoryNames+="${field1}"
+            
+          done <<< "$cMakeNamesAndDirs"
+
+          
           targetLibsJson=""
-          for targetLib in $targetLibs; do
+          for artifact in $artifactNames; do
             if [[ -z $targetLibsJson ]]; then
               targetLibsJson+="[ "
             else
               targetLibsJson+=", "
             fi
+            
             targetLibsJson+="{ \"libraryName\": \"$targetLib\" }"
           done
           targetLibsJson+=" ]"
@@ -294,9 +320,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        build-type: [ Release ]
-#        build-type: [ Release, Debug ]
-#        include: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
+        build-type: [ Release, Debug ]
+        include: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
         target-build-data:
           - target-os: Linux
             runs-on: ubuntu-latest
@@ -371,7 +396,7 @@ jobs:
       - name: dumping matrix for each run
         run: |
            echo "matrix: ${{ toJson(matrix) }}"
-           echo "keys: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}"
+           echo "keys: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}"
            echo "paths: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}"
 
       - name: Install configuration
@@ -382,7 +407,11 @@ jobs:
             uses: ${{ matrix.target-build-data.install-uses.uses || '' }}
             with: ${{ (matrix.target-build-data.install-uses.with && toJSON(matrix.target-build-data.install-uses.with)) || '{}' }}
 
-
+      - name: Get cached/built libraries
+        run: |
+          # build array of library names
+          baseNames=(${{ fromJSON(needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS) }})
+          Array3=(`echo ${Array1[@]} ${Array2[@]} | tr ' ' '\n' | sort | uniq -u `)
 #    uses: ./.github/workflows/Build-Artifacts.yml
 #    with:
 #      build-type: ${{ matrix.build-type }}

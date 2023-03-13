@@ -80,7 +80,7 @@ jobs:
 
       - name: Cache main Source Files without .git, if not already cached
         if: ( steps.tp-check.outputs.FOUND_THIRD_PARTY_CURRENT == 'false' )
-        uses: GeniusVentures/cache-multi@v3.2.2
+        uses: GeniusVentures/cache-multi@v3.2.3
         id: cache-source-directory
         with:
           key: ${{ steps.tp-check.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
@@ -229,9 +229,9 @@ jobs:
 
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
-        uses: GeniusVentures/cache-multi@v3.2.2
+        uses: GeniusVentures/cache-multi@v3.2.3
         with:
-          key: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
+          multi-key: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
           path: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
 
       - name: Create base target library names for target cache to create
