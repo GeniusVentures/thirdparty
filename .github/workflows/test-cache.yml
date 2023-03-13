@@ -97,7 +97,7 @@ jobs:
            while read -r mode stage longsha location; do
              shortSHA="${longsha:0:7}"
              nameHash="$(echo -n "$location" | cksum | cut -f1 -d' ' | cut -c1-4)"
-             cacheNames+="s/$nameHash$shortSHA\n"
+             cacheNames+="s/$nameHash/$shortSHA\n"
              hashToName["$shortSHA"]="$location"
            done <<< $(git ls-tree HEAD | grep "160000 commit")
 
@@ -114,7 +114,7 @@ jobs:
            # Set the field separator to new line
            IFS=$'\n'
            for toCache in $notCached; do
-             shortSHA="${toCache:6:7}"
+             shortSHA="${toCache:7:7}"
              name="${hashToName[$shortSHA]}"
              if [[ "$first" != "true" ]]; then
                matrixJson+=", "
@@ -141,7 +141,7 @@ jobs:
            cachePathsContent="[ "
            first='true'
            for cacheName in $cacheNames; do
-             shortSHA="${toCache:6:7}"
+             shortSHA="${toCache:7:7}"
              name="${hashToName[$shortSHA]}"
              if [[ "$first" != "true" ]]; then
                cacheNameKeysContent+=", "
@@ -193,7 +193,7 @@ jobs:
 
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
-        uses: GeniusVentures/cache-multi@v3.2.2
+        uses: GeniusVentures/cache-multi@v3.2.3
         with:
           key: ${{ matrix.cache-name }}
           path: |
@@ -214,7 +214,7 @@ jobs:
       TARGET_REPO_NAME: ${{ steps.create-target-info.outputs.TARGET_REPO_NAME }}
     steps:
       - name: Cache Third Party Directory
-        uses: GeniusVentures/cache-multi/restore@v3.2.2
+        uses: GeniusVentures/cache-multi/restore@v3.2.3
         id: cache-tp-source-directory
         with:
           key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
