@@ -1,0 +1,53 @@
+# This is a workflow to cache the sources for all the builds
+
+name: Testing Build Matrix of Libraries
+
+# Controls when the workflow will run
+# Triggers the workflow on push or pull request events and manually from the Actions tab
+on:
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+  MAKEFLAGS: "-j 8"
+  CMAKE_BUILD_PARALLEL_LEVEL: 8
+
+jobs:
+  test-matrix-build:
+    runs-on: ubuntu-latest
+#    outputs:
+#      matrix: ${{ steps.set-matrix.outputs.matrix }}
+#      CACHE_NAME_SHAS: ${{ steps.set-matrix.outputs.CACHE_NAME_SHAS }}
+#      HAS_MATRIX_VALUES: ${{ steps.set-matrix.outputs.HAS_MATRIX_VALUES }}
+    steps:
+      - name: Check out main third party without submodules
+        run: |
+          git clone -j 8 https://github.com/$GITHUB_REPOSITORY
+          cd thirdparty
+          git checkout $GITHUB_SHA
+        shell: bash
+        working-directory: ${{github.workspace}}
+
+      - name: Install gh cli extension actions-cache
+        run: |
+          type -p gh >/dev/null || {
+            type -p curl >/dev/null || sudo apt install curl -y
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install gh -y
+          }
+          gh extension install actions/gh-actions-cache
+          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
+          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Check out submodules
+        run: |
+          cd thirdparty
+          time git submodule update --init --recursive --jobs 8
+
+        shell: bash
+        working-directory: ${{github.workspace}}
+
