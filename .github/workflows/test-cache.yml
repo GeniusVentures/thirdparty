@@ -92,71 +92,74 @@ jobs:
         id: set-cache-matrix
         run: |
           echo "Fetching list of cache keys to check if any old ones need deleting"
-           cacheNames=""
-           declare -A hashToName
-           while read -r mode stage longsha location; do
-             shortSHA="${longsha:0:7}"
-             nameHash="$(echo -n "$location" | cksum | cut -f1 -d' ' | cut -c1-4)"
-             cacheNames+="s/$nameHash/$shortSHA\n"
-             hashToName["$shortSHA"]="$location"
-           done <<< $(git ls-tree HEAD | grep "160000 commit")
+          cacheNames=""
+          while read -r mode stage longsha location; do
+            shortSHA="${longsha:0:7}"
+            cacheNames+="s/$location-$shortSHA\n"
+          done <<< $(git ls-tree HEAD | grep "160000 commit")
 
-           cacheNames="$(echo -en "$cacheNames" | sort)"
-           cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="s/" | jq -r ".actions_caches[].key" | sort)
+          cacheNames="$(echo -en "$cacheNames" | sort)"
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="s/" | jq -r ".actions_caches[].key" | sort)
 
-           notMatched="$(comm -3 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$cachesList"))"
-           oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$notMatched"))"
-           notCached="$(comm -12 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$notMatched"))"
+          notMatched="$(comm -3 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$cachesList"))"
+          oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$notMatched"))"
+          notCached="$(comm -12 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$notMatched"))"
 
-           # matrixJson = matrix of source code to cache, that isn't already cached
-           matrixJson="[ "
-           first=true
-           # Set the field separator to new line
-           IFS=$'\n'
-           for toCache in $notCached; do
-             shortSHA="${toCache:7:7}"
-             name="${hashToName[$shortSHA]}"
-             if [[ "$first" != "true" ]]; then
-               matrixJson+=", "
-             fi
-             first=false
-             matrixJson+="{ \"name\":  \"$name\", \"cache-name\": \"$toCache\" }"
-           done
-           matrixJson+=" ]"
+          # matrixJson = matrix of source code to cache, that isn't already cached
+          matrixJson="[ "
+          first=true
+          # Set the field separator to new line
+          IFS=$'\n'
+          for toCache in $notCached; do
+            len=${#toCache}
+            startPos=$((len - 7))
+            shortSHA="${toCache:$startPos:7}"
+            # - 10 for s/ + '-' + shortSHA
+            name="${toCache:2:$((len - 10))}"
+            if [[ "$first" != "true" ]]; then
+              matrixJson+=", "
+            fi
+            first=false
+            matrixJson+="{ \"name\":  \"$name\", \"cache-name\": \"$toCache\" }"
+          done
+          matrixJson+=" ]"
 
-           # delete old caches
-           for oldCache in $oldCaches; do
-             echo "Deleting old cache $oldCache"
-             gh actions-cache delete $oldCache -R $REPO -B $BRANCH --confirm
-           done
+          # delete old caches
+          for oldCache in $oldCaches; do
+            echo "Deleting old cache $oldCache"
+            gh actions-cache delete $oldCache -R $REPO -B $BRANCH --confirm
+          done
 
-           echo "CACHE_MATRIX=$matrixJson" >> $GITHUB_OUTPUT
-           if [[ "$notCached" != "" ]]; then
-             echo "NEEDS_CACHE=true" >> $GITHUB_OUTPUT
-           else
-             echo "NEEDS_CACHE=false" >> $GITHUB_OUTPUT
-           fi
+          echo "CACHE_MATRIX=$matrixJson" >> $GITHUB_OUTPUT
+          if [[ "$notCached" != "" ]]; then
+            echo "NEEDS_CACHE=true" >> $GITHUB_OUTPUT
+          else
+            echo "NEEDS_CACHE=false" >> $GITHUB_OUTPUT
+          fi
 
-           cacheNameKeysContent="[ "
-           cachePathsContent="[ "
-           first='true'
-           for cacheName in $cacheNames; do
-             shortSHA="${toCache:7:7}"
-             name="${hashToName[$shortSHA]}"
-             if [[ "$first" != "true" ]]; then
-               cacheNameKeysContent+=", "
-               cachePathsContent+=", "
-             fi
-             first='false'
-             cacheNameKeysContent+="\"$cacheName\""
-             cachePathsContent+="[\"!./$name/.git/**\", \"./$name/**\"]"
-           done
+          cacheNameKeysContent="[ "
+          cachePathsContent="[ "
+          first='true'
+          for cacheName in $cacheNames; do
+            len=${#cacheName}
+            startPos=$((len - 7))
+            shortSHA="${cacheName:$startPos:7}"
+            # - 10 for s/ + '-' + shortSHA
+            name="${cacheName:2:$((len - 10))}"
+            if [[ "$first" != "true" ]]; then
+              cacheNameKeysContent+=", "
+              cachePathsContent+=", "
+            fi
+            first='false'
+            cacheNameKeysContent+="\"$cacheName\""
+            cachePathsContent+="[\"!./$name/.git/**\", \"./$name/**\"]"
+          done
 
-           cacheNameKeysContent+=" ]"
-           echo "CACHE_MULTI_PARAMETER_NAME_KEYS=$cacheNameKeysContent" >> $GITHUB_OUTPUT
+          cacheNameKeysContent+=" ]"
+          echo "CACHE_MULTI_PARAMETER_NAME_KEYS=$cacheNameKeysContent" >> $GITHUB_OUTPUT
 
-           cachePathsContent+=" ]"
-           echo "CACHE_MULTI_PARAMETER_PATHS=$cachePathsContent" >> $GITHUB_OUTPUT
+          cachePathsContent+=" ]"
+          echo "CACHE_MULTI_PARAMETER_PATHS=$cachePathsContent" >> $GITHUB_OUTPUT
 
         shell: bash
         working-directory: ${{github.workspace}}
@@ -171,7 +174,7 @@ jobs:
         include: ${{ fromJson(needs.setup-src-cache.outputs.CACHE_MATRIX) }}
     steps:
       - name: Cache Third Party Directory
-        uses: GeniusVentures/cache-multi/restore@v3.2.2
+        uses: GeniusVentures/cache-multi/restore@v3.2.3
         id: cache-tp-source-directory
         with:
           key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
