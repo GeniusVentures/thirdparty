@@ -257,12 +257,13 @@ jobs:
           buildDirectoryNames=""
           repoNames=""
           shortSHAs=""
-          gitSubmodules="$(git ls-tree HEAD | grep "160000 commit")"
-          gitSubDirectories="$(git ls-tree HEAD | grep "040000 tree")"
+          gitSubmodules="$(git ls-tree HEAD | grep -E "160000 commit|040000 tree")"
 
           while IFS=',' read -r cmakeName buildDir repoName; do
 
-            #echo "repoName: $repoName"
+            echo "repoName: $repoName"
+            echo "cmakeName: $cmakeName"
+            echo "buildDir: $buildDir"
             # Append the fields to the appropriate array
             cMakeNames+="$cmakeName\n"
             buildDirectoryNames+="$buildDir\n"
