@@ -252,6 +252,8 @@ jobs:
             tr '|' '\n')"
           cd ../../../../
 
+          echo -E "$cMakeNamesDirsAndRepoNames"
+          
           # Initialize the variables
           cMakeNames=""
           buildDirectoryNames=""
@@ -259,8 +261,10 @@ jobs:
           shortSHAs=""
           gitSubmodules="$(git ls-tree HEAD | grep -E "160000 commit|040000 tree")"
 
-          IFS=","
-          while read -r cmakeName buildDir repoName; do
+          while IFS="," read -a fields; do
+            cmakeName="${fields[0]}"
+            buildDir="${fields[1]}"
+            repoName="${fields[2]}"
 
             echo "repoName: $repoName"
             echo "cmakeName: $cmakeName"
@@ -269,13 +273,7 @@ jobs:
             cMakeNames+="$cmakeName\n"
             buildDirectoryNames+="$buildDir\n"
             longSHA=$(echo -e "$gitSubmodules" | grep -m1 "$repoName" | cut -d ' ' -f 3 || true)
-            # part of the thirdparty repo directories and not a submodule
-            if [[ -z $longSHA ]]; then
-              longSHA=$(echo -e "$gitSubDirectories" | grep -m1 "$repoName" | cut -d ' ' -f 3 || true)
-              repoNames+="thirdparty\n"
-            else
-              repoNames+="$repoName\n"
-            fi
+            repoNames+="$repoName\n"
             shortSHAs+="${longSHA:0:7}\n"
 
           done <<< "$cMakeNamesDirsAndRepoNames"
