@@ -259,7 +259,8 @@ jobs:
           shortSHAs=""
           gitSubmodules="$(git ls-tree HEAD | grep -E "160000 commit|040000 tree")"
 
-          while IFS=',' read -r cmakeName buildDir repoName; do
+          IFS=","
+          while read -r cmakeName buildDir repoName; do
 
             echo "repoName: $repoName"
             echo "cmakeName: $cmakeName"
@@ -278,7 +279,8 @@ jobs:
             shortSHAs+="${longSHA:0:7}\n"
 
           done <<< "$cMakeNamesDirsAndRepoNames"
-
+          
+          unset IFS
           echo "TARGET_NAMES=$cMakeNames" >>$GITHUB_OUTPUT
           echo "TARGET_SHAS=$shortSHAs" >>$GITHUB_OUTPUT
           echo "TARGET_DIRECTORIES=$buildDirectoryNames" >>$GITHUB_OUTPUT
