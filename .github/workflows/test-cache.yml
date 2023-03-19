@@ -248,12 +248,12 @@ jobs:
 
           cd CMakeFiles
           declare -A cMakeNamesRepos
-          echo -e "$(grep -m1 -R --include "build.make" -e "make_directory.*thirdparty/[^/]*$" * | sed -E -n 's/^(.*)\.dir.*make_directory.*thirdparty\/([^ ]*)$/\1,\2/p')"
+          echo -e "$(grep -R --include "build.make" -E '^.*-build && /usr/bin/cmake "-GUnix Makefiles"' * | sed -E -n 's/^(.*)\.dir.*\/([^\/]+)$/\1,\2/p')"
           
           while IFS=',' read -r cmakeName repoDir; do
             cMakeNamesRepos["$cmakeName"]="$repoDir"
-          done < <(grep -m1 -R --include "build.make" -e "make_directory.*thirdparty/[^/]*$" * |
-            sed -E -n 's/^(.*)\.dir.*make_directory.*thirdparty\/([^ ]*)$/\1,\2/p')
+          done < <(grep -R --include "build.make" -E '^.*-build && /usr/bin/cmake "-GUnix Makefiles"' * | 
+            sed -E -n 's/^(.*)\.dir.*\/([^\/]+)$/\1,\2/p')
 
           declare -A cMakeBuildDir
           while IFS=',' read -r cmakeName buildDir; do
