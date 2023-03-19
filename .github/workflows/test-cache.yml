@@ -252,8 +252,7 @@ jobs:
             tr '|' '\n')"
           cd ../../../../
 
-          echo -E "$cMakeNamesDirsAndRepoNames"
-          
+          echo -e "$cMakeNamesDirsAndRepoNames"
           # Initialize the variables
           cMakeNames=""
           buildDirectoryNames=""
@@ -261,11 +260,12 @@ jobs:
           shortSHAs=""
           gitSubmodules="$(git ls-tree HEAD | grep -E "160000 commit|040000 tree")"
 
-          while IFS="," read -a fields; do
-            cmakeName="${fields[0]}"
-            buildDir="${fields[1]}"
-            repoName="${fields[2]}"
+          IFS=$'\n'
+          for line in $(echo -e "$cMakeNamesDirsAndRepoNames");do
+            IFS=","
+            read -r cmakeName buildDir repoName <<< "$line"
 
+            IFS=$'\n'
             echo "repoName: $repoName"
             echo "cmakeName: $cmakeName"
             echo "buildDir: $buildDir"
@@ -276,13 +276,12 @@ jobs:
             repoNames+="$repoName\n"
             shortSHAs+="${longSHA:0:7}\n"
 
-          done <<< "$cMakeNamesDirsAndRepoNames"
-          
-          unset IFS
-          echo "TARGET_NAMES=$cMakeNames" >>$GITHUB_OUTPUT
-          echo "TARGET_SHAS=$shortSHAs" >>$GITHUB_OUTPUT
-          echo "TARGET_DIRECTORIES=$buildDirectoryNames" >>$GITHUB_OUTPUT
-          echo "TARGET_REPO_NAME=$repoNames" >>$GITHUB_OUTPUT
+          done
+
+          echo 'TARGET_NAMES='"$cMakeNames" >>$GITHUB_OUTPUT
+          echo 'TARGET_SHAS='"$shortSHAs" >>$GITHUB_OUTPUT
+          echo 'TARGET_DIRECTORIES='"$buildDirectoryNames" >>$GITHUB_OUTPUT
+          echo 'TARGET_REPO_NAME='"$repoNames" >>$GITHUB_OUTPUT
 
         shell: bash
         working-directory: ${{github.workspace}}
