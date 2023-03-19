@@ -247,9 +247,10 @@ jobs:
           fi
           cd CMakeFiles
           cMakeNamesDirsAndRepoNames="$(grep -m2 -R --include "build.make" -e "make_directory.*thirdparty/[^/]*$" -e ".*-complete:.*-build" * |
-          sed -E -n 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2,/p; s/.*thirdparty\/([^ ]*)$/\1|/p' |
-            tr -d $'\n' |
-            tr '|' $'\n')"
+            sed -E -n -e 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2,/p' -e 's/.*thirdparty\/([^ ]*)$/\1\|/p' |
+            tr -d '\n' |
+            tr '\|' '\n')"
+
           cd ../../../../
 
           echo -e "$cMakeNamesDirsAndRepoNames"
@@ -274,10 +275,10 @@ jobs:
 
           done <<< "$cMakeNamesDirsAndRepoNames"
 
-          echo -e "TARGET_NAMES=$cMakeNames" >>$GITHUB_OUTPUT
-          echo -e "TARGET_SHAS=$shortSHAs" >>$GITHUB_OUTPUT
-          echo -e "TARGET_DIRECTORIES=$buildDirectoryNames" >>$GITHUB_OUTPUT
-          echo -e "TARGET_REPO_NAME=$repoNames" >>$GITHUB_OUTPUT
+          echo 'TARGET_NAMES='"$cMakeNames" >>$GITHUB_OUTPUT
+          echo 'TARGET_SHAS='"$shortSHAs" >>$GITHUB_OUTPUT
+          echo 'TARGET_DIRECTORIES='"$buildDirectoryNames" >>$GITHUB_OUTPUT
+          echo 'TARGET_REPO_NAME='"$repoNames" >>$GITHUB_OUTPUT
 
         shell: bash
         working-directory: ${{github.workspace}}
