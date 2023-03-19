@@ -272,21 +272,26 @@ jobs:
           repoNames=""
           shortSHAs=""
 
+          # debugging, works locally..
+          for key in "${!gitLibModules[@]}"; do
+          echo "key: $key, value: ${gitLibModules[$key]}"
+          done
+          
           for key in "${!cMakeBuildDir[@]}"; do
             buildDir="${cMakeBuildDir[$key]}"
             repoDir="${cMakeNamesRepos[$key]}"
-            shortSHA="${gitLibModules[$repoDir]:0:7}"
+            #shortSHA="${gitLibModules[$repoDir]:0:7}"
             cMakeNames+="${key}\n"
             buildDirectoryNames+="${buildDir}\n"
             repoNames+="${repoDir}\n"
-            shortSHAs+="${shortSHA}\n"
+            #shortSHAs+="${shortSHA}\n"
           done
 
           echo 'TARGET_NAMES='"$cMakeNames" >>$GITHUB_OUTPUT
           echo 'TARGET_SHAS='"$shortSHAs" >>$GITHUB_OUTPUT
           echo 'TARGET_DIRECTORIES='"$buildDirectoryNames" >>$GITHUB_OUTPUT
           echo 'TARGET_REPO_NAME='"$repoNames" >>$GITHUB_OUTPUT
-          
+
         shell: bash
         working-directory: ${{github.workspace}}
 
