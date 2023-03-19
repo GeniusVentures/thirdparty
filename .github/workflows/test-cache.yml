@@ -243,13 +243,12 @@ jobs:
           mkdir -p build/Linux/Release >/dev/null
           cd build/Linux/Release
           if [[ ! -d CMakeFiles ]]; then
+            cmake --version
             cmake .. -DCMAKE_BUILD_TYPE=Release
           fi
 
           cd CMakeFiles
-          grep -R --include "build.make" -E '^.*thirdparty/c-ares$' *
-          grep -R --include "build.make" -E '^.*thirdparty/boost$' *
-          grep -R --include "build.make" -E '^.*thirdparty/openssl$' *
+          grep -R --include "build.make" -E '^.*cmake*thirdparty/.*' *
           
           declare -A cMakeNamesRepos
           while IFS=',' read -r cmakeName repoDir; do
