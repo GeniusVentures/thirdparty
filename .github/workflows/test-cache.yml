@@ -248,7 +248,7 @@ jobs:
           fi
 
           cd CMakeFiles
-          grep -R --include "build.make" -E '^.*cmake*thirdparty/.*' *
+          grep -R --include "build.make" -E '^.*cmake.*thirdparty/.*' *
           
           declare -A cMakeNamesRepos
           while IFS=',' read -r cmakeName repoDir; do
