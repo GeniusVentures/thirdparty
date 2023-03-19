@@ -245,45 +245,48 @@ jobs:
           if [[ ! -d CMakeFiles ]]; then
             cmake .. -DCMAKE_BUILD_TYPE=Release
           fi
+
           cd CMakeFiles
-          cMakeNamesDirsAndRepoNames="$(grep -m2 -R --include "build.make" -e "make_directory.*thirdparty/[^/]*$" -e ".*-complete:.*-build" * |
-            sed -E -n -e 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2,/p' -e 's/.*thirdparty\/([^ ]*)$/\1\,/p' |
-            tr -d '\n')"
+          declare -A cMakeNamesRepos
+          while IFS=',' read -r cmakeName repoDir; do
+            cMakeNamesRepos["$cmakeName"]="$repoDir"
+          done < <(grep -m1 -R --include "build.make" -e "make_directory.*thirdparty/[^/]*$" * |
+            sed -E -n 's/^(.*)\.dir.*make_directory.*thirdparty\/([^ ]*)$/\1,\2/p')
 
+          declare -A cMakeBuildDir
+          while IFS=',' read -r cmakeName buildDir; do
+            cMakeBuildDir["$cmakeName"]="$buildDir"
+          done < <(grep -m1 -R --include "build.make" -e ".*-complete:.*-build" * |
+            sed -E -n 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2/p')
+
+          declare -A gitLibModules
           cd ../../../../
+          while IFS=',' read -r longSHA repoDir; do
+            gitLibModules["$repoDir"]="$longSHA"
+          done < <(git ls-tree HEAD | grep -E "160000 commit|040000 tree" |
+            sed -E -n 's/^.*(commit|tree) ([a-f0-9]+)[ \t]+([^ ]+)$/\2,\3/p')
 
-          echo -e "$cMakeNamesDirsAndRepoNames"
           # Initialize the variables
           cMakeNames=""
           buildDirectoryNames=""
           repoNames=""
           shortSHAs=""
-          gitSubmodules="$(git ls-tree HEAD | grep -E "160000 commit|040000 tree")"
 
-          IFS=','
-          read -ra variables <<< "$cMakeNamesDirsAndRepoNames"
-          for ((i = 0; i < ${#variables[@]}; i += 3)); do
-
-            cmakeName="${variables[i]}"
-            buildDir="${variables[i+1]}"
-            repoName="${variables[i+2]}"
-            echo "cmakeName: $cmakeName"
-            echo "buildDir: $buildDir"
-            echo "repoName: $repoName"
-            # Append the fields to the appropriate array
-            cMakeNames+="${cmakeName}\n"
+          for key in "${!cMakeBuildDir[@]}"; do
+            buildDir="${cMakeBuildDir[$key]}"
+            repoDir="${cMakeNamesRepos[$key]}"
+            shortSHA="${gitLibModules[$repoDir]:0:7}"
+            cMakeNames+="${key}\n"
             buildDirectoryNames+="${buildDir}\n"
-            longSHA=$(echo -e "$gitSubmodules" | grep -m1 "${repoName}" | cut -d ' ' -f 3 || true)
-            repoNames+="${repoName}\n"
-            shortSHAs+="${longSHA:0:7}\n"
-
+            repoNames+="${repoDir}\n"
+            shortSHAs+="${shortSHA}\n"
           done
 
           echo 'TARGET_NAMES='"$cMakeNames" >>$GITHUB_OUTPUT
           echo 'TARGET_SHAS='"$shortSHAs" >>$GITHUB_OUTPUT
           echo 'TARGET_DIRECTORIES='"$buildDirectoryNames" >>$GITHUB_OUTPUT
           echo 'TARGET_REPO_NAME='"$repoNames" >>$GITHUB_OUTPUT
-
+          
         shell: bash
         working-directory: ${{github.workspace}}
 
