@@ -247,13 +247,12 @@ jobs:
           fi
 
           cd CMakeFiles
-          grep -R --include "build.make" -E '^.*-build &&' *
           
           declare -A cMakeNamesRepos
           while IFS=',' read -r cmakeName repoDir; do
             echo -e "cmakeName: $cmakeName, repoDir: $repoDir"
             cMakeNamesRepos["$cmakeName"]="$repoDir"
-          done < <(grep -R --include "build.make" -E '^.*-build && /usr/bin/cmake "-GUnix Makefiles"' * | 
+          done < <(grep -R --include "build.make" -E '^.*-build && .* "-GUnix Makefiles"' * | 
             sed -E -n 's/^(.*)\.dir.*\/([^\/]+)$/\1,\2/p')
 
           declare -A cMakeBuildDir
@@ -280,17 +279,17 @@ jobs:
           for key in "${!cMakeBuildDir[@]}"; do
             buildDir="${cMakeBuildDir[$key]}"
             repoDir="${cMakeNamesRepos[$key]}"
-            #shortSHA="${gitLibModules[$repoDir]:0:7}"
+            shortSHA="${gitLibModules[$repoDir]:0:7}"
             cMakeNames+="${key}\n"
             buildDirectoryNames+="${buildDir}\n"
             repoNames+="${repoDir}\n"
-            #shortSHAs+="${shortSHA}\n"
+            shortSHAs+="${shortSHA}\n"
           done
 
-          echo 'TARGET_NAMES='"$cMakeNames" >>$GITHUB_OUTPUT
-          echo 'TARGET_SHAS='"$shortSHAs" >>$GITHUB_OUTPUT
-          echo 'TARGET_DIRECTORIES='"$buildDirectoryNames" >>$GITHUB_OUTPUT
-          echo 'TARGET_REPO_NAME='"$repoNames" >>$GITHUB_OUTPUT
+          echo "TARGET_NAMES=$cMakeNames" >> $GITHUB_OUTPUT
+          echo "TARGET_SHAS=$shortSHAs" >> $GITHUB_OUTPUT
+          echo "TARGET_DIRECTORIES=$buildDirectoryNames" >> $GITHUB_OUTPUT
+          echo "TARGET_REPO_NAME=$repoNames" >> $GITHUB_OUTPUT
 
         shell: bash
         working-directory: ${{github.workspace}}
@@ -380,10 +379,10 @@ jobs:
       - name: dumping matrix for each run
         run: |
           echo -e "matrix: ${{ toJson(matrix) }}"
-          echo -e "cmakeNames: ${{ needs.create-targets-matrix.TARGET_NAMES }}"
-          echo -e "targetSHAs: ${{ needs.create-targets-matrix.TARGET_SHAS }}"
-          echo -e "buildDirs: ${{ needs.create-targets-matrix.TARGET_DIRECTORIES }}"
-          echo -e "targetRepoName: ${{ needs.create-targets-matrix.TARGET_REPO_NAME }}"          
+          echo -e "cmakeNames: ${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}"
+          echo -e "targetSHAs: ${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}"
+          echo -e "buildDirs: ${{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}"
+          echo -e "targetRepoName: ${{ needs.create-targets-matrix.outputs.TARGET_REPO_NAME }}"          
 
       - name: Install configuration
         uses: ChristopherHX/conditional@main
