@@ -247,9 +247,8 @@ jobs:
           fi
           cd CMakeFiles
           cMakeNamesDirsAndRepoNames="$(grep -m2 -R --include "build.make" -e "make_directory.*thirdparty/[^/]*$" -e ".*-complete:.*-build" * |
-            sed -E -n -e 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2,/p' -e 's/.*thirdparty\/([^ ]*)$/\1\|/p' |
-            tr -d '\n' |
-            tr '\|' '\n')"
+            sed -E -n -e 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2,/p' -e 's/.*thirdparty\/([^ ]*)$/\1\,/p' |
+            tr -d '\n')"
 
           cd ../../../../
 
@@ -261,19 +260,24 @@ jobs:
           shortSHAs=""
           gitSubmodules="$(git ls-tree HEAD | grep -E "160000 commit|040000 tree")"
 
-          while IFS="," read -r cmakeName buildDir repoName; do
+          IFS=','
+          read -ra variables <<< "$cMakeNamesDirsAndRepoNames"
+          for ((i = 0; i < ${#variables[@]}; i += 3)); do
 
-            echo "repoName: $repoName"
+            cmakeName="${variables[i]}"
+            buildDir="${variables[i+1]}"
+            repoName="${variables[i+2]}"
             echo "cmakeName: $cmakeName"
             echo "buildDir: $buildDir"
+            echo "repoName: $repoName"
             # Append the fields to the appropriate array
-            cMakeNames+="$cmakeName\n"
-            buildDirectoryNames+="$buildDir\n"
-            longSHA=$(echo -e "$gitSubmodules" | grep -m1 "$repoName" | cut -d ' ' -f 3 || true)
-            repoNames+="$repoName\n"
+            cMakeNames+="${cmakeName}\n"
+            buildDirectoryNames+="${buildDir}\n"
+            longSHA=$(echo -e "$gitSubmodules" | grep -m1 "${repoName}" | cut -d ' ' -f 3 || true)
+            repoNames+="${repoName}\n"
             shortSHAs+="${longSHA:0:7}\n"
 
-          done <<< "$cMakeNamesDirsAndRepoNames"
+          done
 
           echo 'TARGET_NAMES='"$cMakeNames" >>$GITHUB_OUTPUT
           echo 'TARGET_SHAS='"$shortSHAs" >>$GITHUB_OUTPUT
