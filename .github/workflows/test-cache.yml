@@ -247,12 +247,13 @@ jobs:
           fi
 
           cd CMakeFiles
-
+          grep -R --include "build.make" -E '^.*cmake -E make_directory.*thirdparty/[^/]+$' *
+          
           declare -A cMakeNamesRepos
           while IFS=',' read -r cmakeName repoDir; do
-            #echo -e "cmakeName: $cmakeName, repoDir: $repoDir"
+            echo -e "cmakeName: $cmakeName, repoDir: $repoDir"
             cMakeNamesRepos["$cmakeName"]="$repoDir"
-          done < <(grep -R --include "build.make" -E '^.*cmake -E make_directory .*thirdparty/[^/]+$' * |
+          done < <(grep -R --include "build.make" -E '^.*cmake -E make_directory.*thirdparty/[^/]+$' * |
             sed -E -n 's/^(.*)\.dir.*\/([^\/]+)$/\1,\2/p')
 
           declare -A cMakeBuildDir
