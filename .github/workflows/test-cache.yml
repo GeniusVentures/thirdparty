@@ -247,16 +247,18 @@ jobs:
           fi
 
           cd CMakeFiles
-          declare -A cMakeNamesRepos
-          echo -e "$(grep -R --include "build.make" -E '^.*-build && /usr/bin/cmake "-GUnix Makefiles"' * | sed -E -n 's/^(.*)\.dir.*\/([^\/]+)$/\1,\2/p')"
+          find . -iname "build.make"
           
+          declare -A cMakeNamesRepos
           while IFS=',' read -r cmakeName repoDir; do
+            echo -e "cmakeName: $cmakeName, repoDir: $repoDir"
             cMakeNamesRepos["$cmakeName"]="$repoDir"
           done < <(grep -R --include "build.make" -E '^.*-build && /usr/bin/cmake "-GUnix Makefiles"' * | 
             sed -E -n 's/^(.*)\.dir.*\/([^\/]+)$/\1,\2/p')
 
           declare -A cMakeBuildDir
           while IFS=',' read -r cmakeName buildDir; do
+            echo -e "cmakeName: $cmakeName, buildDir: $buildDir"
             cMakeBuildDir["$cmakeName"]="$buildDir"
           done < <(grep -m1 -R --include "build.make" -e ".*-complete:.*-build" * |
             sed -E -n 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2/p')
@@ -264,6 +266,7 @@ jobs:
           declare -A gitLibModules
           cd ../../../../
           while IFS=',' read -r longSHA repoDir; do
+            echo -e "repoDir: $repoDir, longSHA: $longSHA"
             gitLibModules["$repoDir"]="$longSHA"
           done < <(git ls-tree HEAD | grep -E "160000 commit|040000 tree" |
             sed -E -n 's/^.*(commit|tree) ([a-f0-9]+)[ \t]+([^ ]+)$/\2,\3/p')
@@ -274,11 +277,6 @@ jobs:
           repoNames=""
           shortSHAs=""
 
-          # debugging, works locally..
-          for key in "${!gitLibModules[@]}"; do
-          echo "key: $key, value: ${gitLibModules[$key]}"
-          done
-          
           for key in "${!cMakeBuildDir[@]}"; do
             buildDir="${cMakeBuildDir[$key]}"
             repoDir="${cMakeNamesRepos[$key]}"
