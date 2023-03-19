@@ -247,7 +247,7 @@ jobs:
           fi
 
           cd CMakeFiles
-          find . -iname "build.make"
+          grep -R --include "build.make" -E '^.*-build &&' *
           
           declare -A cMakeNamesRepos
           while IFS=',' read -r cmakeName repoDir; do
