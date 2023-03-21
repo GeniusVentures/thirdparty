@@ -390,8 +390,6 @@ jobs:
         id: create-lib-cache-keys
         run: |
           # build array of library names
-          IFS=$'\n' read -d '|' -ra TARGET_REPO_NAMES <<< "$(echo -ne 'hat-trie\nboost\nabseil-cpp\nGSL\ngrpc\nBoost.DI\nlibp2p\nipfs-lite-cpp\nsqlite3\nGTest\nipfs-bitswap-cpp\nkompute\nc-ares\nrocksdb\nfmt\nlibsecp256k1\nspdlog\nsoralog\nsr25519-donna\nxxhash\nrapidjson\nyaml-cpp\nipfs-pubsub\ned25519\nopenssl\nlibp2p-sqlite-modern-cpp\n|')" IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '343e0da\n32da69a\n522606b\n7e99e76\n0a82c02\nc5287ee\nad2f4d0\nba8c735\n2b39544\n516940f\n4230fef\n31db504\n2aa086f\n24a3f36\n7bdf062\nb59ea74\n100f300\n3ebc084\n987e2c5\n520f546\nf56928d\n1b50109\n35cdf9b\nff7065e\n31efcf2\nfc3b700\n|')" IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne 'tsl_hat_trie\nboost\nabsl\nMicrosoft.GSL\ngrpc\nBoost.DI\nlibp2p\nipfs-lite-cpp\nsqlite3\nGTest\nipfs-bitswap-cpp\nkompute\ncares\nrocksdb\nfmt\nlibsecp256k1\nspdlog\nsoralog\nsr25519-donna\nxxhash\nrapidjson\nyaml-cpp\nipfs-pubsub\ned25519\nopenssl\nSQLiteModernCpp\n|')" 
-
           IFS=$'\n' read -d '|' -ra TARGET_REPO_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_REPO_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$$(echo -ne '{{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$$(echo -ne '{{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
