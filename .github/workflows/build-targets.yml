@@ -391,8 +391,8 @@ jobs:
         run: |
           # build array of library names
           IFS=$'\n' read -d '|' -ra TARGET_REPO_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_REPO_NAMES }}|')"
-          IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$$(echo -ne '{{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
-          IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$$(echo -ne '{{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '{{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne '{{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
           LIB_CACHE_NAME_KEYS="[ "
           LIB_CACHE_PATHS="[ "
           first=true
