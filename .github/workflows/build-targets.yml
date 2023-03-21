@@ -391,8 +391,8 @@ jobs:
         run: |
           # build array of library names
           IFS=$'\n' read -d '|' -ra TARGET_REPO_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_REPO_NAMES }}|')"
-          IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '{{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
-          IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne '{{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
           LIB_CACHE_NAME_KEYS="[ "
           LIB_CACHE_PATHS="[ "
           first=true
@@ -465,6 +465,7 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra CACHE_HITS <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.cache-hits }}|')"
+          cd "build/${TARGET_OS}/${BUILD_TYPE}"
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
