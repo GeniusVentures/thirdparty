@@ -1,6 +1,6 @@
-# This is a workflow to cache the sources for all the builds
+# This is a workflow to cache the sources and build all the artifacts for target OSs
 
-name: Build Matrix of Libraries
+name: Cache Sources and build Artifact Libraries per OS
 
 # Controls when the workflow will run
 # Triggers the workflow on push or pull request events and manually from the Actions tab
@@ -13,12 +13,15 @@ env:
   CMAKE_BUILD_PARALLEL_LEVEL: 8
 
 jobs:
-  setup:
+  setup-src-cache:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-      CACHE_NAME_SHAS: ${{ steps.set-matrix.outputs.CACHE_NAME_SHAS }}
-      HAS_MATRIX_VALUES: ${{ steps.set-matrix.outputs.HAS_MATRIX_VALUES }}
+      THIRD_PARTY_CACHE_NAME_KEY: ${{ steps.tp-check.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
+      FOUND_THIRD_PARTY_CURRENT: ${{ steps.tp-check.outputs.FOUND_THIRD_PARTY_CURRENT }}
+      CACHE_MATRIX: ${{ steps.set-cache-matrix.outputs.CACHE_MATRIX }}
+      NEEDS_CACHE: ${{ steps.set-cache-matrix.outputs.NEEDS_CACHE }}
+      CACHE_MULTI_PARAMETER_NAME_KEYS: ${{ steps.set-cache-matrix.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
+      CACHE_MULTI_PARAMETER_PATHS: ${{ steps.set-cache-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
     steps:
       - name: Check out main third party without submodules
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -38,366 +41,380 @@ jobs:
           }
           gh extension install actions/gh-actions-cache
           echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
-          echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
 
       - name: Find cache and Clean out old caches of thirdparty
-        id: tp-clean-out
+        id: tp-check
         run: |
-          echo "Fetching list of cache keys to check if any old ones need deleting"
-          cacheKeys=$(gh actions-cache list -R $REPO -B $BRANCH --key "thirdparty-" | cut -f 1 | sed '/thirdparty-/!d' )
-          fullNameSHA="$thirdparty-${{ github.sha }}"
-
-          foundThirdPartyCurrent=false
-          # Setting this to not fail the workflow while deleting cache keys.
-          set +e
-          if [[ ! -z "$cacheKeys" ]]; then
-            for cacheKey in $cacheKeys
-            do
-              if [[ "$cacheKey" == "$fullNameSHA" ]]; then
-                echo "Found Previous cache $fullNameSHA"
-                foundThirdPartyCurrent=true
-              elif [[ ${#cachekey} == ${#fullNameSHA} ]]; then
-                echo "Deleting old cache $cacheKey"
-                gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
-              fi
-            done
-            echo "Done"
+          echo "Fetching list of thirdparty cache keys to check if any old ones need deleting"
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" | jq -r ".actions_caches[].key" | sort)
+          longSHA="${{ github.sha }}"
+          shortSHA="${longSHA:0:7}"
+          tpCacheNameSHA="thirdparty-$shortSHA"
+          
+          notMatched="$(comm -3 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$cachesList"))"
+          oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$notMatched"))"
+          notCached="$(comm -12 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$notMatched"))"
+          
+          echo -e "notMatched: $notMatched"
+          echo -e "oldCaches: $oldCaches"
+          echo -e "notCached: $notCached"
+          
+          foundThirdPartyCurrent="true"
+          if [[ $notCached == "$tpCacheNameSHA" ]]; then
+            foundThirdPartyCurrent="false"
           fi
-
+          
+          #Set the field separator to new line
+          IFS=$'\n'
+          for oldCache in $oldCaches; do
+            echo -e "Deleting old cache $oldCache"
+            gh actions-cache delete $oldCache -R $REPO -B $BRANCH --confirm
+          done
+          
           echo "FOUND_THIRD_PARTY_CURRENT=$foundThirdPartyCurrent" >> $GITHUB_OUTPUT
+          echo "THIRD_PARTY_CACHE_NAME_KEY=$tpCacheNameSHA" >> $GITHUB_OUTPUT
+        shell: bash
+        working-directory: ${{github.workspace}}
 
       - name: Cache main Source Files without .git, if not already cached
-        if: ( steps.tp-clean-out.outputs.FOUND_THIRD_PARTY_CURRENT == 'false' )
-        uses: GeniusVentures/cache-multi@v3.2.2
+        if: ( steps.tp-check.outputs.FOUND_THIRD_PARTY_CURRENT == 'false' )
+        uses: GeniusVentures/cache-multi@v3.2.3
         id: cache-source-directory
         with:
+          key: ${{ steps.tp-check.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
           path: |
             !.git/**
             ./**
-          key: thirdparty-${{ github.sha }}
 
-      - name: Set matrix of submodules that need updating
-        id: set-matrix
+      - name: Set matrix of src submodules that need updating
+        id: set-cache-matrix
         run: |
-          namesAndHashes=""          
-          while read -r hash name version; do
-            shortSHA="${hash:0:7}"
-            namesAndHashes+="source/$name-$shortSHA\n"
-          done <<< $(git submodule)
+          echo "Fetching list of cache keys to check if any old ones need deleting"
+          cacheNames=""
+          while read -r mode stage longsha location; do
+            shortSHA="${longsha:0:7}"
+            cacheNames+="s/$location-$shortSHA\n"
+          done <<< $(git ls-tree HEAD | grep "160000 commit")
 
-          cachesList=$(gh api -H "Accept: application/vnd.github+json" --key "source/" --paginate repos/GeniusVentures/thirdparty/actions/caches | jq ".actions_caches[].key")
+          cacheNames="$(echo -en "$cacheNames" | sort)"
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="s/" | jq -r ".actions_caches[].key" | sort)
 
-          notCached="$(echo "$namesAndHashes\n" "$cachesList" | sort | uniq -u)"
-          oldCaches="$(echo "$namesAndHashes\n" "$notCached" | sort | uniq -D | uniq)"
-          isCached="$(echo "$cachesList\n" "$notCached" | sort | unitq -D | uniq)"
+          notMatched="$(comm -3 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$cachesList"))"
+          oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$notMatched"))"
+          notCached="$(comm -12 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$notMatched"))"
+
+          # matrixJson = matrix of source code to cache, that isn't already cached
+          matrixJson="[ "
+          first=true
+          # Set the field separator to new line
+          IFS=$'\n'
+          for toCache in $notCached; do
+            len=${#toCache}
+            startPos=$((len - 7))
+            shortSHA="${toCache:$startPos:7}"
+            # - 10 for s/ + '-' + shortSHA
+            name="${toCache:2:$((len - 10))}"
+            if [[ "$first" != "true" ]]; then
+              matrixJson+=", "
+            fi
+            first=false
+            matrixJson+="{ \"name\":  \"$name\", \"cache-name\": \"$toCache\" }"
+          done
+          matrixJson+=" ]"
+
           # delete old caches
-          while read oldCaches oldCacheName; do
-            $(gh
-            longSHA="${longSHA/'-'/}"
-            shortSHA="${longSHA:0:7}"
-            # if not empty, then we need to append a comma
-            if [[ ! -z "$cacheNameSHAS" ]]; then
-              cacheNameSHAS+=","
-            fi
-            cacheNameSHAS+="$name,$shortSHA"
-            fullNameSHA="$name-$shortSHA"
+          for oldCache in $oldCaches; do
+            echo "Deleting old cache $oldCache"
+            gh actions-cache delete $oldCache -R $REPO -B $BRANCH --confirm
+          done
 
-            needCacheRepo="true"
-            if [[ -z "$cacheEmpty" ]]; then
-              foundCachedRepos=$(gh actions-cache list -R $REPO -B $BRANCH --key "$name-" | cut -f 1 | sed ":$name-:"'!d')
-              set +e
-              if [[ ! -z "$foundCachedRepos" ]]; then
-                for cacheKey in $foundCachedRepos
-                do
-                  if [[ "$cacheKey" == "$fullNameSHA" ]]; then
-                    echo "Found existing cache for $fullNameSHA..."
-                    needCacheRepo="false"
-                  # make sure the string length match, as the --key will match least amount of prefix, so boost- will match boost-for-mobile
-                  elif [[ ${#cachekey} == ${#fullNameSHA} ]]; then
-                    echo "Deleting old cache $cacheKey..."
-                    # gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
-                  fi
-                done
-              fi
-            fi
-
-            if  [[ "$needCacheRepo" == "true" ]]; then
-              if (( $toCacheCount > 0 )); then
-               jsonContent+=","
-              fi
-              (( toCacheCount+=1 ))
-              jsonContent+="{ \"name\": \"$name\", \"shortSHA\": \"$shortSHA\", \"longSHA\": \"$longSHA\" }"
-
-            fi
-
-          done <<<"$content"
-          echo "$cacheNameSHAS"
-          if (( $toCacheCount == 0 )); then
-            jsonContent+="{ \"HAS_MATRIX_VALUES\": false }"
-          fi
-          jsonContent+="] }"
-          echo "matrix=$jsonContent" >> $GITHUB_OUTPUT
-          echo "CACHE_NAME_SHAS=$cacheNameSHAS" >> $GITHUB_OUTPUT
-          if (( $toCacheCount > 0 )); then
-            echo "HAS_MATRIX_VALUES=true" >> $GITHUB_OUTPUT
+          echo "CACHE_MATRIX=$matrixJson" >> $GITHUB_OUTPUT
+          if [[ "$notCached" != "" ]]; then
+            echo "NEEDS_CACHE=true" >> $GITHUB_OUTPUT
           else
-            echo "HAS_MATRIX_VALUES=false" >> $GITHUB_OUTPUT
+            echo "NEEDS_CACHE=false" >> $GITHUB_OUTPUT
           fi
-          echo "Found $toCacheCount new source repos to cache!"
-        shell: bash
-        working-directory: ${{github.workspace}}
 
-  cache-src:
-    needs: setup
-    if: (always() && (needs.setup.outputs.HAS_MATRIX_VALUES != 'false'))
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
-    steps:
-      - name: Cache Third Party Director
-        uses: GeniusVentures/cache-multi/restore@v3.2.2
-        id: cache-tp-source-directory
-        with:
-          path: |
-            !.git/**
-            ./**
-          key: thirdparty-${{ github.sha }}
-
-      - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
-        run: |
-          echo "Couldn't find cached thirdparty code, thirdparty-${{ github.sha }} fatal error!"
-          exit 1
-
-
-      - name: Cache Submodule Source Files without .git
-        id: cache-source-directory
-        uses: GeniusVentures/cache-multi@v3.2.2
-        with:
-          path: |
-            !./${{ matrix.name }}/.git/**
-            ./${{ matrix.name }}/**
-          key: ${{ matrix.name }}-${{ matrix.shortSHA }}
-
-      - if: (steps.cache-source-directory.outputs.cache-hit != 'true')
-        name: Git clone submodule source code
-        run: |
-          echo "Cloning source for ${{ matrix.name }}"
-          git submodule update --init --recursive -- ${{ matrix.name }}
-        shell: bash
-        working-directory: ${{github.workspace}}
-
-  get-targets-matrix:
-    needs: [setup, cache-src]
-    if: |
-      always() &&
-      needs.setup.result == 'success' &&
-      (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped')
-    runs-on: ubuntu-latest
-    outputs:
-      TARGET_LIBRARY_NAMES: ${{ steps.make-target-list.outputs.TARGET_LIBRARY_NAMES }}
-      CACHE_MULTI_PARAMETER_NAME_KEYS: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
-      CACHE_MULTI_PARAMETER_PATHS: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_PATHS }}
-    steps:
-      - uses: GeniusVentures/cache-multi/restore@v3.2.3
-        id: cache-tp-source-directory
-        with:
-          path: |
-            !.git/**
-            ./**
-          key: thirdparty-${{ github.sha }}
-
-      - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
-        run: |
-          echo "Couldn't find cached thirdparty code, thirdparty-${{ github.sha }} fatal error!"
-          exit 1
-
-      - name: Install gh, cli extension actions-cache and jq
-        run: |
-          type -p gh >/dev/null || {
-            type -p curl >/dev/null || sudo apt install curl -y >/dev/null
-            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg >/dev/null 2>&1
-            sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg >/dev/null
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-            sudo apt-get update >/dev/null 2>&1
-            sudo apt-get install gh -y >/dev/null 2>&1 
-          }
-          type -p jq >/dev/null || {
-            sudo apt-get install jq -y >/dev/null 2>&1 
-          }
-
-          gh extension install actions/gh-actions-cache
-          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
-          echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
-          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
-
-      - name: Create Inputs for src caches to load
-        id: cache-multi-parameters
-        run: |
-          # now reload the json content into variables list
-          cacheNameSHAS=()
-          IFS="," 
-          read -a cacheNameSHAS <<< "${{ needs.setup.outputs.CACHE_NAME_SHAS }}"
-          unset IFS
-          
-          cacheNameKeysContext="[ "
+          cacheNameKeysContent="[ "
           cachePathsContent="[ "
           first='true'
-          for ((i=0; i < ${#cacheNameSHAS[@]}; i+=2)); do
-            name=${cacheNameSHAS[$i]}
-            shortSHA=${cacheNameSHAS[$i+1]}
+          for cacheName in $cacheNames; do
+            len=${#cacheName}
+            startPos=$((len - 7))
+            shortSHA="${cacheName:$startPos:7}"
+            # - 10 for s/ + '-' + shortSHA
+            name="${cacheName:2:$((len - 10))}"
             if [[ "$first" != "true" ]]; then
-              cacheNameKeysContext+=", "
+              cacheNameKeysContent+=", "
               cachePathsContent+=", "
             fi
             first='false'
-            cacheNameKeyContext+="\"$name-$shortSHA\""
+            cacheNameKeysContent+="\"$cacheName\""
             cachePathsContent+="[\"!./$name/.git/**\", \"./$name/**\"]"
           done
-          
+
           cacheNameKeysContent+=" ]"
           echo "CACHE_MULTI_PARAMETER_NAME_KEYS=$cacheNameKeysContent" >> $GITHUB_OUTPUT
-          
+
           cachePathsContent+=" ]"
           echo "CACHE_MULTI_PARAMETER_PATHS=$cachePathsContent" >> $GITHUB_OUTPUT
 
         shell: bash
         working-directory: ${{github.workspace}}
 
-      - name: Load the source Cache(s) into the system
-        uses: GeniusVentures/cache-multi/restoremulti@v3.2.2
+  cache-src:
+    needs: setup-src-cache
+    if: (needs.setup-src-cache.outputs.NEEDS_CACHE == 'true')
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include: ${{ fromJson(needs.setup-src-cache.outputs.CACHE_MATRIX) }}
+    steps:
+      - name: Cache Third Party Directory
+        uses: GeniusVentures/cache-multi/restore@v3.2.3
+        id: cache-tp-source-directory
         with:
-          keys: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
-          paths: ${{ steps.cache-multi-parameters.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+          key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
+          path: |
+            !.git/**
+            ./**
 
-      - name: build a list of all possible targets that will be made with cmake
-        id: make-target-list
+      - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
         run: |
-          mkdir Release
-          cd Release
-          cmake .. -DCMAKE_BUILD_TYPE=Release
-          cd CMakeFiles
-          cMakeNamesAndDirs=$(grep -r ".*-complete:.*-build" * | sed -r "s/(.*)\.dir.*-complete: (.*)?\/src.*/\1,\2/")
-          cMakeNamesAndDirs=${cMakeNamesAndDirs//$'\n'/|}
-          cd ..
-          
-          # extract cMake names and directories
-          cMakeNames=()
-          directoryNames=()
-          while IFS= read -r -d '|' line; do
-            # Split the line into fields using the comma as the delimiter
-            IFS=","; read -r field0 field1 <<< "$line"
-          
-            # Append the fields to the appropriate string
-            cMakeNames+="${field0}"
-            directoryNames+="${field1}"
-            
-          done <<< "$cMakeNamesAndDirs"
+          echo "Couldn't find cached thirdparty code, ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
+          exit 1
 
-          
-          targetLibsJson=""
-          for artifact in $artifactNames; do
-            if [[ -z $targetLibsJson ]]; then
-              targetLibsJson+="[ "
-            else
-              targetLibsJson+=", "
-            fi
-            
-            targetLibsJson+="{ \"libraryName\": \"$targetLib\" }"
-          done
-          targetLibsJson+=" ]"
-          echo "TARGET_LIBRARY_NAMES=$targetLibsJson" >> $GITHUB_OUTPUT
+      - name: Git clone submodule source code
+        run: |
+          echo "Cloning source for ${{ matrix.name }}"
+          git submodule update --init --recursive -- ${{ matrix.name }}
         shell: bash
-        working-directory: ${{github.workspace}}/build/Linux
+        working-directory: ${{github.workspace}}
 
-  build-targets-matrix:
-    needs: [ setup, get-targets-matrix ]
+      - name: Cache Submodule Source Files without .git
+        id: cache-source-directory
+        uses: GeniusVentures/cache-multi@v3.2.3
+        with:
+          key: ${{ matrix.cache-name }}
+          path: |
+            !./${{ matrix.name }}/.git/**
+            ./${{ matrix.name }}/**
+
+  create-targets-matrix:
+    needs: [ setup-src-cache, cache-src ]
     if: |
       always() &&
-      needs.setup.result == 'success' &&
-      (needs.get-targets-matrix.result == 'success' || needs.get-targets-matrix.result == 'skipped')
+      needs.setup-src-cache.result == 'success' &&
+      (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped')
+    runs-on: ubuntu-latest
+    outputs:
+      TARGET_NAMES: ${{ steps.create-target-info.outputs.TARGET_NAMES }}
+      TARGET_SHAS: ${{ steps.create-target-info.outputs.TARGET_SHAS }}
+      TARGET_DIRECTORIES: ${{ steps.create-target-info.outputs.TARGET_DIRECTORIES }}
+      TARGET_REPO_NAMES: ${{ steps.create-target-info.outputs.TARGET_REPO_NAMES }}
+    steps:
+      - name: Cache Third Party Directory
+        uses: GeniusVentures/cache-multi/restore@v3.2.3
+        id: cache-tp-source-directory
+        with:
+          key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
+          path: |
+            !.git/**
+            ./**
+
+      - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
+        run: |
+          echo "Couldn't find cached thirdparty code, ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
+          exit 1
+
+      - name: Cache Submodule Source Files without .git
+        id: cache-source-directory
+        uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
+        with:
+          multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
+          paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+
+      - name: Create base target library names for target cache to create
+        id: create-target-info
+        run: |
+          mkdir -p build/Linux/Release >/dev/null
+          cd build/Linux/Release
+          if [[ ! -d CMakeFiles ]]; then
+            cmake .. -DCMAKE_BUILD_TYPE=Release
+          fi
+
+
+          cd ../../
+          declare -A cMakeNamesRepos
+          while IFS=',' read -r cmakeName repoDir; do
+            echo -e "cmakeName: $cmakeName, repoDir: $repoDir"
+            cMakeNamesRepos["$cmakeName"]="$repoDir"
+          done < <(sed -nE 's/^ExternalProject_Add\(([^)]*).*/\1/p; s/^[[:space:]]*SOURCE_DIR[[:space:]]+"([^/]*\/)*(.*)".*/\2/p' CommonTargets.CMake Linux/CMakeLists.txt |
+            paste -d ',' - -)
+
+          cd Linux/Release/CMakeFiles
+          declare -A cMakeBuildDir
+          while IFS=',' read -r cmakeName buildDir; do
+            echo -e "cmakeName: $cmakeName, buildDir: $buildDir"
+            cMakeBuildDir["$cmakeName"]="$buildDir"
+          done < <(grep -m1 -R --include "build.make" -e ".*-complete:.*-build" * |
+            sed -E -n 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2/p')
+
+          declare -A gitLibModules
+          cd ../../../../
+          while IFS=',' read -r longSHA repoDir; do
+            echo -e "repoDir: $repoDir, longSHA: $longSHA"
+            gitLibModules["$repoDir"]="$longSHA"
+          done < <(git ls-tree HEAD | grep -E "160000 commit|040000 tree" |
+            sed -E -n 's/^.*(commit|tree) ([a-f0-9]+)[ \t]+([^ ]+)$/\2,\3/p')
+
+          # Initialize the variables
+          cMakeNames=""
+          buildDirectoryNames=""
+          repoNames=""
+          shortSHAs=""
+
+          for key in "${!cMakeBuildDir[@]}"; do
+            buildDir="${cMakeBuildDir[$key]}"
+            repoDir="${cMakeNamesRepos[$key]}"
+            shortSHA="${gitLibModules[$repoDir]:0:7}"
+            cMakeNames+="${key}\n"
+            buildDirectoryNames+="${buildDir}\n"
+            repoNames+="${repoDir}\n"
+            shortSHAs+="${shortSHA}\n"
+          done
+
+          echo "TARGET_NAMES=$cMakeNames" >> $GITHUB_OUTPUT
+          echo "TARGET_SHAS=$shortSHAs" >> $GITHUB_OUTPUT
+          echo "TARGET_DIRECTORIES=$buildDirectoryNames" >> $GITHUB_OUTPUT
+          echo "TARGET_REPO_NAMES=$repoNames" >> $GITHUB_OUTPUT
+
+        shell: bash
+        working-directory: ${{github.workspace}}
+
+  build-targets-matrix:
+    needs: [ setup-src-cache, cache-src, create-targets-matrix ]
+    if: |
+      always() &&
+      needs.setup-src-cache.result == 'success' &&
+      needs.create-targets-matrix.result == 'success' && 
+      (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
         build-type: [ Release, Debug ]
-        include: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
         target-build-data:
           - target-os: Linux
             runs-on: ubuntu-latest
             shell: bash
             setup-script: |
               echo "Setup for Linux Build"
-          - target-os: Android
-            runs-on: ubuntu-latest
-            shell: bash
-            setup-script: |
-              echo "Setup for Android Build"
-              git config --global core.autocrlf false
-              git config --global core.eol lf
-              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
-              echo "MAKEFLAGS=\"-j 8\"" >> $GITHUB_ENV
-              echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-              echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-            arch: |
-              arm64-v8a
-              x86_64
-              x86
-              armeabi-v7a
-          - target-os: OSX
-            runs-on: macos-latest
-            shell: bash
-            setup-script: |
-              echo "Setup for OSX Build"
-              find /Applications/Xcode* -maxdepth 0 -ls
-              sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
-              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
-            cmake-script: |
+            cmake-init-script: |
               cd build/$TARGET_OS
-              mkdir Release
-              cd Release
-              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-              echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
-              make $LIBRARY_NAME
-          - target-os: iOS
-            runs-on: macos-latest
-            shell: bash
-            setup-script: |
-              echo "Setup for iOS Build"
-              find /Applications/Xcode* -maxdepth 0 -ls
-              sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
-              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
-            install-uses:
-              uses: actions/setup-python@v2
-              with:
-                python-version: '3.5'
-            cmake-script: |
-              cd build/$TARGET_OS
-              mkdir Release
-              cd Release
-              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=$WORKSPACE/build/iOS/iOS.cmake
-              echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
-              make $LIBRARY_NAME
-
-          - target-os: Windows
-            runs-on: windows-2022
-            setup-script: |
-              echo "Setup for Windows Build"
-            install-uses:
-              name: Configure build for Windows 10 x64
-              uses: ilammy/msvc-dev-cmd@v1
-              with:
-                arch: amd64
-                sdk: 10.0.22621.0
-                vsversion: 17
+              mkdir $BUILD_TYPE
+              cd $BUILD_TYPE
+              cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+            cmake-compile-script: |
+              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME"
+              make $TARGET_NAME
+    #          - target-os: Android
+    #            runs-on: ubuntu-latest
+    #            shell: bash
+    #            setup-script: |
+    #              echo "Setup for Android Build"
+    #              git config --global core.autocrlf false
+    #              git config --global core.eol lf
+    #              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
+    #              echo "MAKEFLAGS=\"-j 8\"" >> $GITHUB_ENV
+    #              echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+    #              echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+    #            arch: |
+    #              arm64-v8a
+    #              x86_64
+    #              x86
+    #              armeabi-v7a
+    #          - target-os: OSX
+    #            runs-on: macos-latest
+    #            shell: bash
+    #            setup-script: |
+    #              echo "Setup for OSX Build"
+    #              find /Applications/Xcode* -maxdepth 0 -ls
+    #              sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
+    #              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+    #            cmake-script: |
+    #              cd build/$TARGET_OS
+    #              mkdir Release
+    #              cd Release
+    #              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+    #              echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
+    #              make $LIBRARY_NAME
+    #          - target-os: iOS
+    #            runs-on: macos-latest
+    #            shell: bash
+    #            setup-script: |
+    #              echo "Setup for iOS Build"
+    #              find /Applications/Xcode* -maxdepth 0 -ls
+    #              sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
+    #              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+    #            install-uses:
+    #              uses: actions/setup-python@v2
+    #              with:
+    #                python-version: '3.5'
+    #            cmake-script: |
+    #              cd build/$TARGET_OS
+    #              mkdir Release
+    #              cd Release
+    #              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=$WORKSPACE/build/iOS/iOS.cmake
+    #              echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
+    #              make $LIBRARY_NAME
+    #
+    #          - target-os: Windows
+    #            runs-on: windows-2022
+    #            setup-script: |
+    #              echo "Setup for Windows Build"
+    #            install-uses:
+    #              name: Configure build for Windows 10 x64
+    #              uses: ilammy/msvc-dev-cmd@v1
+    #              with:
+    #                arch: amd64
+    #                sdk: 10.0.22621.0
+    #                vsversion: 17
 
     runs-on: ${{ matrix.target-build-data.runs-on }}
     steps:
-      - name: dumping matrix for each run
+
+      - name: Create library Keys and Paths to Cache/build
+        id: create-lib-cache-keys
         run: |
-           echo "matrix: ${{ toJson(matrix) }}"
-           echo "keys: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}"
-           echo "paths: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}"
+          # build array of library names
+          IFS=$'\n' read -d '' -ra TARGET_REPO_NAMES <<< "${{ needs.create-targets-matrix.outputs.TARGET_REPO_NAMES }}"
+          IFS=$'\n' read -d '' -ra TARGET_SHAS <<< "${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}"
+          IFS=$'\n' read -d '' -ra TARGET_DIRECTORIES <<< "${{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}"
+          LIB_CACHE_NAME_KEYS="[ "
+          LIB_CACHE_PATHS="[ "
+          first=true
+          for i in "${!TARGET_REPO_NAMES[@]}"; do
+            if [[ "$first" != "true" ]]; then
+              LIB_CACHE_NAME_KEYS+=", "
+              LIB_CACHE_PATHS+=", "
+            fi
+            first=false
+            LIB_CACHE_NAME_KEYS+="\"l/${{ matrix.target-os }}/${{ matrix.build-type }}/${TARGET_REPO_NAMES[i]}-${TARGET_SHAS[i]}\""
+            LIB_CACHE_PATHS+="[\"./build/${{ matrix.target-os }}/${{ matrix.build-type }}/${TARGET_DIRECTORIES[i]}/**\"]"
+          done
+
+          LIB_CACHE_NAME_KEYS+=" ]"
+          echo "LIB_CACHE_NAME_KEYS=$LIB_CACHE_NAME_KEYS" >> $GITHUB_OUTPUT
+
+          LIB_CACHE_PATHS+=" ]"
+          echo "LIB_CACHE_PATHS=$LIB_CACHE_PATHS" >> $GITHUB_OUTPUT
+
+      - name: Remove old libraries that are cached.
+        run: |
+          echo "We really should remove old library caches here"
 
       - name: Install configuration
         uses: ChristopherHX/conditional@main
@@ -407,17 +424,57 @@ jobs:
             uses: ${{ matrix.target-build-data.install-uses.uses || '' }}
             with: ${{ (matrix.target-build-data.install-uses.with && toJSON(matrix.target-build-data.install-uses.with)) || '{}' }}
 
-      - name: Get cached/built libraries
-        run: |
-          # build array of library names
-          baseNames=(${{ fromJSON(needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS) }})
-          Array3=(`echo ${Array1[@]} ${Array2[@]} | tr ' ' '\n' | sort | uniq -u `)
-#    uses: ./.github/workflows/Build-Artifacts.yml
-#    with:
-#      build-type: ${{ matrix.build-type }}
-#      target-build-data: ${{ format('[ {0} ]', toJson(matrix.target-build-data)) }}
-#      libraries: ${{ needs.get-targets-matrix.outputs.TARGET_LIBRARY_NAMES }}
-#      CACHE_MULTI_PARAMETER_KEYS: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_KEYS }}
-#      CACHE_MULTI_PARAMETER_PATHS: ${{ needs.get-targets-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
-#    secrets: inherit
+      - name: Cache Third Party Directory
+        uses: GeniusVentures/cache-multi/restore@v3.2.3
+        id: cache-tp-source-directory
+        with:
+          key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
+          path: |
+            !.git/**
+            ./**
 
+      - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
+        run: |
+          echo "Couldn't find cached thirdparty code, ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
+          exit 1
+
+      - name: Cache Submodule Source Files without .git
+        id: cache-source-directory
+        uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
+        with:
+          multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
+          paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+
+      - name: Init the CMake build files
+        run: |
+          TARGET_OS="${{ matrix.target-build-data.target-os }}"
+          BUILD_TYPE="${{ matrix.build-type }}"
+          ${{ matrix.target-build-data.cmake-init-script }}
+
+      - name: Load built library caches if any
+        id: cache-library-directory
+        uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
+        with:
+          multi-keys: ${{ steps.create-lib-cache-keys.outputs.LIB_CACHE_NAME_KEYS }}
+          paths: ${{ steps.create-lib-cache-keys.outputs.LIB_CACHE_PATHS }}
+
+      - name: Build any updated libraries
+        run: |
+          TARGET_OS="${{ matrix.target-build-data.target-os }}"
+          BUILD_TYPE="${{ matrix.build-type }}"
+          IFS=$'\n' read -d '' -ra TARGET_NAMES <<< "${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}"
+          IFS=$'\n' read -d '' -ra TARGET_SHAS <<< "${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}"
+          IFS=$'\n' read -d '' -ra CACHE_HITS <<< "${{ steps.cache-library-directory.outputs.cache-hits }}"
+          for i in "${!TARGET_NAMES[@]}"; do
+            TARGET_NAME="${TARGET_NAMES[i]}"
+            TARGET_SHA="${TARGET_SHAS[i]}"
+            if [ "${CACHE_HITS[i]}" == "1" ]; then
+              echo "Skipping cached target: $TARGET_NAME, sha: $TARGET_SHA"
+            else
+              ${{ matrix.target-build-data.cmake-compile-script }}
+            fi
+          done
+
+      - name:  Save target OS SDK as an artifact
+        run: |
+          echo "We should save the artifact here"
