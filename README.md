@@ -22,7 +22,7 @@ Set two environment variables
 - Python >=3.5
 ## Building
     ○ git submodule update --init --recursive
-    ○ cd ./build
+    ○ cd ./build/Windows
     ○ mkdir Release
     ○ cd Release
     ○ cmake ../Windows -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
@@ -30,7 +30,7 @@ Set two environment variables
 ### Building for debugging
 	○ git pull
 	○ git submodule update --init --recursive
-	○ cd ./build
+	○ cd ./build/Windows
 	○ mkdir Debug
 	○ cd Debug
 	○ cmake ../Windows -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug
@@ -41,7 +41,7 @@ Set two environment variables
 - Python >=3.5 (make sure /bin/python links to your python3 version, e.g. `ln -s /bin/python3.8 /bin/python`)
 - clang
 ## Building
-	○ cd ./build
+	○ cd ./build/Linux
 	○ mkdir Release
 	○ cd Release
 	○ cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -57,7 +57,7 @@ Set two environment variables
 * armeabi-v7a
 ```
 ○ cd build/Android
-○ mkdir -P Release/armeabi-v7a
+○ mkdir -p Release/armeabi-v7a
 ○ cd Release/armeabi-v7a
 ○ cmake ../../ -DANDROID_ABI="armeabi-v7a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
 ○ make
@@ -65,7 +65,7 @@ Set two environment variables
 * arm64-v8a
 ```
 ○ cd build/Android
-○ mkdir -P Release/arm64-v8a
+○ mkdir -p Release/arm64-v8a
 ○ cd Release/arm64-v8a
 ○ cmake ../../ -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
 ○ make
@@ -73,7 +73,7 @@ Set two environment variables
 * x86
 ```
 ○ cd build/Android
-○ mkdir -P Release/x86
+○ mkdir -p Release/x86
 ○ cd Release/x86
 ○ cmake ../../ -DANDROID_ABI="x86" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
 ○ make
@@ -81,7 +81,7 @@ Set two environment variables
 * x86_64
 ```
 ○ cd build/Android
-○ mkdir -P Release/x86_64
+○ mkdir -p Release/x86_64
 ○ cd Release/x86_64
 ○ cmake ../../ -DANDROID_ABI="x86_64" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
 ○ make
@@ -94,6 +94,8 @@ Set two environment variables
 
  ## Building
 ```
+○ cd build/OSX
+○ mkdir Release
 ○ cd Release
 ○ cmake .. -DCMAKE_BUILD_TYPE=Release
 ○ make
@@ -106,7 +108,7 @@ Set two environment variables
 ## Building
 ```
 ○ cd build/iOS
-○ mkdir -p Release/
+○ mkdir Release/
 ○ cmake ../../ -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=../iOS.cmake
 ○ make
 ```
