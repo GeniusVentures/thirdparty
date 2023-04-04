@@ -48,9 +48,7 @@ jobs:
         id: tp-check
         run: |
           echo "Fetching list of thirdparty cache keys to check if any old ones need deleting"
-          REPO=${{ github.repository }}
-          BRANCH="refs/pull/${{ github.event.pull_request.number }}/merge"
-          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" -B $BRANCH | jq -r ".actions_caches[].key" | sort)
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" | jq -r ".actions_caches[].key" | sort)
           longSHA="${{ github.sha }}"
           shortSHA="${longSHA:0:7}"
           tpCacheNameSHA="thirdparty-$shortSHA"
