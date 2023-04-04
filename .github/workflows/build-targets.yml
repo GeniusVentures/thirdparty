@@ -48,7 +48,9 @@ jobs:
         id: tp-check
         run: |
           echo "Fetching list of thirdparty cache keys to check if any old ones need deleting"
-          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" | jq -r ".actions_caches[].key" | sort)
+          REPO=${{ github.repository }}
+          BRANCH="refs/pull/${{ github.event.pull_request.number }}/merge"
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" -B $BRANCH | jq -r ".actions_caches[].key" | sort)
           longSHA="${{ github.sha }}"
           shortSHA="${longSHA:0:7}"
           tpCacheNameSHA="thirdparty-$shortSHA"
@@ -65,6 +67,9 @@ jobs:
           if [[ $notCached == "$tpCacheNameSHA" ]]; then
             foundThirdPartyCurrent="false"
           fi
+          
+          ## Setting this to not fail the workflow while deleting cache keys. 
+          set +e
           
           #Set the field separator to new line
           IFS=$'\n'
