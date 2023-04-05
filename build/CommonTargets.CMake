@@ -514,25 +514,32 @@ ExternalProject_Add(xxhash
           ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
-#ExternalProject_Add(wallet-core
-#    PREFIX wallet-core
-#    SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"
-#    CMAKE_CACHE_ARGS
-#    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/wallet-core
-#    -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
-#    -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
-#    -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
-#    -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
-#    -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
-#    -DTESTING:BOOL=${TESTING}
-#    ${_CMAKE_COMMON_BUILD_PARAMS}
-#    ${_BOOST_CACHE_ARGS}
-#    ${_OPENSSL_CACHE_ARGS}
-#    ${_GRPC_CACHE_ARGS}
-#    -DCMAKE_CXX_STANDARD:STRING=17
-#    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
-#    DEPENDS Boost grpc openssl
-#
+
+# --------------------------------------------------------
+# Builds wallet-core 
+ExternalProject_Add(wallet-core
+    PREFIX wallet-core
+    SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"
+#    SET(C_WALLET_COMPILER "/usr/bin/clang")
+#    SET(CXX_WALLET_COMPILER "/usr/bin/clang++")
+    CMAKE_ARGS -DCMAKE_C_COMPILER=/usr/bin/clang
+    -DCMAKE_CXX_COMPILER=/usr/bin/clang++
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/wallet-core
+    -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
+    -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+    -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
+    -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
+    -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
+    -DTESTING:BOOL=${TESTING}
+    ${_CMAKE_COMMON_BUILD_PARAMS}
+    ${_BOOST_CACHE_ARGS}
+    ${_OPENSSL_CACHE_ARGS}
+    ${_GRPC_CACHE_ARGS}
+    -DCMAKE_CXX_STANDARD:STRING=17
+    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+    DEPENDS Boost grpc openssl
+)
 
 # --------------------------------------------------------
 # jsonrpc-lean
