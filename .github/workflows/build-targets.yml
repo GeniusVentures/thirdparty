@@ -318,6 +318,11 @@ jobs:
             shell: bash
             setup-script: |
               echo "Setup for Linux Build"
+              # This is a fix for https://github.com/actions/virtual-environments/issues/1918
+              sudo rm -rf /usr/share/dotnet
+              sudo rm -rf /opt/ghc
+              sudo rm -rf "/usr/local/share/boost"
+              sudo rm -rf "$AGENT_TOOLSDIRECTORY"
             cmake-init-script: |
               cd build/$TARGET_OS
               mkdir $BUILD_TYPE
@@ -450,6 +455,10 @@ jobs:
         with:
           multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
           paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+
+      - name: Run setup script for target OS
+        run: |
+          ${{ matrix.target-build-data.setup-script }}
 
       - name: Init the CMake build files
         run: |
