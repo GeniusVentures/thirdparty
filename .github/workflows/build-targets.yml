@@ -9,7 +9,7 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
-  MAKEFLAGS: "-j 8"
+  MAKEFLAGS: "-j8"
   CMAKE_BUILD_PARALLEL_LEVEL: 8
 
 jobs:
@@ -318,11 +318,6 @@ jobs:
             shell: bash
             setup-script: |
               echo "Setup for Linux Build"
-              # This is a fix for https://github.com/actions/virtual-environments/issues/1918
-              sudo rm -rf /usr/share/dotnet
-              sudo rm -rf /opt/ghc
-              sudo rm -rf "/usr/local/share/boost"
-              sudo rm -rf "$AGENT_TOOLSDIRECTORY"
             cmake-init-script: |
               cd build/$TARGET_OS
               mkdir $BUILD_TYPE
