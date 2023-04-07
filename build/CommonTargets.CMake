@@ -488,7 +488,6 @@ ExternalProject_Add(libsecp256k1
 # Builds kompute
 ExternalProject_Add(kompute
     PREFIX kompute
-    INSTALL_COMMAND ""
     SOURCE_DIR "${THIRDPARTY_DIR}/kompute"
     CMAKE_ARGS -DCMAKE_PROJECT_kompute_INCLUDE=${THIRDPARTY_DIR}/build/cmake/kompute-fix.cmake
     CMAKE_CACHE_ARGS
