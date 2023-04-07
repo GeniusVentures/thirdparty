@@ -9,8 +9,8 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
-  MAKEFLAGS: "-j8"
-  CMAKE_BUILD_PARALLEL_LEVEL: 8
+  #MAKEFLAGS: "-j8"
+  #CMAKE_BUILD_PARALLEL_LEVEL: 8
 
 jobs:
   setup-src-cache:
@@ -325,7 +325,7 @@ jobs:
               cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
             cmake-compile-script: |
               echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME"
-              make $TARGET_NAME
+              make $TARGET_NAME -j8
     #          - target-os: Android
     #            runs-on: ubuntu-latest
     #            shell: bash
