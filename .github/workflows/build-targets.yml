@@ -9,8 +9,8 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
-  MAKEFLAGS: "-j 8"
-  CMAKE_BUILD_PARALLEL_LEVEL: 8
+  #MAKEFLAGS: "-j8"
+  #CMAKE_BUILD_PARALLEL_LEVEL: 8
 
 jobs:
   setup-src-cache:
@@ -65,6 +65,9 @@ jobs:
           if [[ $notCached == "$tpCacheNameSHA" ]]; then
             foundThirdPartyCurrent="false"
           fi
+          
+          ## Setting this to not fail the workflow while deleting cache keys. 
+          set +e
           
           #Set the field separator to new line
           IFS=$'\n'
@@ -124,6 +127,9 @@ jobs:
           done
           matrixJson+=" ]"
 
+          ## Setting this to not fail the workflow while deleting cache keys. 
+          set +e
+          
           # delete old caches
           for oldCache in $oldCaches; do
             echo "Deleting old cache $oldCache"
@@ -319,7 +325,7 @@ jobs:
               cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
             cmake-compile-script: |
               echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME"
-              make $TARGET_NAME
+              make $TARGET_NAME -j$(nproc)
     #          - target-os: Android
     #            runs-on: ubuntu-latest
     #            shell: bash
@@ -444,6 +450,10 @@ jobs:
         with:
           multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
           paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+
+      - name: Run setup script for target OS
+        run: |
+          ${{ matrix.target-build-data.setup-script }}
 
       - name: Init the CMake build files
         run: |
