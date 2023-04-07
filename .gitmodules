@@ -145,3 +145,6 @@
     url = ../Boost-for-Android.git
     path = build/Android/Boost-for-Android
 
+[submodule "Halo2"]
+	path = Halo2
+	url = ../Halo2
