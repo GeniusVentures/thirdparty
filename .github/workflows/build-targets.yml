@@ -325,7 +325,7 @@ jobs:
               cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
             cmake-compile-script: |
               echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME"
-              make $TARGET_NAME -j8
+              make $TARGET_NAME -j$(nproc)
     #          - target-os: Android
     #            runs-on: ubuntu-latest
     #            shell: bash
