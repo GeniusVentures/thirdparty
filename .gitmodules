@@ -84,8 +84,8 @@
     url = ../delta-enabled-crdts.git
     branch = master
 [submodule "wallet-core"]
-	path = wallet-core
-	url = https://github.com/trustwallet/wallet-core.git
+	path = trustwallet/wallet-core
+	url = ../wallet-core.git
 [submodule "rocksdb"]
     path = rocksdb
     url = ../rocksdb.git
@@ -144,7 +144,9 @@
 [submodule "Boost-for-Android"]
     url = ../Boost-for-Android.git
     path = build/Android/Boost-for-Android
-
 [submodule "Halo2"]
 	path = Halo2
 	url = ../Halo2
+[submodule "crypto3"]
+	path = crypto3
+	url = https://github.com/NilFoundation/crypto3.git
