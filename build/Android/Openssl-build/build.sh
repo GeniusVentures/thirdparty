@@ -14,6 +14,7 @@ BUILD_DIR=""
 LOCAL_PATH=""
 LOCAL_ANDROID_NDK=""
 LOCAL_ANDROID_TOOLCHAIN=""
+DEBUG_FLAGS=""
 
 # Process command line arguments
 for i in "$@"

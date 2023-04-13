@@ -485,6 +485,33 @@ ExternalProject_Add(libsecp256k1
 )
 
 # --------------------------------------------------------
+# Builds Vulkan-Headers
+ExternalProject_Add(Vulkan-Headers
+    PREFIX Vulkan-Headers
+    SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Headers"
+    CMAKE_CACHE_ARGS
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers
+      ${_CMAKE_COMMON_BUILD_PARAMS}
+)
+
+# --------------------------------------------------------
+# Builds Vulkan-Loader
+ExternalProject_Add(Vulkan-Loader
+    PREFIX Vulkan-Loader
+    SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Loader"
+    CMAKE_CACHE_ARGS
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader
+      -DVULKAN_HEADERS_INSTALL_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers
+      -DBUILD_WSI_WAYLAND_SUPPORT:BOOL=OFF
+      -DBUILD_WSI_XCB_SUPPORT:BOOL=OFF
+      -DBUILD_WSI_XLIB_SUPPORT:BOOL=OFF
+      -DUSE_GAS:BOOL=OFF
+      -DUPDATE_DEPS:BOOL=ON
+      ${_CMAKE_COMMON_BUILD_PARAMS}
+    DEPENDS Vulkan-Headers
+)
+
+# --------------------------------------------------------
 # Builds kompute
 ExternalProject_Add(kompute
     PREFIX kompute
