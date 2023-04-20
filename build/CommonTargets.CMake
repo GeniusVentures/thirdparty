@@ -484,7 +484,9 @@ ExternalProject_Add(libsecp256k1
       ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
-if( NOT ANDROID) // # Use Android NDK builtin vulkan header
+# For Android use NDK builtin vulkan header, otherwise add as an external project
+if(NOT ANDROID)
+
   # --------------------------------------------------------
   # Builds Vulkan-Headers
   ExternalProject_Add(Vulkan-Headers
