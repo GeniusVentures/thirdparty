@@ -179,8 +179,9 @@ set(_grpc_EXTRA_PARAM
 	-DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
 	-DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=OFF
 	-DgRPC_BUILD_CSHARP_EXT:BOOL=OFF
-  -DgRPC_BUILD_CODEGEN:BOOL=OFF
-  -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -Wno-unused-command-line-argument
+    -DgRPC_BUILD_CODEGEN:BOOL=OFF
+	-DgRPC_INSTALL:BOOL=OFF
+    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -Wno-unused-command-line-argument
 )
 
 # --------------------------------------------------------
