@@ -150,3 +150,6 @@
 [submodule "wallet-core"]
 	path = wallet-core
 	url = ../wallet-core.git
+[submodule "MNN"]
+	path = MNN
+	url = https://github.com/alibaba/MNN.git
