@@ -26,7 +26,7 @@ set(CMAKE_ANDROID_NDK_VERSION ${CMAKE_MATCH_1})
 set(CMAKE_ANDROID_NDK_VERSION_MINOR ${CMAKE_MATCH_2})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden -std=c++17")
-print("Android NDK version: ${CMAKE_ANDROID_NDK_VERSION}.${CMAKE_ANDROID_NDK_VERSION_MINOR}")
+message("Android NDK version: ${CMAKE_ANDROID_NDK_VERSION}.${CMAKE_ANDROID_NDK_VERSION_MINOR}")
 
 if (NOT CMAKE_ANDROID_NDK_VERSION EQUAL 25)
   message(FATAL_ERROR "Android NDK LTS Version (r25b) stable long term support version required")
@@ -37,7 +37,7 @@ if(NOT EXISTS ${CMAKE_TOOLCHAIN_FILE})
   message(FATAL_ERROR "Android NDK toolchain file ${CMAKE_TOOLCHAIN_FILE} not found")
 endif()
 include(${CMAKE_TOOLCHAIN_FILE})
-print("ANDROID_TOOLCHAIN_ROOT: ${ANDROID_TOOLCHAIN_ROOT}")
+message("ANDROID_TOOLCHAIN_ROOT: ${ANDROID_TOOLCHAIN_ROOT}")
 
 if("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
     set(LINUX_TARGET_ARCHITECTURES "${CMAKE_HOST_SYSTEM_PROCESSOR}")
@@ -159,7 +159,7 @@ ExternalProject_Add(openssl
 	INSTALL_COMMAND make install_dev
 )
 
-print("openssl ${_openssl_BUILD_ROOT}")
+message("openssl ${_openssl_BUILD_ROOT}")
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 set(_OPENSSL_CACHE_ARGS
 	  -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
@@ -174,7 +174,7 @@ find_library(ndk-log-lib
 		# Specifies the name of the NDK library that
 		# you want CMake to locate.
 		log REQUIRED)
-print("NDK log lib: ${ndk-log-lib}")
+message("NDK log lib: ${ndk-log-lib}")
 
 # --------------------------------------------------------
 # set config for grpc
