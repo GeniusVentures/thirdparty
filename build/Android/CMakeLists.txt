@@ -168,6 +168,12 @@ set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
+find_library(ndk-log-lib
+		# Specifies the name of the NDK library that
+		# you want CMake to locate.
+		log REQUIRED)
+print("NDK log lib: ${ndk-log-lib}")
+
 # --------------------------------------------------------
 # set config for grpc
 set(_grpc_EXTRA_PARAM
@@ -181,7 +187,7 @@ set(_grpc_EXTRA_PARAM
 	-DgRPC_BUILD_CSHARP_EXT:BOOL=OFF
     -DgRPC_BUILD_CODEGEN:BOOL=OFF
 	-DgRPC_INSTALL:BOOL=OFF
-    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -llog\ -Wno-unused-command-line-argument
+    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -llog\ ${ndk-log-lib}\ -Wno-unused-command-line-argument
 )
 
 # --------------------------------------------------------
