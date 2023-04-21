@@ -545,6 +545,16 @@ ExternalProject_Add(xxhash
           ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
+# --------------------------------------------------------
+# Builds MNN
+ExternalProject_Add(MNN
+  PREFIX MNN
+  SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+)
+
 #ExternalProject_Add(wallet-core
 #    PREFIX wallet-core
 #    SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"
