@@ -26,7 +26,7 @@ set(CMAKE_ANDROID_NDK_VERSION ${CMAKE_MATCH_1})
 set(CMAKE_ANDROID_NDK_VERSION_MINOR ${CMAKE_MATCH_2})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden -std=c++17")
-message("Android NDK version: ${CMAKE_ANDROID_NDK_VERSION}.${CMAKE_ANDROID_NDK_VERSION_MINOR}")
+message(WARNING "Android NDK version: ${CMAKE_ANDROID_NDK_VERSION}.${CMAKE_ANDROID_NDK_VERSION_MINOR}")
 
 if (NOT CMAKE_ANDROID_NDK_VERSION EQUAL 25)
   message(FATAL_ERROR "Android NDK LTS Version (r25b) stable long term support version required")
@@ -37,7 +37,7 @@ if(NOT EXISTS ${CMAKE_TOOLCHAIN_FILE})
   message(FATAL_ERROR "Android NDK toolchain file ${CMAKE_TOOLCHAIN_FILE} not found")
 endif()
 include(${CMAKE_TOOLCHAIN_FILE})
-message("ANDROID_TOOLCHAIN_ROOT: ${ANDROID_TOOLCHAIN_ROOT}")
+message(WARNING "ANDROID_TOOLCHAIN_ROOT: ${ANDROID_TOOLCHAIN_ROOT}")
 
 if("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
     set(LINUX_TARGET_ARCHITECTURES "${CMAKE_HOST_SYSTEM_PROCESSOR}")
@@ -174,7 +174,7 @@ find_library(ndk-log-lib
 		# Specifies the name of the NDK library that
 		# you want CMake to locate.
 		log REQUIRED)
-message("NDK log lib: ${ndk-log-lib}")
+message(WARNING "NDK log lib: ${ndk-log-lib}")
 
 # --------------------------------------------------------
 # set config for grpc
