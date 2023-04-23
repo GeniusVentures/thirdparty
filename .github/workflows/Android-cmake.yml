@@ -25,7 +25,7 @@ jobs:
         ANDROID_NDK_HOME: ${{github.workspace}}/android-ndk/android-ndk-r25b
         ANDROID_TOOLCHAIN: ${{github.workspace}}/android-ndk/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/bin
         ANDROID_PLATFORM_LEVEL: 28
-        ANDROID_NDK_LIB: ${{github.workspace}}/android-ndk/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/${{env.ANDROID_PLATFORM_LEVEL}}/
+        ANDROID_NDK_LIB: ${{github.workspace}}/android-ndk/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/$ANDROID_PLATFORM_LEVEL/
 
         NDK_URL: "https://dl.google.com/android/repository/android-ndk-r25b-linux.zip"
         MAKEFLAGS: "-j1"
