@@ -65,8 +65,10 @@ jobs:
             export ANDROID_NDK=${{env.ANDROID_NDK_HOME}}
             export ANDROID_NDK_HOME=${{env.ANDROID_NDK_HOME}}
             export ANDROID_TOOLCHAIN=${{env.ANDROID_TOOLCHAIN}}
+            # ANDROID_PLATFORM_LEVEL 28 set in build/Android/CMakeLists.txt
+            export ANDROID_NDK_LIB=${{env.ANDROID_TOOLCHAIN}}/sysroot/usr/lib/aarch64-linux-android/28/
             echo $PATH
-            export PATH=${{env.ANDROID_TOOLCHAIN}}:$PATH
+            export PATH=${{env.ANDROID_TOOLCHAIN}}:$ANDROID_NDK_LIB:$PATH
             echo $PATH
             echo $CC
             ls -la $ANDROID_TOOLCHAIN
