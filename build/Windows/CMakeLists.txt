@@ -186,5 +186,12 @@ set(rocksdb_EXTRA_PARAM
 ExternalProject_Add(wallet-core
 	PREFIX wallet-core
 	SOURCE_DIR  "${THIRDPARTY_DIR}/wallet-core"
-	BUILD_COMMAND powershell ./tools/windows-build.ps1
+	CMAKE_CACHE_ARGS
+    	-DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
+    	-DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+    	-DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
+    	-DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
+    	-DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
+		${_BOOST_CACHE_ARGS}
+	#BUILD_COMMAND powershell ./tools/windows-build.ps1
 	)
