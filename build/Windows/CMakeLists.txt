@@ -183,3 +183,8 @@ set(rocksdb_EXTRA_PARAM
 	-D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN8
 )
 
+ExternalProject_Add(wallet-core
+	PREFIX wallet-core
+	SOURCE_DIR  "${THIRDPARTY_DIR}/wallet-core"
+	BUILD_COMMAND powershell .\tools\windows-build.ps1
+	)
