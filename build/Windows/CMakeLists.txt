@@ -186,5 +186,5 @@ set(rocksdb_EXTRA_PARAM
 ExternalProject_Add(wallet-core
 	PREFIX wallet-core
 	SOURCE_DIR  "${THIRDPARTY_DIR}/wallet-core"
-	BUILD_COMMAND powershell .\tools\windows-build.ps1
+	BUILD_COMMAND powershell ./tools/windows-build.ps1
 	)
