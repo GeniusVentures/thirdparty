@@ -123,9 +123,6 @@
 [submodule "xxhash"]
 	path = xxhash
 	url = https://github.com/hunter-packages/xxHash.git
-[submodule "kompute"]
-	path = kompute
-	url = https://github.com/GeniusVentures/kompute.git
 [submodule "MoltenVK"]
 	path = MoltenVK
 	url = https://github.com/KhronosGroup/MoltenVK.git
