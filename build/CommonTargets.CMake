@@ -349,6 +349,9 @@ ExternalProject_Add(ipfs-lite-cpp
         -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
         -DSQLiteModernCpp_DIR:PATH=${_FINDPACKAGE_SQLITECPP_CONFIG_DIR}
         -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
+        -DMNN_DIR:PATH=${_FINDPACKAGE_MNN_CONFIG_DIR}
+        -DMNN_INCLUDE_DIR:PATH=${_FINDPACKAGE_MNN_INCLUDE_DIR}
+        -DMNN_LIBRARIES:PATH=${_FINDPACKAGE_MNN_LIBRARY_DIR}
         -DTESTING:BOOL=${TESTING}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_BOOST_CACHE_ARGS}
@@ -356,7 +359,7 @@ ExternalProject_Add(ipfs-lite-cpp
         ${ipfs-lite-cpp_EXTRA_PARAM}
         -DCMAKE_CXX_STANDARD:STRING=17
         -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_ROCKSDB_INCLUDE_DIR}
-  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p grpc ${_PROTOBUF_TARGET} rocksdb Boost.DI
+  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p grpc ${_PROTOBUF_TARGET} rocksdb Boost.DI MNN
 )
 
 # --------------------------------------------------------
@@ -532,8 +535,19 @@ ExternalProject_Add(MNN
   SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN
+        -DMNN_BUILD_CONVERTER:BOOL=ON
+        -DMNN_BUILD_SHARED_LIBS:BOOL=ON
+        -DMNN_SEP_BUILD:BOOL=ON
         ${_CMAKE_COMMON_BUILD_PARAMS}
 )
+# Your-external "libMNN", add GLOBAL if the imported library is located in directories above the current.
+add_library( libMNN SHARED IMPORTED )
+# You can define two import-locations: one for debug and one for release.
+set_target_properties( libMNN PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/MNN/build/libMNN.so )
+
+set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/mnn")
+set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
+set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
 
 #ExternalProject_Add(wallet-core
 #    PREFIX wallet-core
