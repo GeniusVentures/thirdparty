@@ -175,6 +175,9 @@ find_library(ndk-log-lib
 		# you want CMake to locate.
 		log REQUIRED)
 message(WARNING "NDK log lib: ${ndk-log-lib}")
+get_filename_component(_ANDROID_NDK_LINK_DIRECTORY "${ndk-log-lib}" DIRECTORY ABSOLUTE)
+message(WARNING "NDK link directory: ${_ANDROID_NDK_LINK_DIRECTORY}")
+
 
 # --------------------------------------------------------
 # set config for grpc
@@ -191,6 +194,7 @@ set(_grpc_EXTRA_PARAM
 	-DgRPC_INSTALL:BOOL=OFF
 	-DCMAKE_SYSROOT:PATH=${CMAKE_SYSROOT}
 	-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY:STRING=ONLY
+	-DLINK_DIRECTORIES:PATH=${_ANDROID_NDK_LINK_DIRECTORY};${LINK_DIRECTORIES}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -llog\ -Wno-unused-command-line-argument
 )
 
