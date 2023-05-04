@@ -325,6 +325,27 @@ set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
 set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include")
 
 # --------------------------------------------------------
+# Builds MNN
+ExternalProject_Add(MNN
+  PREFIX MNN
+  SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN
+        -DMNN_BUILD_CONVERTER:BOOL=ON
+        -DMNN_BUILD_SHARED_LIBS:BOOL=ON
+        -DMNN_SEP_BUILD:BOOL=ON
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+)
+# Your-external "libMNN", add GLOBAL if the imported library is located in directories above the current.
+add_library( libMNN SHARED IMPORTED )
+# You can define two import-locations: one for debug and one for release.
+set_target_properties( libMNN PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/MNN/build/libMNN.so )
+
+set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/mnn")
+set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
+set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
+
+# --------------------------------------------------------
 # builds ipfs-lite-cpp
 ExternalProject_Add(ipfs-lite-cpp
   PREFIX ipfs-lite-cpp
@@ -528,26 +549,6 @@ ExternalProject_Add(xxhash
           ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
-# --------------------------------------------------------
-# Builds MNN
-ExternalProject_Add(MNN
-  PREFIX MNN
-  SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
-  CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN
-        -DMNN_BUILD_CONVERTER:BOOL=ON
-        -DMNN_BUILD_SHARED_LIBS:BOOL=ON
-        -DMNN_SEP_BUILD:BOOL=ON
-        ${_CMAKE_COMMON_BUILD_PARAMS}
-)
-# Your-external "libMNN", add GLOBAL if the imported library is located in directories above the current.
-add_library( libMNN SHARED IMPORTED )
-# You can define two import-locations: one for debug and one for release.
-set_target_properties( libMNN PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/MNN/build/libMNN.so )
-
-set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/mnn")
-set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
-set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
 
 #ExternalProject_Add(wallet-core
 #    PREFIX wallet-core
