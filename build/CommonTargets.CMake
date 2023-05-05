@@ -333,17 +333,22 @@ ExternalProject_Add(MNN
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN
         -DMNN_BUILD_CONVERTER:BOOL=ON
         -DMNN_BUILD_SHARED_LIBS:BOOL=ON
-        -DMNN_SEP_BUILD:BOOL=ON
+        -DMNN_BUILD_CONVERTER:BOOL=ON
+        -DMNN_BUILD_QUANTOOLS:BOOL=ON
         ${_CMAKE_COMMON_BUILD_PARAMS}
 )
-# Your-external "libMNN", add GLOBAL if the imported library is located in directories above the current.
-add_library( libMNN SHARED IMPORTED )
-# You can define two import-locations: one for debug and one for release.
-set_target_properties( libMNN PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/MNN/build/libMNN.so )
 
 set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/mnn")
 set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
 set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
+include_directories(${_FINDPACKAGE_MNN_INCLUDE_DIR})
+
+# # Your-external "libMNN", add GLOBAL if the imported library is located in directories above the current.
+# add_library(${MNN_LIBS} SHARED IMPORTED )
+# # You can define two import-locations: one for debug and one for release. TODO: We need update it for other platform compile Win/Linux/MACOS
+# set_target_properties(${MNN_LIBS} PROPERTIES IMPORTED_LOCATION ${_FINDPACKAGE_MNN_LIBRARY_DIR}/libMNN.so )
+
+
 
 # --------------------------------------------------------
 # builds ipfs-lite-cpp
@@ -379,7 +384,7 @@ ExternalProject_Add(ipfs-lite-cpp
         ${_OPENSSL_CACHE_ARGS}
         ${ipfs-lite-cpp_EXTRA_PARAM}
         -DCMAKE_CXX_STANDARD:STRING=17
-        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_ROCKSDB_INCLUDE_DIR}
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_ROCKSDB_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_MNN_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_LIBP2P_INCLUDE_DIR}
   DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p grpc ${_PROTOBUF_TARGET} rocksdb Boost.DI MNN
 )
 

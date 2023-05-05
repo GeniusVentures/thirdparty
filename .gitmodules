@@ -9,7 +9,6 @@
 [submodule "ipfs-lite-cpp"]
     path = ipfs-lite-cpp
     url = https://github.com/GeniusVentures/ipfs-lite-cpp.git
-    branch = 14-integrate-ipfs-mnn
 [submodule "restclient-cpp"]
     path = restclient-cpp
     url = https://github.com/mrtazz/restclient-cpp.git
