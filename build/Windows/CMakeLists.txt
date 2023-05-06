@@ -194,9 +194,15 @@ ExternalProject_Add(wallet-core
     #	#-DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
     #	#-DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
 	#	${_BOOST_CACHE_ARGS}
-		BUILD_COMMAND powershell ./tools/windows-dependencies.ps1
-		BUILD_COMMAND powershell ./tools/windows-generate.ps1
-		BUILD_COMMAND powershell ./tools/windows-build.ps1
+		#BUILD_COMMAND powershell ./wallet-core/tools/windows-dependencies.ps1
+		#BUILD_COMMAND powershell ./wallet-core/tools/windows-generate.ps1
+		#BUILD_COMMAND powershell ./wallet-core/tools/windows-build.ps1
+		CONFIGURE_COMMAND powershell ./tools/windows-dependencies.ps1
+		COMMAND powershell ./tools/windows-generate.ps1
+		BUILD_COMMAND     powershell ./tools/windows-build.ps1
+		INSTALL_COMMAND   echo <install
+		TEST_COMMAND      echo <Test
+		BUILD_IN_SOURCE  TRUE
 	)
 
 	#add_library(libWalletCore SHARED IMPORTED)
