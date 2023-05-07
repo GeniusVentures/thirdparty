@@ -566,6 +566,23 @@ set(_FINDPACKAGE_check_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/check/bin")
 set(_FINDPACKAGE_check_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/check/lib")
 set(_FINDPACKAGE_check_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/check/include")
 
+ExternalProject_Add(protobufCpp
+  PREFIX protobufCpp
+  URL https://github.com/protocolbuffers/protobuf/releases/download/v3.19.1/protobuf-cpp-3.19.1.zip
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+  CONFIGURE_COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_BINARY_DIR}/protobufCpp/src/protobufCpp/cmake
+  INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install 
+  CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobufCppLib
+    -Dprotobuf_WITH_ZLIB:BOOL=OFF
+    -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
+    -Dprotobuf_BUILD_TESTS:BOOL=OFF
+    -Dprotobuf_BUILD_SHARED_LIBS:BOOL=OFF
+  #BUILD_COMMAND ""
+  #BUILD_IN_SOURCE TRUE
+)
+
+
 #ExternalProject_Add(wallet-core
 #    PREFIX wallet-core
 #    SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"
