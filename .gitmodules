@@ -153,3 +153,6 @@
 [submodule "MNN"]
 	path = MNN
 	url = https://github.com/alibaba/MNN.git
+[submodule "check"]
+	path = check
+	url = https://github.com/libcheck/check.git

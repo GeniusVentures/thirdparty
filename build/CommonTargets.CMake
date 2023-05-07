@@ -555,6 +555,17 @@ ExternalProject_Add(MNN
         ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
+ExternalProject_Add(check
+  PREFIX check
+  SOURCE_DIR "${THIRDPARTY_DIR}/check"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/check
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+)
+set(_FINDPACKAGE_check_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/check/bin")
+set(_FINDPACKAGE_check_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/check/lib")
+set(_FINDPACKAGE_check_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/check/include")
+
 #ExternalProject_Add(wallet-core
 #    PREFIX wallet-core
 #    SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"

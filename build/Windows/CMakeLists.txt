@@ -183,10 +183,13 @@ set(rocksdb_EXTRA_PARAM
 	-D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN8
 )
 
+message(BOOBS="${_FINDPACKAGE_BOOST_INCLUDE_DIR}")
+
 ExternalProject_Add(wallet-core
 	PREFIX wallet-core
 	SOURCE_DIR  "${THIRDPARTY_DIR}/wallet-core"
-	#CMAKE_CACHE_ARGS
+	CMAKE_CACHE_ARGS
+	#_BOOST_CACHE_ARGS
 	#	-DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
     #	-DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
     #	-DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
@@ -194,11 +197,14 @@ ExternalProject_Add(wallet-core
     #	#-DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
     #	#-DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
 	#	${_BOOST_CACHE_ARGS}
-		#BUILD_COMMAND powershell ./wallet-core/tools/windows-dependencies.ps1
-		#BUILD_COMMAND powershell ./wallet-core/tools/windows-generate.ps1
-		#BUILD_COMMAND powershell ./wallet-core/tools/windows-build.ps1
-		CONFIGURE_COMMAND powershell ./tools/windows-dependencies.ps1
-		COMMAND powershell ./tools/windows-generate.ps1
+		-DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
+		-DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
+        -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+        -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
+        -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
+		#CONFIGURE_COMMAND powershell ./tools/windows-dependencies.ps1
+		#COMMAND powershell ./tools/windows-generate.ps1
+		CONFIGURE_COMMAND powershell ./tools/windows-generate.ps1
 		BUILD_COMMAND     powershell ./tools/windows-build.ps1
 		INSTALL_COMMAND   echo <install
 		TEST_COMMAND      echo <Test
