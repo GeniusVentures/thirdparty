@@ -619,6 +619,50 @@ ExternalProject_Add(Halo2
         DEPENDS Boost crypto3 openssl spdlog GTest
 )
 
+ExternalProject_Add(cpprestsdk
+        PREFIX cpprestsdk
+        SOURCE_DIR "${THIRDPARTY_DIR}/cpprestsdk"
+        CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/cpprestsdk
+        -DBoost_USE_STATIC_LIBS:BOOL=TRUE
+        -DBUILD_SAMPLES:BOOL=FALSE
+        -DBUILD_TESTS:BOOL=FALSE
+        -DBUILD_SHARED_LIBS:BOOL=FALSE
+        -DBoost_NO_SYSTEM_PATHS:BOOL=ON
+        -DBoost_DIR:PATH=${_FINDPACKAGE_BOOST_CONFIG_DIR}
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+        ${_BOOST_CACHE_ARGS}
+        ${_OPENSSL_CACHE_ARGS}
+        -DCMAKE_CXX_STANDARD:STRING=17
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
+        DEPENDS Boost openssl
+)
+
+set(_FINDPACKAGE_CPPRESTSDK_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/cpprestsdk/lib/cmake/cpprestsdk")
+set(_FINDPACKAGE_CPPRESTSDK_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/cpprestsdk/lib")
+set(_FINDPACKAGE_CPPRESTSDK_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/cpprestsdk/include")
+
+
+ExternalProject_Add(Chainge
+        PREFIX Chainge
+        SOURCE_DIR "${THIRDPARTY_DIR}/Chainge"
+        CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Chainge
+        -DTESTING:BOOL=FALSE
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+        ${_BOOST_CACHE_ARGS}
+        ${_OPENSSL_CACHE_ARGS}
+        -DBoost_NO_SYSTEM_PATHS:BOOL=ON
+        -DBoost_USE_STATIC_LIBS:BOOL=TRUE
+        -DBoost_USE_STATIC_RUNTIME:BOOL=TRUE
+        -DBoost_DIR:PATH=${_FINDPACKAGE_BOOST_CONFIG_DIR}
+        -DCMAKE_CXX_STANDARD:STRING=17
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_CPPRESTSDK_INCLUDE_DIR}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}
+        -Dcpprestsdk_DIR:PATH=${_FINDPACKAGE_CPPRESTSDK_CONFIG_DIR}
+        DEPENDS openssl cpprestsdk Boost
+)
+
+
 # --------------------------------------------------------
 # jsonrpc-lean
 install(
