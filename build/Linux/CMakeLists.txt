@@ -53,7 +53,7 @@ ExternalProject_Add(Boost
     PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
     BUILD_COMMAND <SOURCE_DIR>/b2 headers
     BUILD_IN_SOURCE  TRUE
-    INSTALL_COMMAND <SOURCE_DIR>/b2 "cxxflags=-fPIC -std=c++17" visibility=global runtime-link=static link=static toolset=clang threading=multi --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=${BOOST_VARIANT}   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
+    INSTALL_COMMAND <SOURCE_DIR>/b2 "cxxflags=-fPIC -std=c++17" visibility=global runtime-link=static link=static toolset=clang threading=multi --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log --with-container --with-test address-model=64 architecture=x86  variant=${BOOST_VARIANT}   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
     UPDATE_COMMAND ""
 )
 
