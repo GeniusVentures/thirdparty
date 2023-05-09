@@ -325,6 +325,32 @@ set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
 set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include")
 
 # --------------------------------------------------------
+# Builds MNN
+ExternalProject_Add(MNN
+  PREFIX MNN
+  SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN
+        -DMNN_BUILD_CONVERTER:BOOL=ON
+        -DMNN_BUILD_SHARED_LIBS:BOOL=ON
+        -DMNN_BUILD_CONVERTER:BOOL=ON
+        -DMNN_BUILD_QUANTOOLS:BOOL=ON
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+)
+
+set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/mnn")
+set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
+set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
+include_directories(${_FINDPACKAGE_MNN_INCLUDE_DIR})
+
+# # Your-external "libMNN", add GLOBAL if the imported library is located in directories above the current.
+# add_library(${MNN_LIBS} SHARED IMPORTED )
+# # You can define two import-locations: one for debug and one for release. TODO: We need update it for other platform compile Win/Linux/MACOS
+# set_target_properties(${MNN_LIBS} PROPERTIES IMPORTED_LOCATION ${_FINDPACKAGE_MNN_LIBRARY_DIR}/libMNN.so )
+
+
+
+# --------------------------------------------------------
 # builds ipfs-lite-cpp
 ExternalProject_Add(ipfs-lite-cpp
   PREFIX ipfs-lite-cpp
@@ -349,14 +375,17 @@ ExternalProject_Add(ipfs-lite-cpp
         -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
         -DSQLiteModernCpp_DIR:PATH=${_FINDPACKAGE_SQLITECPP_CONFIG_DIR}
         -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
+        -DMNN_DIR:PATH=${_FINDPACKAGE_MNN_CONFIG_DIR}
+        -DMNN_INCLUDE_DIR:PATH=${_FINDPACKAGE_MNN_INCLUDE_DIR}
+        -DMNN_LIBRARIES:PATH=${_FINDPACKAGE_MNN_LIBRARY_DIR}
         -DTESTING:BOOL=${TESTING}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_BOOST_CACHE_ARGS}
         ${_OPENSSL_CACHE_ARGS}
         ${ipfs-lite-cpp_EXTRA_PARAM}
         -DCMAKE_CXX_STANDARD:STRING=17
-        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_ROCKSDB_INCLUDE_DIR}
-  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p grpc ${_PROTOBUF_TARGET} rocksdb Boost.DI
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_ROCKSDB_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_MNN_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_LIBP2P_INCLUDE_DIR}
+  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p grpc ${_PROTOBUF_TARGET} rocksdb Boost.DI MNN
 )
 
 # --------------------------------------------------------
@@ -516,26 +545,6 @@ if(NOT ANDROID)
 endif()
 
 # --------------------------------------------------------
-# Builds kompute
-# Disabled kompute build - don't need it at the moment
-#ExternalProject_Add(kompute
-#    PREFIX kompute
-#    SOURCE_DIR "${THIRDPARTY_DIR}/kompute"
-#    CMAKE_ARGS -DCMAKE_PROJECT_kompute_INCLUDE=${THIRDPARTY_DIR}/build/cmake/kompute-fix.cmake
-#    CMAKE_CACHE_ARGS
-#      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/kompute
-#      -DKOMPUTE_OPT_BUILD_TESTS:BOOL=OFF
-#      -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
-#      -DBUILD_SHARED_LIBS:BOOL=OFF
-#      ${_CMAKE_COMMON_BUILD_PARAMS}
-#      -DCMAKE_CXX_STANDARD:STRING=14
-#      -DKOMPUTE_OPT_INSTALL:BOOL=ON
-#      ${_KOMPUTE_EXTRA_PARAM}
-#        DEPENDS fmt
-#)
-
-
-# --------------------------------------------------------
 # Builds xxhash
 ExternalProject_Add(xxhash
     PREFIX xxhash
@@ -545,15 +554,6 @@ ExternalProject_Add(xxhash
           ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
-# --------------------------------------------------------
-# Builds MNN
-ExternalProject_Add(MNN
-  PREFIX MNN
-  SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
-  CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN
-        ${_CMAKE_COMMON_BUILD_PARAMS}
-)
 
 ExternalProject_Add(wallet-core
         PREFIX wallet-core

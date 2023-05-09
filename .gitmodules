@@ -8,8 +8,7 @@
     branch = master
 [submodule "ipfs-lite-cpp"]
     path = ipfs-lite-cpp
-    url = ../ipfs-lite-cpp.git
-    branch = master
+    url = https://github.com/GeniusVentures/ipfs-lite-cpp.git
 [submodule "restclient-cpp"]
     path = restclient-cpp
     url = https://github.com/mrtazz/restclient-cpp.git
@@ -123,9 +122,6 @@
 [submodule "xxhash"]
 	path = xxhash
 	url = https://github.com/hunter-packages/xxHash.git
-[submodule "kompute"]
-	path = kompute
-	url = https://github.com/GeniusVentures/kompute.git
 [submodule "MoltenVK"]
 	path = MoltenVK
 	url = https://github.com/KhronosGroup/MoltenVK.git
