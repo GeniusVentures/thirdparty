@@ -25,7 +25,7 @@ Set two environment variables
     ○ cd ./build/Windows
     ○ mkdir Release
     ○ cd Release
-    ○ cmake ../Windows -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+    ○ cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
     ○ cmake --build . --config Release
 ### Building for debugging
 	○ git pull
@@ -33,7 +33,7 @@ Set two environment variables
 	○ cd ./build/Windows
 	○ mkdir Debug
 	○ cd Debug
-	○ cmake ../Windows -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug
+	○ cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug
 	○ cmake --build . --config Debug
 # Build on Linux
 ## Preinstall
