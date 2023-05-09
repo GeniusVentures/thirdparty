@@ -20,6 +20,7 @@ Set two environment variables
 - Visual Studio 2015, 2017, 2019 or 2022
 - Strawberry Perl (https://strawberryperl.com/)
 - Python >=3.5
+- Ruby
 ## Building
     ○ git submodule update --init --recursive
     ○ cd ./build/Windows
