@@ -35,7 +35,7 @@
 
 BOOST_VERSION=1.80.0
 
-BOOST_LIBS="atomic chrono date_time filesystem log program_options random regex system thread"
+BOOST_LIBS="atomic chrono date_time filesystem log program_options random regex system thread container test"
 ALL_BOOST_LIBS_1_68="atomic chrono container context coroutine coroutine2
 date_time exception fiber filesystem graph graph_parallel iostreams locale log
 math metaparse mpi program_options python random regex serialization signals

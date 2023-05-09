@@ -69,7 +69,7 @@ ExternalProject_Add(Boost
       CONFIGURE_COMMAND ""
       BUILD_COMMAND ./b2.exe headers
 	  BUILD_IN_SOURCE  TRUE
-      INSTALL_COMMAND ./b2.exe toolset=${BOOST_TOOLSET} runtime-link=static visibility=global --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=${BOOST_VARIANT}  link=static threading=multi   --stagedir=stage/x64  --build-dir=${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib install
+      INSTALL_COMMAND ./b2.exe toolset=${BOOST_TOOLSET} runtime-link=static visibility=global --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log --with-container --with-test address-model=64 architecture=x86  variant=${BOOST_VARIANT}  link=static threading=multi   --stagedir=stage/x64  --build-dir=${_BOOST_ROOT}  --prefix=${_BOOST_ROOT}   --libdir=${_BOOST_ROOT}/lib install
 )
 set(BOOST_LIB_CMAKE_DIR "${_BOOST_ROOT}/lib/cmake")
 # not sure why this can't match the exaxt ${BOOST_VERSION} string of everything else.
@@ -81,8 +81,11 @@ set(_BOOST_CACHE_ARGS
       -Dboost_system_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_system-${BOOST_VERSION}
       -Dboost_filesystem_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_filesystem-${BOOST_VERSION}
       -Dboost_program_options_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_program_options-${BOOST_VERSION}
+	  -Dboost_regex_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_regex-${BOOST_VERSION}
+	  -Dboost_date_time_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_date_time-${BOOST_VERSION}
       -DBoost_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/Boost-${BOOST_VERSION}
-      -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
+	  -DBOOST_ROOT:PATH=${_BOOST_ROOT}
+	  -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
       -DBoost_USE_MULTITHREADED:BOOL=ON
       -DBoost_USE_STATIC_RUNTIME:BOOL=ON
       -DBoost_USE_STATIC_LIBS:BOOL=ON

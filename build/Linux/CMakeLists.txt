@@ -53,7 +53,7 @@ ExternalProject_Add(Boost
     PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh
     BUILD_COMMAND <SOURCE_DIR>/b2 headers
     BUILD_IN_SOURCE  TRUE
-    INSTALL_COMMAND <SOURCE_DIR>/b2 "cxxflags=-fPIC -std=c++17" visibility=global runtime-link=static link=static toolset=clang threading=multi --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log  address-model=64 architecture=x86  variant=${BOOST_VARIANT}   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
+    INSTALL_COMMAND <SOURCE_DIR>/b2 "cxxflags=-fPIC -std=c++17" visibility=global runtime-link=static link=static toolset=clang threading=multi --build-type=minimal --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-log --with-container --with-test address-model=64 architecture=x86  variant=${BOOST_VARIANT}   --stagedir=stage/x64  --build-dir=${_BOOST_BUILD_ROOT}  --prefix=${_BOOST_BUILD_ROOT}   --libdir=${_BOOST_BUILD_ROOT}/lib install
     UPDATE_COMMAND ""
 )
 
@@ -65,7 +65,15 @@ set(_BOOST_CACHE_ARGS
     -DBoost_USE_STATIC_LIBS:BOOL=ON
     -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
+    -DBOOST_ROOT:PATH=${_BOOST_ROOT}
     -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
+    -Dboost_headers_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_headers-${BOOST_VERSION}
+    -Dboost_random_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_random-${BOOST_VERSION}
+    -Dboost_system_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_system-${BOOST_VERSION}
+    -Dboost_filesystem_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_filesystem-${BOOST_VERSION}
+    -Dboost_program_options_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_program_options-${BOOST_VERSION}
+    -Dboost_regex_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_regex-${BOOST_VERSION}
+    -Dboost_date_time_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_date_time-${BOOST_VERSION}
 )
 
 # --------------------------------------------------------
@@ -123,6 +131,9 @@ set(_libp2p_BUILD_EXAMPLES ON)
 set(FORCE_MULTILE ON)
 set(MULTIPLE_OPTION "-z muldefs")
 
+set(CPPRESTSDK_NOWARN "-Wno-format-truncation" CACHE INTERNAL "")
+
 # --------------------------------------------------------
 # build common targets
 include(../CommonTargets.CMake)
+
