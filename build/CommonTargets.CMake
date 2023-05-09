@@ -514,7 +514,7 @@ ExternalProject_Add(libsecp256k1
 )
 
 # For Android use NDK builtin vulkan header, otherwise add as an external project
-if(NOT ANDROID)
+if(FALSE) # NOT ANDROID)
 
   # --------------------------------------------------------
   # Builds Vulkan-Headers
