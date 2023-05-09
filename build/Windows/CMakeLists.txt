@@ -81,8 +81,11 @@ set(_BOOST_CACHE_ARGS
       -Dboost_system_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_system-${BOOST_VERSION}
       -Dboost_filesystem_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_filesystem-${BOOST_VERSION}
       -Dboost_program_options_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_program_options-${BOOST_VERSION}
+	  -Dboost_regex_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_regex-${BOOST_VERSION}
+	  -Dboost_date_time_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_date_time-${BOOST_VERSION}
       -DBoost_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/Boost-${BOOST_VERSION}
-      -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
+	  -DBOOST_ROOT:PATH=${_BOOST_ROOT}
+	  -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
       -DBoost_USE_MULTITHREADED:BOOL=ON
       -DBoost_USE_STATIC_RUNTIME:BOOL=ON
       -DBoost_USE_STATIC_LIBS:BOOL=ON

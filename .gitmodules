@@ -159,3 +159,6 @@
 [submodule "cpprestsdk"]
 	path = cpprestsdk
 	url = https://github.com/Microsoft/cpprestsdk
+[submodule "zlib"]
+	path = zlib
+	url = https://github.com/madler/zlib.git

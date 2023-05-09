@@ -65,7 +65,15 @@ set(_BOOST_CACHE_ARGS
     -DBoost_USE_STATIC_LIBS:BOOL=ON
     -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
+    -DBOOST_ROOT:PATH=${_BOOST_ROOT}
     -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
+    -Dboost_headers_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_headers-${BOOST_VERSION}
+    -Dboost_random_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_random-${BOOST_VERSION}
+    -Dboost_system_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_system-${BOOST_VERSION}
+    -Dboost_filesystem_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_filesystem-${BOOST_VERSION}
+    -Dboost_program_options_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_program_options-${BOOST_VERSION}
+    -Dboost_regex_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_regex-${BOOST_VERSION}
+    -Dboost_date_time_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_date_time-${BOOST_VERSION}
 )
 
 # --------------------------------------------------------
@@ -123,6 +131,9 @@ set(_libp2p_BUILD_EXAMPLES ON)
 set(FORCE_MULTILE ON)
 set(MULTIPLE_OPTION "-z muldefs")
 
+set(CPPRESTSDK_NOWARN "-Wno-format-truncation" CACHE INTERNAL "")
+
 # --------------------------------------------------------
 # build common targets
 include(../CommonTargets.CMake)
+

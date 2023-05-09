@@ -80,6 +80,8 @@ set(boost_random_DIR "${_BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
 set(boost_system_DIR "${_BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
 set(boost_filesystem_DIR "${_BOOST_ROOT}/lib/cmake/boost_filesystem-${BOOST_VERSION}")
 set(boost_program_options_DIR "${_BOOST_ROOT}/lib/cmake/boost_program_options-${BOOST_VERSION}")
+set(boost_regex_DIR "${_BOOST_ROOT}/lib/cmake/boost_regex-${BOOST_VERSION}")
+set(boost_date_time_DIR "${_BOOST_ROOT}/lib/cmake/boost_date_time-${BOOST_VERSION}")
 set(boost_DIR "${_BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
 set(Boost_USE_STATIC_RUNTIME ON)
 print("boost_DIR: ${boost_DIR}")
@@ -92,6 +94,8 @@ set(_BOOST_CACHE_ARGS
 	-Dboost_system_DIR:PATH=${boost_system_DIR}
 	-Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
 	-Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
+	-Dboost_regex_DIR:PATH=${boost_regex_DIR}
+	-Dboost_date_time_DIR:PATH=${boost_date-time_DIR}
 	-DBoost_DIR:PATH=${boost_DIR}
 	-DBOOST_ROOT:PATH=${_BOOST_ROOT}
 	-DBoost_USE_MULTITHREADED:BOOL=ON
