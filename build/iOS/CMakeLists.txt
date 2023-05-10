@@ -197,6 +197,10 @@ set(tsl_hat_trie_patch
 # Set config for libp2p
 set(_libp2p_BUILD_EXAMPLES OFF)
 
+# ---------------------------------------------------------
+# Set config for MNN modules
+set(_MNN_WIN_RUNTIME_MT OFF)
+
 # --------------------------------------------------------
 # Set o iOS specific configurations
 #set(grpc_patch

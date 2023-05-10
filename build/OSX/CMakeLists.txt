@@ -158,6 +158,10 @@ set(_ED25519_RANDOM dev_urandom)
 # Set config for libp2p
 set(_libp2p_BUILD_EXAMPLES ON)
 
+# ---------------------------------------------------------
+# Set config for MNN modules
+set(_MNN_WIN_RUNTIME_MT OFF)
+
 # --------------------------------------------------------
 # Allow multiple definitions
 set(FORCE_MULTILE ON)

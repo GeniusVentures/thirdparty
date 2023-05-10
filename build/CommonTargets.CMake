@@ -332,7 +332,8 @@ ExternalProject_Add(MNN
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN
         -DMNN_BUILD_CONVERTER:BOOL=ON
-        -DMNN_BUILD_SHARED_LIBS:BOOL=ON
+        -DMNN_BUILD_SHARED_LIBS:BOOL=OFF
+        -DMNN_WIN_RUNTIME_MT:BOOL=${_MNN_WIN_RUNTIME_MT}
         -DMNN_BUILD_CONVERTER:BOOL=ON
         -DMNN_BUILD_QUANTOOLS:BOOL=ON
         ${_CMAKE_COMMON_BUILD_PARAMS}
@@ -342,13 +343,6 @@ set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/mnn")
 set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
 set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
 include_directories(${_FINDPACKAGE_MNN_INCLUDE_DIR})
-
-# # Your-external "libMNN", add GLOBAL if the imported library is located in directories above the current.
-# add_library(${MNN_LIBS} SHARED IMPORTED )
-# # You can define two import-locations: one for debug and one for release. TODO: We need update it for other platform compile Win/Linux/MACOS
-# set_target_properties(${MNN_LIBS} PROPERTIES IMPORTED_LOCATION ${_FINDPACKAGE_MNN_LIBRARY_DIR}/libMNN.so )
-
-
 
 # --------------------------------------------------------
 # builds ipfs-lite-cpp
