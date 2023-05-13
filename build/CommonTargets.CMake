@@ -568,7 +568,7 @@ ExternalProject_Add(wallet-core-protobuf-plugin
 ExternalProject_Add(wallet-core
         PREFIX wallet-core
         SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"
-        CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PREFIX=${CMAKE_CURRENT_BINARY_DIR}/grpc/ bash -c "${THIRDPARTY_DIR}/build/config-wallet-core.sh ${THIRDPARTY_DIR}/wallet-core"
+        PATCH_COMMAND ${CMAKE_COMMAND} -E env PREFIX=${CMAKE_CURRENT_BINARY_DIR}/grpc/ bash -c "${THIRDPARTY_DIR}/build/config-wallet-core.sh ${THIRDPARTY_DIR}/wallet-core"
         CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/wallet-core
         -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
