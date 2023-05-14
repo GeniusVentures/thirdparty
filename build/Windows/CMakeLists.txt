@@ -172,6 +172,10 @@ set(ipfs-bitswap-cpp_EXTRA_PARAM
 	-D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN7
 	)
 
+set(wallet-core_EXTRA_PARAM
+	-D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN7
+)
+
 # ---------------------------------------------------------
 # Set config for MNN modules
 set(_MNN_WIN_RUNTIME_MT ON)
