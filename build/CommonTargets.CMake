@@ -546,32 +546,32 @@ ExternalProject_Add(xxhash
 )
 
 
-ExternalProject_Add(wallet-core
-        PREFIX wallet-core
-        SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"
-        CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/wallet-core
-        -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
-        -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
-        -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
-        -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
-        -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
-        -DTW_UNIT_TESTS:BOOL=FALSE
-        -DTW_BUILD_EXAMPLES:BOOL=FALSE
-        -DTW_SKIP_DEPENDENCIES:BOOL=TRUE
-        -DTESTING:BOOL=FALSE
-        ${_CMAKE_COMMON_BUILD_PARAMS}
-        ${_BOOST_CACHE_ARGS}
-        ${_OPENSSL_CACHE_ARGS}
-        -DCMAKE_CXX_STANDARD:STRING=17
-        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
-        COMMAND env PREFIX= bash -c 'echo $FOO'
-        COMMAND "tools/generate-files"
-        #    BUILD_COMMAND go install .
-        #    INSTALL_COMMAND  ""
-        BUILD_IN_SOURCE  FALSE
-        DEPENDS grpc
-        )
+#ExternalProject_Add(wallet-core
+#        PREFIX wallet-core
+#        SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"
+#        CMAKE_CACHE_ARGS
+#        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/wallet-core
+#        -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
+#        -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+#        -DProtobuf_LIBRARIES:PATH=${_FINDPACKAGE_PROTOBUF_LIB_DIR}
+#        -DProtobuf_PROTOC_EXECUTABLE:PATH=${_PROTOBUF_PROTOC_EXEC}
+#        -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
+#        -DTW_UNIT_TESTS:BOOL=FALSE
+#        -DTW_BUILD_EXAMPLES:BOOL=FALSE
+#        -DTW_SKIP_DEPENDENCIES:BOOL=TRUE
+#        -DTESTING:BOOL=FALSE
+#        ${_CMAKE_COMMON_BUILD_PARAMS}
+#        ${_BOOST_CACHE_ARGS}
+#        ${_OPENSSL_CACHE_ARGS}
+#        -DCMAKE_CXX_STANDARD:STRING=17
+#        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+#        COMMAND env PREFIX= bash -c 'echo $FOO'
+#        COMMAND "tools/generate-files"
+#        #    BUILD_COMMAND go install .
+#        #    INSTALL_COMMAND  ""
+#        BUILD_IN_SOURCE  FALSE
+#        DEPENDS grpc
+#        )
 
 ExternalProject_Add(crypto3
         PREFIX crypto3
