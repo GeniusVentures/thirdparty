@@ -188,9 +188,9 @@ set(_grpc_EXTRA_PARAM
 message(WARNING "Patching grpc module - update with caution")
 set(grpc_patch
 		PATCH_COMMAND
-			${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/patch.CMakeLists.txt" "${CMAKE_CURRENT_SOURCE_DIR}/grpc/CMakeLists.txt"
-			${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/patch.libprotobuf.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/grpc/third_party/protobuf/cmake/libprotobuf.cmake"
-			${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/patch.libprotobuf-lite.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/grpc/third_party/protobuf/cmake/libprotobuf-lite.cmake"
+			${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/patch.CMakeLists.txt" "${CMAKE_CURRENT_SOURCE_DIR}/grpc/CMakeLists.txt";
+			${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/patch.libprotobuf.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/grpc/third_party/protobuf/cmake/libprotobuf.cmake";
+			${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/patch.libprotobuf-lite.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/grpc/third_party/protobuf/cmake/libprotobuf-lite.cmake";
 			)
 
 
