@@ -184,6 +184,12 @@ set(_grpc_EXTRA_PARAM
 )
 
 # --------------------------------------------------------
+# Set Android specific configurations
+set(grpc_patch
+		PATCH_COMMAND patch < "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/fix.android.missing.log.patch")
+
+
+# --------------------------------------------------------
 # set config for rocksdb
 set(_rocksdb_EXTRA_PARAM
     -DROCKSDB_LITE:BOOL=ON

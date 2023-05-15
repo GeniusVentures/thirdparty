@@ -1,0 +1,15 @@
+--- /tmp/Ol6lvB_CMakeLists.txt
++++ /home/heffter/devel/geniustokens/thirdparty.develop/grpc/CMakeLists.txt
+@@ -1666,9 +1666,10 @@
+   absl::variant
+ )
+ if(_gRPC_PLATFORM_ANDROID)
++  find_library(log-lib log )
+   target_link_libraries(gpr
+     android
+-    log
++    ${log-lib}
+   )
+ endif()
+ 
+
