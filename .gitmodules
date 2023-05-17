@@ -149,12 +149,6 @@
 [submodule "MNN"]
 	path = MNN
 	url = https://github.com/alibaba/MNN.git
-[submodule "Chainge"]
-	path = Chainge
-	url = ../chainge.git
-[submodule "cpprestsdk"]
-	path = cpprestsdk
-	url = https://github.com/Microsoft/cpprestsdk
 [submodule "zlib"]
 	path = zlib
 	url = https://github.com/madler/zlib.git
