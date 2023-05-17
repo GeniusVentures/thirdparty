@@ -74,8 +74,8 @@ set(_BOOST_CACHE_ARGS
     -Dboost_program_options_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_program_options-${BOOST_VERSION}
     -Dboost_regex_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_regex-${BOOST_VERSION}
     -Dboost_date_time_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_date_time-${BOOST_VERSION}
-    -Dboost_container_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_container-${BOOST_VERSION})
-    -Dboost_unit_test_framework_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_unit_test_framework-${BOOST_VERSION})
+    -Dboost_container_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_container-${BOOST_VERSION}
+    -Dboost_unit_test_framework_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_unit_test_framework-${BOOST_VERSION}
 )
 
 # --------------------------------------------------------
