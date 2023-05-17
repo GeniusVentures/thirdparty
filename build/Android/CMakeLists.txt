@@ -90,6 +90,7 @@ set(boost_random_DIR "${BOOST_LIBRARYDIR}/cmake/boost_random-${BOOST_VERSION}")
 set(boost_filesystem_DIR "${BOOST_LIBRARYDIR}/cmake/boost_filesystem-${BOOST_VERSION}")
 set(boost_log_DIR "${BOOST_LIBRARYDIR}/cmake/boost_log-${BOOST_VERSION}")
 set(boost_container_DIR "${BOOST_LIBRARYDIR}/cmake/boost_container-${BOOST_VERSION}")
+set(boost_unit_test_framework_DIR "${BOOST_LIBRARYDIR}/cmake/boost_unit_test_framework-${BOOST_VERSION}")
 set(Boost-COMPILTER "clang")
 print("boost dir ${_BOOST_ROOT}")
 print("boost lib ${BOOST_LIBRARYDIR}")
@@ -125,6 +126,7 @@ set(_BOOST_CACHE_ARGS
 	-Dboost_log_DIR:PATH=${boost_log_DIR}
 	-Dboost_random_DIR:PATH=${boost_random_DIR}
 	-Dboost_container_DIR:PATH=${boost_container_DIR}
+	-Dboost_unit_test_framework_DIR:PATH=${boost_unit_test_framework_DIR}
 	-DBoost_COMPILER:STRING=clang
 )
 
