@@ -89,6 +89,8 @@ set(boost_atomic_DIR "${BOOST_LIBRARYDIR}/cmake/boost_atomic-${BOOST_VERSION}")
 set(boost_random_DIR "${BOOST_LIBRARYDIR}/cmake/boost_random-${BOOST_VERSION}")
 set(boost_filesystem_DIR "${BOOST_LIBRARYDIR}/cmake/boost_filesystem-${BOOST_VERSION}")
 set(boost_log_DIR "${BOOST_LIBRARYDIR}/cmake/boost_log-${BOOST_VERSION}")
+set(boost_container_DIR "${BOOST_LIBRARYDIR}/cmake/boost_container-${BOOST_VERSION}")
+set(boost_unit_test_framework_DIR "${BOOST_LIBRARYDIR}/cmake/boost_unit_test_framework-${BOOST_VERSION}")
 set(Boost-COMPILTER "clang")
 print("boost dir ${_BOOST_ROOT}")
 print("boost lib ${BOOST_LIBRARYDIR}")
@@ -123,6 +125,8 @@ set(_BOOST_CACHE_ARGS
 	-Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
 	-Dboost_log_DIR:PATH=${boost_log_DIR}
 	-Dboost_random_DIR:PATH=${boost_random_DIR}
+	-Dboost_container_DIR:PATH=${boost_container_DIR}
+	-Dboost_unit_test_framework_DIR:PATH=${boost_unit_test_framework_DIR}
 	-DBoost_COMPILER:STRING=clang
 )
 
@@ -185,16 +189,17 @@ set(_grpc_EXTRA_PARAM
 
 # --------------------------------------------------------
 # Set Android specific configurations
+message(WARNING "Patching grpc module - update with caution")
 set(grpc_patch
-		PATCH_COMMAND patch < "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/fix.android.missing.log.patch")
-
+		PATCH_COMMAND
+			${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/patching.sh --patch-dir=${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch --grpc-dir=${THIRDPARTY_DIR}/grpc
+		)
 
 # --------------------------------------------------------
 # set config for rocksdb
 set(_rocksdb_EXTRA_PARAM
     -DROCKSDB_LITE:BOOL=ON
 )
-
 
 # --------------------------------------------------------
 # Build protobuf project from the git submodule for local executation of protoc.
@@ -226,6 +231,9 @@ set(_libp2p_BUILD_EXAMPLES OFF)
 # ---------------------------------------------------------
 # Set config for MNN modules
 set(_MNN_WIN_RUNTIME_MT OFF)
+set(_MNN_EXTRA_PARAM
+    -DMNN_BUILD_FOR_ANDROID_COMMAND:BOOL=ON
+)
 
 # --------------------------------------------------------
 # Set config for kompute
