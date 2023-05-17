@@ -188,7 +188,7 @@ set(_grpc_EXTRA_PARAM
 message(WARNING "Patching grpc module - update with caution")
 set(grpc_patch
 		PATCH_COMMAND
-			${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/patching.sh --patch-dir=${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch --grpc-dir=${CMAKE_CURRENT_SOURCE_DIR}/grpc
+			${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/patching.sh --patch-dir=${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch --grpc-dir=${THIRDPARTY_DIR}/grpc
 		)
 
 # --------------------------------------------------------
