@@ -140,7 +140,7 @@ ExternalProject_Add(protobuf
     DEPENDS
   )
 
-set(_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
+set(_PROTOBUF_INCLUDE_DIRS "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
 set(_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
 
 # Build protoc for host OS
