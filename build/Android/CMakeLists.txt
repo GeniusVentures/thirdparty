@@ -199,7 +199,6 @@ set(_rocksdb_EXTRA_PARAM
     -DROCKSDB_LITE:BOOL=ON
 )
 
-
 # --------------------------------------------------------
 # Build protobuf project from the git submodule for local executation of protoc.
 ExternalProject_Add(protobuf
@@ -230,6 +229,9 @@ set(_libp2p_BUILD_EXAMPLES OFF)
 # ---------------------------------------------------------
 # Set config for MNN modules
 set(_MNN_WIN_RUNTIME_MT OFF)
+set(_MNN_EXTRA_PARAM
+    -DMNN_BUILD_FOR_ANDROID_COMMAND:BOOL=ON
+)
 
 # --------------------------------------------------------
 # Set config for kompute
