@@ -117,6 +117,15 @@ set(_grpc_EXTRA_PARAM
 )
 
 # --------------------------------------------------------
+
+# set config for grpc
+set(wallet-core_EXTRA_PARAM
+    -DCMAKE_C_COMPILER:STRING=clang
+    -DCMAKE_CXX_COMPILER:STRING=clang++
+)
+
+# --------------------------------------------------------
+
 # Set ed25519 OS specific configurations
 set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)
