@@ -572,7 +572,6 @@ ExternalProject_Add(wallet-core-protobuf-plugin
         ${_CMAKE_COMMON_BUILD_PARAMS}
         -DTW_STATIC_LIBRARY:BOOL=TRUE
         -DTW_USE_EXTERNAL_PROTOC:BOOL=TRUE
-        -DLOG_BUILD:BOOL=TRUE
         BUILD_IN_SOURCE  FALSE
         DEPENDS grpc
 )
@@ -602,7 +601,7 @@ ExternalProject_Add(wallet-core
         ${_OPENSSL_CACHE_ARGS}
         -DCMAKE_CXX_STANDARD:STRING=17
         -DCXX_EXTENSIONS:BOOL=FALSE
-        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIRS}
         ${wallet-core_EXTRA_PARAM}
         BUILD_IN_SOURCE  FALSE
         DEPENDS grpc Boost wallet-core-protobuf-plugin GTest
