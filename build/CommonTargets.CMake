@@ -585,6 +585,7 @@ ExternalProject_Add(crypto3
         -DCMAKE_CXX_STANDARD:STRING=17
         -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}
         -DBUILD_SHARED_LIBS:BOOL=FALSE
+        ${crypto3_patch}
         DEPENDS Boost
 )
 
