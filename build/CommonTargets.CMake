@@ -343,6 +343,25 @@ set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
 include_directories(${_FINDPACKAGE_MNN_INCLUDE_DIR})
 
 # --------------------------------------------------------
+# Build FileLoader
+ExternalProject_Add(FileLoader
+  PREFIX FileLoader
+  SOURCE_DIR "${THIRDPARTY_DIR}/FileLoader"
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/FileLoader
+        -DBUILD_FILELOADER_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/FileLoader
+        -DMNN_INCLUDE_DIR:PATH=${_FINDPACKAGE_MNN_INCLUDE_DIR}
+        -DMNN_LIBRARY_DIR:PATH=${_FINDPACKAGE_MNN_LIBRARY_DIR}
+        -DTESTING:BOOL=OFF
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+  DEPENDS MNN
+)
+
+set(_FINDPACKAGE_FILELOADER_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/FileLoader/lib/cmake/mnn")
+set(_FINDPACKAGE_FILELOADER_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/FileLoader/lib")
+set(_FINDPACKAGE_FILELOADER_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/FileLoader/include")
+
+# --------------------------------------------------------
 # builds ipfs-lite-cpp
 ExternalProject_Add(ipfs-lite-cpp
   PREFIX ipfs-lite-cpp
