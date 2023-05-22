@@ -52,30 +52,30 @@ jobs:
           longSHA="${{ github.sha }}"
           shortSHA="${longSHA:0:7}"
           tpCacheNameSHA="thirdparty-$shortSHA"
-          
+
           notMatched="$(comm -3 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$cachesList"))"
           oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$notMatched"))"
           notCached="$(comm -12 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$notMatched"))"
-          
+
           echo -e "notMatched: $notMatched"
           echo -e "oldCaches: $oldCaches"
           echo -e "notCached: $notCached"
-          
+
           foundThirdPartyCurrent="true"
           if [[ $notCached == "$tpCacheNameSHA" ]]; then
             foundThirdPartyCurrent="false"
           fi
-          
-          ## Setting this to not fail the workflow while deleting cache keys. 
+
+          ## Setting this to not fail the workflow while deleting cache keys.
           set +e
-          
+
           #Set the field separator to new line
           IFS=$'\n'
           for oldCache in $oldCaches; do
             echo -e "Deleting old cache $oldCache"
             gh actions-cache delete $oldCache -R $REPO -B $BRANCH --confirm
           done
-          
+
           echo "FOUND_THIRD_PARTY_CURRENT=$foundThirdPartyCurrent" >> $GITHUB_OUTPUT
           echo "THIRD_PARTY_CACHE_NAME_KEY=$tpCacheNameSHA" >> $GITHUB_OUTPUT
         shell: bash
@@ -90,7 +90,6 @@ jobs:
           path: |
             !.git/**
             ./**
-          key: thirdparty-${{ github.sha }}
 
       - name: Set matrix of src submodules that need updating
         id: set-cache-matrix
@@ -128,9 +127,9 @@ jobs:
           done
           matrixJson+=" ]"
 
-          ## Setting this to not fail the workflow while deleting cache keys. 
+          ## Setting this to not fail the workflow while deleting cache keys.
           set +e
-          
+
           # delete old caches
           for oldCache in $oldCaches; do
             echo "Deleting old cache $oldCache"
@@ -188,7 +187,6 @@ jobs:
           path: |
             !.git/**
             ./**
-          key: thirdparty-${{ github.sha }}
 
       - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
         run: |
@@ -210,7 +208,6 @@ jobs:
           path: |
             !./${{ matrix.name }}/.git/**
             ./${{ matrix.name }}/**
-          key: ${{ matrix.name }}-${{ matrix.shortSHA }}
 
   create-targets-matrix:
     needs: [ setup-src-cache, cache-src ]
@@ -233,7 +230,6 @@ jobs:
           path: |
             !.git/**
             ./**
-          key: thirdparty-${{ github.sha }}
 
       - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
         run: |
@@ -256,10 +252,6 @@ jobs:
             cmake .. -DCMAKE_BUILD_TYPE=Release
           fi
 
-          gh extension install actions/gh-actions-cache
-          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
-          echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
-          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
 
           cd ../../
           declare -A cMakeNamesRepos
@@ -314,7 +306,7 @@ jobs:
     if: |
       always() &&
       needs.setup-src-cache.result == 'success' &&
-      needs.create-targets-matrix.result == 'success' && 
+      needs.create-targets-matrix.result == 'success' &&
       (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped')
     strategy:
       fail-fast: false
@@ -446,7 +438,6 @@ jobs:
           path: |
             !.git/**
             ./**
-          key: thirdparty-${{ github.sha }}
 
       - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
         run: |
