@@ -8,7 +8,8 @@
     branch = master
 [submodule "ipfs-lite-cpp"]
     path = ipfs-lite-cpp
-    url = https://github.com/GeniusVentures/ipfs-lite-cpp.git
+    url = ../ipfs-lite-cpp.git
+    branch = master
 [submodule "restclient-cpp"]
     path = restclient-cpp
     url = https://github.com/mrtazz/restclient-cpp.git

@@ -9,8 +9,8 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
-  MAKEFLAGS: "-j 8"
-  CMAKE_BUILD_PARALLEL_LEVEL: 8
+  #MAKEFLAGS: "-j8"
+  #CMAKE_BUILD_PARALLEL_LEVEL: 8
 
 jobs:
   setup-src-cache:
@@ -66,6 +66,9 @@ jobs:
             foundThirdPartyCurrent="false"
           fi
           
+          ## Setting this to not fail the workflow while deleting cache keys. 
+          set +e
+          
           #Set the field separator to new line
           IFS=$'\n'
           for oldCache in $oldCaches; do
@@ -87,6 +90,7 @@ jobs:
           path: |
             !.git/**
             ./**
+          key: thirdparty-${{ github.sha }}
 
       - name: Set matrix of src submodules that need updating
         id: set-cache-matrix
@@ -124,6 +128,9 @@ jobs:
           done
           matrixJson+=" ]"
 
+          ## Setting this to not fail the workflow while deleting cache keys. 
+          set +e
+          
           # delete old caches
           for oldCache in $oldCaches; do
             echo "Deleting old cache $oldCache"
@@ -181,6 +188,7 @@ jobs:
           path: |
             !.git/**
             ./**
+          key: thirdparty-${{ github.sha }}
 
       - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
         run: |
@@ -202,6 +210,7 @@ jobs:
           path: |
             !./${{ matrix.name }}/.git/**
             ./${{ matrix.name }}/**
+          key: ${{ matrix.name }}-${{ matrix.shortSHA }}
 
   create-targets-matrix:
     needs: [ setup-src-cache, cache-src ]
@@ -224,6 +233,7 @@ jobs:
           path: |
             !.git/**
             ./**
+          key: thirdparty-${{ github.sha }}
 
       - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
         run: |
@@ -246,6 +256,10 @@ jobs:
             cmake .. -DCMAKE_BUILD_TYPE=Release
           fi
 
+          gh extension install actions/gh-actions-cache
+          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.ref }}" >> $GITHUB_ENV
+          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
 
           cd ../../
           declare -A cMakeNamesRepos
@@ -319,7 +333,7 @@ jobs:
               cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
             cmake-compile-script: |
               echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME"
-              make $TARGET_NAME
+              make $TARGET_NAME -j$(nproc)
     #          - target-os: Android
     #            runs-on: ubuntu-latest
     #            shell: bash
@@ -432,6 +446,7 @@ jobs:
           path: |
             !.git/**
             ./**
+          key: thirdparty-${{ github.sha }}
 
       - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
         run: |
@@ -444,6 +459,10 @@ jobs:
         with:
           multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
           paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+
+      - name: Run setup script for target OS
+        run: |
+          ${{ matrix.target-build-data.setup-script }}
 
       - name: Init the CMake build files
         run: |
