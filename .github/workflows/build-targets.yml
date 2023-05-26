@@ -324,8 +324,12 @@ jobs:
               cd $BUILD_TYPE
               cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
             cmake-compile-script: |
-              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME"
+              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
               make $TARGET_NAME -j$(nproc)
+              make install
+            gzip-script: |
+              echo "Zipping $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
+              tar -zcvf $TARGET_NAME_$TARGET_SHA.tar.gz $TARGET_NAME              
     #          - target-os: Android
     #            runs-on: ubuntu-latest
     #            shell: bash
@@ -486,6 +490,31 @@ jobs:
             fi
           done
 
-      - name:  Save target OS SDK as an artifact
+      - name:  Save target OS SDK as github release
         run: |
-          echo "We should save the artifact here"
+          TARGET_OS="${{ matrix.target-build-data.target-os }}"
+          BUILD_TYPE="${{ matrix.build-type }}"
+          IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
+          IFS=$'\n' read -d '|' -ra CACHE_HITS <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.cache-hits }}|')"
+          # Check if release already defined e.g. Linux-master-release
+          gh release view $TARGET_OS-$BRANCH-$BUILD_TYPE
+          if [ $? -eq 1 ]
+          then
+            # Create release on github
+            gh release create $TARGET_OS-$BRANCH-$BUILD_TYPE -n "$BRANCH branch" --target $BRANCH -t "$TARGET_OS $BRANCH branch $BUILD_TYPE build"
+          fi
+          
+          cd "build/${TARGET_OS}/${BUILD_TYPE}"
+          for i in "${!TARGET_NAMES[@]}"; do
+            TARGET_NAME="${TARGET_NAMES[i]}"
+            TARGET_SHA="${TARGET_SHAS[i]}"
+            if [ "${CACHE_HITS[i]}" == "1" ]; then
+              echo "Skipping cached target zipping: $TARGET_NAME, sha: $TARGET_SHA"
+            else
+              ${{ matrix.target-build-data.gzip-script }}
+              echo "Uploading target to github release: "
+              gh release upload $TARGET_OS-$BRANCH-$BUILD_TYPE $TARGET_NAME_$TARGET_SHA.tar.gz
+            fi
+          done
+
