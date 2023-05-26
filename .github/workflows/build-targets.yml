@@ -497,6 +497,10 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra CACHE_HITS <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.cache-hits }}|')"
+          
+          ## Setting this to not fail the workflow while checking release tag 
+          set +e
+          
           # Check if release already defined e.g. Linux-master-release
           gh release view $TARGET_OS-$BRANCH-$BUILD_TYPE
           if [ $? -eq 1 ]
