@@ -487,9 +487,6 @@ jobs:
               echo "Skipping cached target: $TARGET_NAME, sha: $TARGET_SHA"
             else
               ${{ matrix.target-build-data.cmake-compile-script }}
-              
-              echo "TODO: remove it, just for testing"
-              break
             fi
           done
 
@@ -497,8 +494,8 @@ jobs:
         run: |
           TARGET_OS="${{ matrix.target-build-data.target-os }}"
           BUILD_TYPE="${{ matrix.build-type }}"
-          echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
-          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+          BRANCH=${{ github.ref_name }}
+          GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra CACHE_HITS <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.cache-hits }}|')"
