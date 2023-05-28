@@ -487,6 +487,9 @@ jobs:
               echo "Skipping cached target: $TARGET_NAME, sha: $TARGET_SHA"
             else
               ${{ matrix.target-build-data.cmake-compile-script }}
+              
+              echo "TODO: remove it, just for testing"
+              break
             fi
           done
 
