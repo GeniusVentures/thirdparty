@@ -491,10 +491,16 @@ jobs:
           echo "Testing if gh assets uploded state is true: "
           echo `gh release view ${GITHUB_RELEASE_NAME} --json assets --jq 'any(.assets[]; .state == "uploaded")'`
           
+          echo "Testing if tsl_hat_trie-343e0da.tar.gz found:"
+          echo `gh release view Linux-develop-release-Release --json assets --jq 'any(.assets[]; .name == "tsl_hat_trie-343e0da.tar.gz")'`
+                    
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             COMPRESSED_TARGET="${TARGET_NAME}-${TARGET_SHA}.tar.gz"
+            
+            echo "Printing command executed: "
+            echo "gh release view ${GITHUB_RELEASE_NAME} --json assets --jq 'any(.assets[]; .name == "${COMPRESSED_TARGET}")'"
             targetBuilt=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq 'any(.assets[]; .name == "${COMPRESSED_TARGET}")'`
             if [ $? -eq 1 ]
             then
