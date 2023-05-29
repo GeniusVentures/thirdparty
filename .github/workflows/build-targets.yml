@@ -327,9 +327,14 @@ jobs:
               echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
               make $TARGET_NAME -j$(nproc)
               make install
-            gzip-script: |
-              echo "Zipping $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
-              tar -zcvf $TARGET_NAME_$TARGET_SHA.tar.gz $TARGET_NAME              
+            release-target: |
+              echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode"
+              tar -zcvf ${TARGET_NAME}-${TARGET_SHA}.tar.gz ${TARGET_NAME} 
+              GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+              echo "Uploading target ${TARGET_NAME}-${TARGET_SHA}.tar.gz to github release ${GITHUB_RELEASE_NAME}"
+              gh release upload ${GITHUB_RELEASE_NAME} ${TARGET_NAME}-${TARGET_SHA}.tar.gz
+
+              
     #          - target-os: Android
     #            runs-on: ubuntu-latest
     #            shell: bash
@@ -526,9 +531,7 @@ jobs:
             if [ "${CACHE_HITS[i]}" == "1" ]; then
               echo "Skipping cached target zipping: ${TARGET_NAME}, sha: ${TARGET_SHA}"
             else
-              ${{ matrix.target-build-data.gzip-script }}
-              echo "Uploading target ${TARGET_NAME}-${TARGET_SHA}.tar.gz to github release ${GITHUB_RELEASE_NAME}"
-              gh release upload ${GITHUB_RELEASE_NAME} ${TARGET_NAME}-${TARGET_SHA}.tar.gz
+              ${{ matrix.target-build-data.release-target }}
             fi
           done
 
