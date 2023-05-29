@@ -504,16 +504,17 @@ jobs:
           set +e
           
           # Check if release already defined e.g. Linux-master-release
-          gh release view $TARGET_OS-$BRANCH-$BUILD_TYPE
+          GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+          gh release view ${GITHUB_RELEASE_NAME}
           if [ $? -eq 1 ]
           then
-            echo "Creating github release with tag: $TARGET_OS-$BRANCH-$BUILD_TYPE"
+            echo "Creating github release with tag: ${GITHUB_RELEASE_NAME}"
             # Create release on github
-            gh release create $TARGET_OS-$BRANCH-$BUILD_TYPE -n "$BRANCH branch" --target $BRANCH -t "$TARGET_OS $BRANCH branch $BUILD_TYPE build"
+            gh release create ${GITHUB_RELEASE_NAME} -n "${BRANCH} branch" --target ${BRANCH} -t "${TARGET_OS} ${BRANCH} branch ${BUILD_TYPE} build"
             if [ $? -eq 1 ]
             then
               set -e
-              echo "Failed to create github release with tag: $TARGET_OS-$BRANCH-$BUILD_TYPE"
+              echo "Failed to create github release with tag: ${GITHUB_RELEASE_NAME}"
               return 1
             fi
           fi
@@ -523,11 +524,11 @@ jobs:
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             if [ "${CACHE_HITS[i]}" == "1" ]; then
-              echo "Skipping cached target zipping: $TARGET_NAME, sha: $TARGET_SHA"
+              echo "Skipping cached target zipping: ${TARGET_NAME}, sha: ${TARGET_SHA}"
             else
               ${{ matrix.target-build-data.gzip-script }}
-              echo "Uploading target to github release: "
-              gh release upload $TARGET_OS-$BRANCH-$BUILD_TYPE $TARGET_NAME_$TARGET_SHA.tar.gz
+              echo "Uploading target ${TARGET_NAME}-${TARGET_SHA}.tar.gz to github release ${GITHUB_RELEASE_NAME}"
+              gh release upload ${GITHUB_RELEASE_NAME} ${TARGET_NAME}-${TARGET_SHA}.tar.gz
             fi
           done
 
