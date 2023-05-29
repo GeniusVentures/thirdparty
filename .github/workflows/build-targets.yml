@@ -486,7 +486,8 @@ jobs:
             TARGET_SHA="${TARGET_SHAS[i]}"
             COMPRESSED_TARGET="${TARGET_NAME}-${TARGET_SHA}.tar.gz"
             targetBuilt=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq 'any(.assets[]; .name == "${COMPRESSED_TARGET}")'`
-            targetBuiltList+="${cMakeBuildDir[$key]}"
+            echo "Check if ${COMPRESSED_TARGET} found on ${GITHUB_RELEASE_NAME}: ${targetBuilt}"
+            targetBuiltList+="${targetBuilt}"
           done
           
           echo "TARGET_BUILT=$targetBuiltList" >> $GITHUB_OUTPUT
