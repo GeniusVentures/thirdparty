@@ -399,8 +399,9 @@ jobs:
     #                vsversion: 17
 
     runs-on: ${{ matrix.target-build-data.runs-on }}
+    outputs:
+        TARGET_NAMES: ${{ steps.cache-library-directory.outputs.TARGET_BUILT }}
     steps:
-
       - name: Create library Keys and Paths to Cache/build
         id: create-lib-cache-keys
         run: |
@@ -472,10 +473,23 @@ jobs:
 
       - name: Load built library caches if any
         id: cache-library-directory
-        uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
-        with:
-          multi-keys: ${{ steps.create-lib-cache-keys.outputs.LIB_CACHE_NAME_KEYS }}
-          paths: ${{ steps.create-lib-cache-keys.outputs.LIB_CACHE_PATHS }}
+        run: |
+          TARGET_OS="${{ matrix.target-build-data.target-os }}"
+          BUILD_TYPE="${{ matrix.build-type }}"
+          BRANCH=${{ github.ref_name }}
+          IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
+          
+          GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+          for i in "${!TARGET_NAMES[@]}"; do
+            TARGET_NAME="${TARGET_NAMES[i]}"
+            TARGET_SHA="${TARGET_SHAS[i]}"
+            COMPRESSED_TARGET="${TARGET_NAME}-${TARGET_SHA}.tar.gz"
+            targetBuilt=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq 'any(.assets[]; .name == "${COMPRESSED_TARGET}")'`
+            targetBuiltList+="${cMakeBuildDir[$key]}"
+          done
+          
+          echo "TARGET_BUILT=$targetBuiltList" >> $GITHUB_OUTPUT
 
       - name: Build any updated libraries
         run: |
@@ -483,12 +497,12 @@ jobs:
           BUILD_TYPE="${{ matrix.build-type }}"
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
-          IFS=$'\n' read -d '|' -ra CACHE_HITS <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.cache-hits }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
-            if [ "${CACHE_HITS[i]}" == "1" ]; then
+            if [ "${TARGET_BUILT[i]}" == "true" ]; then
               echo "Skipping cached target: $TARGET_NAME, sha: $TARGET_SHA"
             else
               ${{ matrix.target-build-data.cmake-compile-script }}
@@ -503,7 +517,7 @@ jobs:
           GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
-          IFS=$'\n' read -d '|' -ra CACHE_HITS <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.cache-hits }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
                     
           ## Setting this to not fail the workflow while checking release tag 
           set +e
@@ -528,8 +542,8 @@ jobs:
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
-            if [ "${CACHE_HITS[i]}" == "1" ]; then
-              echo "Skipping cached target zipping: ${TARGET_NAME}, sha: ${TARGET_SHA}"
+            if [ "${TARGET_BUILT[i]}" == "true" ]; then
+              echo "Skipping installed target zipping: ${TARGET_NAME}, sha: ${TARGET_SHA}"
             else
               ${{ matrix.target-build-data.release-target }}
             fi
