@@ -488,6 +488,9 @@ jobs:
           echo "Assets found on ${GITHUB_RELEASE_NAME}:"
           echo `gh release view ${GITHUB_RELEASE_NAME} --json assets`
           
+          echo "Testing if gh assets uploded state is true: "
+          echo `gh release view ${GITHUB_RELEASE_NAME} --json assets --jq 'any(.assets[]; .state == "uploaded")'`
+          
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
