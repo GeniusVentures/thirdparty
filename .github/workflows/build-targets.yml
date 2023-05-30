@@ -511,6 +511,7 @@ jobs:
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
+            echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
               echo "Skipping cached target: $TARGET_NAME, sha: $TARGET_SHA"
             else
