@@ -144,11 +144,11 @@ ExternalProject_Add(Microsoft.GSL
   PREFIX Microsoft.GSL
   SOURCE_DIR "${THIRDPARTY_DIR}/GSL"
   CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/GSL
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Microsoft.GSL
         -DGSL_TEST:BOOL=OFF
         ${_CMAKE_COMMON_BUILD_PARAMS}
 )
-set(_FINDPACKAGE_GSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/GSL/include")
+set(_FINDPACKAGE_GSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Microsoft.GSL/include")
 
 # --------------------------------------------------------
 ExternalProject_Add(fmt
