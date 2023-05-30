@@ -504,6 +504,10 @@ jobs:
         run: |
           TARGET_OS="${{ matrix.target-build-data.target-os }}"
           BUILD_TYPE="${{ matrix.build-type }}"
+          BRANCH=${{ github.ref_name }}
+          
+          GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+          
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
@@ -513,7 +517,16 @@ jobs:
             TARGET_SHA="${TARGET_SHAS[i]}"
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
-              echo "Skipping cached target: $TARGET_NAME, sha: $TARGET_SHA"
+              echo "Downloading cached target: $TARGET_NAME, sha: $TARGET_SHA"
+              gh release download ${GITHUB_RELEASE_NAME} --pattern "${TARGET_NAME}-${TARGET_SHA}.tar.gz" --clobber
+              if [ $? -eq 0 ]
+              then
+                echo "Extracting cached target: ${TARGET_NAME}-${TARGET_SHA}.tar.gz"
+                tar -xf ${TARGET_NAME}-${TARGET_SHA}.tar.gz
+              else
+                echo "Failed to download cached target: ${TARGET_NAME}-${TARGET_SHA}.tar.gz - Starting to rebuild it"
+                ${{ matrix.target-build-data.cmake-compile-script }}
+              fi
             else
               ${{ matrix.target-build-data.cmake-compile-script }}
             fi
