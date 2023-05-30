@@ -549,10 +549,13 @@ jobs:
             fi
           done
           
-          for i in "${!listOfTargetNamesToBuild[@]}"; do
-            TARGET_NAME="${listOfTargetNamesToBuild[i]}"
-            TARGET_SHA="${listOfTargetSHAsToBuild[i]}"
-            TARGET_DIRECTORY="${listOfTargetDirToBuild[i]}"
+          IFS=$'\n' read -d '|' -ra TARGET_NAMES_TO_BUILD <<< "$(echo -ne '${listOfTargetNamesToBuild}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_SHAS_TO_BUILD <<< "$(echo -ne '${listOfTargetSHAsToBuild}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_DIR_TO_BUILD <<< "$(echo -ne '${listOfTargetDirToBuild}|')"
+          for i in "${!TARGET_NAMES_TO_BUILD[@]}"; do
+            TARGET_NAME="${TARGET_NAMES_TO_BUILD[i]}"
+            TARGET_SHA="${TARGET_SHAS_TO_BUILD[i]}"
+            TARGET_DIRECTORY="${TARGET_DIR_TO_BUILD[i]}"
             echo "Starting to compile target: ${TARGET_NAME}"
             ${{ matrix.target-build-data.cmake-compile-script }}
           done
