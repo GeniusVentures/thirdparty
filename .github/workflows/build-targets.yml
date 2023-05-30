@@ -519,6 +519,7 @@ jobs:
           
           listOfTargetNamesToBuild=""
           listOfTargetSHAsToBuild=""
+          listOfTargetDirToBuild=""
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
@@ -531,24 +532,27 @@ jobs:
               then
                 echo "Extracting cached target: ${TARGET_NAME}-${TARGET_SHA}.tar.gz"
                 tar -xf ${TARGET_NAME}-${TARGET_SHA}.tar.gz
-                pwd ./${TARGET_DIRECTORY}
+                echo "Target extracted to `pwd`/${TARGET_DIRECTORY}"
+                echo "Contents of target folder `pwd`/${TARGET_DIRECTORY}"
                 ls -la ./${TARGET_DIRECTORY}
               else
                 echo "Failed to download cached target: ${TARGET_NAME}-${TARGET_SHA}.tar.gz - need to rebuild it"
                 listOfTargetNamesToBuild+="$TARGET_NAME\n"
                 listOfTargetSHAsToBuild+="$TARGET_SHA\n"
+                listOfTargetDirToBuild+="$TARGET_DIRECTORY\n"
               fi
             else
               echo "Cached target not found: ${TARGET_NAME}-${TARGET_SHA}.tar.gz - need to rebuild it"
               listOfTargetNamesToBuild+="$TARGET_NAME\n"
               listOfTargetSHAsToBuild+="$TARGET_SHA\n"
+              listOfTargetDirToBuild+="$TARGET_DIRECTORY\n"
             fi
           done
           
           for i in "${!listOfTargetNamesToBuild[@]}"; do
             TARGET_NAME="${listOfTargetNamesToBuild[i]}"
             TARGET_SHA="${listOfTargetSHAsToBuild[i]}"
-            TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
+            TARGET_DIRECTORY="${listOfTargetDirToBuild[i]}"
             echo "Starting to compile target: ${TARGET_NAME}"
             ${{ matrix.target-build-data.cmake-compile-script }}
           done
