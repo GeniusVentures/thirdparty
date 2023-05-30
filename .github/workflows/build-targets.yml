@@ -328,8 +328,8 @@ jobs:
               make $TARGET_NAME -j$(nproc)
               make install
             release-target: |
-              echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode"
-              tar -zcvf ${TARGET_NAME}-${TARGET_SHA}.tar.gz ${TARGET_NAME} 
+              echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode (target build folder: ${TARGET_DIRECTORY})"
+              tar -zcvf ${TARGET_NAME}-${TARGET_SHA}.tar.gz ${TARGET_DIRECTORY} 
               GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
               echo "Uploading target ${TARGET_NAME}-${TARGET_SHA}.tar.gz to github release ${GITHUB_RELEASE_NAME}"
               gh release upload ${GITHUB_RELEASE_NAME} ${TARGET_NAME}-${TARGET_SHA}.tar.gz
@@ -511,13 +511,18 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
+          
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
+          
+          set +e
           
           listOfTargetNamesToBuild=""
           listOfTargetSHAsToBuild=""
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
+            TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
               echo "Downloading cached target: $TARGET_NAME, sha: $TARGET_SHA"
@@ -526,8 +531,8 @@ jobs:
               then
                 echo "Extracting cached target: ${TARGET_NAME}-${TARGET_SHA}.tar.gz"
                 tar -xf ${TARGET_NAME}-${TARGET_SHA}.tar.gz
-                pwd ./${TARGET_NAME}
-                ls -la ./${TARGET_NAME}
+                pwd ./${TARGET_DIRECTORY}
+                ls -la ./${TARGET_DIRECTORY}
               else
                 echo "Failed to download cached target: ${TARGET_NAME}-${TARGET_SHA}.tar.gz - need to rebuild it"
                 listOfTargetNamesToBuild+="$TARGET_NAME\n"
@@ -543,6 +548,7 @@ jobs:
           for i in "${!listOfTargetNamesToBuild[@]}"; do
             TARGET_NAME="${listOfTargetNamesToBuild[i]}"
             TARGET_SHA="${listOfTargetSHAsToBuild[i]}"
+            TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
             echo "Starting to compile target: ${TARGET_NAME}"
             ${{ matrix.target-build-data.cmake-compile-script }}
           done
@@ -556,7 +562,8 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
-                    
+          IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
+          
           ## Setting this to not fail the workflow while checking release tag 
           set +e
           
@@ -580,6 +587,7 @@ jobs:
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
+            echo "TARGET_DIRECTORIES=$buildDirectoryNames" >> $GITHUB_OUTPUT
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
               echo "Skipping installed target zipping: ${TARGET_NAME}, sha: ${TARGET_SHA}"
