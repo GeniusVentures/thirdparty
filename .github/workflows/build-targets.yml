@@ -488,7 +488,7 @@ jobs:
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             COMPRESSED_TARGET="${TARGET_NAME}-${TARGET_SHA}.tar.gz"
-            targetBuilt=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq 'any(.assets[]; .name == \"${COMPRESSED_TARGET}\")'`
+            targetBuilt=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq "any(.assets[]; .name == \"${COMPRESSED_TARGET}\")"`
             if [ $? -eq 1 ]
             then
               echo "gh release view command failed for ${GITHUB_RELEASE_NAME}"
