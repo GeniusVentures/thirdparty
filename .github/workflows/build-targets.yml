@@ -483,7 +483,7 @@ jobs:
           set +e
           
           GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
-          targetBuiltList = ""
+          targetBuiltList=""
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
