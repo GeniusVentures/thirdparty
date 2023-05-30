@@ -524,7 +524,7 @@ jobs:
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
-            echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
+            echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]} (Target direcory: $TARGET_DIRECTORY)"
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
               echo "Downloading cached target: $TARGET_NAME, sha: $TARGET_SHA"
               gh release download ${GITHUB_RELEASE_NAME} --pattern "${TARGET_NAME}-${TARGET_SHA}.tar.gz" --clobber
@@ -591,7 +591,7 @@ jobs:
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
-            echo "TARGET_DIRECTORIES=$buildDirectoryNames" >> $GITHUB_OUTPUT
+            TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
               echo "Skipping installed target zipping: ${TARGET_NAME}, sha: ${TARGET_SHA}"
