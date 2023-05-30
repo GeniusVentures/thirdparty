@@ -512,6 +512,9 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
+          
+          listOfTargetNamesToBuild=""
+          listOfTargetSHAsToBuild=""
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
@@ -523,13 +526,25 @@ jobs:
               then
                 echo "Extracting cached target: ${TARGET_NAME}-${TARGET_SHA}.tar.gz"
                 tar -xf ${TARGET_NAME}-${TARGET_SHA}.tar.gz
+                pwd ./${TARGET_NAME}
+                ls -la ./${TARGET_NAME}
               else
-                echo "Failed to download cached target: ${TARGET_NAME}-${TARGET_SHA}.tar.gz - Starting to rebuild it"
-                ${{ matrix.target-build-data.cmake-compile-script }}
+                echo "Failed to download cached target: ${TARGET_NAME}-${TARGET_SHA}.tar.gz - need to rebuild it"
+                listOfTargetNamesToBuild+="$TARGET_NAME\n"
+                listOfTargetSHAsToBuild+="$TARGET_SHA\n"
               fi
             else
-              ${{ matrix.target-build-data.cmake-compile-script }}
+              echo "Cached target not found: ${TARGET_NAME}-${TARGET_SHA}.tar.gz - need to rebuild it"
+              listOfTargetNamesToBuild+="$TARGET_NAME\n"
+              listOfTargetSHAsToBuild+="$TARGET_SHA\n"
             fi
+          done
+          
+          for i in "${!listOfTargetNamesToBuild[@]}"; do
+            TARGET_NAME="${listOfTargetNamesToBuild[i]}"
+            TARGET_SHA="${listOfTargetSHAsToBuild[i]}"
+            echo "Starting to compile target: ${TARGET_NAME}"
+            ${{ matrix.target-build-data.cmake-compile-script }}
           done
 
       - name:  Save target OS SDK as github release
