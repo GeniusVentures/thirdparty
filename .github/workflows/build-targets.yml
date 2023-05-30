@@ -549,9 +549,9 @@ jobs:
             fi
           done
           
-          IFS=$'\n' read -d '|' -ra TARGET_NAMES_TO_BUILD <<< "$(echo -ne '${listOfTargetNamesToBuild}|')"
-          IFS=$'\n' read -d '|' -ra TARGET_SHAS_TO_BUILD <<< "$(echo -ne '${listOfTargetSHAsToBuild}|')"
-          IFS=$'\n' read -d '|' -ra TARGET_DIR_TO_BUILD <<< "$(echo -ne '${listOfTargetDirToBuild}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_NAMES_TO_BUILD <<< "$(echo -ne '${{ listOfTargetNamesToBuild }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_SHAS_TO_BUILD <<< "$(echo -ne '${{ listOfTargetSHAsToBuild }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_DIR_TO_BUILD <<< "$(echo -ne '${{ listOfTargetDirToBuild }}|')"
           for i in "${!TARGET_NAMES_TO_BUILD[@]}"; do
             TARGET_NAME="${TARGET_NAMES_TO_BUILD[i]}"
             TARGET_SHA="${TARGET_SHAS_TO_BUILD[i]}"
