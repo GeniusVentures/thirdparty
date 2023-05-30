@@ -400,7 +400,7 @@ jobs:
 
     runs-on: ${{ matrix.target-build-data.runs-on }}
     outputs:
-        TARGET_NAMES: ${{ steps.cache-library-directory.outputs.TARGET_BUILT }}
+        TARGET_BUILT: ${{ steps.cache-library-directory.outputs.TARGET_BUILT }}
     steps:
       - name: Create library Keys and Paths to Cache/build
         id: create-lib-cache-keys
@@ -551,6 +551,7 @@ jobs:
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
+            echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
               echo "Skipping installed target zipping: ${TARGET_NAME}, sha: ${TARGET_SHA}"
             else
