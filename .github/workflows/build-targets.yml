@@ -509,7 +509,7 @@ jobs:
             targetBuilt=true
             
             #targetBuilt=false
-            #shaFound=`jq ".[] | select(.name == \"${TARGET_NAME}\") | .sha" <<< $jsonStr`
+            #shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< $jsonStr`
             #if [[ "$shaFound" == "$TARGET_SHA" ]]; 
             #then
             #  targetBuilt=true
@@ -609,7 +609,7 @@ jobs:
             fi
           fi
           
-          jsonStr="[ "           
+          jsonStr="{}"           
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
@@ -638,7 +638,6 @@ jobs:
             --arg targetBinary $TARGET_BINARY \
             <<< "$jsonStr"`; 
           done
-          jsonStr=" ]";
           
           # Print final JSON file 
           jq <<< $jsonStr
