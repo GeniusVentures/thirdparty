@@ -484,17 +484,37 @@ jobs:
           set +e
           
           GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+          
+          # check if release.json file already available
+          jsonStr="[]"
+          jsonFound=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
+          if [ $? -eq 0 ]
+          then
+            echo "Downloading release.json file"
+            gh release download ${GITHUB_RELEASE_NAME} --pattern "release.json" --clobber
+            if [ $? -eq 0 ]
+            then
+              echo "Loading release.json file"
+              jsonStr=`cat release.json`
+            fi
+          fi
+
           targetBuiltList=""
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
-            targetBuilt=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq "any(.assets[]; .name == \"${COMPRESSED_TARGET}\")"`
-            if [ $? -eq 1 ]
-            then
-              echo "gh release view command failed for ${GITHUB_RELEASE_NAME}"
-              targetBuilt=false
-            fi
+            
+            echo "TODO: just for simplification - remove it"
+            targetBuilt=true
+            
+            #targetBuilt=false
+            #shaFound=`jq ".[] | select(.name == \"${TARGET_NAME}\") | .sha" <<< $jsonStr`
+            #if [[ "$shaFound" == "$TARGET_SHA" ]]; 
+            #then
+            #  targetBuilt=true
+            #fi
+            
             echo "Check if ${COMPRESSED_TARGET} found on ${GITHUB_RELEASE_NAME}: ${targetBuilt}"
             targetBuiltList+="${targetBuilt}\n"
           done
@@ -589,20 +609,7 @@ jobs:
             fi
           fi
           
-          jsonStr="{}"; 
-          # check if release.json file already available, load that first
-          jsonFound=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
-          if [ $? -eq 0 ]
-          then
-            echo "Downloading release.json file"
-            gh release download ${GITHUB_RELEASE_NAME} --pattern "release.json" --clobber
-            if [ $? -eq 0 ]
-            then
-              echo "Loading release.json file"
-              jsonStr=`cat release.json`
-            fi
-          fi
-            
+          jsonStr="[ "           
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
@@ -614,21 +621,28 @@ jobs:
               echo "Skipping installed target zipping: ${TARGET_NAME}, sha: ${TARGET_SHA}"
             else
               ${{ matrix.target-build-data.release-target }}
-              # Get source url
-              #TARGET_SOURCE=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`
-              TARGET_SOURCE="TODO-IMPLEMENT IT"
-              # Get target url
-              TARGET_BINARY=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`
-              
-              jsonStr=`jq '. + { "name": $targetName, "sha" : $targetSHA, "binFolderName" : $targetDirectory, "source" : $targetSource, "binary" : $targetBinary }' \
-              --arg targetName $TARGET_NAME \
-              --arg targetSHA $TARGET_SHA \
-              --arg targetDirectory $TARGET_DIRECTORY \
-              --arg targetSource $TARGET_SOURCE \
-              --arg targetBinary $TARGET_BINARY \
-              <<< "$jsonStr"`; jq <<< $jsonStr
             fi
+            
+            # Update JSON file 
+            # Get source url
+            #TARGET_SOURCE=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`
+            TARGET_SOURCE="TODO-IMPLEMENT IT"
+            # Get target url
+            TARGET_BINARY=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`
+            
+            jsonStr+=`jq '. + { "name": $targetName, "sha" : $targetSHA, "binFolderName" : $targetDirectory, "source" : $targetSource, "binary" : $targetBinary }' \
+            --arg targetName $TARGET_NAME \
+            --arg targetSHA $TARGET_SHA \
+            --arg targetDirectory $TARGET_DIRECTORY \
+            --arg targetSource $TARGET_SOURCE \
+            --arg targetBinary $TARGET_BINARY \
+            <<< "$jsonStr"`; 
           done
+          jsonStr=" ]";
+          
+          # Print final JSON file 
+          jq <<< $jsonStr
+          
           # Upload JSON file release 
           jq <<< $jsonStr >> release.json
           echo "Uploading release.json to github release ${GITHUB_RELEASE_NAME}"
