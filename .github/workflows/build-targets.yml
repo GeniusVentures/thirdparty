@@ -37,7 +37,7 @@ jobs:
             sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
             echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
             sudo apt update
-            sudo apt install gh -y
+            sudo apt install gh jo -y            
           }
           gh extension install actions/gh-actions-cache
           echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
@@ -328,11 +328,12 @@ jobs:
               make $TARGET_NAME -j$(nproc)
               make install
             release-target: |
+              COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
               echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode (target build folder: ${TARGET_DIRECTORY})"
-              tar -zcvf ${TARGET_NAME}-${TARGET_SHA}.tar.gz ${TARGET_DIRECTORY} 
+              tar -zcvf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
               GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
-              echo "Uploading target ${TARGET_NAME}-${TARGET_SHA}.tar.gz to github release ${GITHUB_RELEASE_NAME}"
-              gh release upload ${GITHUB_RELEASE_NAME} ${TARGET_NAME}-${TARGET_SHA}.tar.gz
+              echo "Uploading target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
+              gh release upload ${GITHUB_RELEASE_NAME} ${COMPRESSED_TARGET}
 
               
     #          - target-os: Android
@@ -487,7 +488,7 @@ jobs:
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
-            COMPRESSED_TARGET="${TARGET_NAME}-${TARGET_SHA}.tar.gz"
+            COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
             targetBuilt=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq "any(.assets[]; .name == \"${COMPRESSED_TARGET}\")"`
             if [ $? -eq 1 ]
             then
@@ -524,25 +525,26 @@ jobs:
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
+            COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]} (Target direcory: $TARGET_DIRECTORY)"
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
               echo "Downloading cached target: $TARGET_NAME, sha: $TARGET_SHA"
-              gh release download ${GITHUB_RELEASE_NAME} --pattern "${TARGET_NAME}-${TARGET_SHA}.tar.gz" --clobber
+              gh release download ${GITHUB_RELEASE_NAME} --pattern "${COMPRESSED_TARGET}" --clobber
               if [ $? -eq 0 ]
               then
-                echo "Extracting cached target: ${TARGET_NAME}-${TARGET_SHA}.tar.gz"
-                tar -xf ${TARGET_NAME}-${TARGET_SHA}.tar.gz
+                echo "Extracting cached target: ${COMPRESSED_TARGET}"
+                tar -xf ${COMPRESSED_TARGET}
                 echo "Target extracted to `pwd`/${TARGET_DIRECTORY}"
                 echo "Contents of target folder `pwd`/${TARGET_DIRECTORY}"
                 ls -la ./${TARGET_DIRECTORY}
               else
-                echo "Failed to download cached target: ${TARGET_NAME}-${TARGET_SHA}.tar.gz - need to rebuild it"
+                echo "Failed to download cached target: ${COMPRESSED_TARGET} - need to rebuild it"
                 listOfTargetNamesToBuild+=("${TARGET_NAME}")
                 listOfTargetSHAsToBuild+=("${TARGET_SHA}")
                 listOfTargetDirToBuild+=("${TARGET_DIRECTORY}")
               fi
             else
-              echo "Cached target not found: ${TARGET_NAME}-${TARGET_SHA}.tar.gz - need to rebuild it"
+              echo "Cached target not found: ${COMPRESSED_TARGET} - need to rebuild it"
               listOfTargetNamesToBuild+=("${TARGET_NAME}")
               listOfTargetSHAsToBuild+=("${TARGET_SHA}")
               listOfTargetDirToBuild+=("${TARGET_DIRECTORY}")
@@ -587,16 +589,47 @@ jobs:
             fi
           fi
           
+          jsonStr="{}"; 
+          # check if release.json file already available, load that first
+          jsonFound=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
+          if [ $? -eq 0 ]
+          then
+            echo "Downloading release.json file"
+            gh release download ${GITHUB_RELEASE_NAME} --pattern "release.json" --clobber
+            if [ $? -eq 0 ]
+            then
+              echo "Loading release.json file"
+              jsonStr=`cat release.json`
+            fi
+          fi
+            
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
+            COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
               echo "Skipping installed target zipping: ${TARGET_NAME}, sha: ${TARGET_SHA}"
             else
               ${{ matrix.target-build-data.release-target }}
+              # Get source url
+              #TARGET_SOURCE=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`
+              TARGET_SOURCE="TODO-IMPLEMENT IT"
+              # Get target url
+              TARGET_BINARY=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`
+              
+              jsonStr=`jq '. + { "name": $targetName, "sha" : $targetSHA, "binFolderName" : $targetDirectory, "source" : $targetSource, "binary" : $targetBinary }' \
+              --arg targetName $TARGET_NAME \
+              --arg targetSHA $TARGET_SHA \
+              --arg targetDirectory $TARGET_DIRECTORY \
+              --arg targetSource $TARGET_SOURCE \
+              --arg targetBinary $TARGET_BINARY \
+              <<< "$jsonStr"`; jq <<< $jsonStr
             fi
           done
-
+          # Upload JSON file release 
+          jq <<< $jsonStr >> release.json
+          echo "Uploading release.json to github release ${GITHUB_RELEASE_NAME}"
+          gh release upload ${GITHUB_RELEASE_NAME} release.json
