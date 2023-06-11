@@ -609,7 +609,7 @@ jobs:
             fi
           fi
           
-          jsonStr="{}"           
+          jsonStr=""           
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
@@ -629,7 +629,7 @@ jobs:
             TARGET_SOURCE="TODO-IMPLEMENT IT"
             # Get target url
             TARGET_BINARY=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`
-            jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : \"${TARGET_SOURCE}\", \"binary\" : \"${TARGET_BINARY}\" }" <<< ${jsonStr}`
+            jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : \"${TARGET_SOURCE}\", \"binary\" : \"${TARGET_BINARY}\" }" <<< "{}"`
             echo ${jsonStrTarget}
             #jsonStr+=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : \"${TARGET_SOURCE}\", \"binary\" : \"${TARGET_BINARY}\" }" <<< ${jsonStr}` 
             jsonStr+=`echo ${jsonStrTarget}`
