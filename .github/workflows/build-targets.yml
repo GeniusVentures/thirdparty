@@ -333,7 +333,7 @@ jobs:
               tar -zcvf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
               GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
               echo "Uploading target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
-              gh release upload ${GITHUB_RELEASE_NAME} ${COMPRESSED_TARGET}
+              gh release upload --clobber ${GITHUB_RELEASE_NAME} ${COMPRESSED_TARGET}
 
               
     #          - target-os: Android
@@ -641,4 +641,4 @@ jobs:
           # Upload JSON file release 
           jq <<< $jsonStr >> release.json
           echo "Uploading release.json to github release ${GITHUB_RELEASE_NAME}"
-          gh release upload ${GITHUB_RELEASE_NAME} release.json
+          gh release upload --clobber ${GITHUB_RELEASE_NAME} release.json
