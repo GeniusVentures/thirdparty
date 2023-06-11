@@ -632,8 +632,6 @@ jobs:
             # Get target url
             TARGET_BINARY=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`
             jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : \"${TARGET_SOURCE}\", \"binary\" : \"${TARGET_BINARY}\" }" <<< "{}"`
-            echo ${jsonStrTarget}
-            #jsonStr+=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : \"${TARGET_SOURCE}\", \"binary\" : \"${TARGET_BINARY}\" }" <<< ${jsonStr}` 
             jsonStr+=`echo ${jsonStrTarget}`
           done
           
