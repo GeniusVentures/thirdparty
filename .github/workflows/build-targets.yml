@@ -506,11 +506,7 @@ jobs:
             COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
                         
             targetBuilt=false
-            targetJSON=`jq ". | select(.name == \"${TARGET_NAME}\")" <<< ${jsonStr}`
-            echo ${targetJSON}
-            
             shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< ${jsonStr}`
-            echo "shaFound: ${shaFound}"
             if [[ "${shaFound}" == \"${TARGET_SHA}\" ]]; 
             then
               targetBuilt=true
@@ -576,8 +572,13 @@ jobs:
             TARGET_NAME="${listOfTargetNamesToBuild[i]}"
             TARGET_SHA="${listOfTargetSHAsToBuild[i]}"
             TARGET_DIRECTORY="${listOfTargetDirToBuild[i]}"
+            COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
             echo "Starting to compile target: ${TARGET_NAME}"
             ${{ matrix.target-build-data.cmake-compile-script }}
+            
+            echo "Starting to upload target: ${COMPRESSED_TARGET}"
+            # Upload released target 
+            ${{ matrix.target-build-data.release-target }}
           done
 
       - name:  Save target OS SDK as github release
@@ -618,11 +619,14 @@ jobs:
             TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
             COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
+            
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
-              echo "Skipping installed target zipping: ${TARGET_NAME}, sha: ${TARGET_SHA}"
-            else
+              echo "Uploading already installed target: ${TARGET_NAME}, sha: ${TARGET_SHA}"
               ${{ matrix.target-build-data.release-target }}
             fi
+            
+            # Upload released target 
+            ${{ matrix.target-build-data.release-target }}
             
             # Update JSON file 
             # Get source url
