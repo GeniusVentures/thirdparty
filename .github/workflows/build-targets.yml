@@ -629,7 +629,7 @@ jobs:
             TARGET_SOURCE="TODO-IMPLEMENT IT"
             # Get target url
             TARGET_BINARY=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`            
-            jsonStr+=`jq ". + { \"name\": ${TARGET_NAME}, \"sha\" : ${TARGET_SHA}, \"binFolderName\" : ${TARGET_DIRECTORY}, \"source\" : ${TARGET_SOURCE}, \"binary\" : ${TARGET_BINARY} }" <<< ${jsonStr}` 
+            jsonStr+=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : \"${TARGET_SOURCE}\", \"binary\" : \"${TARGET_BINARY}\" }" <<< ${jsonStr}` 
           done
           
           # Print final JSON file 
