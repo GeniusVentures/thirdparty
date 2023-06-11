@@ -624,10 +624,7 @@ jobs:
               echo "Uploading already installed target: ${TARGET_NAME}, sha: ${TARGET_SHA}"
               ${{ matrix.target-build-data.release-target }}
             fi
-            
-            # Upload released target 
-            ${{ matrix.target-build-data.release-target }}
-            
+                        
             # Update JSON file 
             # Get source url
             #TARGET_SOURCE=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`
