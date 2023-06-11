@@ -506,7 +506,10 @@ jobs:
             COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
                         
             targetBuilt=false
-            shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< $jsonStr`
+            targetJSON=`jq ". | select(.name == \"${TARGET_NAME}\")" <<< ${jsonStr}`
+            echo ${targetJSON}
+            
+            shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< ${jsonStr}`
             if [[ "$shaFound" == "$TARGET_SHA" ]]; 
             then
               targetBuilt=true
