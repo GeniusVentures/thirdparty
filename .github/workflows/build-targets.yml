@@ -504,16 +504,13 @@ jobs:
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
-            
-            echo "TODO: just for simplification - remove it"
-            targetBuilt=true
-            
-            #targetBuilt=false
-            #shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< $jsonStr`
-            #if [[ "$shaFound" == "$TARGET_SHA" ]]; 
-            #then
-            #  targetBuilt=true
-            #fi
+                        
+            targetBuilt=false
+            shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< $jsonStr`
+            if [[ "$shaFound" == "$TARGET_SHA" ]]; 
+            then
+              targetBuilt=true
+            fi
             
             echo "Check if ${COMPRESSED_TARGET} found on ${GITHUB_RELEASE_NAME}: ${targetBuilt}"
             targetBuiltList+="${targetBuilt}\n"
