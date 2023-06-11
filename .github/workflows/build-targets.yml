@@ -510,7 +510,8 @@ jobs:
             echo ${targetJSON}
             
             shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< ${jsonStr}`
-            if [[ "$shaFound" == "$TARGET_SHA" ]]; 
+            echo "shaFound: ${shaFound}"
+            if [[ "${shaFound}" == \"${TARGET_SHA}\" ]]; 
             then
               targetBuilt=true
             fi
