@@ -577,7 +577,7 @@ jobs:
                 FOLDER_HASH=`find ./${TARGET_DIRECTORY} -xdev -type f -print0 | LC_COLLATE=C sort -z | xargs -0 cat | md5sum | awk '{print $1}'`
                 echo "Cached target folder hash: ${FOLDER_HASH}"
                 jsonStrHash=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"binFolderHash\" : \"${FOLDER_HASH}\" }" <<< "{}"`
-                jsonStr+=`echo ${jsonStrTarget}`
+                jsonStr+=`echo ${jsonStrHash}`
                 
                 echo "Target extracted to `pwd`/${TARGET_DIRECTORY}"
                 echo "Contents of target folder `pwd`/${TARGET_DIRECTORY}"
@@ -595,6 +595,7 @@ jobs:
               listOfTargetDirToBuild+=("${TARGET_DIRECTORY}")
             fi
           done
+          
           # Print hash JSON file 
           jq <<< $jsonStr
           
