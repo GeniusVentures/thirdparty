@@ -642,7 +642,7 @@ jobs:
             
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
               # Compare uncompressed original hash of the binary folder with current to see if any changes has been made
-              originalHash=`jq "select(.name == \"${TARGET_NAME}\" | .binFolderHash )" hash.json`
+              originalHash=`jq "select(.name == \"${TARGET_NAME}\") | .binFolderHash" hash.json`
               currentHash=`find ./${TARGET_DIRECTORY} -xdev -type f -print0 | LC_COLLATE=C sort -z | xargs -0 cat | md5sum | awk '{print $1}'`
               echo "originalHash: ${originalHash}"
               echo "currentHash: ${currentHash}"
