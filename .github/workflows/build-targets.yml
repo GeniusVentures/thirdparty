@@ -328,7 +328,7 @@ jobs:
               make $TARGET_NAME -j$(nproc)
               make install
             release-target: |
-              COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
+              COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
               echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode (target build folder: ${TARGET_DIRECTORY})"
               tar -zcvf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
               GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
@@ -503,7 +503,7 @@ jobs:
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
-            COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
+            COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
                         
             targetBuilt=false
             shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< ${jsonStr}`
@@ -542,7 +542,7 @@ jobs:
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
-            COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
+            COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]} (Target direcory: $TARGET_DIRECTORY)"
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
               echo "Downloading cached target: $TARGET_NAME, sha: $TARGET_SHA"
@@ -572,7 +572,7 @@ jobs:
             TARGET_NAME="${listOfTargetNamesToBuild[i]}"
             TARGET_SHA="${listOfTargetSHAsToBuild[i]}"
             TARGET_DIRECTORY="${listOfTargetDirToBuild[i]}"
-            COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
+            COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
             echo "Starting to compile target: ${TARGET_NAME}"
             ${{ matrix.target-build-data.cmake-compile-script }}
             
@@ -617,7 +617,7 @@ jobs:
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
-            COMPRESSED_TARGET="${TARGET_NAME}.tar.gz"
+            COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
             
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
