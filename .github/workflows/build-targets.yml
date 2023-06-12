@@ -334,8 +334,15 @@ jobs:
               if [ $? -eq 1 ]
               then
                 echo "Creating github release with tag: ${GITHUB_RELEASE_NAME}"
+                
+                RELEASE_TYPE="--latest"
+                if [[ "${BUILD_TYPE}" != "Release" ]]; 
+                then
+                  RELEASE_TYPE="--prerelease"
+                fi
+                
                 # Create release on github
-                gh release create ${GITHUB_RELEASE_NAME} -n "${BRANCH} branch" --target ${BRANCH} -t "${TARGET_OS} ${BRANCH} branch ${BUILD_TYPE} build"
+                gh release create ${GITHUB_RELEASE_NAME} -n "${BRANCH} branch" --target ${BRANCH} ${RELEASE_TYPE} -t "${TARGET_OS} ${BRANCH} branch ${BUILD_TYPE} build"
                 if [ $? -eq 1 ]
                 then
                   set -e
@@ -609,7 +616,9 @@ jobs:
           
           ## Setting this to not fail the workflow while checking release tag 
           set +e
-           
+          
+          GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+          
           jsonStr=""           
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
           for i in "${!TARGET_NAMES[@]}"; do
