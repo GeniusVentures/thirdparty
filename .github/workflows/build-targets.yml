@@ -557,6 +557,7 @@ jobs:
           
           set +e
           
+          jsonStr=""
           declare -a listOfTargetNamesToBuild
           declare -a listOfTargetSHAsToBuild
           declare -a listOfTargetDirToBuild
@@ -573,6 +574,11 @@ jobs:
               then
                 echo "Extracting cached target: ${COMPRESSED_TARGET}"
                 tar -xf ${COMPRESSED_TARGET}
+                FOLDER_HASH=`find ./${TARGET_DIRECTORY} -xdev -type f -print0 | LC_COLLATE=C sort -z | xargs -0 cat | md5sum | awk '{print $1}'`
+                echo "Cached target folder hash: ${FOLDER_HASH}"
+                jsonStrHash=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"binFolderHash\" : \"${FOLDER_HASH}\" }" <<< "{}"`
+                jsonStr+=`echo ${jsonStrTarget}`
+                
                 echo "Target extracted to `pwd`/${TARGET_DIRECTORY}"
                 echo "Contents of target folder `pwd`/${TARGET_DIRECTORY}"
                 ls -la ./${TARGET_DIRECTORY}
@@ -589,6 +595,11 @@ jobs:
               listOfTargetDirToBuild+=("${TARGET_DIRECTORY}")
             fi
           done
+          # Print hash JSON file 
+          jq <<< $jsonStr
+          
+          # save hash JSON file  
+          jq <<< $jsonStr >> hash.json
           
           for i in "${!listOfTargetNamesToBuild[@]}"; do
             TARGET_NAME="${listOfTargetNamesToBuild[i]}"
@@ -629,8 +640,16 @@ jobs:
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
             
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
-              echo "Uploading already installed target: ${TARGET_NAME}, sha: ${TARGET_SHA}"
-              ${{ matrix.target-build-data.release-target }}
+              # Compare uncompressed original hash of the binary folder with current to see if any changes has been made
+              originalHash=`jq "select(.name == \"${TARGET_NAME}\" | .binFolderHash )" hash.json`
+              currentHash=`find ./${TARGET_DIRECTORY} -xdev -type f -print0 | LC_COLLATE=C sort -z | xargs -0 cat | md5sum | awk '{print $1}'`
+              echo "originalHash: ${originalHash}"
+              echo "currentHash: ${currentHash}"
+              if [[ "${originalHash}" == \"${currentHash}\" ]]; 
+              then
+                echo "Uploading already installed target: ${TARGET_NAME}, sha: ${TARGET_SHA}"
+                ${{ matrix.target-build-data.release-target }}
+              fi
             fi
                         
             # Update JSON file 
