@@ -646,7 +646,7 @@ jobs:
               currentHash=`find ./${TARGET_DIRECTORY} -xdev -type f -print0 | LC_COLLATE=C sort -z | xargs -0 cat | md5sum | awk '{print $1}'`
               echo "originalHash: ${originalHash}"
               echo "currentHash: ${currentHash}"
-              if [[ "${originalHash}" == \"${currentHash}\" ]]; 
+              if [[ "${originalHash}" != \"${currentHash}\" ]]; 
               then
                 echo "Uploading already installed target: ${TARGET_NAME}, sha: ${TARGET_SHA}"
                 ${{ matrix.target-build-data.release-target }}
