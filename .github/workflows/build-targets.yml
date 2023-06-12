@@ -328,10 +328,25 @@ jobs:
               make $TARGET_NAME -j$(nproc)
               make install
             release-target: |
+              # Check if release already defined e.g. Linux-master-release
+              GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+              gh release view ${GITHUB_RELEASE_NAME}
+              if [ $? -eq 1 ]
+              then
+                echo "Creating github release with tag: ${GITHUB_RELEASE_NAME}"
+                # Create release on github
+                gh release create ${GITHUB_RELEASE_NAME} -n "${BRANCH} branch" --target ${BRANCH} -t "${TARGET_OS} ${BRANCH} branch ${BUILD_TYPE} build"
+                if [ $? -eq 1 ]
+                then
+                  set -e
+                  echo "Failed to create github release with tag: ${GITHUB_RELEASE_NAME}"
+                  return 1
+                fi
+              fi
+              
               COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
               echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode (target build folder: ${TARGET_DIRECTORY})"
               tar -zcvf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
-              GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
               echo "Uploading target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
               gh release upload --clobber ${GITHUB_RELEASE_NAME} ${COMPRESSED_TARGET}
 
@@ -594,23 +609,7 @@ jobs:
           
           ## Setting this to not fail the workflow while checking release tag 
           set +e
-          
-          # Check if release already defined e.g. Linux-master-release
-          GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
-          gh release view ${GITHUB_RELEASE_NAME}
-          if [ $? -eq 1 ]
-          then
-            echo "Creating github release with tag: ${GITHUB_RELEASE_NAME}"
-            # Create release on github
-            gh release create ${GITHUB_RELEASE_NAME} -n "${BRANCH} branch" --target ${BRANCH} -t "${TARGET_OS} ${BRANCH} branch ${BUILD_TYPE} build"
-            if [ $? -eq 1 ]
-            then
-              set -e
-              echo "Failed to create github release with tag: ${GITHUB_RELEASE_NAME}"
-              return 1
-            fi
-          fi
-          
+           
           jsonStr=""           
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
           for i in "${!TARGET_NAMES[@]}"; do
