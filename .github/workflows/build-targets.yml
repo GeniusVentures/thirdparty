@@ -303,14 +303,13 @@ jobs:
 
   save-target-sources:
     needs: [ setup-src-cache, cache-src, create-targets-matrix ]
-    # if: |
-    #   always() &&
-    #   needs.setup-src-cache.result == 'success' &&
-    #   needs.create-targets-matrix.result == 'success' &&
-    #   (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped')
+    if: |
+      always() &&
+      needs.setup-src-cache.result == 'success' &&
+      needs.create-targets-matrix.result == 'success' &&
+      (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped')    
     strategy:
       fail-fast: false
-      
       matrix:
         target-os: [Linux, Windows, OSX, iOS, Android]
         build-type: [ Release, Debug ]
