@@ -331,7 +331,7 @@ jobs:
         id: create-github-release-tag
         run: |
           set +e
-
+          echo "Check if github release tag ${GITHUB_RELEASE_NAME} available."
           gh release view ${GITHUB_RELEASE_NAME}
           if [ $? -eq 1 ]
           then
@@ -354,7 +354,7 @@ jobs:
           fi
 
           set -e
-          
+
       - name: Compress and upload targets source folder
         id: compress-targets-source
         run: |
