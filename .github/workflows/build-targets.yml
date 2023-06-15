@@ -318,14 +318,15 @@ jobs:
       - name: Create library Keys and Paths to release sources
         id: create-src-cache-keys
         run: |
-          # build array of library names
-          IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
-          IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
-
           TARGET_OS="${{ matrix.target-os }}"
           BUILD_TYPE="${{ matrix.build-type }}"
           BRANCH=${{ github.ref_name }}
           GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+
+          echo "TARGET_OS=${TARGET_OS}" >> $GITHUB_OUTPUT
+          echo "BUILD_TYPE=${BUILD_TYPE}" >> $GITHUB_OUTPUT
+          echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
+          echo "GITHUB_RELEASE_NAME=${GITHUB_RELEASE_NAME}" >> $GITHUB_OUTPUT
 
       - name: Creating github release tag
         id: create-github-release-tag
@@ -358,6 +359,10 @@ jobs:
       - name: Compress and upload targets source folder
         id: compress-targets-source
         run: |
+          # build array of library names
+          IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
+
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
