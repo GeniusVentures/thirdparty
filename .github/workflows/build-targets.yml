@@ -368,6 +368,9 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
 
+          # print folder
+          ls -la
+
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
