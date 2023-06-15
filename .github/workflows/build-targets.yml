@@ -330,6 +330,8 @@ jobs:
       - name: Creating github release tag
         id: create-github-release-tag
         run: |
+          set +e
+
           gh release view ${GITHUB_RELEASE_NAME}
           if [ $? -eq 1 ]
           then
@@ -351,6 +353,8 @@ jobs:
             fi
           fi
 
+          set -e
+          
       - name: Compress and upload targets source folder
         id: compress-targets-source
         run: |
