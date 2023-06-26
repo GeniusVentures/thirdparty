@@ -335,6 +335,7 @@ jobs:
           set +e
           echo "Check if github release tag ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} available."
           gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}
+          echo "Result of gh release view call: $?"
           if [ $? -eq 1 ]
           then
             echo "Creating github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
