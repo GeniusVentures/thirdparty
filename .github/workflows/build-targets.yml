@@ -329,37 +329,6 @@ jobs:
           echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
           echo "GITHUB_RELEASE_NAME=${GITHUB_RELEASE_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Creating github release tag
-        id: create-github-release-tag
-        run: |
-          set +e
-          echo "Check if github release tag ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} available."
-          gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}
-          releaseFound=$?
-          if [[ $releaseFound -ne 0 ]];
-          then
-            echo "gh release view return value: ${releaseFound}"
-            echo "Creating github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
-          
-            RELEASE_TYPE="--latest"
-            if [[ "${{ steps.create-src-cache-keys.outputs.BUILD_TYPE }}" != "Release" ]]; 
-            then
-              RELEASE_TYPE="--prerelease"
-            fi
-          
-            # Create release on github
-            gh release create "${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}" -n "${{ steps.create-src-cache-keys.outputs.BRANCH }} branch" --target "${{ steps.create-src-cache-keys.outputs.BRANCH }}" ${RELEASE_TYPE} -t "${{ steps.create-src-cache-keys.outputs.TARGET_OS }} ${{ steps.create-src-cache-keys.outputs.BRANCH }} branch ${{ steps.create-src-cache-keys.outputs.BUILD_TYPE }} build" | echo
-            releaseCreated=$?
-            if [[ $releaseCreated -ne 0 ]];
-            then
-              set -e
-              echo "gh release create return value: ${releaseCreated}"
-              echo "Failed to create github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
-              return 1
-            fi
-          fi
-
-          set -e
       - name: Cache Third Party Directory
         uses: GeniusVentures/cache-multi/restore@v3.2.3
         id: cache-tp-source-directory
@@ -380,6 +349,44 @@ jobs:
         with:
           multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
           paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+
+      - name: Creating github release tag
+        id: create-github-release-tag
+        run: |
+          set +e
+          echo "Check if github release tag ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} available."
+          gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}
+          
+          releaseFound=$?
+          if [[ $releaseFound -ne 0 ]];
+          then
+            echo "gh release view return value: ${releaseFound}"
+            echo "Creating github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
+          
+            RELEASE_TYPE="--latest"
+            if [[ "${{ steps.create-src-cache-keys.outputs.BUILD_TYPE }}" != "Release" ]]; 
+            then
+              RELEASE_TYPE="--prerelease"
+            fi
+          
+            # Create release on github
+            gh release create ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} \
+            -n "${{ steps.create-src-cache-keys.outputs.BRANCH }} branch" \
+            --target "${{ steps.create-src-cache-keys.outputs.BRANCH }}" \
+            ${RELEASE_TYPE} \
+            -t "${{ steps.create-src-cache-keys.outputs.TARGET_OS }} ${{ steps.create-src-cache-keys.outputs.BRANCH }} branch ${{ steps.create-src-cache-keys.outputs.BUILD_TYPE }} build" 
+            
+            releaseCreated=$?
+            if [[ $releaseCreated -ne 0 ]];
+            then
+              set -e
+              echo "gh release create return value: ${releaseCreated}"
+              echo "Failed to create github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
+              return 1
+            fi
+          fi
+  
+          set -e
   
       - name: Compress and upload targets source folder
         id: compress-targets-source
