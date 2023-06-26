@@ -334,9 +334,9 @@ jobs:
         run: |
           set +e
           echo "Check if github release tag ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} available."
-          gh release view "${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}" | echo
+          gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}
           releaseFound=$?
-          if [[ ${releaseFound} -ne 0 ]];
+          if [[ $releaseFound -ne 0 ]];
           then
             echo "gh release view return value: ${releaseFound}"
             echo "Creating github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
@@ -350,7 +350,7 @@ jobs:
             # Create release on github
             gh release create "${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}" -n "${{ steps.create-src-cache-keys.outputs.BRANCH }} branch" --target "${{ steps.create-src-cache-keys.outputs.BRANCH }}" ${RELEASE_TYPE} -t "${{ steps.create-src-cache-keys.outputs.TARGET_OS }} ${{ steps.create-src-cache-keys.outputs.BRANCH }} branch ${{ steps.create-src-cache-keys.outputs.BUILD_TYPE }} build" | echo
             releaseCreated=$?
-            if [[ ${releaseCreated} -ne 0 ]];
+            if [[ $releaseCreated -ne 0 ]];
             then
               set -e
               echo "gh release create return value: ${releaseCreated}"
