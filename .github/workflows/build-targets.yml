@@ -388,6 +388,7 @@ jobs:
           # build array of library names
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
 
           # print folder
           echo "Current folder: "
@@ -396,10 +397,11 @@ jobs:
 
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
+            TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
-            echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} source folder"
-            tar -zcvf ${COMPRESSED_TARGET_SRC} ${TARGET_NAME} 
+            echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_DIRECTORY} source folder"
+            tar -zcvf ${COMPRESSED_TARGET_SRC} ${TARGET_DIRECTORY} 
             echo "Uploading target ${COMPRESSED_TARGET_SRC} to github release ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
             gh release upload --clobber ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} ${COMPRESSED_TARGET_SRC}
           done
