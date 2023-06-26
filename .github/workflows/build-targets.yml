@@ -335,8 +335,9 @@ jobs:
           set +e
           echo "Check if github release tag ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} available."
           gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}
-          if [ $? -ne 0 ]
+          if [[ $? -ne 0 ]];
           then
+            echo "gh release view return value: $?"
             echo "Creating github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
           
             RELEASE_TYPE="--latest"
@@ -348,7 +349,7 @@ jobs:
             # Create release on github
             gh release create ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} -n "${{ steps.create-src-cache-keys.outputs.BRANCH }} branch" --target ${{ steps.create-src-cache-keys.outputs.BRANCH }} ${RELEASE_TYPE} -t "${{ steps.create-src-cache-keys.outputs.TARGET_OS }} ${{ steps.create-src-cache-keys.outputs.BRANCH }} branch ${{ steps.create-src-cache-keys.outputs.BUILD_TYPE }} build"
 
-            if [ $? -ne 0 ]
+            if [[ $? -ne 0 ]];
             then
               set -e
               echo "gh release create return value: $?"
