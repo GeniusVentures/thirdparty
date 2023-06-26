@@ -369,6 +369,8 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
 
           # print folder
+          echo "Current folder: "
+          pwd
           ls -la
 
           for i in "${!TARGET_NAMES[@]}"; do
