@@ -334,7 +334,7 @@ jobs:
         run: |
           set +e
           echo "Check if github release tag ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} available."
-          gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}
+          gh release view "${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
           releaseFound=$?
           if [[ ${releaseFound} -ne 0 ]];
           then
@@ -348,7 +348,7 @@ jobs:
             fi
           
             # Create release on github
-            gh release create ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} -n "${{ steps.create-src-cache-keys.outputs.BRANCH }} branch" --target ${{ steps.create-src-cache-keys.outputs.BRANCH }} ${RELEASE_TYPE} -t "${{ steps.create-src-cache-keys.outputs.TARGET_OS }} ${{ steps.create-src-cache-keys.outputs.BRANCH }} branch ${{ steps.create-src-cache-keys.outputs.BUILD_TYPE }} build"
+            gh release create "${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}" -n "${{ steps.create-src-cache-keys.outputs.BRANCH }} branch" --target "${{ steps.create-src-cache-keys.outputs.BRANCH }}" ${RELEASE_TYPE} -t "${{ steps.create-src-cache-keys.outputs.TARGET_OS }} ${{ steps.create-src-cache-keys.outputs.BRANCH }} branch ${{ steps.create-src-cache-keys.outputs.BUILD_TYPE }} build"
             releaseCreated=$?
             if [[ ${releaseCreated} -ne 0 ]];
             then
