@@ -335,8 +335,7 @@ jobs:
           set +e
           echo "Check if github release tag ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} available."
           gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}
-          echo "Result of gh release view call: $?"
-          if [ $? -eq 1 ]
+          if [ $? -ne 0 ]
           then
             echo "Creating github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
           
@@ -352,7 +351,7 @@ jobs:
             -t "${{ steps.create-src-cache-keys.outputs.TARGET_OS }} ${{ steps.create-src-cache-keys.outputs.BRANCH }} \
             branch ${{ steps.create-src-cache-keys.outputs.BUILD_TYPE }} build"
 
-            if [ $? -eq 1 ]
+            if [ $? -ne 0 ]
             then
               set -e
               echo "Failed to create github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
@@ -438,7 +437,7 @@ jobs:
               # Check if release already defined e.g. Linux-master-release
               GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
               gh release view ${GITHUB_RELEASE_NAME}
-              if [ $? -eq 1 ]
+              if [ $? -ne 0 ]
               then
                 echo "Creating github release with tag: ${GITHUB_RELEASE_NAME}"
                 
@@ -450,7 +449,7 @@ jobs:
                 
                 # Create release on github
                 gh release create ${GITHUB_RELEASE_NAME} -n "${BRANCH} branch" --target ${BRANCH} ${RELEASE_TYPE} -t "${TARGET_OS} ${BRANCH} branch ${BUILD_TYPE} build"
-                if [ $? -eq 1 ]
+                if [ $? -ne 0 ]
                 then
                   set -e
                   echo "Failed to create github release with tag: ${GITHUB_RELEASE_NAME}"
