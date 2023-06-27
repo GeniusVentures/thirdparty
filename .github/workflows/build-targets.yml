@@ -480,7 +480,7 @@ jobs:
               
               COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
               echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode (target build folder: ${TARGET_DIRECTORY})"
-              tar -zcvf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
+              tar -zcf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
               echo "Uploading target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
               gh release upload --clobber ${GITHUB_RELEASE_NAME} ${COMPRESSED_TARGET}
 
