@@ -382,7 +382,7 @@ jobs:
               set -e
               echo "gh release create return value: ${releaseCreated}"
               echo "Failed to create github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
-              return 1
+              exit 1
             fi
           fi
   
@@ -399,7 +399,7 @@ jobs:
 
           # check if release.json file already available
           jsonStr="[]"
-          jsonFound=`gh release view ${( steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
+          jsonFound=`gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
           if [ $? -eq 0 ]
           then
             echo "Downloading release.json file"
@@ -491,7 +491,7 @@ jobs:
                 then
                   set -e
                   echo "Failed to create github release with tag: ${GITHUB_RELEASE_NAME}"
-                  return 1
+                  exit 1
                 fi
               fi
               
