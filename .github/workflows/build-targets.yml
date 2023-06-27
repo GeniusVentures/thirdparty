@@ -387,23 +387,6 @@ jobs:
           fi
   
           set -e
-      - name: Check API rate limit
-        shell: pwsh
-        run: |
-          # add random sleep since we run on fixed schedule
-          sleep (get-random -max 60)
-          
-          # get currently authenticated user rate limit info
-          $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
-
-          # if we don't have at least 100 requests left, wait until reset
-          if ($rate.remaining -lt 10) {
-              $wait = ($rate.reset - (Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
-              echo "Rate limit remaining is $($rate.remaining), waiting for $($wait) seconds to reset"
-              sleep $wait
-              $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
-              echo "Rate limit has reset to $($rate.remaining) requests"
-          }
 
       - name: Compress and upload targets source folder
         id: compress-targets-source
@@ -420,6 +403,19 @@ jobs:
           ls -la
 
           for i in "${!TARGET_NAMES[@]}"; do
+            # get currently authenticated user rate limit info
+            $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
+            echo "Remaining rate limit is $rate.remaining"
+
+            # if we don't have at least 10 requests left, wait until reset
+            if ($rate.remaining -lt 10) {
+                $wait = ($rate.reset - (Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
+                echo "Rate limit remaining is $($rate.remaining), waiting for $($wait) seconds to reset"
+                sleep $wait
+                $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
+                echo "Rate limit has reset to $($rate.remaining) requests"
+            }
+
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_REPO_NAME="${TARGET_REPO_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
@@ -432,12 +428,13 @@ jobs:
 
 
   build-targets-matrix:
-    needs: [ setup-src-cache, cache-src, create-targets-matrix ]
+    needs: [ setup-src-cache, cache-src, create-targets-matrix, save-target-sources ]
     if: |
       always() &&
       needs.setup-src-cache.result == 'success' &&
       needs.create-targets-matrix.result == 'success' &&
       (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped')
+      (needs.save-target-sources.result == 'success' || needs.save-target-sources.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
