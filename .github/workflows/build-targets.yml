@@ -399,17 +399,20 @@ jobs:
 
           for i in "${!TARGET_NAMES[@]}"; do
             # get currently authenticated user rate limit info
-            $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
-            echo "Remaining rate limit is $rate.remaining"
+            rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
+            echo "Remaining rate limit is $rateRemaining"
 
             # if we don't have at least 10 requests left, wait until reset
-            if ($rate.remaining -lt 10) {
-                $wait = ($rate.reset - (Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
-                echo "Rate limit remaining is $($rate.remaining), waiting for $($wait) seconds to reset"
-                sleep $wait
-                $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
-                echo "Rate limit has reset to $($rate.remaining) requests"
-            }
+            if [[ $rateRemaining -lt 10 ]]; 
+            then
+              rateReset=`gh api rate_limit --jq ".rate | .reset"`
+              currentTime=`date +%s`
+              wait=$((rateReset - currentTime))
+              echo "Rate limit remaining is $rateRemaining, waiting for $wait seconds to reset"
+              sleep $wait
+              rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
+              echo "Rate limit has reset to $rateRemaining requests"
+            fi
 
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_REPO_NAME="${TARGET_REPO_NAMES[i]}"
