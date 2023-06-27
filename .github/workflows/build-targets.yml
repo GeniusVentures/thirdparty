@@ -397,6 +397,7 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_REPO_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_REPO_NAMES }}|')"
 
+          set +e
           # check if release.json file already available
           jsonStr="[]"
           jsonFound=`gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
@@ -442,6 +443,7 @@ jobs:
               gh release upload --clobber ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} ${COMPRESSED_TARGET_SRC}
             fi
           done
+          set -e
 
 
   build-targets-matrix:
