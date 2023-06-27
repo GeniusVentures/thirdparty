@@ -765,6 +765,7 @@ jobs:
             TARGET_SHA="${TARGET_SHAS[i]}"
             TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
             COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
+            COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
             
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
@@ -784,8 +785,7 @@ jobs:
                         
             # Update JSON file 
             # Get source url
-            #TARGET_SOURCE=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`
-            TARGET_SOURCE="TODO-IMPLEMENT IT"
+            TARGET_SOURCE=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url"`
             # Get target url
             TARGET_BINARY=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`
             jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : \"${TARGET_SOURCE}\", \"binary\" : \"${TARGET_BINARY}\" }" <<< "{}"`
