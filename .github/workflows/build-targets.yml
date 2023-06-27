@@ -397,10 +397,23 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_REPO_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_REPO_NAMES }}|')"
 
+          # check if release.json file already available
+          jsonStr="[]"
+          jsonFound=`gh release view ${( steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
+          if [ $? -eq 0 ]
+          then
+            echo "Downloading release.json file"
+            gh release download ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --pattern "release.json" --clobber
+            if [ $? -eq 0 ]
+            then
+              echo "Loading release.json file"
+              jsonStr=`cat release.json`
+            fi
+          fi
+
           for i in "${!TARGET_NAMES[@]}"; do
             # get currently authenticated user rate limit info
             rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
-            echo "Remaining rate limit is $rateRemaining"
 
             # if we don't have at least 10 requests left, wait until reset
             if [[ $rateRemaining -lt 10 ]]; 
@@ -419,9 +432,9 @@ jobs:
             TARGET_SHA="${TARGET_SHAS[i]}"
             COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
 
-            # TODO: Temporary solution, upload only those files are missing 
-            COMPRESSED_TARGET_SRC_URL=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url"`
-            if [ -z "$COMPRESSED_TARGET_SRC_URL" ]
+            shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< ${jsonStr}`
+            COMPRESSED_TARGET_SRC_URL=`gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url"`
+            if [ -z "$COMPRESSED_TARGET_SRC_URL" ] || [[ "${shaFound}" != \"${TARGET_SHA}\" ]]; 
             then
               echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_REPO_NAME} source folder"
               tar -zcf ${COMPRESSED_TARGET_SRC} ${TARGET_REPO_NAME} 
