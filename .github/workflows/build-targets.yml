@@ -420,10 +420,14 @@ jobs:
             if [[ $rateRemaining -lt 10 ]]; 
             then
               rateReset=`gh api rate_limit --jq ".rate | .reset"`
-              currentTime=`date +%s`
-              wait=$((rateReset - currentTime))
+              wait=$((rateReset - `date +%s`));
               echo "Rate limit remaining is $rateRemaining, waiting for $wait seconds to reset"
-              sleep $wait
+              while [ $wait -ge 0 ]
+              do
+                sleep 5
+                wait=$((rateReset - `date +%s`));
+                echo "Waiting $wait seconds to reset rate limit"
+              done
               rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
               echo "Rate limit has reset to $rateRemaining requests"
             fi
