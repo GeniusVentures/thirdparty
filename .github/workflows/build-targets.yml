@@ -421,7 +421,7 @@ jobs:
             TARGET_SHA="${TARGET_SHAS[i]}"
             COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
             echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_REPO_NAME} source folder"
-            tar -zcvf ${COMPRESSED_TARGET_SRC} ${TARGET_REPO_NAME} 
+            tar -zcf ${COMPRESSED_TARGET_SRC} ${TARGET_REPO_NAME} 
             echo "Uploading target ${COMPRESSED_TARGET_SRC} to github release ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
             gh release upload --clobber ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} ${COMPRESSED_TARGET_SRC}
           done
