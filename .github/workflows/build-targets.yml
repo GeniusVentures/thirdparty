@@ -434,7 +434,7 @@ jobs:
       always() &&
       needs.setup-src-cache.result == 'success' &&
       needs.create-targets-matrix.result == 'success' &&
-      (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped')
+      (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped') &&
       (needs.save-target-sources.result == 'success' || needs.save-target-sources.result == 'skipped')
     strategy:
       fail-fast: false
