@@ -39,6 +39,11 @@ jobs:
             sudo apt update
             sudo apt install gh jo -y            
           }
+
+          # get currently authenticated user rate limit info
+          rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
+          echo "Rate limit remaining is $rateRemaining"
+
           gh extension install actions/gh-actions-cache
           echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
           echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
@@ -412,33 +417,37 @@ jobs:
             fi
           fi
 
-          for i in "${!TARGET_NAMES[@]}"; do
-            # get currently authenticated user rate limit info
-            rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
+          RELEASE_ASSETS=`gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --json assets`
 
-            # if we don't have at least 10 requests left, wait until reset
-            if [[ $rateRemaining -lt 10 ]]; 
-            then
-              rateReset=`gh api rate_limit --jq ".rate | .reset"`
+          # get currently authenticated user rate limit info
+          rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
+          echo "Rate limit remaining is $rateRemaining"
+          
+          # if we don't have at least 50 requests left, wait until reset
+          if [[ $rateRemaining -lt 50 ]]; 
+          then
+            rateReset=`gh api rate_limit --jq ".rate | .reset"`
+            wait=$((rateReset - `date +%s`));
+            echo "Rate limit remaining is $rateRemaining, waiting for $wait seconds to reset"
+            while [ $wait -ge 0 ]
+            do
+              sleep 5
               wait=$((rateReset - `date +%s`));
-              echo "Rate limit remaining is $rateRemaining, waiting for $wait seconds to reset"
-              while [ $wait -ge 0 ]
-              do
-                sleep 5
-                wait=$((rateReset - `date +%s`));
-                echo "Waiting $wait seconds to reset rate limit"
-              done
-              rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
-              echo "Rate limit has reset to $rateRemaining requests"
-            fi
+              echo "Waiting $wait seconds to reset rate limit"
+            done
+            rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
+            echo "Rate limit has reset to $rateRemaining requests"
+          fi
 
+
+          for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_REPO_NAME="${TARGET_REPO_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
 
             shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< ${jsonStr}`
-            COMPRESSED_TARGET_SRC_URL=`gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url"`
+            COMPRESSED_TARGET_SRC_URL=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url" <<< ${RELEASE_ASSETS}`
             if [ -z "$COMPRESSED_TARGET_SRC_URL" ] || [[ "${shaFound}" != \"${TARGET_SHA}\" ]]; 
             then
               echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_REPO_NAME} source folder"
@@ -781,6 +790,8 @@ jobs:
           
           GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
           
+          RELEASE_ASSETS=`gh release view ${GITHUB_RELEASE_NAME} --json assets`
+
           jsonStr=""           
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
           for i in "${!TARGET_NAMES[@]}"; do
@@ -808,9 +819,9 @@ jobs:
                         
             # Update JSON file 
             # Get source url
-            TARGET_SOURCE=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url"`
+            TARGET_SOURCE=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url" <<< ${RELEASE_ASSETS}`
             # Get target url
-            TARGET_BINARY=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url"`
+            TARGET_BINARY=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url" <<< ${RELEASE_ASSETS}`
             jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : \"${TARGET_SOURCE}\", \"binary\" : \"${TARGET_BINARY}\" }" <<< "{}"`
             jsonStr+=`echo ${jsonStrTarget}`
           done
