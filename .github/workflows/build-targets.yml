@@ -265,7 +265,7 @@ jobs:
           while IFS=',' read -r cmakeName repoDir; do
             echo -e "cmakeName: $cmakeName, repoDir: $repoDir"
             cMakeNamesRepos["$cmakeName"]="$repoDir"
-          done < <(sed -nE 's/${BRANCH}/^ExternalProject_Add\(([^)]*).*/\1/p; s/${BRANCH}/^[[:space:]]*SOURCE_DIR[[:space:]]+"([^/]*\/)*(.*)".*/\2/p' CommonTargets.CMake Linux/CMakeLists.txt |
+          done < <(sed -nE 's/^ExternalProject_Add\(([^)]*).*/\1/p; s/^[[:space:]]*SOURCE_DIR[[:space:]]+"([^/]*\/)*(.*)".*/\2/p' CommonTargets.CMake Linux/CMakeLists.txt |
             paste -d ',' - -)
 
           cd Linux/Release/CMakeFiles
@@ -274,7 +274,7 @@ jobs:
             echo -e "cmakeName: $cmakeName, buildDir: $buildDir"
             cMakeBuildDir["$cmakeName"]="$buildDir"
           done < <(grep -m1 -R --include "build.make" -e ".*-complete:.*-build" * |
-            sed -E -n 's/${BRANCH}/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2/p')
+            sed -E -n 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2/p')
 
           declare -A gitLibModules
           cd ../../../../
@@ -282,7 +282,7 @@ jobs:
             echo -e "repoDir: $repoDir, longSHA: $longSHA"
             gitLibModules["$repoDir"]="$longSHA"
           done < <(git ls-tree HEAD | grep -E "160000 commit|040000 tree" |
-            sed -E -n 's/${BRANCH}/^.*(commit|tree) ([a-f0-9]+)[ \t]+([^ ]+)$/\2,\3/p')
+            sed -E -n 's/^.*(commit|tree) ([a-f0-9]+)[ \t]+([^ ]+)$/\2,\3/p')
 
           # Initialize the variables
           cMakeNames=""
