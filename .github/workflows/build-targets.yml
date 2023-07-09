@@ -123,8 +123,8 @@ jobs:
             startPos=$((len - 7))
             shortSHA="${toCache:$startPos:7}"
             lenBranch=${#BRANCH}
-            # - 10 for s/$BRANCH/ + '-' + shortSHA
-            name="${toCache:$((2 + lenBranch + 1)):$((len - 10 - lenBranch))}"
+            # - 10 - lenBranch - 1 for s/$BRANCH/ + '-' + shortSHA
+            name="${toCache:$((2 + lenBranch + 1)):$((len - 10 - lenBranch - 1))}"
             if [[ "$first" != "true" ]]; then
               matrixJson+=", "
             fi
@@ -157,8 +157,8 @@ jobs:
             startPos=$((len - 7))
             shortSHA="${cacheName:$startPos:7}"
             lenBranch=${#BRANCH}
-            # - 10 for s/$BRANCH/ + '-' + shortSHA
-            name="${cacheName:$((2 + lenBranch + 1)):$((len - 10 - lenBranch))}"
+            # - 10 - lenBranch - 1 for s/$BRANCH/ + '-' + shortSHA
+            name="${cacheName:$((2 + lenBranch + 1)):$((len - 10 - lenBranch - 1))}"
             if [[ "$first" != "true" ]]; then
               cacheNameKeysContent+=", "
               cachePathsContent+=", "
