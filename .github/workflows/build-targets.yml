@@ -821,7 +821,7 @@ jobs:
             TARGET_SOURCE=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url" <<< ${RELEASE_ASSETS}`
             # Get target url
             TARGET_BINARY=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url" <<< ${RELEASE_ASSETS}`
-            jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : \"${TARGET_SOURCE}\", \"binary\" : \"${TARGET_BINARY}\" }" <<< "{}"`
+            jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : ${TARGET_SOURCE}, \"binary\" : ${TARGET_BINARY} }" <<< "{}"`
             jsonStr+=`echo ${jsonStrTarget}`
           done
           
