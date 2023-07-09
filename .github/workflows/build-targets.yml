@@ -56,7 +56,7 @@ jobs:
           cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" | jq -r ".actions_caches[].key" | sort)
           longSHA="${{ github.sha }}"
           shortSHA="${longSHA:0:7}"
-          tpCacheNameSHA="thirdparty-$shortSHA"
+          tpCacheNameSHA="$BRANCH/thirdparty-$shortSHA"
 
           notMatched="$(comm -3 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$cachesList"))"
           oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$notMatched"))"
@@ -103,11 +103,11 @@ jobs:
           cacheNames=""
           while read -r mode stage longsha location; do
             shortSHA="${longsha:0:7}"
-            cacheNames+="s/$location-$shortSHA\n"
+            cacheNames+="s/$BRANCH/$location-$shortSHA\n"
           done <<< $(git ls-tree HEAD | grep "160000 commit")
 
           cacheNames="$(echo -en "$cacheNames" | sort)"
-          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="s/" | jq -r ".actions_caches[].key" | sort)
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="s/${BRANCH}" | jq -r ".actions_caches[].key" | sort)
 
           notMatched="$(comm -3 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$cachesList"))"
           oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$notMatched"))"
@@ -122,8 +122,9 @@ jobs:
             len=${#toCache}
             startPos=$((len - 7))
             shortSHA="${toCache:$startPos:7}"
-            # - 10 for s/ + '-' + shortSHA
-            name="${toCache:2:$((len - 10))}"
+            lenBranch=${#BRANCH}
+            # - 10 for s/$BRANCH/ + '-' + shortSHA
+            name="${toCache:$((2 + lenBranch + 1)):$((len - 10))}"
             if [[ "$first" != "true" ]]; then
               matrixJson+=", "
             fi
@@ -155,8 +156,9 @@ jobs:
             len=${#cacheName}
             startPos=$((len - 7))
             shortSHA="${cacheName:$startPos:7}"
-            # - 10 for s/ + '-' + shortSHA
-            name="${cacheName:2:$((len - 10))}"
+            lenBranch=${#BRANCH}
+            # - 10 for s/$BRANCH/ + '-' + shortSHA
+            name="${cacheName:$((2 + lenBranch + 1)):$((len - 10))}"
             if [[ "$first" != "true" ]]; then
               cacheNameKeysContent+=", "
               cachePathsContent+=", "
@@ -263,7 +265,7 @@ jobs:
           while IFS=',' read -r cmakeName repoDir; do
             echo -e "cmakeName: $cmakeName, repoDir: $repoDir"
             cMakeNamesRepos["$cmakeName"]="$repoDir"
-          done < <(sed -nE 's/^ExternalProject_Add\(([^)]*).*/\1/p; s/^[[:space:]]*SOURCE_DIR[[:space:]]+"([^/]*\/)*(.*)".*/\2/p' CommonTargets.CMake Linux/CMakeLists.txt |
+          done < <(sed -nE 's/${BRANCH}/^ExternalProject_Add\(([^)]*).*/\1/p; s/${BRANCH}/^[[:space:]]*SOURCE_DIR[[:space:]]+"([^/]*\/)*(.*)".*/\2/p' CommonTargets.CMake Linux/CMakeLists.txt |
             paste -d ',' - -)
 
           cd Linux/Release/CMakeFiles
@@ -272,7 +274,7 @@ jobs:
             echo -e "cmakeName: $cmakeName, buildDir: $buildDir"
             cMakeBuildDir["$cmakeName"]="$buildDir"
           done < <(grep -m1 -R --include "build.make" -e ".*-complete:.*-build" * |
-            sed -E -n 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2/p')
+            sed -E -n 's/${BRANCH}/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2/p')
 
           declare -A gitLibModules
           cd ../../../../
@@ -280,7 +282,7 @@ jobs:
             echo -e "repoDir: $repoDir, longSHA: $longSHA"
             gitLibModules["$repoDir"]="$longSHA"
           done < <(git ls-tree HEAD | grep -E "160000 commit|040000 tree" |
-            sed -E -n 's/^.*(commit|tree) ([a-f0-9]+)[ \t]+([^ ]+)$/\2,\3/p')
+            sed -E -n 's/${BRANCH}/^.*(commit|tree) ([a-f0-9]+)[ \t]+([^ ]+)$/\2,\3/p')
 
           # Initialize the variables
           cMakeNames=""
