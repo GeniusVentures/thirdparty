@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  GITHUB_TOKEN: ${{ github.token }}
+  #GITHUB_TOKEN: ${{ github.token }}
+  ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN_1 }}
   #MAKEFLAGS: "-j8"
   #CMAKE_BUILD_PARALLEL_LEVEL: 8
 
@@ -47,7 +48,7 @@ jobs:
           gh extension install actions/gh-actions-cache
           echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
           echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
-          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+          echo "GH_TOKEN=${ACCESS_TOKEN}" >> $GITHUB_ENV
 
       - name: Find cache and Clean out old caches of thirdparty
         id: tp-check
@@ -779,7 +780,7 @@ jobs:
           TARGET_OS="${{ matrix.target-build-data.target-os }}"
           BUILD_TYPE="${{ matrix.build-type }}"
           BRANCH=${{ github.ref_name }}
-          GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN=${ACCESS_TOKEN}
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
