@@ -474,6 +474,7 @@ jobs:
       matrix:
         build-type: [ Release, Debug ]
         target-build-data:
+          # --------------------------------------------------------------------------
           - target-os: Linux
             runs-on: ubuntu-latest
             shell: bash
@@ -518,40 +519,33 @@ jobs:
               echo "Uploading target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
               gh release upload --clobber ${GITHUB_RELEASE_NAME} ${COMPRESSED_TARGET}
 
-              
-    #          - target-os: Android
-    #            runs-on: ubuntu-latest
-    #            shell: bash
-    #            setup-script: |
-    #              echo "Setup for Android Build"
-    #              git config --global core.autocrlf false
-    #              git config --global core.eol lf
-    #              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
-    #              echo "MAKEFLAGS=\"-j 8\"" >> $GITHUB_ENV
-    #              echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-    #              echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-    #            arch: |
-    #              arm64-v8a
-    #              x86_64
-    #              x86
-    #              armeabi-v7a
-          - target-os: OSX
-            runs-on: macos-latest
+          # --------------------------------------------------------------------------    
+          - target-os: Android
+            runs-on: ubuntu-latest
             shell: bash
+            env:
+              CC: clang
             setup-script: |
-              echo "Setup for OSX Build"
-              find /Applications/Xcode* -maxdepth 0 -ls
-              sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
-              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+              echo "Setup for Android Build"
+              git config --global core.autocrlf false
+              git config --global core.eol lf
+              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
+              echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+              echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+            arch: |
+              arm64-v8a
+              x86_64
+              x86
+              armeabi-v7a
             cmake-init-script: |
               cd build/$TARGET_OS
               mkdir $BUILD_TYPE
               cd $BUILD_TYPE
-              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
             cmake-compile-script: |
               echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
               make $TARGET_NAME -j$(nproc)
-              make install
+              make install  
             release-target: |
               # Check if release already defined e.g. MacOS-master-release
               GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
@@ -581,6 +575,57 @@ jobs:
               tar -zcf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
               echo "Uploading target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
               gh release upload --clobber ${GITHUB_RELEASE_NAME} ${COMPRESSED_TARGET}
+
+
+          # --------------------------------------------------------------------------    
+          # - target-os: OSX
+          #   runs-on: macos-latest
+          #   shell: bash
+          #   setup-script: |
+          #     echo "Setup for OSX Build"
+          #     find /Applications/Xcode* -maxdepth 0 -ls
+          #     sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
+          #     sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*        
+          #   cmake-init-script: |
+          #     cd build/$TARGET_OS
+          #     mkdir $BUILD_TYPE
+          #     cd $BUILD_TYPE
+          #     cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+          #   cmake-compile-script: |
+          #     echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
+          #     make $TARGET_NAME -j$(nproc)
+          #     make install
+          #   release-target: |
+          #     # Check if release already defined e.g. MacOS-master-release
+          #     GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+          #     gh release view ${GITHUB_RELEASE_NAME}
+          #     if [ $? -ne 0 ]
+          #     then
+          #       echo "Creating github release with tag: ${GITHUB_RELEASE_NAME}"
+                
+          #       RELEASE_TYPE="--latest"
+          #       if [[ "${BUILD_TYPE}" != "Release" ]]; 
+          #       then
+          #         RELEASE_TYPE="--prerelease"
+          #       fi
+                
+          #       # Create release on github
+          #       gh release create ${GITHUB_RELEASE_NAME} -n "${BRANCH} branch" --target ${BRANCH} ${RELEASE_TYPE} -t "${TARGET_OS} ${BRANCH} branch ${BUILD_TYPE} build"
+          #       if [ $? -ne 0 ]
+          #       then
+          #         set -e
+          #         echo "Failed to create github release with tag: ${GITHUB_RELEASE_NAME}"
+          #         exit 1
+          #       fi
+          #     fi
+              
+          #     COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
+          #     echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode (target build folder: ${TARGET_DIRECTORY})"
+          #     tar -zcf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
+          #     echo "Uploading target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
+          #     gh release upload --clobber ${GITHUB_RELEASE_NAME} ${COMPRESSED_TARGET}
+
+          # --------------------------------------------------------------------------
     #          - target-os: iOS
     #            runs-on: macos-latest
     #            shell: bash
@@ -600,7 +645,8 @@ jobs:
     #              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=$WORKSPACE/build/iOS/iOS.cmake
     #              echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
     #              make $LIBRARY_NAME
-    #
+    
+              # --------------------------------------------------------------------------
     #          - target-os: Windows
     #            runs-on: windows-2022
     #            setup-script: |
@@ -612,6 +658,7 @@ jobs:
     #                arch: amd64
     #                sdk: 10.0.22621.0
     #                vsversion: 17
+
 
     runs-on: ${{ matrix.target-build-data.runs-on }}
     outputs:
