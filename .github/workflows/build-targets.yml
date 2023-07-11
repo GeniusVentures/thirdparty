@@ -551,8 +551,8 @@ jobs:
             setup-script: | 
               echo "Setup for iOS Build"
               find /Applications/Xcode* -maxdepth 0 -ls
-              sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
-              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*        
+              sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_*[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
+              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
             cmake-init-script: |
               cd build/$TARGET_OS
               mkdir $BUILD_TYPE
