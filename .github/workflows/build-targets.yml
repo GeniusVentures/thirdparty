@@ -625,7 +625,7 @@ jobs:
     steps:
       - name: Create library Keys and Paths to Cache/build
         id: create-lib-cache-keys
-        shell: ${{ matrix.target-build-data.shell }}
+        shell: bash
         run: |
           # build array of library names
           IFS=$'\n' read -d '|' -ra TARGET_REPO_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_REPO_NAMES }}|')"
