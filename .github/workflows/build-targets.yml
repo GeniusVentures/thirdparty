@@ -620,12 +620,12 @@ jobs:
               gh release upload --clobber ${GITHUB_RELEASE_NAME} ${COMPRESSED_TARGET}
 
     runs-on: ${{ matrix.target-build-data.runs-on }}
-    shell: ${{ matrix.target-build-data.shell }}
     outputs:
         TARGET_BUILT: ${{ steps.cache-library-directory.outputs.TARGET_BUILT }}
     steps:
       - name: Create library Keys and Paths to Cache/build
         id: create-lib-cache-keys
+        shell: ${{ matrix.target-build-data.shell }}
         run: |
           # build array of library names
           IFS=$'\n' read -d '|' -ra TARGET_REPO_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_REPO_NAMES }}|')"
