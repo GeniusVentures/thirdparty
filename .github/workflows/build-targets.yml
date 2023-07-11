@@ -665,7 +665,6 @@ jobs:
       - name: Cache Third Party Directory
         uses: GeniusVentures/cache-multi/restore@v3.2.3
         id: cache-tp-source-directory
-        shell: bash
         with:
           key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
           path: |
@@ -679,7 +678,6 @@ jobs:
 
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
-        shell: bash
         uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
         with:
           multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
