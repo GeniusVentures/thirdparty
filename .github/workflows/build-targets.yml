@@ -478,6 +478,7 @@ jobs:
           - target-os: Linux
             runs-on: ubuntu-latest
             shell: bash
+            init-script:
             setup-script: |
               echo "Setup for Linux Build"
             cmake-init-script: |
@@ -496,6 +497,7 @@ jobs:
             shell: bash
             env:
               CC: clang
+            init-script:
             setup-script: |
               echo "Setup for Android Build"
               git config --global core.autocrlf false
@@ -522,6 +524,7 @@ jobs:
           - target-os: OSX
             runs-on: macos-latest
             shell: bash
+            init-script:
             setup-script: |
               echo "Setup for OSX Build"
               find /Applications/Xcode* -maxdepth 0 -ls
@@ -541,11 +544,11 @@ jobs:
           - target-os: iOS
             runs-on: macos-latest
             shell: bash
-            setup-script:
+            init-script:
               uses: actions/setup-python@v2
               with:
                 python-version: '3.5' 
-              |
+            setup-script: | 
               echo "Setup for iOS Build"
               find /Applications/Xcode* -maxdepth 0 -ls
               sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
@@ -563,12 +566,14 @@ jobs:
           # --------------------------------------------------------------------------
           - target-os: Windows
             runs-on: windows-2022
-            setup-script: 
+            shell: bash
+            init-script:
               uses: ilammy/msvc-dev-cmd@v1
               with:
                 arch: amd64
                 sdk: 10.0.22621.0
                 vsversion: 17
+            setup-script: |
               echo "Setup for Windows Build"
             cmake-init-script: |
               cd build/$TARGET_OS
@@ -679,6 +684,7 @@ jobs:
 
       - name: Run setup script for target OS
         run: |
+          ${{ matrix.target-build-data.init-script }}
           ${{ matrix.target-build-data.setup-script }}
 
       - name: Init the CMake build files
