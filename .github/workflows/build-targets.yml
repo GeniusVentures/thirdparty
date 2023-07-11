@@ -542,7 +542,7 @@ jobs:
             runs-on: macos-latest
             shell: bash
             setup-script:
-            uses: actions/setup-python@v2
+              uses: actions/setup-python@v2
               with:
                 python-version: '3.5' 
               |
