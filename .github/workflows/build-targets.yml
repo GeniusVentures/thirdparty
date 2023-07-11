@@ -686,7 +686,13 @@ jobs:
       - name: Run setup script for target OS
         shell: bash
         run: |
+          
+          echo "Running init script"
+          set +e
           ${{ matrix.target-build-data.init-script }}
+          set -e
+
+          echo "Running setup script"
           ${{ matrix.target-build-data.setup-script }}
 
       - name: Init the CMake build files
