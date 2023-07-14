@@ -700,6 +700,7 @@ jobs:
         run: |
           TARGET_OS="${{ matrix.target-build-data.target-os }}"
           BUILD_TYPE="${{ matrix.build-type }}"
+          WORKSPACE=${{ github.workspace }}
           ${{ matrix.target-build-data.cmake-init-script }}
 
       - name: Load built library caches if any
