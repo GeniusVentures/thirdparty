@@ -846,13 +846,23 @@ jobs:
             TARGET_SOURCE=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url" <<< ${RELEASE_ASSETS}`
             # Get target url
             TARGET_BINARY=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url" <<< ${RELEASE_ASSETS}`
-            releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).sha |= \"${TARGET_SHA}\" " <<< ${releaseJsonStr}`
-            releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).binFolderName |= \"${TARGET_DIRECTORY}\" " <<< ${releaseJsonStr}`
-            releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).source |= \"${TARGET_SOURCE}\" " <<< ${releaseJsonStr}`
-            releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).binary |= \"${TARGET_BINARY}\" " <<< ${releaseJsonStr}`
-            
+
+            releaseFound=`jq "(. | select(.name == \"${TARGET_NAME}\")" <<< ${releaseJsonStr}`
+            if [ ${#releaseFound} -qt 0 ]
+            then 
+              echo "Updating release.json file with target ${TARGET_NAME}"
+              releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).sha |= \"${TARGET_SHA}\" " <<< ${releaseJsonStr}`
+              releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).binFolderName |= \"${TARGET_DIRECTORY}\" " <<< ${releaseJsonStr}`
+              releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).source |= \"${TARGET_SOURCE}\" " <<< ${releaseJsonStr}`
+              releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).binary |= \"${TARGET_BINARY}\" " <<< ${releaseJsonStr}`
+            else
+              echo "Adding target ${TARGET_NAME} to release.json file"
+              jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : ${TARGET_SOURCE}, \"binary\" : ${TARGET_BINARY} }" <<< "{}"`
+              releaseJsonStr+=`echo ${jsonStrTarget}`
+            fi
+
             # Upload JSON file release 
-            jq <<< $jsonStr >> release.json
+            jq <<< $releaseJsonStr >> release.json
             echo "Uploading release.json to github release ${GITHUB_RELEASE_NAME}"
             gh release upload --clobber ${GITHUB_RELEASE_NAME} release.json
           done
