@@ -834,12 +834,15 @@ jobs:
             TARGET_SHA="${listOfTargetSHAsToBuild[i]}"
             TARGET_DIRECTORY="${listOfTargetDirToBuild[i]}"
             COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
+            COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
             echo "Starting to compile target: ${TARGET_NAME}"
             ${{ matrix.target-build-data.cmake-compile-script }}
             
             echo "Starting to upload target: ${COMPRESSED_TARGET}"
             # Upload released target 
             ${{ matrix.target-save-data.release-target }}
+
+            RELEASE_ASSETS=`gh release view ${GITHUB_RELEASE_NAME} --json assets`
 
             # Updating release.json
             # Get source url
