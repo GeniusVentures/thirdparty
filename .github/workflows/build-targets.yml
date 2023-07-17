@@ -848,7 +848,7 @@ jobs:
             TARGET_BINARY=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url" <<< ${RELEASE_ASSETS}`
 
             releaseFound=`jq "(. | select(.name == \"${TARGET_NAME}\")" <<< ${releaseJsonStr}`
-            if [ ${#releaseFound} -qt 0 ]
+            if [ ${#releaseFound} -gt 0 ]
             then 
               echo "Updating release.json file with target ${TARGET_NAME}"
               releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).sha |= \"${TARGET_SHA}\" " <<< ${releaseJsonStr}`
