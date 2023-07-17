@@ -816,7 +816,7 @@ jobs:
           jq <<< $jsonStr >> hash.json
           
           # check if release.json file already available
-          releaseJsonStr="[]"
+          releaseJsonStr=""
           jsonFound=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
           if [ $? -eq 0 ]
           then
