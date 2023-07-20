@@ -37,15 +37,49 @@ Set two environment variables
 	○ cmake --build . --config Debug
 # Build on Linux
 ## Preinstall
-- CMake
-- Python >=3.5 (make sure /bin/python links to your python3 version, e.g. `ln -s /bin/python3.8 /bin/python`)
-- clang
+	
+- Ubuntu 22.04 (or compatible) recommended
+
+Open a terminal as root ("sudo" won't do it because of Ruby installation)
+
+```bash
+	apt-get -y update
+	apt-get -y install g++ clang llvm cmake ntp zlib1g-dev libgtk-3-dev ninja-build libjsoncpp25 libsecret-1-0 libjsoncpp-dev libsecret-1-dev git cmake default-jre curl
+	cd /usr/local/src
+	wget --no-check-certificate https://www.openssl.org/source/openssl-1.1.1t.tar.gz 
+	tar -xf openssl-1.1.1t.tar.gz 
+	cd openssl-1.1.1t/
+	./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib >build.log 
+	make install >>build.log
+	cd ~/
+	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+	. "$HOME/.cargo/env" 
+	cargo install cbindgen >rust-install.log 
+	rustup target add wasm32-unknown-emscripten >rust-install.log 
+	cp -R /root/.cargo /home/your_user_here 
+	cp -R /root/.rustup /home/your_user_here 
+	chown -R your_user_here:your_user_here /home/your_user_here/.cargo /home/your_user_here/.rustup
+	apt-get -y install gnupg2
+	curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
+	curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import -
+	curl -sSL https://get.rvm.io | bash -s stable  >>ruby-build.log 
+	source /etc/profile.d/rvm.sh
+	rvm install ruby-2.7.8 --with-openssl-dir=/usr/local/ssl/ >>ruby-build.log
+	rvm --default use ruby-2.7.8 
+	ln -s /usr/bin/python3 /usr/bin/python
+```
+These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](../../../TestVMs/blob/master/Ubuntu64Desktop/bootstrap.sh)
+
 ## Building
+
+	○ export CMAKE_BUILD_PARALLEL_LEVEL=8
+	○ export MAKEFLAGS="-j8"
 	○ cd ./build/Linux
 	○ mkdir Release
 	○ cd Release
 	○ cmake .. -DCMAKE_BUILD_TYPE=Release
 	○ make
+
 # Build on Linux for Android cross compile
 ## Preinstall
 - CMake
