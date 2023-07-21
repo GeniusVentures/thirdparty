@@ -751,6 +751,7 @@ jobs:
           echo "TARGET_BUILT=$targetBuiltList" >> $GITHUB_OUTPUT
 
       - name: Build any updated libraries
+        id: build-updated-libraries
         shell: bash
         run: |
           TARGET_OS="${{ matrix.target-build-data.target-os }}"
@@ -866,9 +867,20 @@ jobs:
 
             # Upload JSON file release 
             jq <<< $releaseJsonStr > release.json
-            echo "Uploading release.json to github release ${GITHUB_RELEASE_NAME}"
-            gh release upload --clobber ${GITHUB_RELEASE_NAME} release.json
           done
+
+      - name: Upload JSON file release on build failure
+        if: ${{ failure() && steps.build-updated-libraries.conclusion == 'failure' }}
+        shell: bash
+        run: |
+          TARGET_OS="${{ matrix.target-build-data.target-os }}"
+          BUILD_TYPE="${{ matrix.build-type }}"
+          BRANCH=${{ github.ref_name }}
+          
+          GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+
+          echo "Uploading release.json to github release ${GITHUB_RELEASE_NAME}"
+          gh release upload --clobber ${GITHUB_RELEASE_NAME} release.json
 
       - name:  Save target OS SDK as github release
         shell: bash
