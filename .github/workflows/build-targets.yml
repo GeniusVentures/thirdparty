@@ -616,8 +616,32 @@ jobs:
               COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
               echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode (target build folder: ${TARGET_DIRECTORY})"
               tar -zcf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
-              echo "Uploading target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
-              gh release upload --clobber ${GITHUB_RELEASE_NAME} ${COMPRESSED_TARGET}
+              
+              retValue=1
+              numberOfTries=1
+              until [[ $retValue -eq 0 ]]
+              do
+                if [[ $numberOfTries -gt 5 ]]
+                  break
+                fi
+                
+                echo "#${numberOfTries} Uploading target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
+                gh release upload --clobber ${GITHUB_RELEASE_NAME} ${COMPRESSED_TARGET}
+                retValue=$?
+                
+                if [[ $retValue -ne 0 ]]
+                  echo "gh release upload failed, sleep 2 sec before next try"
+                  sleep 2
+                fi
+
+                ((numberOfTries++))
+              done
+
+              if [[ $retValue -ne 0 ]]
+                  set -e
+                  echo "Failed to upload target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
+                  exit 1
+              fi
 
     runs-on: ${{ matrix.target-build-data.runs-on }}
     outputs:
@@ -879,8 +903,25 @@ jobs:
           
           GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
 
-          echo "Uploading release.json to github release ${GITHUB_RELEASE_NAME}"
-          gh release upload --clobber ${GITHUB_RELEASE_NAME} release.json
+          retValue=1
+          numberOfTries=1
+          until [[ $retValue -eq 0 ]]
+          do
+            if [[ $numberOfTries -gt 5 ]]
+              break
+            fi
+            
+            echo "#${numberOfTries} Uploading release.json to github release ${GITHUB_RELEASE_NAME}"
+            gh release upload --clobber ${GITHUB_RELEASE_NAME} release.json
+            retValue=$?
+            
+            if [[ $retValue -ne 0 ]]
+              echo "gh release upload failed, sleep 2 sec before next try"
+              sleep 2
+            fi
+
+            ((numberOfTries++))
+          done
 
       - name:  Save target OS SDK as github release
         shell: bash
@@ -940,5 +981,29 @@ jobs:
           
           # Upload JSON file release 
           jq <<< $jsonStr > release.json
-          echo "Uploading release.json to github release ${GITHUB_RELEASE_NAME}"
-          gh release upload --clobber ${GITHUB_RELEASE_NAME} release.json
+
+          retValue=1
+          numberOfTries=1
+          until [[ $retValue -eq 0 ]]
+          do
+            if [[ $numberOfTries -gt 5 ]]
+              break
+            fi
+            
+            echo "#${numberOfTries} Uploading release.json to github release ${GITHUB_RELEASE_NAME}"
+            gh release upload --clobber ${GITHUB_RELEASE_NAME} release.json
+            retValue=$?
+            
+            if [[ $retValue -ne 0 ]]
+              echo "gh release upload failed, sleep 2 sec before next try"
+              sleep 2
+            fi
+
+            ((numberOfTries++))
+          done
+
+          if [[ $retValue -ne 0 ]]
+            set -e
+            echo "Failed to upload release.json to github release ${GITHUB_RELEASE_NAME}"
+            exit 1
+          fi
