@@ -88,7 +88,7 @@ jobs:
 
       - name: Cache main Source Files without .git, if not already cached
         if: ( steps.tp-check.outputs.FOUND_THIRD_PARTY_CURRENT == 'false' )
-        uses: GeniusVentures/cache-multi@v3.2.3
+        uses: GeniusVentures/cache-multi@v3.2.4
         id: cache-source-directory
         with:
           key: ${{ steps.tp-check.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
@@ -187,7 +187,7 @@ jobs:
         include: ${{ fromJson(needs.setup-src-cache.outputs.CACHE_MATRIX) }}
     steps:
       - name: Cache Third Party Directory
-        uses: GeniusVentures/cache-multi/restore@v3.2.3
+        uses: GeniusVentures/cache-multi/restore@v3.2.4
         id: cache-tp-source-directory
         with:
           key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
@@ -209,7 +209,7 @@ jobs:
 
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
-        uses: GeniusVentures/cache-multi@v3.2.3
+        uses: GeniusVentures/cache-multi@v3.2.4
         with:
           key: ${{ matrix.cache-name }}
           path: |
@@ -230,7 +230,7 @@ jobs:
       TARGET_REPO_NAMES: ${{ steps.create-target-info.outputs.TARGET_REPO_NAMES }}
     steps:
       - name: Cache Third Party Directory
-        uses: GeniusVentures/cache-multi/restore@v3.2.3
+        uses: GeniusVentures/cache-multi/restore@v3.2.4
         id: cache-tp-source-directory
         with:
           key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
@@ -245,7 +245,7 @@ jobs:
 
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
-        uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
+        uses: GeniusVentures/cache-multi/restoremulti@v3.2.4
         with:
           multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
           paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
@@ -337,7 +337,7 @@ jobs:
           echo "GITHUB_RELEASE_NAME=${GITHUB_RELEASE_NAME}" >> $GITHUB_OUTPUT
 
       - name: Cache Third Party Directory
-        uses: GeniusVentures/cache-multi/restore@v3.2.3
+        uses: GeniusVentures/cache-multi/restore@v3.2.4
         id: cache-tp-source-directory
         with:
           key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
@@ -352,7 +352,7 @@ jobs:
   
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
-        uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
+        uses: GeniusVentures/cache-multi/restoremulti@v3.2.4
         with:
           multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
           paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
@@ -717,7 +717,7 @@ jobs:
             with: ${{ (matrix.target-build-data.install-uses.with && toJSON(matrix.target-build-data.install-uses.with)) || '{}' }}
 
       - name: Cache Third Party Directory
-        uses: GeniusVentures/cache-multi/restore@v3.2.3
+        uses: GeniusVentures/cache-multi/restore@v3.2.4
         id: cache-tp-source-directory
         with:
           key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
@@ -732,7 +732,7 @@ jobs:
 
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
-        uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
+        uses: GeniusVentures/cache-multi/restoremulti@v3.2.4
         with:
           multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
           paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
