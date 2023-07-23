@@ -181,9 +181,8 @@ jobs:
     needs: setup-src-cache
     if: (needs.setup-src-cache.outputs.NEEDS_CACHE == 'true')
     runs-on: ubuntu-latest
-    strategy:
-      # TODO: Remove fail-fast until erros fixed, github cannot handle it properly, logs disappear 
-      #fail-fast: true
+    strategy: 
+      fail-fast: true
       matrix:
         include: ${{ fromJson(needs.setup-src-cache.outputs.CACHE_MATRIX) }}
     steps:
@@ -471,7 +470,8 @@ jobs:
       (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped') &&
       (needs.save-target-sources.result == 'success' || needs.save-target-sources.result == 'skipped')
     strategy:
-      fail-fast: false
+      # TODO: Remove fail-fast until erros fixed, github cannot handle it properly, logs disappear
+      #fail-fast: false
       matrix:
         build-type: [ Release, Debug ]
         target-build-data:
