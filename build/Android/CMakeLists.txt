@@ -217,6 +217,7 @@ ExternalProject_Add(protobuf
 )
 set(PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
 set(_PROTOBUF_TARGET protobuf)
+set(_PROTOBUF_HOST_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
 
 # --------------------------------------------------------
 # set config for ed25519 crypto
