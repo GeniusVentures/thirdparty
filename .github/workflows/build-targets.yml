@@ -38,7 +38,7 @@ jobs:
             sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
             echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
             sudo apt update
-            sudo apt install gh jo -y            
+            sudo apt install gh zstd jo -y  
           }
 
           # get currently authenticated user rate limit info
@@ -186,6 +186,10 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.setup-src-cache.outputs.CACHE_MATRIX) }}
     steps:
+      - name: Setup
+        run: |
+          sudo apt install zstd -y
+
       - name: Cache Third Party Directory
         uses: GeniusVentures/cache-multi/restore@v3.2.4
         id: cache-tp-source-directory
@@ -229,6 +233,10 @@ jobs:
       TARGET_DIRECTORIES: ${{ steps.create-target-info.outputs.TARGET_DIRECTORIES }}
       TARGET_REPO_NAMES: ${{ steps.create-target-info.outputs.TARGET_REPO_NAMES }}
     steps:
+      - name: Setup
+        run: |
+          sudo apt install zstd -y
+
       - name: Cache Third Party Directory
         uses: GeniusVentures/cache-multi/restore@v3.2.4
         id: cache-tp-source-directory
@@ -323,6 +331,10 @@ jobs:
         build-type: [ Release, Debug ]
     runs-on: ubuntu-latest
     steps:
+      - name: Setup
+        run: |
+          sudo apt install zstd -y
+
       - name: Create library Keys and Paths to release sources
         id: create-src-cache-keys
         run: |
@@ -482,6 +494,7 @@ jobs:
             init-script:
             setup-script: |
               echo "Setup for Linux Build"
+              sudo apt install zstd -y
             cmake-init-script: |
               cd build/$TARGET_OS
               mkdir $BUILD_TYPE
@@ -506,6 +519,7 @@ jobs:
               echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
               echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
               echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+              sudo apt install zstd -y
             arch: |
               arm64-v8a
               x86_64
@@ -530,7 +544,8 @@ jobs:
               echo "Setup for OSX Build"
               find /Applications/Xcode* -maxdepth 0 -ls
               sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
-              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*        
+              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/* 
+              brew install zstd
             cmake-init-script: |
               cd build/$TARGET_OS
               mkdir $BUILD_TYPE
@@ -554,6 +569,8 @@ jobs:
               find /Applications/Xcode* -maxdepth 0 -ls
               sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_*[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
               sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+              brew install zstd
+
             cmake-init-script: |
               cd build/$TARGET_OS
               mkdir $BUILD_TYPE
@@ -576,6 +593,8 @@ jobs:
                 vsversion: 17
             setup-script: |
               echo "Setup for Windows Build"
+              echo "Adding GNU tar to PATH"
+              echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%" 
             cmake-init-script: |
               cd build/$TARGET_OS
               mkdir $BUILD_TYPE
