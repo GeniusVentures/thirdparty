@@ -489,8 +489,7 @@ jobs:
       (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped') &&
       (needs.save-target-sources.result == 'success' || needs.save-target-sources.result == 'skipped')
     strategy:
-      # TODO: Remove fail-fast until erros fixed, github cannot handle it properly, logs disappear
-      #fail-fast: false
+      fail-fast: false
       matrix:
         build-type: [ Release, Debug ]
         target-build-data:
