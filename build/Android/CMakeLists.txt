@@ -15,6 +15,9 @@ set(CMAKE_SYSTEM_VERSION 28) # API level
 set(ANDROID_PLATFORM_LEVEL 28)
 set(ANDROID_NATIVE_API_LEVEL ${ANDROID_PLATFORM_LEVEL})
 set(ANDROID_PLATFORM ${ANDROID_PLATFORM_LEVEL})
+set(_ARCH_PLATFORM ${ANDROID_ABI})
+
+
 
 if(NOT CMAKE_ANDROID_NDK)
 	message(FATAL_ERROR "Cannot find Android NDK, make sure you pass -DCMAKE_ANDROID_NDK=[path_to_NDK]")
@@ -203,10 +206,14 @@ set(_rocksdb_EXTRA_PARAM
 
 # --------------------------------------------------------
 # Build protobuf project from the git submodule for local executation of protoc.
+
+#set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake")
+
 ExternalProject_Add(protobuf
   PREFIX protobuf
   BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf"
-  SOURCE_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake"
+  SOURCE_DIR "${PROTOBUF_SRC_DIR}"
   CMAKE_CACHE_ARGS
         -Dprotobuf_BUILD_TESTS:BOOL=OFF
         -Dprotobuf_WITH_ZLIB:BOOL=OFF
@@ -215,9 +222,31 @@ ExternalProject_Add(protobuf
         -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
   DEPENDS
 )
+
+ExternalProject_Add(protobuf-host
+  PREFIX protobuf-host
+  BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf-host"
+  SOURCE_DIR "${PROTOBUF_SRC_DIR}"
+  CMAKE_CACHE_ARGS
+        -Dprotobuf_BUILD_TESTS:BOOL=OFF
+        -Dprotobuf_WITH_ZLIB:BOOL=OFF
+        -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf-host
+        -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
+  DEPENDS
+)
+
 set(PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
 set(_PROTOBUF_TARGET protobuf)
+set(_PROTOBUF_HOST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+set(_PROTOBUF_HOST_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
 set(_PROTOBUF_HOST_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
+set(_PROTOBUF_HOST_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf")
+
+#set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+#set(_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
+#set(_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
+
 
 # --------------------------------------------------------
 # set config for ed25519 crypto
