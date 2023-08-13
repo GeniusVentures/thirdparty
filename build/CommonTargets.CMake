@@ -89,11 +89,13 @@ if (NOT DEFINED _PROTOBUF_HOST_DIR)
 endif()
 set(_FINDPACKAGE_PROTOBUF_HOST_DIR "${_PROTOBUF_HOST_DIR}")
 print("_PROTOBUF_HOST_DIR: ${_FINDPACKAGE_PROTOBUF_HOST_DIR}")
+
+set(_PROTOBUF_BINARY_DIR "${_PROTOBUF_HOST_DIR}/bin")
 # --------------------------------------------------------
 ## Builds grpc
 ExternalProject_Add(grpc
   PREFIX grpc
-  BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/build"
+  BINARY_DIR "${_PROTOBUF_BINARY_DIR}"
   SOURCE_DIR "${THIRDPARTY_DIR}/grpc"
   CMAKE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/grpc
@@ -569,12 +571,11 @@ ExternalProject_Add(xxhash
           ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
-
 ExternalProject_Add(protobuf-plugin
     PREFIX protobuf-plugin
     SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core/protobuf-plugin"
     CMAKE_CACHE_ARGS
-    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf-plugin
+    -DCMAKE_INSTALL_PREFIX:PATH=${_PROTOBUF_BINARY_DIR}/protobuf-plugin
     -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_HOST_CONFIG_DIR}
     -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_HOST_INCLUDE_DIR}
     -DProtobuf_LIB_DIR:PATH=${_FINDPACKAGE_PROTOBUF_HOST_LIB_DIR}
@@ -585,7 +586,7 @@ ExternalProject_Add(protobuf-plugin
     -DCMAKE_CXX_STANDARD:STRING=17
     DEPENDS ${_PROTOBUF_TARGET}
 )
-set(_PROTOBUF_PLUGIN_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf-plugin")
+set(_PROTOBUF_PLUGIN_DIR "${_PROTOBUF_BINARY_DIR}/protobuf-plugin")
 
 ExternalProject_Add(wallet-core
     PREFIX wallet-core
@@ -606,7 +607,7 @@ ExternalProject_Add(wallet-core
     ${_GRPC_CACHE_ARGS}
     -DCMAKE_CXX_STANDARD:STRING=17
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
-    BUILD_COMMAND "${THIRDPARTY_DIR}/wallet-core/tools/generate-files" --arch=${_ARCH_PLATFORM} --protobuff-dir=${_FINDPACKAGE_PROTOBUF_HOST_DIR} --prj-dir=${THIRDPARTY_DIR}/wallet-core --plugin-dir=${_PROTOBUF_PLUGIN_DIR}/bin
+    PATCH_COMMAND "${THIRDPARTY_DIR}/wallet-core/tools/generate-files" --arch=${_ARCH_PLATFORM} --protobuff-dir=${_FINDPACKAGE_PROTOBUF_HOST_DIR} --prj-dir=${THIRDPARTY_DIR}/wallet-core --plugin-dir=${_PROTOBUF_PLUGIN_DIR}/bin
     DEPENDS Boost grpc openssl protobuf-plugin
 )
 

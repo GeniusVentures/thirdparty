@@ -11,7 +11,7 @@ This is the repository for third party of SuperGenius
 ### Speeding up the build tools
 Set two environment variables
 - CMAKE_BUILD_PARALLEL_LEVEL=8
-- MAKEFLAGS="-j8"
+- MAKEFLAGS="-j8"  # this errors on Windows nmake, so don't use on Windows
 
 # Build on Windows
 
@@ -20,6 +20,12 @@ Set two environment variables
 - Visual Studio 2015, 2017, 2019 or 2022
 - Strawberry Perl (https://strawberryperl.com/)
 - Python >=3.5
+- rvm/Ruby 2.7.8
+  - ```rvm --default use ruby-2.7.8```
+- wallet-core dependency tools
+  - Rust, cargo
+    - ```rustup set default-host x86_64-pc-windows-msvc```
+    - ```rustup target add x86_64-pc-windows-msvc```
 ## Building
     ○ git submodule update --init --recursive
     ○ cd ./build/Windows
@@ -55,7 +61,7 @@ Open a terminal as root ("sudo" won't do it because of Ruby installation)
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 	. "$HOME/.cargo/env" 
 	cargo install cbindgen >rust-install.log 
-	rustup target add wasm32-unknown-emscripten >rust-install.log 
+	rustup target add x86_64-unknown-linux-gnu >rust-install.log 
 	cp -R /root/.cargo /home/your_user_here 
 	cp -R /root/.rustup /home/your_user_here 
 	chown -R your_user_here:your_user_here /home/your_user_here/.cargo /home/your_user_here/.rustup
@@ -80,14 +86,20 @@ These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](
 	○ cmake .. -DCMAKE_BUILD_TYPE=Release
 	○ make
 
-# Build on Linux for Android cross compile
-## Preinstall
+# Build/Cross-Compile Android on Linux/OSX/Windows Hosts 
+## Preinstall Host tools
 - CMake
 - Android NDK Latest LTS Version (r25b) [(link)](https://developer.android.com/ndk/downloads#lts-downloads)
-## Building
+- rvm/Ruby 2.7.8
+  - ```rvm --default use ruby-2.7.8``` 
+- wallet-core dependency tools
+  - Rust, cargo
+    - ```rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android```
+## Host settings in .bash_profile (ex.)
 	○ export ANDROID_NDK=/path/to/android-ndk-r25b
 	○ export ANDROID_TOOLCHAIN="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
 	○ export PATH="$ANDROID_TOOLCHAIN":"$PATH"
+# Building
 * armeabi-v7a
 ```
 ○ cd build/Android
@@ -122,10 +134,14 @@ These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](
 ```
 # Build on OSX (Builds x86_64 & Arm64)
 ## Preinstall
-   - CMake    
-   - Python >=3.5
-   - xCode Command line Tools & SDK
-
+- CMake    
+- Python >=3.5
+- xCode Command line Tools & SDK
+- rvm/Ruby 2.7.8
+  - ```rvm --default use ruby-2.7.8```
+- wallet-core dependency tools
+  - Rust, cargo
+    - ```rustup target add aarch64-apple-darwin x86_64-apple-darwin```
  ## Building
 ```
 ○ cd build/OSX
@@ -136,9 +152,12 @@ These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](
 ```
 # Build for iOS
 ## Preinstall
-  - CMake
-  - xCode Command line Tools & SDK 
-
+- CMake
+- xCode Command line Tools & SDK
+- rvm/Ruby 2.7.8
+- wallet-core dependency tools
+  - Rust, cargo
+    - ```rustup target add x86_64-apple-ios aarch64-apple-ios-sim aarch64-apple-ios```
 ## Building
 ```
 ○ cd build/iOS

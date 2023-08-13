@@ -206,24 +206,47 @@ set(_rocksdb_EXTRA_PARAM
 
 # --------------------------------------------------------
 # Build protobuf project from the git submodule for local executation of protoc.
+set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake")
+
+# Build protobuf project from the git submodule.
 ExternalProject_Add(protobuf
-  PREFIX protobuf
-  BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf"
-  SOURCE_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake"
-  CMAKE_CACHE_ARGS
-        -Dprotobuf_BUILD_TESTS:BOOL=OFF
-        -Dprotobuf_WITH_ZLIB:BOOL=OFF
-        -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
-        -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
-  DEPENDS
+		PREFIX protobuf
+		SOURCE_DIR "${PROTOBUF_SRC_DIR}"
+		CMAKE_CACHE_ARGS
+		-Dprotobuf_BUILD_TESTS:BOOL=OFF
+		-Dprotobuf_WITH_ZLIB:BOOL=OFF
+		-Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
+		-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
+		-Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=OFF
+		${_CMAKE_COMMON_BUILD_PARAMS}
+		DEPENDS
 )
-set(PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
-set(_PROTOBUF_TARGET protobuf)
-set(_PROTOBUF_HOST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
-set(_PROTOBUF_HOST_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
-set(_PROTOBUF_HOST_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
-set(_PROTOBUF_HOST_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf")
+
+set(_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
+set(_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
+set(_PROTOBUF_HOST_DIR "${THIRDPARTY_DIR}/build/${TP_BUILD_SUBDIR}/${CMAKE_BUILD_TYPE}/protobuf")
+
+# Build protoc for host OS
+ExternalProject_Add(protobuf-host
+		PREFIX ${_PROTOBUF_HOST_DIR}
+		SOURCE_DIR "${PROTOBUF_SRC_DIR}"
+		CMAKE_CACHE_ARGS
+		-Dprotobuf_BUILD_TESTS:BOOL=OFF
+		-Dprotobuf_WITH_ZLIB:BOOL=OFF
+		-Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
+		-DCMAKE_INSTALL_PREFIX:PATH=${_PROTOBUF_HOST_DIR}
+		-Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
+		${CMAKE_CHCHE_ARGS_CFLAGES_ADD}
+		DEPENDS
+)
+
+set(PROTOC_EXECUTABLE "${_PROTOBUF_HOST_DIR}/bin/protoc")
+set(_PROTOBUF_TARGET protobuf protobuf-host)
+
+set(_PROTOBUF_HOST_CONFIG_DIR "${_PROTOBUF_HOST_DIR}/lib/cmake/protobuf")
+set(_PROTOBUF_HOST_INCLUDE_DIR "${_PROTOBUF_HOST_DIR}/include")
+set(_PROTOBUF_HOST_LIB_DIR "${_PROTOBUF_HOST_DIR}/lib")
 
 # --------------------------------------------------------
 # set config for ed25519 crypto
