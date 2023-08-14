@@ -588,6 +588,7 @@ ExternalProject_Add(protobuf-plugin
 )
 set(_PROTOBUF_PLUGIN_DIR "${_PROTOBUF_BINARY_DIR}/protobuf-plugin")
 
+STRING(TOLOWER ${CMAKE_SYSTEM_NAME} _WALLET_CORE_ARCH)
 ExternalProject_Add(wallet-core
     PREFIX wallet-core
     SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"
@@ -606,8 +607,8 @@ ExternalProject_Add(wallet-core
     ${_OPENSSL_CACHE_ARGS}
     ${_GRPC_CACHE_ARGS}
     -DCMAKE_CXX_STANDARD:STRING=17
-    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
-    PATCH_COMMAND "${THIRDPARTY_DIR}/wallet-core/tools/generate-files" --arch=${_ARCH_PLATFORM} --protobuff-dir=${_FINDPACKAGE_PROTOBUF_HOST_DIR} --prj-dir=${THIRDPARTY_DIR}/wallet-core --plugin-dir=${_PROTOBUF_PLUGIN_DIR}/bin
+    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -Wno-double-promotion\ -std=c++17
+    PATCH_COMMAND "${THIRDPARTY_DIR}/wallet-core/tools/generate-files" --arch=${_WALLET_CORE_ARCH} --protobuf-dir=${_FINDPACKAGE_PROTOBUF_HOST_DIR} --prj-dir=${THIRDPARTY_DIR}/wallet-core --plugin-dir=${_PROTOBUF_PLUGIN_DIR}/bin
     DEPENDS Boost grpc openssl protobuf-plugin
 )
 

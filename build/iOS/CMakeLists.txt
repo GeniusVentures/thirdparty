@@ -121,7 +121,11 @@ set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
-# Build protobuf project from the git submodule.
+# --------------------------------------------------------
+# Build protobuf project from the git submodule for local executation of protoc.
+set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
+set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake")
+
 ExternalProject_Add(protobuf
         PREFIX protobuf
         SOURCE_DIR "${PROTOBUF_SRC_DIR}"
@@ -177,6 +181,9 @@ set(_grpc_EXTRA_PARAM
         -DHAVE_LIBSOCKET:BOOL=FALSE
         -DHAVE_LIBRT:BOOL=FALSE
         -DCARES_BUILD_TOOLS:BOOL=OFF
+        -DgRPC_INSTALL:BOOL=OFF
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -Wno-unused-command-line-argument
+        -DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}\ -Wno-unused-command-line-argument
 )
 
 # --------------------------------------------------------
