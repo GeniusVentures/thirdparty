@@ -589,7 +589,6 @@ ExternalProject_Add(protobuf-plugin
 set(_PROTOBUF_PLUGIN_DIR "${_PROTOBUF_BINARY_DIR}/protobuf-plugin")
 
 STRING(TOLOWER ${CMAKE_SYSTEM_NAME} _WALLET_CORE_ARCH)
-
 ExternalProject_Add(wallet-core
     PREFIX wallet-core
     SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"
