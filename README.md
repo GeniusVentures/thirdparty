@@ -50,7 +50,7 @@ Open a terminal as root ("sudo" won't do it because of Ruby installation)
 
 ```bash
 	apt-get -y update
-	apt-get -y install g++ clang llvm cmake ntp zlib1g-dev libgtk-3-dev ninja-build libjsoncpp25 libsecret-1-0 libjsoncpp-dev libsecret-1-dev git cmake default-jre curl libc++-dev
+	apt-get -y install g++ clang llvm cmake ntp zlib1g-dev libgtk-3-dev ninja-build libjsoncpp25 libsecret-1-0 libjsoncpp-dev libsecret-1-dev git cmake default-jre curl libc++-dev libc++abi-dev
 	cd /usr/local/src
 	wget --no-check-certificate https://www.openssl.org/source/openssl-1.1.1t.tar.gz 
 	tar -xf openssl-1.1.1t.tar.gz 
