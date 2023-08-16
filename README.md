@@ -50,7 +50,7 @@ Open a terminal as root ("sudo" won't do it because of Ruby installation)
 
 ```bash
 	apt-get -y update
-	apt-get -y install g++ clang llvm cmake ntp zlib1g-dev libgtk-3-dev ninja-build libjsoncpp25 libsecret-1-0 libjsoncpp-dev libsecret-1-dev git cmake default-jre curl
+	apt-get -y install g++ clang llvm cmake ntp zlib1g-dev libgtk-3-dev ninja-build libjsoncpp25 libsecret-1-0 libjsoncpp-dev libsecret-1-dev git cmake default-jre curl libc++-dev
 	cd /usr/local/src
 	wget --no-check-certificate https://www.openssl.org/source/openssl-1.1.1t.tar.gz 
 	tar -xf openssl-1.1.1t.tar.gz 
@@ -73,6 +73,8 @@ Open a terminal as root ("sudo" won't do it because of Ruby installation)
 	rvm install ruby-2.7.8 --with-openssl-dir=/usr/local/ssl/ >>ruby-build.log
 	rvm --default use ruby-2.7.8 
 	ln -s /usr/bin/python3 /usr/bin/python
+	update-alternatives --set c++ /usr/bin/clang++
+	update-alternatives --set cc /usr/bin/clang
 ```
 These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](../../../TestVMs/blob/master/Ubuntu64Desktop/bootstrap.sh)
 
