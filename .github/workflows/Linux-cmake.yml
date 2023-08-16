@@ -5,14 +5,6 @@ name: Linux Build
 # Controls when the workflow will run
 # Triggers the workflow on push or pull request events and manually from the Actions tab
 on:
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - 'README.md'
-      - '.github/workflows/**'
-      - '.gitignore'
-  pull_request:
   workflow_dispatch:
 
 env:
@@ -30,12 +22,11 @@ jobs:
             submodules: 'recursive'
 
         - name: Create Build Directory
-          run: cmake -E make_directory ${{github.workspace}}/.build
+          run: |
+            mkdir -p ${{github.workspace}}/Linux/build/Release/
+            update-alternatives --set c++ /usr/bin/clang++
+            update-alternatives --set cc /usr/bin/clang
+            cd ${{github.workspace}}/Linux/build/Release/
+            cmake .. -DCMAKE_BUILD_TYPE=Release
+            make
 
-        - name: Configure CMake
-          working-directory: ${{github.workspace}}/.build
-          run: cmake -S ../build/Linux/ -DCMAKE_BUILD_TYPE=Release
-
-        - name: Compile
-          working-directory: ${{github.workspace}}/.build
-          run: make
