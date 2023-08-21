@@ -83,6 +83,9 @@ source /etc/profile.d/rvm.sh
 # this updates the path
 rvm --default use ruby-2.7.8
 echo '. "$HOME/.cargo/env"' >> $HOME/.bashrc
+# default to use clang
+sudo update-alternatives --set c++ /usr/bin/clang++
+sudo update-alternatives --set cc /usr/bin/clang
 ```
 These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](../../../TestVMs/blob/master/Ubuntu64Desktop/bootstrap.sh)
 
