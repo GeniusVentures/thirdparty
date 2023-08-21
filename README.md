@@ -78,6 +78,9 @@ Open a terminal as root ("sudo" won't do it because of Ruby installation)
 ```
 These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](../../../TestVMs/blob/master/Ubuntu64Desktop/bootstrap.sh)
 
+The following Rust target is needed for now but will be deprecated soon:
+
+- ```rustup target add wasm32-unknown-emscripten```	 # this will be deprecated on wallet-core soon
 ## Building
 
 	○ export CMAKE_BUILD_PARALLEL_LEVEL=8
@@ -144,6 +147,7 @@ These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](
 - wallet-core dependency tools
   - Rust, cargo
     - ```rustup target add aarch64-apple-darwin x86_64-apple-darwin```
+	- ```rustup target add wasm32-unknown-emscripten```	 # this will be deprecated on wallet-core soon
  ## Building
 ```
 ○ cd build/OSX
