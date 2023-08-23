@@ -11,7 +11,7 @@ This is the repository for third party of SuperGenius
 ### Speeding up the build tools
 Set two environment variables
 - CMAKE_BUILD_PARALLEL_LEVEL=8
-- MAKEFLAGS="-j8"
+- MAKEFLAGS="-j8"  # this errors on Windows nmake, so don't use on Windows
 
 # Build on Windows
 
@@ -20,6 +20,12 @@ Set two environment variables
 - Visual Studio 2015, 2017, 2019 or 2022
 - Strawberry Perl (https://strawberryperl.com/)
 - Python >=3.5
+- rvm/Ruby 2.7.8
+  - ```rvm --default use ruby-2.7.8```
+- wallet-core dependency tools
+  - Rust, cargo
+    - ```rustup set default-host x86_64-pc-windows-msvc```
+    - ```rustup target add x86_64-pc-windows-msvc```
 ## Building
     ○ git submodule update --init --recursive
     ○ cd ./build/Windows
@@ -51,7 +57,7 @@ Install default requirements
 ```bash
 #!/bin/bash
 apt-get -y update
-apt-get -y install g++ clang llvm cmake ntp zlib1g-dev libgtk-3-dev ninja-build libjsoncpp25 libsecret-1-0 libjsoncpp-dev libsecret-1-dev git cmake default-jre curl
+apt-get -y install g++ clang llvm cmake ntp zlib1g-dev libgtk-3-dev ninja-build libjsoncpp25 libsecret-1-0 libjsoncpp-dev libsecret-1-dev git cmake default-jre curl libc++-dev libc++abi-dev
 cd /usr/local/src
 wget --no-check-certificate https://www.openssl.org/source/openssl-1.1.1t.tar.gz 
 tar -xf openssl-1.1.1t.tar.gz 
@@ -62,7 +68,7 @@ cd ~/
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 . "$HOME/.cargo/env" 
 cargo install cbindgen >rust-install.log 
-rustup target add wasm32-unknown-emscripten >rust-install.log 
+rustup target add x86_64-unknown-linux-gnu >rust-install.log 
 cp -R /root/.cargo /home/$SUDO_USER 
 cp -R /root/.rustup /home/$SUDO_USER 
 chown -R /$SUDO_USER:/$SUDO_USER /home//$SUDO_USER/.cargo /home//$SUDO_USER/.rustup
@@ -89,6 +95,9 @@ sudo update-alternatives --set cc /usr/bin/clang
 ```
 These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](../../../TestVMs/blob/master/Ubuntu64Desktop/bootstrap.sh)
 
+The following Rust target is needed for now but will be deprecated soon:
+
+- ```rustup target add wasm32-unknown-emscripten```	 # this will be deprecated on wallet-core soon
 ## Building
 
 	○ export CMAKE_BUILD_PARALLEL_LEVEL=8
@@ -99,14 +108,20 @@ These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](
 	○ cmake .. -DCMAKE_BUILD_TYPE=Release
 	○ make
 
-# Build on Linux for Android cross compile
-## Preinstall
+# Build/Cross-Compile Android on Linux/OSX/Windows Hosts 
+## Preinstall Host tools
 - CMake
 - Android NDK Latest LTS Version (r25b) [(link)](https://developer.android.com/ndk/downloads#lts-downloads)
-## Building
+- rvm/Ruby 2.7.8
+  - ```rvm --default use ruby-2.7.8``` 
+- wallet-core dependency tools
+  - Rust, cargo
+    - ```rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android```
+## Host settings in .bash_profile (ex.)
 	○ export ANDROID_NDK=/path/to/android-ndk-r25b
 	○ export ANDROID_TOOLCHAIN="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
 	○ export PATH="$ANDROID_TOOLCHAIN":"$PATH"
+# Building
 * armeabi-v7a
 ```
 ○ cd build/Android
@@ -141,10 +156,15 @@ These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](
 ```
 # Build on OSX (Builds x86_64 & Arm64)
 ## Preinstall
-   - CMake    
-   - Python >=3.5
-   - xCode Command line Tools & SDK
-
+- CMake    
+- Python >=3.5
+- xCode Command line Tools & SDK
+- rvm/Ruby 2.7.8
+  - ```rvm --default use ruby-2.7.8```
+- wallet-core dependency tools
+  - Rust, cargo
+    - ```rustup target add aarch64-apple-darwin x86_64-apple-darwin```
+	- ```rustup target add wasm32-unknown-emscripten```	 # this will be deprecated on wallet-core soon
  ## Building
 ```
 ○ cd build/OSX
@@ -155,13 +175,16 @@ These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](
 ```
 # Build for iOS
 ## Preinstall
-  - CMake
-  - xCode Command line Tools & SDK 
-
+- CMake
+- xCode Command line Tools & SDK
+- rvm/Ruby 2.7.8
+- wallet-core dependency tools
+  - Rust, cargo
+    - ```rustup target add x86_64-apple-ios aarch64-apple-ios-sim aarch64-apple-ios```
 ## Building
 ```
 ○ cd build/iOS
 ○ mkdir Release/
-○ cmake .. -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=../iOS.cmake
+○ cmake .. -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=$PWD/../iOS.cmake
 ○ make
 ```

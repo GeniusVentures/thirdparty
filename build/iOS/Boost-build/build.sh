@@ -63,7 +63,7 @@ MAC_CATALYST_ARCHS=("x86_64")
 # Applied to all platforms
 CXX_FLAGS=""
 LD_FLAGS=""
-OTHER_FLAGS="-std=c++14 -stdlib=libc++ -DNDEBUG"
+OTHER_FLAGS="-stdlib=libc++ -DNDEBUG"
 
 XCODE_VERSION=$(xcrun xcodebuild -version | head -n1 | tr -Cd '[:digit:].')
 XCODE_ROOT=$(xcode-select -print-path)
@@ -887,7 +887,7 @@ buildBoost_iOS()
     doneSection
 
     echo Building Boost for iPhoneSimulator
-    ./b2 cxxflags="std=c++17" "$THREADS"  \
+    ./b2 cxxflags="-std=c++17" "$THREADS"  \
         --build-dir=iphonesim-build \
         --stagedir=iphonesim-build/stage \
         toolset="darwin-$COMPILER_VERSION~iphonesim" \
@@ -907,7 +907,7 @@ buildBoost_tvOS()
     mkdir -p "$TVOS_OUTPUT_DIR"
 
     echo Building Boost for AppleTV
-    ./b2 cxxflags="std=c++17" "$THREADS"  \
+    ./b2 cxxflags="-std=c++17" "$THREADS"  \
         --build-dir=appletv-build \
         --stagedir=appletv-build/stage \
         --prefix="$TVOS_OUTPUT_DIR" \
@@ -920,7 +920,7 @@ buildBoost_tvOS()
     # shellcheck disable=SC2181
     if [ $? != 0 ]; then echo "Error staging AppleTV. Check log."; exit 1; fi
 
-    ./b2 cxxflags="std=c++17" "$THREADS"  \
+    ./b2 cxxflags="-std=c++17" "$THREADS"  \
         --build-dir=appletv-build \
         --stagedir=appletv-build/stage \
         --prefix="$TVOS_OUTPUT_DIR" \
@@ -935,7 +935,7 @@ buildBoost_tvOS()
     doneSection
 
     echo "Building Boost for AppleTVSimulator"
-    ./b2 cxxflags="std=c++17" "$THREADS"  \
+    ./b2 cxxflags="-std=c++17" "$THREADS"  \
         --build-dir=appletvsim-build \
         --stagedir=appletvsim-build/stage \
         --prefix="$TVOS_OUTPUT_DIR" \

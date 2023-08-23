@@ -126,38 +126,43 @@ set(_OPENSSL_CACHE_ARGS
 set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
 set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake")
 
-# Build protobuf project from the git submodule.
 ExternalProject_Add(protobuf
-    PREFIX protobuf
-    SOURCE_DIR "${PROTOBUF_SRC_DIR}"
-    CMAKE_CACHE_ARGS
-          -Dprotobuf_BUILD_TESTS:BOOL=OFF
-          -Dprotobuf_WITH_ZLIB:BOOL=OFF
-          -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
-          -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
-          -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=OFF
-          ${_CMAKE_COMMON_BUILD_PARAMS}
-    DEPENDS
-  )
+        PREFIX protobuf
+        SOURCE_DIR "${PROTOBUF_SRC_DIR}"
+        CMAKE_CACHE_ARGS
+        -Dprotobuf_BUILD_TESTS:BOOL=OFF
+        -Dprotobuf_WITH_ZLIB:BOOL=OFF
+        -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
+        -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=OFF
+        ${_CMAKE_COMMON_BUILD_PARAMS}
+        DEPENDS
+)
 
 set(_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
 set(_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
+set(_PROTOBUF_HOST_DIR "${THIRDPARTY_DIR}/build/${TP_BUILD_SUBDIR}/${CMAKE_BUILD_TYPE}/protobuf")
 
 # Build protoc for host OS
 ExternalProject_Add(protobuf-host
-    PREFIX protobuf-host
-    SOURCE_DIR "${PROTOBUF_SRC_DIR}"
-    CMAKE_CACHE_ARGS
-          -Dprotobuf_BUILD_TESTS:BOOL=OFF
-          -Dprotobuf_WITH_ZLIB:BOOL=OFF
-          -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
-          -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf-host
-          -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
-          ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}
-    DEPENDS
-  )
-set(PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf-host/bin/protoc")
+        PREFIX ${_PROTOBUF_HOST_DIR}
+        SOURCE_DIR "${PROTOBUF_SRC_DIR}"
+        CMAKE_CACHE_ARGS
+        -Dprotobuf_BUILD_TESTS:BOOL=OFF
+        -Dprotobuf_WITH_ZLIB:BOOL=OFF
+        -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
+        -DCMAKE_INSTALL_PREFIX:PATH=${_PROTOBUF_HOST_DIR}
+        -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
+        ${CMAKE_CHCHE_ARGS_CFLAGES_ADD}
+        DEPENDS
+)
+
+set(PROTOC_EXECUTABLE "${_PROTOBUF_HOST_DIR}/bin/protoc")
 set(_PROTOBUF_TARGET protobuf protobuf-host)
+
+set(_PROTOBUF_HOST_CONFIG_DIR "${_PROTOBUF_HOST_DIR}/lib/cmake/protobuf")
+set(_PROTOBUF_HOST_INCLUDE_DIR "${_PROTOBUF_HOST_DIR}/include")
+set(_PROTOBUF_HOST_LIB_DIR "${_PROTOBUF_HOST_DIR}/lib")
 
 # --------------------------------------------------------
 # set config for grpc
@@ -176,6 +181,9 @@ set(_grpc_EXTRA_PARAM
         -DHAVE_LIBSOCKET:BOOL=FALSE
         -DHAVE_LIBRT:BOOL=FALSE
         -DCARES_BUILD_TOOLS:BOOL=OFF
+        -DgRPC_INSTALL:BOOL=OFF
+        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -Wno-unused-command-line-argument
+        -DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}\ -Wno-unused-command-line-argument
 )
 
 # --------------------------------------------------------
