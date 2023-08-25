@@ -613,7 +613,7 @@ ExternalProject_Add(wallet-core
     ${_OPENSSL_CACHE_ARGS}
     ${_GRPC_CACHE_ARGS}
     -DCMAKE_CXX_STANDARD:STRING=17
-    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -Wno-double-promotion\ -std=c++17
+    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -std=c++17
     PATCH_COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} -f --target-os=${_WALLET_CORE_ARCH} --arch-abi=${_ARCH_ABI} --protobuf-dir=${_FINDPACKAGE_PROTOBUF_HOST_DIR} --prj-dir=${THIRDPARTY_DIR}/wallet-core --plugin-dir=${_PROTOBUF_PLUGIN_DIR}/bin
     DEPENDS Boost grpc openssl protobuf-plugin
 )
