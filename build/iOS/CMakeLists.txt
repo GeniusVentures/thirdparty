@@ -16,7 +16,7 @@ if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
-set(IOS_DEPLOYMENT_TARGET 13.0)
+set(IOS_DEPLOYMENT_TARGET 16.2)
 
 project(iOS_SHARED_THIRD_PARTY)
 
@@ -200,6 +200,14 @@ set(_libp2p_BUILD_EXAMPLES OFF)
 # ---------------------------------------------------------
 # Set config for MNN modules
 set(_MNN_WIN_RUNTIME_MT OFF)
+set(_MNN_EXTRA_PARAM
+    -DMNN_METAL:BOOL=ON 
+    -DARCHS:STRING="arm64" 
+    -DENABLE_BITCODE:BOOL=OFF 
+    -DMNN_AAPL_FMWK:BOOL=ON 
+    -DMNN_SEP_BUILD:BOOL=OFF 
+    -DMNN_ARM82:BOOL=ON 
+)
 
 # --------------------------------------------------------
 # Set o iOS specific configurations
