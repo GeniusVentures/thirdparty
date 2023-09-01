@@ -867,6 +867,8 @@ buildBoost_iOS()
         visibility=global \
         link=static \
         runtime-link=static \
+        binary-format=mach-o \
+        address-model=64 \
         variant=${BUILD_VARIANT} \
         stage >> "${IOS_OUTPUT_DIR}/ios-build.log" 2>&1
     # shellcheck disable=SC2181
