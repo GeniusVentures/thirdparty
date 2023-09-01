@@ -26,8 +26,7 @@ include(../CommonCompilerOptions.CMake)
 # ------------------------------------------
 # Set OSX specific runtime options
 
-# TODO: use single architecture to avoid Crypto3 error - removed ";x86_64"  
-set(CMAKE_OSX_ARCHITECTURES "arm64")
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
 
