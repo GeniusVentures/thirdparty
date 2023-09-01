@@ -206,7 +206,6 @@ set(_MNN_EXTRA_PARAM
     -DENABLE_BITCODE:BOOL=OFF 
     -DMNN_AAPL_FMWK:BOOL=ON 
     -DMNN_SEP_BUILD:BOOL=OFF 
-    -DMNN_ARM82:BOOL=ON 
 )
 
 # --------------------------------------------------------
