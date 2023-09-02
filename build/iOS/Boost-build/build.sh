@@ -897,7 +897,7 @@ buildBoost_iOS()
     doneSection
 
     echo Building Boost for iPhoneSimulator
-    ./b2 cxxflags="-fPIC std=c++17" "$THREADS"  \
+    ./b2 cxxflags="-fPIC -std=c++17" "$THREADS"  \
         --build-dir=iphonesim-build \
         --stagedir=iphonesim-build/stage \
         toolset="darwin-$COMPILER_VERSION~iphonesim" \
