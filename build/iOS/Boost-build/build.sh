@@ -891,23 +891,29 @@ buildBoost_iOS()
     # shellcheck disable=SC2181
     if [ $? != 0 ]; then 
         echo "Error installing iPhone. Check log."; 
-        "${IOS_OUTPUT_DIR}/ios-build.log"
+        cat "${IOS_OUTPUT_DIR}/ios-build.log"
         exit 1; 
     fi
     doneSection
 
     echo Building Boost for iPhoneSimulator
-    ./b2 cxxflags="std=c++17" "$THREADS"  \
+    ./b2 cxxflags="-fPIC std=c++17" "$THREADS"  \
         --build-dir=iphonesim-build \
         --stagedir=iphonesim-build/stage \
         toolset="darwin-$COMPILER_VERSION~iphonesim" \
         visibility=global \
         link=static \
         runtime-link=static \
+        binary-format=mach-o \
+        address-model=64 \
         variant=${BUILD_VARIANT} \
         stage >> "${IOS_OUTPUT_DIR}/ios-build.log" 2>&1
     # shellcheck disable=SC2181
-    if [ $? != 0 ]; then echo "Error staging iPhoneSimulator. Check log."; exit 1; fi
+    if [ $? != 0 ]; then 
+        echo "Error staging iPhoneSimulator. Check log."; 
+        cat "${IOS_OUTPUT_DIR}/ios-build.log"
+        exit 1; 
+    fi
     doneSection
 }
 
