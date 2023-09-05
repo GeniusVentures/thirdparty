@@ -559,7 +559,7 @@ jobs:
               cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
             cmake-compile-script: |
               echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
-              make $TARGET_NAME -j$(nproc)
+              make $TARGET_NAME 
               make install
 
           # --------------------------------------------------------------------------
