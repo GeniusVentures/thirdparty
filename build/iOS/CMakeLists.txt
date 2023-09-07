@@ -24,13 +24,6 @@ project(iOS_SHARED_THIRD_PARTY)
 # build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
-# added since if we haven't compiled crypto3 on OSX it won't be patched
-message(WARNING "Patching crypto3 module - update with caution")
-set(crypto3_patch
-        PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-        "${PROJECT_BUILD_FOLDER}/cmake.in/crypto3-patch/patch.TargetArchitecture.cmake" <SOURCE_DIR>/cmake/TargetArchitecture.cmake
-)
-
 set(_PKG_CONFIG_EXECUTABLE -DPKG_CONFIG_EXECUTABLE:PATH=/usr/local/bin/pkg-config)
 
 # ------------------------------------------

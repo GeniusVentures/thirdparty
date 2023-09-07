@@ -145,15 +145,6 @@ set(_grpc_EXTRA_PARAM
 )
 
 # --------------------------------------------------------
-# set config for crypto3
-message(WARNING "Patching crypto3 module - update with caution")
-set(crypto3_patch
-		PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-            "${PROJECT_BUILD_FOLDER}/cmake.in/crypto3-patch/patch.TargetArchitecture.cmake" <SOURCE_DIR>/cmake/TargetArchitecture.cmake
-		)
-
-
-# --------------------------------------------------------
 # set config for rocksdb
 set(_rocksdb_EXTRA_PARAM
   -DHAS_ARMV8_CRC:BOOL=ON)
