@@ -24,6 +24,15 @@ project(iOS_SHARED_THIRD_PARTY)
 # build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
+# added since if we haven't compiled crypto3 on OSX it won't be patched
+message(WARNING "Patching crypto3 module - update with caution")
+set(crypto3_patch
+        PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+        "${PROJECT_BUILD_FOLDER}/cmake.in/crypto3-patch/patch.TargetArchitecture.cmake" <SOURCE_DIR>/cmake/TargetArchitecture.cmake
+)
+
+set(_PKG_CONFIG_EXECUTABLE -DPKG_CONFIG_EXECUTABLE:PATH=/usr/local/bin/pkg-config)
+
 # ------------------------------------------
 # Set OSX specific runtime options
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
@@ -31,6 +40,7 @@ set(CMAKE_SYSTEM_NAME "iOS")
 set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
+    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
     -DOPENSSL_USE_STATIC_LIBS:BOOL=TRUE
@@ -92,7 +102,7 @@ set(_BOOST_CACHE_ARGS
     -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
     -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
     -DBoost_USE_MULTITHREADED:BOOL=ON
-    -DBoost_USE_STATIC_RUNTIME:BOOL=OFF
+    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}

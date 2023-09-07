@@ -163,8 +163,15 @@ The following Rust target is needed for now but will be deprecated soon:
   - ```rvm --default use ruby-2.7.8```
 - wallet-core dependency tools
   - Rust, cargo
-    - ```rustup target add aarch64-apple-darwin x86_64-apple-darwin```
-	- ```rustup target add wasm32-unknown-emscripten```	 # this will be deprecated on wallet-core soon
+    ```bash
+    rustup update
+    rustup toolchain install nightly
+    rustup default nightly
+    rustup toolchain install nightly-x86_64-apple-darwin
+    rustup target add aarch64-apple-darwin
+    rustup component add rust-src --toolchain nightly-x86_64-apple-darwin
+    cargo install cbindgen cargo-lipo
+    ```
  ## Building
 ```
 ○ cd build/OSX
@@ -180,7 +187,15 @@ The following Rust target is needed for now but will be deprecated soon:
 - rvm/Ruby 2.7.8
 - wallet-core dependency tools
   - Rust, cargo
-    - ```rustup target add x86_64-apple-ios aarch64-apple-ios-sim aarch64-apple-ios```
+    ```bash
+    rustup update
+    rustup toolchain install nightly
+    rustup default nightly
+    rustup toolchain install nightly-x86_64-apple-darwin
+    rustup target add x86_64-apple-ios aarch64-apple-ios-sim aarch64-apple-ios
+    cargo install cbindgen cargo-lipo
+    ```
+
 ## Building
 ```
 ○ cd build/iOS
