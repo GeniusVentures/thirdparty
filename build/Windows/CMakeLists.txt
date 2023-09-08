@@ -19,7 +19,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 
-set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/win-generate-files.bat")
 
 # ------------------------------------------
 # Enable c++ exceptions
@@ -29,6 +28,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP")
 # build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
+set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/win-generate-files.bat")
 # ------------------------------------------
 # Set Windows specific protobuf options
 set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/cmake")
