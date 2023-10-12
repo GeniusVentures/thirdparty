@@ -169,7 +169,7 @@ The following Rust target is needed for now but will be deprecated soon:
     rustup default stable
     rustup target add x86_64-apple-darwin
     rustup target add aarch64-apple-darwin
-    rustup component add rust-src --toolchain nightly-x86_64-apple-darwin
+    rustup target add wasm32-unknown-emscripten
     cargo install cbindgen cargo-lipo
     ```
  ## Building
@@ -192,6 +192,8 @@ The following Rust target is needed for now but will be deprecated soon:
     rustup toolchain install stable
     rustup default stable
     rustup toolchain install stable-x86_64-apple-darwin
+    rustup toolchain install nightly-x86_64-apple-darwin
+    rustup component add rust-src --toolchain nightly-x86_64-apple-darwin
     rustup target add x86_64-apple-ios aarch64-apple-ios-sim aarch64-apple-ios
     cargo install cbindgen cargo-lipo
     ```
