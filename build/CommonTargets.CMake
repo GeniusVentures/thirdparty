@@ -148,11 +148,11 @@ ExternalProject_Add(Microsoft.GSL
   PREFIX Microsoft.GSL
   SOURCE_DIR "${THIRDPARTY_DIR}/GSL"
   CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/GSL
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Microsoft.GSL
         -DGSL_TEST:BOOL=OFF
         ${_CMAKE_COMMON_BUILD_PARAMS}
 )
-set(_FINDPACKAGE_GSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/GSL/include")
+set(_FINDPACKAGE_GSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Microsoft.GSL/include")
 
 # --------------------------------------------------------
 ExternalProject_Add(fmt
@@ -192,11 +192,11 @@ ExternalProject_Add(tsl_hat_trie
   PREFIX tsl_hat_trie
   SOURCE_DIR "${THIRDPARTY_DIR}/hat-trie"
   CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/hat-trie
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/tsl_hat_trie
         ${_tsl_hat_trie_patch}
 )
-set(_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/hat-trie/lib/cmake/tsl_hat_trie")
-set(_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/hat-trie/include")
+set(_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/tsl_hat_trie/lib/cmake/tsl_hat_trie")
+set(_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/tsl_hat_trie/include")
 
 # --------------------------------------------------------
 # Builds Boost.DI
@@ -269,6 +269,7 @@ ExternalProject_Add(soralog
   CMAKE_CACHE_ARGS
         -DHUNTER_ENABLED:BOOL=OFF
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/soralog
+        -DCMAKE_POLICY_DEFAULT_CMP0025:STRING=OLD
         -DEXAMPLES:BOOL=OFF
         -DTESTING:BOOL=OFF
         -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
@@ -364,6 +365,9 @@ ExternalProject_Add(MNN
   CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN
         -DMNN_BUILD_SHARED_LIBS:BOOL=OFF
+        -DMNN_BUILD_TESTS:BOOL=OFF
+        -DMNN_BUILD_TOOLS:BOOL=OFF
+        -DMNN_BUILD_PROTOBUFFER:BOOL=OFF
         -DMNN_WIN_RUNTIME_MT:BOOL=${_MNN_WIN_RUNTIME_MT}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_MNN_EXTRA_PARAM}
@@ -614,45 +618,6 @@ ExternalProject_Add(wallet-core
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
     PATCH_COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${_ARCH_ABI} --protobuf-dir=${_FINDPACKAGE_PROTOBUF_HOST_DIR} --out-dir=${CMAKE_CURRENT_BINARY_DIR}/wallet-core --plugin-dir=${_PROTOBUF_PLUGIN_DIR}/bin
     DEPENDS Boost grpc openssl protobuf-plugin
-)
-
-ExternalProject_Add(crypto3
-        PREFIX crypto3
-        SOURCE_DIR "${THIRDPARTY_DIR}/crypto3"
-        CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/crypto3
-        -DBoost_NO_SYSTEM_PATHS:BOOL=ON
-        -DBoost_DIR:PATH=${_FINDPACKAGE_BOOST_CONFIG_DIR}
-        -DTESTING:BOOL=${TESTING}
-        -DBUILD_TESTS:BOOL=FALSE
-        ${_CMAKE_COMMON_BUILD_PARAMS}
-        ${_BOOST_CACHE_ARGS}
-        -DCMAKE_CXX_STANDARD:STRING=17
-        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}
-        -DBUILD_SHARED_LIBS:BOOL=FALSE
-        ${crypto3_patch}
-        DEPENDS Boost
-)
-
-ExternalProject_Add(Halo2
-        PREFIX Halo2
-        SOURCE_DIR "${THIRDPARTY_DIR}/Halo2"
-        CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Halo2
-        -DBoost_NO_SYSTEM_PATHS:BOOL=ON
-        -DBoost_DIR:PATH=${_FINDPACKAGE_BOOST_CONFIG_DIR}
-        -DTESTING:BOOL=${TESTING}
-        ${_CMAKE_COMMON_BUILD_PARAMS}
-        ${_BOOST_CACHE_ARGS}
-        ${_OPENSSL_CACHE_ARGS}
-        -DCMAKE_CXX_STANDARD:STRING=17
-        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}
-        -DBUILD_SHARED_LIBS:BOOL=FALSE
-        -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
-        -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
-        -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
-        -Dcrypto3_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/crypto3
-        DEPENDS Boost crypto3 openssl spdlog GTest
 )
 
 ExternalProject_Add(zlib

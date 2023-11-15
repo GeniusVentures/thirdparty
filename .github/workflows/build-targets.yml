@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  GITHUB_TOKEN: ${{ github.token }}
+  #GITHUB_TOKEN: ${{ github.token }}
+  GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN_1 }}
   #MAKEFLAGS: "-j8"
   #CMAKE_BUILD_PARALLEL_LEVEL: 8
 
@@ -37,21 +38,25 @@ jobs:
             sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
             echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
             sudo apt update
-            sudo apt install gh -y
+            sudo apt install gh zstd jo -y  
           }
+
+          # get currently authenticated user rate limit info
+          rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
+          echo "Rate limit remaining is $rateRemaining"
+
           gh extension install actions/gh-actions-cache
           echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
           echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
-          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
 
       - name: Find cache and Clean out old caches of thirdparty
         id: tp-check
         run: |
           echo "Fetching list of thirdparty cache keys to check if any old ones need deleting"
-          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="thirdparty" | jq -r ".actions_caches[].key" | sort)
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="${BRANCH}/thirdparty" | jq -r ".actions_caches[].key" | sort)
           longSHA="${{ github.sha }}"
           shortSHA="${longSHA:0:7}"
-          tpCacheNameSHA="thirdparty-$shortSHA"
+          tpCacheNameSHA="$BRANCH/thirdparty-$shortSHA"
 
           notMatched="$(comm -3 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$cachesList"))"
           oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$tpCacheNameSHA") <(echo -en "$notMatched"))"
@@ -83,10 +88,11 @@ jobs:
 
       - name: Cache main Source Files without .git, if not already cached
         if: ( steps.tp-check.outputs.FOUND_THIRD_PARTY_CURRENT == 'false' )
-        uses: GeniusVentures/cache-multi@v3.2.3
+        uses: GeniusVentures/cache-multi@v3.3.1
         id: cache-source-directory
         with:
           key: ${{ steps.tp-check.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
+          enableCrossOsArchive: true
           path: |
             !.git/**
             ./**
@@ -98,11 +104,11 @@ jobs:
           cacheNames=""
           while read -r mode stage longsha location; do
             shortSHA="${longsha:0:7}"
-            cacheNames+="s/$location-$shortSHA\n"
+            cacheNames+="s/$BRANCH/$location-$shortSHA\n"
           done <<< $(git ls-tree HEAD | grep "160000 commit")
 
           cacheNames="$(echo -en "$cacheNames" | sort)"
-          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="s/" | jq -r ".actions_caches[].key" | sort)
+          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="s/${BRANCH}" | jq -r ".actions_caches[].key" | sort)
 
           notMatched="$(comm -3 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$cachesList"))"
           oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$notMatched"))"
@@ -117,8 +123,9 @@ jobs:
             len=${#toCache}
             startPos=$((len - 7))
             shortSHA="${toCache:$startPos:7}"
-            # - 10 for s/ + '-' + shortSHA
-            name="${toCache:2:$((len - 10))}"
+            lenBranch=${#BRANCH}
+            # - 10 - lenBranch - 1 for s/$BRANCH/ + '-' + shortSHA
+            name="${toCache:$((2 + lenBranch + 1)):$((len - 10 - lenBranch - 1))}"
             if [[ "$first" != "true" ]]; then
               matrixJson+=", "
             fi
@@ -150,8 +157,9 @@ jobs:
             len=${#cacheName}
             startPos=$((len - 7))
             shortSHA="${cacheName:$startPos:7}"
-            # - 10 for s/ + '-' + shortSHA
-            name="${cacheName:2:$((len - 10))}"
+            lenBranch=${#BRANCH}
+            # - 10 - lenBranch - 1 for s/$BRANCH/ + '-' + shortSHA
+            name="${cacheName:$((2 + lenBranch + 1)):$((len - 10 - lenBranch - 1))}"
             if [[ "$first" != "true" ]]; then
               cacheNameKeysContent+=", "
               cachePathsContent+=", "
@@ -174,16 +182,21 @@ jobs:
     needs: setup-src-cache
     if: (needs.setup-src-cache.outputs.NEEDS_CACHE == 'true')
     runs-on: ubuntu-latest
-    strategy:
+    strategy: 
       fail-fast: true
       matrix:
         include: ${{ fromJson(needs.setup-src-cache.outputs.CACHE_MATRIX) }}
     steps:
+      - name: Setup
+        run: |
+          sudo apt install zstd -y
+
       - name: Cache Third Party Directory
-        uses: GeniusVentures/cache-multi/restore@v3.2.3
+        uses: GeniusVentures/cache-multi/restore@v3.3.1
         id: cache-tp-source-directory
         with:
           key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
+          enableCrossOsArchive: true
           path: |
             !.git/**
             ./**
@@ -202,9 +215,10 @@ jobs:
 
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
-        uses: GeniusVentures/cache-multi@v3.2.3
+        uses: GeniusVentures/cache-multi@v3.3.1
         with:
           key: ${{ matrix.cache-name }}
+          enableCrossOsArchive: true
           path: |
             !./${{ matrix.name }}/.git/**
             ./${{ matrix.name }}/**
@@ -222,11 +236,16 @@ jobs:
       TARGET_DIRECTORIES: ${{ steps.create-target-info.outputs.TARGET_DIRECTORIES }}
       TARGET_REPO_NAMES: ${{ steps.create-target-info.outputs.TARGET_REPO_NAMES }}
     steps:
+      - name: Setup
+        run: |
+          sudo apt install zstd -y
+
       - name: Cache Third Party Directory
-        uses: GeniusVentures/cache-multi/restore@v3.2.3
+        uses: GeniusVentures/cache-multi/restore@v3.3.1
         id: cache-tp-source-directory
         with:
           key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
+          enableCrossOsArchive: true
           path: |
             !.git/**
             ./**
@@ -238,9 +257,10 @@ jobs:
 
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
-        uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
+        uses: GeniusVentures/cache-multi/restoremulti@v3.3.1
         with:
           multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
+          enableCrossOsArchive: true
           paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
 
       - name: Create base target library names for target cache to create
@@ -301,99 +321,390 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}
 
-  build-targets-matrix:
+  save-target-sources:
     needs: [ setup-src-cache, cache-src, create-targets-matrix ]
     if: |
       always() &&
       needs.setup-src-cache.result == 'success' &&
       needs.create-targets-matrix.result == 'success' &&
-      (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped')
+      (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped') &&
+      needs.create-targets-matrix.result == 'success'    
+    strategy:
+      fail-fast: false
+      matrix:
+        target-os: [Linux, Windows, OSX, iOS, Android]
+        build-type: [ Release, Debug ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup
+        run: |
+          sudo apt install zstd -y
+
+      - name: Create library Keys and Paths to release sources
+        id: create-src-cache-keys
+        run: |
+          TARGET_OS="${{ matrix.target-os }}"
+          BUILD_TYPE="${{ matrix.build-type }}"
+          BRANCH=${{ github.ref_name }}
+          GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+
+          echo "TARGET_OS=${TARGET_OS}" >> $GITHUB_OUTPUT
+          echo "BUILD_TYPE=${BUILD_TYPE}" >> $GITHUB_OUTPUT
+          echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
+          echo "GITHUB_RELEASE_NAME=${GITHUB_RELEASE_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Cache Third Party Directory
+        uses: GeniusVentures/cache-multi/restore@v3.3.1
+        id: cache-tp-source-directory
+        with:
+          key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
+          enableCrossOsArchive: true
+          path: |
+            !.git/**
+            ./**
+  
+      - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
+        run: |
+          echo "Couldn't find cached thirdparty code, ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
+          exit 1
+  
+      - name: Cache Submodule Source Files without .git
+        id: cache-source-directory
+        uses: GeniusVentures/cache-multi/restoremulti@v3.3.1
+        with:
+          multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
+          enableCrossOsArchive: true
+          paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
+
+      - name: Creating github release tag
+        id: create-github-release-tag
+        run: |
+          set +e
+          echo "Check if github release tag ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} available."
+          gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}
+          
+          releaseFound=$?
+          if [[ $releaseFound -ne 0 ]];
+          then
+            echo "gh release view return value: ${releaseFound}"
+            echo "Creating github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
+          
+            RELEASE_TYPE="--latest"
+            if [[ "${{ steps.create-src-cache-keys.outputs.BUILD_TYPE }}" != "Release" ]]; 
+            then
+              RELEASE_TYPE="--prerelease"
+            fi
+          
+            # Create release on github
+            gh release create ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} \
+            -n "${{ steps.create-src-cache-keys.outputs.BRANCH }} branch" \
+            --target "${{ steps.create-src-cache-keys.outputs.BRANCH }}" \
+            ${RELEASE_TYPE} \
+            -t "${{ steps.create-src-cache-keys.outputs.TARGET_OS }} ${{ steps.create-src-cache-keys.outputs.BRANCH }} branch ${{ steps.create-src-cache-keys.outputs.BUILD_TYPE }} build" 
+            
+            releaseCreated=$?
+            if [[ $releaseCreated -ne 0 ]];
+            then
+              set -e
+              echo "gh release create return value: ${releaseCreated}"
+              echo "Failed to create github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
+              exit 1
+            fi
+          fi
+  
+          set -e
+
+      - name: Compress and upload targets source folder
+        id: compress-targets-source
+        working-directory: ${{github.workspace}}
+        run: |
+          # build array of library names
+          IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_REPO_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_REPO_NAMES }}|')"
+
+          set +e
+          # check if release.json file already available
+          jsonStr="[]"
+          jsonFound=`gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
+          if [ $? -eq 0 ]
+          then
+            echo "Downloading release.json file"
+            gh release download ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --pattern "release.json" --clobber
+            if [ $? -eq 0 ]
+            then
+              echo "Loading release.json file"
+              jsonStr=`cat release.json`
+            fi
+          fi
+
+          RELEASE_ASSETS=`gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --json assets`
+
+          # get currently authenticated user rate limit info
+          rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
+          echo "Rate limit remaining is $rateRemaining"
+          
+          # if we don't have at least 50 requests left, wait until reset
+          if [[ $rateRemaining -lt 50 ]]; 
+          then
+            rateReset=`gh api rate_limit --jq ".rate | .reset"`
+            wait=$((rateReset - `date +%s`));
+            echo "Rate limit remaining is $rateRemaining, waiting for $wait seconds to reset"
+            while [ $wait -ge 0 ]
+            do
+              sleep 5
+              wait=$((rateReset - `date +%s`));
+              echo "Waiting $wait seconds to reset rate limit"
+            done
+            rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
+            echo "Rate limit has reset to $rateRemaining requests"
+          fi
+
+
+          for i in "${!TARGET_NAMES[@]}"; do
+            TARGET_NAME="${TARGET_NAMES[i]}"
+            TARGET_REPO_NAME="${TARGET_REPO_NAMES[i]}"
+            TARGET_SHA="${TARGET_SHAS[i]}"
+            COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
+
+            shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< ${jsonStr}`
+            COMPRESSED_TARGET_SRC_URL=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url" <<< ${RELEASE_ASSETS}`
+            if [ -z "$COMPRESSED_TARGET_SRC_URL" ] || [[ "${shaFound}" != \"${TARGET_SHA}\" ]]; 
+            then
+              echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_REPO_NAME} source folder"
+              tar -zcf ${COMPRESSED_TARGET_SRC} ${TARGET_REPO_NAME} 
+              echo "Uploading target ${COMPRESSED_TARGET_SRC} to github release ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
+              gh release upload --clobber ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} ${COMPRESSED_TARGET_SRC}
+            fi
+          done
+          set -e
+
+
+  build-targets-matrix:
+    needs: [ setup-src-cache, cache-src, create-targets-matrix, save-target-sources ]
+    if: |
+      always() &&
+      needs.setup-src-cache.result == 'success' &&
+      needs.create-targets-matrix.result == 'success' &&
+      (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped') &&
+      (needs.save-target-sources.result == 'success' || needs.save-target-sources.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
         build-type: [ Release, Debug ]
         target-build-data:
+          # --------------------------------------------------------------------------
           - target-os: Linux
             runs-on: ubuntu-latest
             shell: bash
+            init-script:
             setup-script: |
               echo "Setup for Linux Build"
+              sudo apt install zstd -y
             cmake-init-script: |
               cd build/$TARGET_OS
               mkdir $BUILD_TYPE
               cd $BUILD_TYPE
               cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
             cmake-compile-script: |
-              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME"
+              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
               make $TARGET_NAME -j$(nproc)
-    #          - target-os: Android
-    #            runs-on: ubuntu-latest
-    #            shell: bash
-    #            setup-script: |
-    #              echo "Setup for Android Build"
-    #              git config --global core.autocrlf false
-    #              git config --global core.eol lf
-    #              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
-    #              echo "MAKEFLAGS=\"-j 8\"" >> $GITHUB_ENV
-    #              echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-    #              echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-    #            arch: |
-    #              arm64-v8a
-    #              x86_64
-    #              x86
-    #              armeabi-v7a
-    #          - target-os: OSX
-    #            runs-on: macos-latest
-    #            shell: bash
-    #            setup-script: |
-    #              echo "Setup for OSX Build"
-    #              find /Applications/Xcode* -maxdepth 0 -ls
-    #              sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
-    #              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
-    #            cmake-script: |
-    #              cd build/$TARGET_OS
-    #              mkdir Release
-    #              cd Release
-    #              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-    #              echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
-    #              make $LIBRARY_NAME
-    #          - target-os: iOS
-    #            runs-on: macos-latest
-    #            shell: bash
-    #            setup-script: |
-    #              echo "Setup for iOS Build"
-    #              find /Applications/Xcode* -maxdepth 0 -ls
-    #              sudo xcode-select --switch "$(find /Applications/Xcode*.app -maxdepth 0 | sort -V | tail -1)/Contents/Developer"
-    #              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
-    #            install-uses:
-    #              uses: actions/setup-python@v2
-    #              with:
-    #                python-version: '3.5'
-    #            cmake-script: |
-    #              cd build/$TARGET_OS
-    #              mkdir Release
-    #              cd Release
-    #              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=$WORKSPACE/build/iOS/iOS.cmake
-    #              echo "Compiling $TARGET_OS version $LIBRARY_VERSION of $LIBRARY_NAME"
-    #              make $LIBRARY_NAME
-    #
-    #          - target-os: Windows
-    #            runs-on: windows-2022
-    #            setup-script: |
-    #              echo "Setup for Windows Build"
-    #            install-uses:
-    #              name: Configure build for Windows 10 x64
-    #              uses: ilammy/msvc-dev-cmd@v1
-    #              with:
-    #                arch: amd64
-    #                sdk: 10.0.22621.0
-    #                vsversion: 17
+              make install
+
+          # --------------------------------------------------------------------------    
+          - target-os: Android
+            runs-on: ubuntu-latest
+            shell: bash
+            env:
+              CC: clang
+            init-script:
+            setup-script: |
+              echo "Setup for Android Build"
+              git config --global core.autocrlf false
+              git config --global core.eol lf
+              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
+              echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+              echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+              sudo apt install zstd -y
+            arch: |
+              arm64-v8a
+              x86_64
+              x86
+              armeabi-v7a
+            cmake-init-script: |
+              cd build/$TARGET_OS
+              mkdir $BUILD_TYPE
+              cd $BUILD_TYPE
+              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
+            cmake-compile-script: |
+              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
+              make $TARGET_NAME -j$(nproc)
+              make install  
+
+          # --------------------------------------------------------------------------    
+          - target-os: OSX
+            runs-on: macos-latest
+            shell: bash
+            init-script:
+            setup-script: |
+              echo "Setup for OSX Build"
+              find /Applications/Xcode* -maxdepth 0 -ls
+              sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
+              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/* 
+              brew install zstd
+            cmake-init-script: |
+              cd build/$TARGET_OS
+              mkdir $BUILD_TYPE
+              cd $BUILD_TYPE
+              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+            cmake-compile-script: |
+              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
+              make $TARGET_NAME -j$(nproc)
+              make install
+
+          # --------------------------------------------------------------------------
+          - target-os: iOS
+            runs-on: macos-latest
+            shell: bash
+            init-script:
+              uses: actions/setup-python@v2
+              with:
+                python-version: '3.5' 
+            setup-script: | 
+              echo "Setup for iOS Build"
+              find /Applications/Xcode* -maxdepth 0 -ls
+              sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_*[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
+              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+              brew install zstd
+
+            cmake-init-script: |
+              cd build/$TARGET_OS
+              mkdir $BUILD_TYPE
+              cd $BUILD_TYPE
+              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${WORKSPACE}/build/iOS/iOS.cmake
+            cmake-compile-script: |  
+              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
+              make $TARGET_NAME -j$(nproc)
+              make install
+    
+          # --------------------------------------------------------------------------
+          - target-os: Windows
+            runs-on: windows-2022
+            shell: bash
+            init-script:
+              uses: ilammy/msvc-dev-cmd@v1
+              with:
+                arch: amd64
+                sdk: 10.0.22621.0
+                vsversion: 17
+            setup-script: |
+              echo "Setup for Windows Build"
+              echo "Adding GNU tar to PATH"
+              echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%" 
+            cmake-init-script: |
+              cd build/$TARGET_OS
+              mkdir $BUILD_TYPE
+              cd $BUILD_TYPE
+              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 17 2022" -A x64 -DCMAKE_SYSTEM_VERSION="10.0"
+            cmake-compile-script: |
+              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
+              cmake --build . --target $TARGET_NAME --config $BUILD_TYPE -j$(nproc)
+              cmake --install $TARGET_NAME
+
+        target-save-data: 
+          - target-os: $TARGET_OS
+            runs-on: $TARGET_RUNS_ON
+            shell: bash
+            upload-release-json: |
+              GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+              
+              retValue=1
+              numberOfTries=1
+              until [[ $retValue -eq 0 ]]
+              do
+                if [[ $numberOfTries -gt 5 ]]; then
+                  break
+                fi
+                
+                echo "#${numberOfTries} Uploading release.json to github release ${GITHUB_RELEASE_NAME}"
+                gh release upload --clobber ${GITHUB_RELEASE_NAME} release.json
+                retValue=$?
+                
+                if [[ $retValue -ne 0 ]]; then
+                  echo "gh release upload failed, sleep 2 sec before next try"
+                  sleep 2
+                fi
+
+                ((numberOfTries++))
+              done
+
+              if [[ $retValue -ne 0 ]]; then
+                set -e
+                echo "Failed to upload release.json to github release ${GITHUB_RELEASE_NAME}"
+                exit 1
+              fi
+
+            release-target: |
+              # Check if release already defined e.g. Linux-master-release
+              GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+              gh release view ${GITHUB_RELEASE_NAME}
+              if [ $? -ne 0 ]
+              then
+                echo "Creating github release with tag: ${GITHUB_RELEASE_NAME}"
+                
+                RELEASE_TYPE="--latest"
+                if [[ "${BUILD_TYPE}" != "Release" ]]; 
+                then
+                  RELEASE_TYPE="--prerelease"
+                fi
+                
+                # Create release on github
+                gh release create ${GITHUB_RELEASE_NAME} -n "${BRANCH} branch" --target ${BRANCH} ${RELEASE_TYPE} -t "${TARGET_OS} ${BRANCH} branch ${BUILD_TYPE} build"
+                if [ $? -ne 0 ]
+                then
+                  set -e
+                  echo "Failed to create github release with tag: ${GITHUB_RELEASE_NAME}"
+                  exit 1
+                fi
+              fi
+              
+              COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
+              echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode (target build folder: ${TARGET_DIRECTORY})"
+              tar -zcf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
+              
+              retValue=1
+              numberOfTries=1
+              until [[ $retValue -eq 0 ]]
+              do
+                if [[ $numberOfTries -gt 5 ]]; then
+                  break
+                fi
+                
+                echo "#${numberOfTries} Uploading target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
+                gh release upload --clobber ${GITHUB_RELEASE_NAME} ${COMPRESSED_TARGET}
+                retValue=$?
+                
+                if [[ $retValue -ne 0 ]]; then
+                  echo "gh release upload failed, sleep 2 sec before next try"
+                  sleep 2
+                fi
+
+                ((numberOfTries++))
+              done
+
+              if [[ $retValue -ne 0 ]]; then
+                  set -e
+                  echo "Failed to upload target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
+                  exit 1
+              fi
 
     runs-on: ${{ matrix.target-build-data.runs-on }}
+    outputs:
+        TARGET_BUILT: ${{ steps.cache-library-directory.outputs.TARGET_BUILT }}
     steps:
-
       - name: Create library Keys and Paths to Cache/build
         id: create-lib-cache-keys
+        shell: bash
         run: |
           # build array of library names
           IFS=$'\n' read -d '|' -ra TARGET_REPO_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_REPO_NAMES }}|')"
@@ -431,10 +742,11 @@ jobs:
             with: ${{ (matrix.target-build-data.install-uses.with && toJSON(matrix.target-build-data.install-uses.with)) || '{}' }}
 
       - name: Cache Third Party Directory
-        uses: GeniusVentures/cache-multi/restore@v3.2.3
+        uses: GeniusVentures/cache-multi/restore@v3.3.1
         id: cache-tp-source-directory
         with:
           key: ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }}
+          enableCrossOsArchive: true
           path: |
             !.git/**
             ./**
@@ -446,46 +758,289 @@ jobs:
 
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
-        uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
+        uses: GeniusVentures/cache-multi/restoremulti@v3.3.1
         with:
           multi-keys: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_NAME_KEYS }}
+          enableCrossOsArchive: true
           paths: ${{ needs.setup-src-cache.outputs.CACHE_MULTI_PARAMETER_PATHS }}
 
       - name: Run setup script for target OS
+        shell: bash
         run: |
+          
+          echo "Running init script"
+          set +e
+          ${{ matrix.target-build-data.init-script }}
+          set -e
+
+          echo "Running setup script"
           ${{ matrix.target-build-data.setup-script }}
 
       - name: Init the CMake build files
+        shell: bash
         run: |
           TARGET_OS="${{ matrix.target-build-data.target-os }}"
           BUILD_TYPE="${{ matrix.build-type }}"
+          WORKSPACE=${{ github.workspace }}
           ${{ matrix.target-build-data.cmake-init-script }}
 
       - name: Load built library caches if any
         id: cache-library-directory
-        uses: GeniusVentures/cache-multi/restoremulti@v3.2.3
-        with:
-          multi-keys: ${{ steps.create-lib-cache-keys.outputs.LIB_CACHE_NAME_KEYS }}
-          paths: ${{ steps.create-lib-cache-keys.outputs.LIB_CACHE_PATHS }}
-
-      - name: Build any updated libraries
+        shell: bash
         run: |
           TARGET_OS="${{ matrix.target-build-data.target-os }}"
           BUILD_TYPE="${{ matrix.build-type }}"
+          BRANCH=${{ github.ref_name }}
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
-          IFS=$'\n' read -d '|' -ra CACHE_HITS <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.cache-hits }}|')"
+          
+          set +e
+          
+          GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+          
+          # check if release.json file already available
+          jsonStr="[]"
+          jsonFound=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
+          if [ $? -eq 0 ]
+          then
+            echo "Downloading release.json file"
+            gh release download ${GITHUB_RELEASE_NAME} --pattern "release.json" --clobber
+            if [ $? -eq 0 ]
+            then
+              echo "Loading release.json file"
+              jsonStr=`cat release.json`
+            fi
+          fi
+
+          targetBuiltList=""
+          for i in "${!TARGET_NAMES[@]}"; do
+            TARGET_NAME="${TARGET_NAMES[i]}"
+            TARGET_SHA="${TARGET_SHAS[i]}"
+            COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
+                        
+            targetBuilt=false
+            shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< ${jsonStr}`
+            if [[ "${shaFound}" == \"${TARGET_SHA}\" ]]; 
+            then
+              targetBuilt=true
+            fi
+            
+            echo "Check if ${COMPRESSED_TARGET} found on ${GITHUB_RELEASE_NAME}: ${targetBuilt}"
+            targetBuiltList+="${targetBuilt}\n"
+          done
+          
+          echo "TARGET_BUILT=$targetBuiltList" >> $GITHUB_OUTPUT
+
+      - name: Build any updated libraries
+        id: build-updated-libraries
+        shell: bash
+        run: |
+          TARGET_OS="${{ matrix.target-build-data.target-os }}"
+          TARGET_RUNS_ON="${{ matrix.target-build-data.runs-on }}"
+          BUILD_TYPE="${{ matrix.build-type }}"
+          BRANCH=${{ github.ref_name }}
+          WORKSPACE=${{ github.workspace }}
+          
+          GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+          
+          IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
+          
+          cd "build/${TARGET_OS}/${BUILD_TYPE}"
+          
+          set +e
+          
+          jsonStr=""
+          declare -a listOfTargetNamesToBuild
+          declare -a listOfTargetSHAsToBuild
+          declare -a listOfTargetDirToBuild
+          for i in "${!TARGET_NAMES[@]}"; do
+            TARGET_NAME="${TARGET_NAMES[i]}"
+            TARGET_SHA="${TARGET_SHAS[i]}"
+            TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
+            COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
+            echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]} (Target direcory: $TARGET_DIRECTORY)"
+            if [ "${TARGET_BUILT[i]}" == "true" ]; then
+              echo "Downloading cached target: $TARGET_NAME, sha: $TARGET_SHA"
+              gh release download ${GITHUB_RELEASE_NAME} --pattern "${COMPRESSED_TARGET}" --clobber
+              if [ $? -eq 0 ]
+              then
+                echo "Extracting cached target: ${COMPRESSED_TARGET}"
+                tar -xf ${COMPRESSED_TARGET}
+                FOLDER_HASH=`find ./${TARGET_DIRECTORY} -xdev -type f -print0 | LC_COLLATE=C sort -z | xargs -0 cat | md5sum | awk '{print $1}'`
+                echo "Cached target folder hash: ${FOLDER_HASH}"
+                jsonStrHash=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"binFolderHash\" : \"${FOLDER_HASH}\" }" <<< "{}"`
+                jsonStr+=`echo ${jsonStrHash}`
+                
+                echo "Target extracted to `pwd`/${TARGET_DIRECTORY}"
+                echo "Contents of target folder `pwd`/${TARGET_DIRECTORY}"
+                ls -la ./${TARGET_DIRECTORY}
+              else
+                echo "Failed to download cached target: ${COMPRESSED_TARGET} - need to rebuild it"
+                listOfTargetNamesToBuild+=("${TARGET_NAME}")
+                listOfTargetSHAsToBuild+=("${TARGET_SHA}")
+                listOfTargetDirToBuild+=("${TARGET_DIRECTORY}")
+              fi
+            else
+              echo "Cached target not found: ${COMPRESSED_TARGET} - need to rebuild it"
+              listOfTargetNamesToBuild+=("${TARGET_NAME}")
+              listOfTargetSHAsToBuild+=("${TARGET_SHA}")
+              listOfTargetDirToBuild+=("${TARGET_DIRECTORY}")
+            fi
+          done
+          
+          # Print hash JSON file 
+          jq <<< $jsonStr
+          
+          # save hash JSON file  
+          jq <<< $jsonStr > hash.json
+          
+          # check if release.json file already available
+          releaseJsonStr=""
+          jsonFound=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
+          if [ $? -eq 0 ]
+          then
+            echo "Downloading release.json file"
+            gh release download ${GITHUB_RELEASE_NAME} --pattern "release.json" --clobber
+            if [ $? -eq 0 ]
+            then
+              echo "Loading release.json file"
+              releaseJsonStr=`cat release.json`
+            fi
+          fi
+
+          for i in "${!listOfTargetNamesToBuild[@]}"; do
+            TARGET_NAME="${listOfTargetNamesToBuild[i]}"
+            TARGET_SHA="${listOfTargetSHAsToBuild[i]}"
+            TARGET_DIRECTORY="${listOfTargetDirToBuild[i]}"
+            COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
+            COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
+            echo "Starting to compile target: ${TARGET_NAME}"
+            ${{ matrix.target-build-data.cmake-compile-script }}
+            
+            echo "Starting to upload target: ${COMPRESSED_TARGET}"
+            # Upload released target 
+            ${{ matrix.target-save-data.release-target }}
+
+            RELEASE_ASSETS=`gh release view ${GITHUB_RELEASE_NAME} --json assets`
+
+            # Updating release.json
+            # Get source url
+            TARGET_SOURCE=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url" <<< ${RELEASE_ASSETS}`
+            # Get target url
+            TARGET_BINARY=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url" <<< ${RELEASE_ASSETS}`
+
+            releaseFound=`jq "(. | select(.name == \"${TARGET_NAME}\")" <<< ${releaseJsonStr}`
+            if [ ${#releaseFound} -gt 0 ]
+            then 
+              echo "Updating release.json file with target ${TARGET_NAME}"
+              releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).sha |= \"${TARGET_SHA}\" " <<< ${releaseJsonStr}`
+              releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).binFolderName |= \"${TARGET_DIRECTORY}\" " <<< ${releaseJsonStr}`
+              releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).source |= \"${TARGET_SOURCE}\" " <<< ${releaseJsonStr}`
+              releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).binary |= \"${TARGET_BINARY}\" " <<< ${releaseJsonStr}`
+            else
+              echo "Adding target ${TARGET_NAME} to release.json file"
+              jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : ${TARGET_SOURCE}, \"binary\" : ${TARGET_BINARY} }" <<< "{}"`
+              releaseJsonStr+=`echo ${jsonStrTarget}`
+            fi
+
+            # Upload JSON file release 
+            jq <<< $releaseJsonStr > release.json
+
+            ${{ matrix.target-save-data.upload-release-json }}
+
+          done
+
+      - name: Upload JSON file release on build failure
+        if: ${{ failure() && steps.build-updated-libraries.conclusion == 'failure' }}
+        shell: bash
+        run: |
+          TARGET_OS="${{ matrix.target-build-data.target-os }}"
+          BUILD_TYPE="${{ matrix.build-type }}"
+          BRANCH=${{ github.ref_name }}
+          
+          GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+
+          retValue=1
+          numberOfTries=1
+          until [[ $retValue -eq 0 ]]
+          do
+            if [[ $numberOfTries -gt 5 ]]; then
+              break
+            fi
+            
+            echo "#${numberOfTries} Uploading release.json to github release ${GITHUB_RELEASE_NAME}"
+            gh release upload --clobber ${GITHUB_RELEASE_NAME} release.json
+            retValue=$?
+            
+            if [[ $retValue -ne 0 ]]; then
+              echo "gh release upload failed, sleep 2 sec before next try"
+              sleep 2
+            fi
+
+            ((numberOfTries++))
+          done
+
+      - name:  Save target OS SDK as github release
+        shell: bash
+        run: |
+          TARGET_OS="${{ matrix.target-build-data.target-os }}"
+          TARGET_RUNS_ON="${{ matrix.target-build-data.runs-on }}"
+          BUILD_TYPE="${{ matrix.build-type }}"
+          BRANCH=${{ github.ref_name }}
+          IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
+          IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
+          
+          ## Setting this to not fail the workflow while checking release tag 
+          set +e
+          
+          GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
+          
+          RELEASE_ASSETS=`gh release view ${GITHUB_RELEASE_NAME} --json assets`
+
+          jsonStr=""           
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
-            if [ "${CACHE_HITS[i]}" == "1" ]; then
-              echo "Skipping cached target: $TARGET_NAME, sha: $TARGET_SHA"
-            else
-              ${{ matrix.target-build-data.cmake-compile-script }}
+            TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
+            COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
+            COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
+            echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
+            
+            if [ "${TARGET_BUILT[i]}" == "true" ]; then
+              # Compare uncompressed original hash of the binary folder with current to see if any changes has been made
+              originalHash=`jq "select(.name == \"${TARGET_NAME}\") | .binFolderHash" hash.json`
+              currentHash=`find ./${TARGET_DIRECTORY} -xdev -type f -print0 | LC_COLLATE=C sort -z | xargs -0 cat | md5sum | awk '{print $1}'`
+              if [[ "${originalHash}" != \"${currentHash}\" ]]; 
+              then
+                echo "originalHash: ${originalHash}"
+                echo "currentHash:  \"${currentHash}\""
+                echo "Has does not match, uploading already installed modified target: ${TARGET_NAME}, sha: ${TARGET_SHA}"
+                ${{ matrix.target-save-data.release-target }}
+              else
+                echo "Target ${TARGET_NAME} binary folder did not change, no need to update release"
+              fi
             fi
+                        
+            # Update JSON file 
+            # Get source url
+            TARGET_SOURCE=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url" <<< ${RELEASE_ASSETS}`
+            # Get target url
+            TARGET_BINARY=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url" <<< ${RELEASE_ASSETS}`
+            jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : ${TARGET_SOURCE}, \"binary\" : ${TARGET_BINARY} }" <<< "{}"`
+            jsonStr+=`echo ${jsonStrTarget}`
           done
+          
+          # Print final JSON file 
+          jq <<< $jsonStr
+          
+          # Upload JSON file release 
+          jq <<< $jsonStr > release.json
 
-      - name:  Save target OS SDK as an artifact
-        run: |
-          echo "We should save the artifact here"
+          ${{ matrix.target-save-data.upload-release-json }}
+          
