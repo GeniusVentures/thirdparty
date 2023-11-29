@@ -26,8 +26,8 @@ include(../CommonCompilerOptions.CMake)
 # ------------------------------------------
 # Set OSX specific runtime options
 
-# TODO: use single architecture to avoid Crypto3 error - removed ";x86_64"  
-set(CMAKE_OSX_ARCHITECTURES "arm64")
+# TODO: use single architecture to avoid Crypto3 error - removed ";arm64"  
+set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
 
@@ -132,8 +132,8 @@ set(_OPENSSL_CACHE_ARGS
 # --------------------------------------------------------
 # set config for grpc
 set(_grpc_EXTRA_PARAM
-    -D_gRPC_PROTOBUF_PROTOC_EXECUTABLE:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/build/third_party/protobuf/protoc
-    -D_gRPC_CPP_PLUGIN:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/build/grpc_cpp_plugin
+    -D_gRPC_PROTOBUF_PROTOC_EXECUTABLE:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/third_party/protobuf/protoc
+    -D_gRPC_CPP_PLUGIN:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/grpc_cpp_plugin
 		-DgRPC_SSL_PROVIDER:STRING=package
 	  -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
     -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
@@ -143,15 +143,6 @@ set(_grpc_EXTRA_PARAM
     -DgRPC_BUILD_GRPC_NODE_PLUGIN:BOOL=OFF
     -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
 )
-
-# --------------------------------------------------------
-# set config for crypto3
-message(WARNING "Patching crypto3 module - update with caution")
-set(crypto3_patch
-		PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-            "${PROJECT_BUILD_FOLDER}/cmake.in/crypto3-patch/patch.TargetArchitecture.cmake" <SOURCE_DIR>/cmake/TargetArchitecture.cmake
-		)
-
 
 # --------------------------------------------------------
 # set config for rocksdb

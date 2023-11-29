@@ -16,13 +16,15 @@ if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
-set(IOS_DEPLOYMENT_TARGET 13.0)
+set(IOS_DEPLOYMENT_TARGET 16.2)
 
 project(iOS_SHARED_THIRD_PARTY)
 
 # --------------------------------------------------------
 # build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
+
+set(_PKG_CONFIG_EXECUTABLE -DPKG_CONFIG_EXECUTABLE:PATH=/usr/local/bin/pkg-config)
 
 # ------------------------------------------
 # Set OSX specific runtime options
@@ -31,6 +33,7 @@ set(CMAKE_SYSTEM_NAME "iOS")
 set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
+    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
     -DOPENSSL_USE_STATIC_LIBS:BOOL=TRUE
@@ -92,7 +95,7 @@ set(_BOOST_CACHE_ARGS
     -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
     -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
     -DBoost_USE_MULTITHREADED:BOOL=ON
-    -DBoost_USE_STATIC_RUNTIME:BOOL=OFF
+    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
@@ -208,6 +211,16 @@ set(_libp2p_BUILD_EXAMPLES OFF)
 # ---------------------------------------------------------
 # Set config for MNN modules
 set(_MNN_WIN_RUNTIME_MT OFF)
+set(_MNN_EXTRA_PARAM
+    -DMNN_METAL:BOOL=ON 
+    -DARCHS:STRING="arm64" 
+    -DENABLE_BITCODE:BOOL=OFF 
+    -DMNN_SEP_BUILD:BOOL=OFF 
+    -DMNN_USE_LOGCAT:BOOL=OFF
+    -DMNN_USE_SSE:BOOL=OFF
+    -DMNN_SUPPORT_BF16:BOOL=OFF
+    -DMNN_BUILD_FOR_ANDROID_COMMAND:BOOL=ON
+)
 
 # --------------------------------------------------------
 # Set o iOS specific configurations

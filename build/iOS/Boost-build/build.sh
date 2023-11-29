@@ -46,7 +46,7 @@ math metaparse mpi program_options python random regex serialization signals2
 system test thread timer type_erasure wave"
 BOOTSTRAP_LIBS=""
 
-MIN_IOS_VERSION=13.0
+MIN_IOS_VERSION=16.2
 MIN_TVOS_VERSION=11.0
 MIN_MACOS_VERSION=10.12
 MIN_MACOS_SILICON_VERSION=11
@@ -867,10 +867,16 @@ buildBoost_iOS()
         visibility=global \
         link=static \
         runtime-link=static \
+        binary-format=mach-o \
+        address-model=64 \
         variant=${BUILD_VARIANT} \
         stage >> "${IOS_OUTPUT_DIR}/ios-build.log" 2>&1
     # shellcheck disable=SC2181
-    if [ $? != 0 ]; then echo "Error staging iPhone. Check log."; exit 1; fi
+    if [ $? != 0 ]; then 
+        echo "Error staging iPhone. Check log."; 
+        cat "${IOS_OUTPUT_DIR}/ios-build.log"
+        exit 1; 
+    fi
 
     ./b2 cxxflags="-fPIC -std=c++17" "$THREADS" \
         --build-dir=iphone-build \
@@ -883,21 +889,31 @@ buildBoost_iOS()
         variant=${BUILD_VARIANT} \
         install >> "${IOS_OUTPUT_DIR}/ios-build.log" 2>&1
     # shellcheck disable=SC2181
-    if [ $? != 0 ]; then echo "Error installing iPhone. Check log."; exit 1; fi
+    if [ $? != 0 ]; then 
+        echo "Error installing iPhone. Check log."; 
+        cat "${IOS_OUTPUT_DIR}/ios-build.log"
+        exit 1; 
+    fi
     doneSection
 
     echo Building Boost for iPhoneSimulator
-    ./b2 cxxflags="-std=c++17" "$THREADS"  \
+    ./b2 cxxflags="-fPIC -std=c++17" "$THREADS"  \
         --build-dir=iphonesim-build \
         --stagedir=iphonesim-build/stage \
         toolset="darwin-$COMPILER_VERSION~iphonesim" \
         visibility=global \
         link=static \
         runtime-link=static \
+        binary-format=mach-o \
+        address-model=64 \
         variant=${BUILD_VARIANT} \
         stage >> "${IOS_OUTPUT_DIR}/ios-build.log" 2>&1
     # shellcheck disable=SC2181
-    if [ $? != 0 ]; then echo "Error staging iPhoneSimulator. Check log."; exit 1; fi
+    if [ $? != 0 ]; then 
+        echo "Error staging iPhoneSimulator. Check log."; 
+        cat "${IOS_OUTPUT_DIR}/ios-build.log"
+        exit 1; 
+    fi
     doneSection
 }
 
