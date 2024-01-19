@@ -149,4 +149,4 @@
 	url = https://github.com/abdes/cryptopp-cmake.git
 [submodule "zkLLVM"]
 	path = zkLLVM
-	url = ../Super-Genius/zkLLVM.git
+	url = ../zkLLVM.git
