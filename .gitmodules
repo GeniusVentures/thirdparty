@@ -46,9 +46,6 @@
     path = Boost.DI
     url = https://github.com/masterjedy/di
     branch = cpp14
-[submodule "cryptopp"]
-    path = cryptopp
-    url = https://github.com/weidai11/cryptopp
 [submodule "cpp-ipfs-http-client"]
     path = cpp-ipfs-http-client
     url = https://github.com/vasild/cpp-ipfs-http-client
@@ -147,3 +144,9 @@
 [submodule "zlib"]
 	path = zlib
 	url = https://github.com/madler/zlib.git
+[submodule "cryptopp-cmake"]
+	path = cryptopp-cmake
+	url = https://github.com/abdes/cryptopp-cmake.git
+[submodule "zkLLVM"]
+	path = zkLLVM
+	url = ../Super-Genius/zkLLVM.git
