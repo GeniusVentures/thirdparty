@@ -35,6 +35,15 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: amd64
+      - name: Install Rust dependencies
+        run: |
+            rustup update
+            rustup toolchain install stable
+            rustup default stable
+            rustup set default-host x86_64-pc-windows-msvc
+            rustup target add x86_64-pc-windows-msvc
+            rustup target add wasm32-unknown-emscripten
+            cargo install cbindgen
 
       - name: Create Build Directory
         run: cmake -E make_directory ${{github.workspace}}/.build

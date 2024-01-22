@@ -49,6 +49,14 @@ jobs:
             curl -o ndk.zip ${{ env.NDK_URL }}
             unzip ndk.zip
             rm ndk.zip
+        - name: Install Rust dependencies
+          run: |
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+            rustup update
+            rustup toolchain install stable
+            rustup default stable
+            rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-androidd
+            cargo install cbindgen
 
         - name: Create Build Directory
           run: cmake -E make_directory ${{github.workspace}}/.build
