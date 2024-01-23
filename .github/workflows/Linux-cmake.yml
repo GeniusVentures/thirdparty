@@ -33,8 +33,9 @@ jobs:
         - name: Create Build Directory
           run: |
             mkdir -p ${{github.workspace}}/Linux/build/Release/
-            update-alternatives --set c++ /usr/bin/clang++
+            apt install clang
             update-alternatives --set cc /usr/bin/clang
+            update-alternatives --set c++ /usr/bin/clang++
             cd ${{github.workspace}}/Linux/build/Release/
             cmake .. -DCMAKE_BUILD_TYPE=Release
             make
