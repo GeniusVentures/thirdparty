@@ -42,7 +42,6 @@ jobs:
           rustup default stable
           rustup target add x86_64-apple-darwin
           rustup target add aarch64-apple-darwin
-          rustup component add rust-src --toolchain nightly-x86_64-apple-darwin
           rustup target add wasm32-unknown-emscripten
           cargo install cbindgen cargo-lipo
 
