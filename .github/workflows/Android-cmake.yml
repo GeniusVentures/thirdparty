@@ -54,7 +54,7 @@ jobs:
             rustup update
             rustup toolchain install stable
             rustup default stable
-            rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-androidd
+            rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
             cargo install cbindgen
 
         - name: Create Build Directory
