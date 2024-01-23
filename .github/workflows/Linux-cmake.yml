@@ -18,7 +18,8 @@ jobs:
       steps:
         - name: Configure clang
           run: |
-            sudo apt install clang -y
+            sudo apt-get update && sudo apt install -y clang
+            sudo apt install -y libc++-dev libc++abi-dev
             sudo update-alternatives --set cc /usr/bin/clang
             sudo update-alternatives --set c++ /usr/bin/clang++
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
