@@ -16,6 +16,11 @@ jobs:
       env:
         MAKEFLAGS: "-j 8"
       steps:
+        - name: Configure clang
+          run: |
+            apt install clang -y
+            update-alternatives --set cc /usr/bin/clang
+            update-alternatives --set c++ /usr/bin/clang++
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         - uses: actions/checkout@v2
           with:
@@ -33,9 +38,6 @@ jobs:
         - name: Create Build Directory
           run: |
             mkdir -p ${{github.workspace}}/Linux/build/Release/
-            apt install clang
-            update-alternatives --set cc /usr/bin/clang
-            update-alternatives --set c++ /usr/bin/clang++
             cd ${{github.workspace}}/Linux/build/Release/
             cmake .. -DCMAKE_BUILD_TYPE=Release
             make
