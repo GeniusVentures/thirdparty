@@ -723,7 +723,9 @@ ExternalProject_Add(
 		${_OPENSSL_CACHE_ARGS}
 	DEPENDS libssh2 openssl ipfs-lite-cpp ipfs-bitswap-cpp protobuf Boost
 )
-
+set(_FINDPACKAGE_ASIOMGR_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/lib/cmake/AsyncIOManager")
+set(_FINDPACKAGE_ASIOMGR_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/lib")
+set(_FINDPACKAGE_ASIOMGR_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/include")
 # --------------------------------------------------------
 # jsonrpc-lean
 install(
