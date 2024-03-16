@@ -144,6 +144,13 @@
 [submodule "zlib"]
 	path = zlib
 	url = https://github.com/madler/zlib.git
+[submodule "libssh2"]
+	path = libssh2
+	url = https://github.com/libssh2/libssh2.git
+[submodule "AsyncIOManager"]
+	path = AsyncIOManager
+	url = https://github.com/GeniusVentures/AsyncIOManager.git
+	branch = refactor_async_mnnloader
 [submodule "cryptopp-cmake"]
 	path = cryptopp-cmake
 	url = https://github.com/abdes/cryptopp-cmake.git
