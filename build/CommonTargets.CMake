@@ -726,7 +726,7 @@ ExternalProject_Add(
 		-DCMAKE_OSX_ARCHITECTURES:STRING=x86_64
 		${_BOOST_CACHE_ARGS}
 		${_OPENSSL_CACHE_ARGS}
-	DEPENDS libssh2 openssl ipfs-lite-cpp ipfs-bitswap-cpp protobuf Boost
+	DEPENDS libssh2 openssl ipfs-lite-cpp ipfs-bitswap-cpp grpc ${_PROTOBUF_TARGET} Boost
 )
 set(_FINDPACKAGE_ASIOMGR_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/lib/cmake/AsyncIOManager")
 set(_FINDPACKAGE_ASIOMGR_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/lib")
