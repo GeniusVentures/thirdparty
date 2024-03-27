@@ -35,7 +35,7 @@ INSTALL_DIR=$BUILD_DIR
 LIB_DIR="$INSTALL_DIR/lib"
 
 MACOS_SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
-
+echo "BUILDDIR ${INSTALL_DIR}"
 echo "Getting dependencies..."
 cd $SRC_DIR
 echo "Src Dir ${SRC_DIR}"
@@ -43,4 +43,9 @@ echo "Src Dir ${SRC_DIR}"
 
 echo "building..."
 
-xcodebuild build -quiet -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package (macOS only)" -configuration "${VARIANT}" 
+xcodebuild build -quiet -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package (macOS only)" -configuration "${VARIANT}" -archivePath "${INSTALL_DIR}"
+
+
+mkdir -p ${LIB_DIR}
+cp -R ./Package/"${VARIANT}"/MoltenVK/include "${INSTALL_DIR}"/
+cp -R ./Package/"${VARIANT}"/MoltenVK/static/* "${LIB_DIR}"/

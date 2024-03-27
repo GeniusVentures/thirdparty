@@ -132,7 +132,7 @@ set(_OPENSSL_CACHE_ARGS
 
 # ------------------------------------------
 # build MoltenVK
-set(_MVK_ROOT "${CMAKE_CURRENT_BINARY_DIR}/MoltenVK/build/${CMAKE_SYSTEM_NAME}")
+set(_MVK_ROOT "${CMAKE_CURRENT_BINARY_DIR}/MoltenVK/build/")
 ExternalProject_Add(MoltenVK
 	PREFIX  moltenvk
     SOURCE_DIR    "${THIRDPARTY_DIR}/MoltenVK"
