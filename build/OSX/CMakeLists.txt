@@ -129,6 +129,20 @@ set(_OPENSSL_CACHE_ARGS
   -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
+
+# ------------------------------------------
+# build MoltenVK
+set(_MVK_ROOT "${CMAKE_CURRENT_BINARY_DIR}/MoltenVK/build/${CMAKE_SYSTEM_NAME}")
+ExternalProject_Add(MoltenVK
+	PREFIX  moltenvk
+    SOURCE_DIR    "${THIRDPARTY_DIR}/MoltenVK"
+	CONFIGURE_COMMAND  ""
+	PATCH_COMMAND ""
+ 	BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/MoltenVK-build/build.sh ${BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
+	INSTALL_COMMAND ""
+	UPDATE_COMMAND ""
+)
+
 # --------------------------------------------------------
 # set config for grpc
 set(_grpc_EXTRA_PARAM
