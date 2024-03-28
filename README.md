@@ -26,6 +26,7 @@ Set two environment variables
   - Rust, cargo
     - ```rustup set default-host x86_64-pc-windows-msvc```
     - ```rustup target add x86_64-pc-windows-msvc```
+	- ```cargo install cbindgen cargo-lipo```
 ## Building
     ○ git submodule update --init --recursive
     ○ cd ./build/Windows
