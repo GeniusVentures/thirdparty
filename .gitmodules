@@ -157,6 +157,6 @@
 [submodule "zkLLVM"]
 	path = zkLLVM
 	url = ../zkLLVM.git
-[submodule "opencv"]
-	path = opencv
-	url = https://github.com/opencv/opencv.git
+[submodule "stb"]
+	path = stb
+	url = https://github.com/nothings/stb.git
