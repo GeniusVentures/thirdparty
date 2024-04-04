@@ -246,6 +246,20 @@ set(_FINDPACKAGE_YAMLCPP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/lib")
 set(_FINDPACKAGE_YAMLCPP_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/include")
 
 # --------------------------------------------------------
+## Copies STB headers
+
+file(GLOB STB_HEADERS "${THIRDPARTY_DIR}/stb/*.h")
+
+ExternalProject_Add(STB
+    PREFIX stb
+    SOURCE_DIR "${THIRDPARTY_DIR}/stb"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/stb/include
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${STB_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/stb/include/
+)
+
+# --------------------------------------------------------
 ## Builds cares
 ExternalProject_Add(cares
   PREFIX cares
