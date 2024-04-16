@@ -27,6 +27,7 @@ Set two environment variables
     - ```rustup set default-host x86_64-pc-windows-msvc```
     - ```rustup target add x86_64-pc-windows-msvc```
 	- ```cargo install cbindgen cargo-lipo```
+  	- ```rustup target add wasm32-unknown-emscripten``` (to be deprecated)
 ## Building
     ○ git submodule update --init --recursive
     ○ cd ./build/Windows
