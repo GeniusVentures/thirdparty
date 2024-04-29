@@ -460,6 +460,8 @@ ExternalProject_Add(ipfs-pubsub
         -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
         -DBoost_NO_SYSTEM_PATHS:BOOL=ON
         -DBoost_DIR:PATH=${_FINDPACKAGE_BOOST_CONFIG_DIR}
+		-Dipfs-lite-cpp_DIR:PATH=${_FINDPACKAGE_IPFS_LITE_CONFIG_DIR}
+		-Dipfs-lite-cpp_INCLUDE_DIR:PATH=${_FINDPACKAGE_IPFS_LITE_INCLUDE_DIR}
         -DTESTING:BOOL=${TESTING}
         ${_CMAKE_COMMON_BUILD_PARAMS}
         ${_BOOST_CACHE_ARGS}
@@ -467,7 +469,7 @@ ExternalProject_Add(ipfs-pubsub
         ${ipfs-pubsub_EXTRA_PARAM}
         -DCMAKE_CXX_STANDARD:STRING=17
         -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}
-  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p Boost.DI
+  DEPENDS GTest Microsoft.GSL spdlog tsl_hat_trie libp2p Boost.DI ipfs-lite-cpp
 )
 set(_FINDPACKAGE_IPFS_PUBSUB_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-pubsub/lib/cmake/ipfs-pubsub")
 set(_FINDPACKAGE_IPFS_PUBSUB_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-pubsub/lib")
