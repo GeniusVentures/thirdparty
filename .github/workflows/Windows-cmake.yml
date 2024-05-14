@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Windows Build
 
 # Controls when the workflow will run
@@ -9,50 +7,41 @@ on:
     branches:
       - master
     paths-ignore:
-      - 'README.md'
-      - '.github/workflows/**'
-      - '.gitignore'
+      - "README.md"
+      - ".github/workflows/**"
+      - ".gitignore"
   pull_request:
   workflow_dispatch:
 
-env:
-  CMAKE_BUILD_PARALLEL_LEVEL: 8
-
 jobs:
-  Windows:
+  build:
     runs-on: windows-2022
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4.1.5
         with:
-          submodules: 'recursive'
-      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1
+          submodules: "recursive"
+
+      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v2
         with:
           sdk-version: 22000
 
-      # Sets up the visual studio environment to build x64
+      # Sets up MSVC to build x64
       - name: Configure build for Windows 10 x64
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@v1.13.0
         with:
           arch: amd64
-      - name: Install Rust dependencies
-        run: |
-            rustup update
-            rustup toolchain install stable
-            rustup default stable
-            rustup set default-host x86_64-pc-windows-msvc
-            rustup target add x86_64-pc-windows-msvc
-            rustup target add wasm32-unknown-emscripten
-            cargo install cbindgen
 
-      - name: Create Build Directory
-        run: cmake -E make_directory ${{github.workspace}}/.build
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: "x86_64-pc-windows-msvc, wasm32-unknown-emscripten"
 
-      - name: Configure CMake
-        working-directory: ${{github.workspace}}/.build
-        run: cmake -S ../build/Windows/ -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_VERSION="10.0"
-
-      - name: Compile
-        working-directory: ${{github.workspace}}/.build
-        run: cmake --build . --config Release
-
+      - name: Run CMake
+        uses: threeal/cmake-action@v1.3.0
+        with:
+          run-build: true
+          source-dir: build/Windows
+          build-dir: build/Windows/Debug
+          options: ["CMAKE_BUILD_TYPE=Release"]
+          build-args: ["--configure Release"]
