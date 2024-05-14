@@ -37,11 +37,14 @@ jobs:
         with:
           targets: "x86_64-pc-windows-msvc, wasm32-unknown-emscripten"
 
+      - name: Install bindgen
+        run: cargo install cbindgen
+
       - name: Run CMake
         uses: threeal/cmake-action@v1.3.0
         with:
           run-build: true
           source-dir: build/Windows
           build-dir: build/Windows/Debug
-          options: ["CMAKE_BUILD_TYPE=Release"]
-          build-args: ["--configure Release"]
+          options: "CMAKE_BUILD_TYPE=Release"
+          build-args: "--configure Release"
