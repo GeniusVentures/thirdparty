@@ -45,6 +45,6 @@ jobs:
         with:
           run-build: true
           source-dir: build/Windows
-          build-dir: build/Windows/Debug
+          build-dir: build/Windows/Release
           options: "CMAKE_BUILD_TYPE=Release"
           build-args: "--configure Release"
