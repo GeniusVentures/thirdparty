@@ -17,7 +17,6 @@ jobs:
         uses: KyleMayes/install-llvm-action@v2.0.2
         with:
             version: "14"
-            cached: true
             env: true
 
       - name: Install Rust
