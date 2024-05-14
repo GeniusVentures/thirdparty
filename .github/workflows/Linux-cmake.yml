@@ -34,4 +34,4 @@ jobs:
           source-dir: build/Linux
           build-dir: build/Linux/Release
           options: "CMAKE_BUILD_TYPE=Release"
-          build-args: "--configure Release"
+          build-args: "--config Release"

@@ -22,12 +22,12 @@ jobs:
         with:
           submodules: "recursive"
 
-      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v2
+      - name: Configure Windows SDK
+        uses: GuillaumeFalourd/setup-windows10-sdk-action@v2
         with:
           sdk-version: 22000
 
-      # Sets up MSVC to build x64
-      - name: Configure build for Windows 10 x64
+      - name: Configure MSVC
         uses: ilammy/msvc-dev-cmd@v1.13.0
         with:
           arch: amd64
@@ -47,4 +47,4 @@ jobs:
           source-dir: build/Windows
           build-dir: build/Windows/Release
           options: "CMAKE_BUILD_TYPE=Release"
-          build-args: "--configure Release"
+          build-args: "--config Release"
