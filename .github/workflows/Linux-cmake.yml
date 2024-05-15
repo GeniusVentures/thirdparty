@@ -19,11 +19,6 @@ jobs:
           version: "14"
           env: true
 
-      - name: Install libc++
-        run: |
-          sudo apt update
-          sudo apt install -y libstdc++-12-dev
-
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
