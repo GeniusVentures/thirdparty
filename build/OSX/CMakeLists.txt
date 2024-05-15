@@ -29,11 +29,7 @@ set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
 
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(BUILD_VARIANT "--debug")
-else()
-    set(BUILD_VARIANT "")
-endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+set(BUILD_VARIANT $<$<CONFIG:Debug>,--debug>)
 
 # Assuming that xcode 12.0 is installed you most probably have ios sdk 14.0 or later installed (tested on Big Sur)
 # if you don't set a deployment target it will be set the way you only get 64-bit builds

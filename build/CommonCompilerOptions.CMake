@@ -1,3 +1,8 @@
+# Convenience settings
+if(NOT CMAKE_COLOR_DIAGNOSTICS)
+    set(CMAKE_COLOR_DIAGNOSTICS ON)
+endif()
+
 # Set PROJECT_BUILD folder
 get_filename_component(PROJECT_BUILD_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}" DIRECTORY ABSOLUTE)
 get_filename_component(PROJECT_SRC_FOLDER "${PROJECT_BUILD_FOLDER}" DIRECTORY ABSOLUTE)
@@ -7,27 +12,18 @@ include(CheckCXXCompilerFlag)
 include(${PROJECT_BUILD_FOLDER}/cmake.in/functions.cmake)
 include(ExternalProject)
 
-# somehow this doesn't work on github CI/CD probably permission error - get_BOOST_version(BOOST_VERSION "${THIRDPARTY_DIR}/boost/boost/version.hpp")
+set(BOOST_VARIANT $<IF:$<CONFIG:Debug>,debug,release>)
+
+# Workaournd for on GitHub actions, probably permission error - get_BOOST_version(BOOST_VERSION "${THIRDPARTY_DIR}/boost/boost/version.hpp")
 set(BOOST_MAJOR_VERSION "1" CACHE STRING "Boost Major Version")
 set(BOOST_MINOR_VERSION "80" CACHE STRING "Boost Minor Version")
 set(BOOST_PATCH_VERSION "0" CACHE STRING "Boost Patch Version")
-
-# convenience settings
-if(NOT CMAKE_COLOR_DIAGNOSTICS)
-    set(CMAKE_COLOR_DIAGNOSTICS ON)
-endif()
 
 set(BOOST_VERSION "${BOOST_MAJOR_VERSION}.${BOOST_MINOR_VERSION}.${BOOST_PATCH_VERSION}")
 set(BOOST_VERSION_3U "${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}_${BOOST_PATCH_VERSION}")
 set(BOOST_VERSION_2U "${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}")
 
 set(_BOOST_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-
-print("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(TP_BUILD_SUBDIR "OSX")
@@ -48,15 +44,8 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
 
-    if(CMAKE_BUILD_TYPE STREQUAL Debug)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MTd")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MTd")
-    endif(CMAKE_BUILD_TYPE STREQUAL Debug)
-
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MT")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
-    endif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_C_FLAGS $<IF:$<CONFIG:Debug>,${CMAKE_C_FLAGS} /MTd,${CMAKE_C_FLAGS} /MTd>)
+    set(CMAKE_CXX_FLAGS $<IF:$<CONFIG:Debug>,${CMAKE_CXX_FLAGS} /MT,${CMAKE_CXX_FLAGS} /MT>)
 
     set(CompilerFlags
         CMAKE_CXX_FLAGS
@@ -85,7 +74,6 @@ set(CMAKE_CACHE_ARGS_CFLAGS_ADD
     -DCMAKE_C_FLAGS_RELEASE:STRING=${CMAKE_C_FLAGS_RELEASE}
     -DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}
     -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}
-    -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
     ${_MSVC_RUNTIME_LIBRARY}
 )

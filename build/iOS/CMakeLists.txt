@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20)
 
 # if on OSX Darwin system, build the iOS executables
 if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
@@ -31,7 +31,6 @@ set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
     -DBoost_USE_STATIC_RUNTIME:BOOL=ON
-    -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
     -DOPENSSL_USE_STATIC_LIBS:BOOL=TRUE
     -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
@@ -59,11 +58,7 @@ set(Boost_NO_SYSTEM_PATHS ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_RUNTIME ON)
 
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(BUILD_VARIANT "--debug")
-else()
-    set(BUILD_VARIANT "")
-endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+set(BUILD_VARIANT $<$<CONFIG:Debug>,--debug>)
 
 ExternalProject_Add(Boost
     PREFIX boost

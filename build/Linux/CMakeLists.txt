@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20)
 
 # if on Linux system, build the Linux executables
 if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
@@ -7,33 +7,14 @@ endif()
 
 project(LINUX_SHARED_THIRD_PARTY)
 
-# Set OS threading settings
-set(CMAKE_HAVE_THREADS_LIBRARY ON)
-set(CMAKE_USE_WIN32_THREADS_INIT OFF)
-set(CMAKE_USE_PTHREADS_INIT ON)
-
-# Set extra compiler flags
-set(EXTRA_CXX_FLAGS "-pthread")
-
-# build common libraries by platforms
+# Build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
-# Set Linux specific runtime options
-if("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
-    set(LINUX_TARGET_ARCHITECTURES "${CMAKE_HOST_SYSTEM_PROCESSOR}")
-endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
-
-# build boost
+# Build boost
 set(_BOOST_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 set(Boost_NO_SYSTEM_PATHS ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_RUNTIME ON)
-
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(BOOST_VARIANT "debug")
-else()
-    set(BOOST_VARIANT "release")
-endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
 ExternalProject_Add(Boost
     PREFIX boost
@@ -74,11 +55,7 @@ set(_BOOST_CACHE_ARGS
 # build openssl
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(OPENSSL_VARIANT "-d")
-else()
-    set(OPENSSL_VARIANT "")
-endif()
+set(OPENSSL_VARIANT $<$<CONFIG:Debug>:-d>)
 
 ExternalProject_Add(openssl
     PREFIX openssl

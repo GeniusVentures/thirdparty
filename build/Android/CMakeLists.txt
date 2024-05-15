@@ -141,11 +141,7 @@ endif()
 
 message("android abi is ${_abi}")
 
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(OPENSSL_VARIANT "--debug")
-else()
-    set(OPENSSL_VARIANT "")
-endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+set(OPENSSL_VARIANT $<$<CONFIG:Debug>,--debug>)
 
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Android/${ANDROID_ABI}")
 ExternalProject_Add(openssl

@@ -1,19 +1,10 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20)
 
 if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
     message(FATAL_ERROR "${CMAKE_HOST_SYSTEM_NAME} host system name does not match Windows - Please select the correct folder for configuring project")
 endif()
 
 project(WINDOWS_SHARED_THIRD_PARTY)
-
-# Set Windows specific runtime options
-if(CMAKE_BUILD_TYPE STREQUAL Debug)
-    set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
-
-if(CMAKE_BUILD_TYPE STREQUAL Release)
-    set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Realease>:Release>")
-endif()
 
 # Enable c++ exceptions
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP")
@@ -45,12 +36,6 @@ set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 set(Boost_NO_SYSTEM_PATHS ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_RUNTIME ON)
-
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(BOOST_VARIANT "debug")
-else()
-    set(BOOST_VARIANT "release")
-endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
 ExternalProject_Add(Boost
     PREFIX boost
@@ -93,11 +78,7 @@ set(_BOOST_CACHE_ARGS
 # builds openssl
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 
-set(OPENSSL_CONFIG_MODE VC-WIN64A)
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(OPENSSL_CONFIG_MODE VC-WIN64A --debug)
-endif()
+set(OPENSSL_CONFIG_MODE VC-WIN64A $<$<CONFIG:Debug>,--debug>)
 
 ExternalProject_Add(openssl
     PREFIX openssl
@@ -108,7 +89,7 @@ ExternalProject_Add(openssl
     INSTALL_COMMAND nmake install_dev
 )
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows" AND $<CONFIG:Debug>)
     ExternalProject_Add_Step(openssl AddDebugSuffix
         DEPENDEES install
         COMMAND ${CMAKE_COMMAND} -E rename ${_openssl_BUILD_ROOT}/lib/libcrypto.lib ${_openssl_BUILD_ROOT}/lib/libcryptod.lib
