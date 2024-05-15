@@ -58,7 +58,7 @@ set(Boost_NO_SYSTEM_PATHS ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_RUNTIME ON)
 
-set(BUILD_VARIANT $<$<CONFIG:Debug>,--debug>)
+set(BUILD_VARIANT $<$<CONFIG:Debug>:--debug>)
 
 ExternalProject_Add(Boost
     PREFIX boost
