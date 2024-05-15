@@ -16,13 +16,18 @@ jobs:
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v2.0.2
         with:
-            version: "14"
-            env: true
+          version: "14"
+          env: true
+
+      - name: Install libc++
+        run: |
+          sudo apt update
+          sudo apt install -y libstdc++-12-dev
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-            targets: "x86_64-pc-windows-msvc, wasm32-unknown-emscripten"
+          targets: "x86_64-pc-windows-msvc, wasm32-unknown-emscripten"
 
       - name: Install bindgen
         run: cargo install cbindgen
