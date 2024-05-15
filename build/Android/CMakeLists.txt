@@ -24,7 +24,7 @@ string(REGEX MATCH "Pkg\\.Revision = ([0-9]+)\\.([0-9]+)\\." NDK_VERSION_MATCH "
 set(CMAKE_ANDROID_NDK_VERSION ${CMAKE_MATCH_1})
 set(CMAKE_ANDROID_NDK_VERSION_MINOR ${CMAKE_MATCH_2})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden -std=c++17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
 print("Android NDK version: ${CMAKE_ANDROID_NDK_VERSION}.${CMAKE_ANDROID_NDK_VERSION_MINOR}")
 
 if(NOT CMAKE_ANDROID_NDK_VERSION EQUAL 25)
