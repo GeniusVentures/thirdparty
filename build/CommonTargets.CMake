@@ -7,7 +7,7 @@ mark_as_advanced(JSON_FOR_MODERN_CXX_INCLUDE_DIR)
 # Set config for spdlog config path
 set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
 
-# Builds abseil/absl
+# absl
 ExternalProject_Add(absl
     PREFIX absl
     SOURCE_DIR "${THIRDPARTY_DIR}/abseil-cpp"
@@ -21,7 +21,7 @@ set(_FINDPACKAGE_ABSL_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/absl/lib/cmake/abs
 set(_FINDPACKAGE_ABSL_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/absl/lib")
 set(_FINDPACKAGE_ABSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/absl/include")
 
-# Builds GTest project from the git submodule.
+# GTest
 ExternalProject_Add(GTest
     PREFIX GTest
     SOURCE_DIR "${THIRDPARTY_DIR}/GTest"
@@ -31,7 +31,7 @@ ExternalProject_Add(GTest
 )
 set(_FINDPACKAGE_GTEST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/GTest/lib/cmake/GTest")
 
-# Set Protobuf library path
+# Protobuf library path
 if(NOT DEFINED _PROTOBUF_CONFIG_DIR)
     set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib/cmake/protobuf")
 endif()
@@ -61,7 +61,7 @@ set(_PROTOBUF_PROTOC_EXEC "${PROTOC_EXECUTABLE}")
 print("PROTOBUF_PROTOC_EXECUTABLE: ${_PROTOBUF_PROTOC_EXEC}")
 print("CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 
-# Set Protobuf HOST library path
+# Protobuf HOST library path
 if(NOT DEFINED _PROTOBUF_HOST_CONFIG_DIR)
     set(_PROTOBUF_HOST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib/cmake/protobuf")
 endif()
@@ -96,7 +96,7 @@ if(NOT DEFINED _WALLET_CORE_GENERATE_SCRIPT)
     set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/generate-files")
 endif()
 
-# # Builds grpc
+# gRPC
 ExternalProject_Add(grpc
     PREFIX grpc
     BINARY_DIR "${_PROTOBUF_BINARY_DIR}"
@@ -115,7 +115,7 @@ ExternalProject_Add(grpc
     DEPENDS openssl absl
 )
 
-# Builds rocksdb
+# RocksDB
 ExternalProject_Add(rocksdb
     PREFIX rocksdb
     SOURCE_DIR "${THIRDPARTY_DIR}/rocksdb"
@@ -140,7 +140,7 @@ ExternalProject_Add(rocksdb
 set(_FINDPACKAGE_ROCKSDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/cmake/rocksdb")
 set(_FINDPACKAGE_ROCKSDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/include")
 
-# Builds Microsoft.GSL
+# GSL
 ExternalProject_Add(Microsoft.GSL
     PREFIX Microsoft.GSL
     SOURCE_DIR "${THIRDPARTY_DIR}/GSL"
@@ -166,7 +166,7 @@ set(_FINDPACKAGE_FMT_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/lib/cmake/fmt")
 set(_FINDPACKAGE_FMT_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/lib")
 set(_FINDPACKAGE_FMT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/include")
 
-# Builds spdlog v1.4.2
+# spdlog
 ExternalProject_Add(spdlog
     PREFIX spdlog
     SOURCE_DIR "${THIRDPARTY_DIR}/spdlog"
@@ -181,7 +181,7 @@ ExternalProject_Add(spdlog
 set(_FINDPACKAGE_SPDLOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/include")
 set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
 
-# Builds tsl_hat_trie
+# tsl_hat_trie
 ExternalProject_Add(tsl_hat_trie
     PREFIX tsl_hat_trie
     SOURCE_DIR "${THIRDPARTY_DIR}/hat-trie"
@@ -192,7 +192,7 @@ ExternalProject_Add(tsl_hat_trie
 set(_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/tsl_hat_trie/lib/cmake/tsl_hat_trie")
 set(_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/tsl_hat_trie/include")
 
-# Builds Boost.DI
+# Boost.DI
 ExternalProject_Add(Boost.DI
     PREFIX Boost.DI
     SOURCE_DIR "${THIRDPARTY_DIR}/Boost.DI"
@@ -205,7 +205,7 @@ ExternalProject_Add(Boost.DI
 set(_FINDPACKAGE_BOOST_DI_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/lib/cmake/Boost.DI")
 set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/include")
 
-# # Builds delta-enabled-crdts
+# delta-enabled-crdts
 # ExternalProject_Add(delta-enabled-crdts
 # PREFIX delta-enabled-crdts
 # SOURCE_DIR "${THIRDPARTY_DIR}/delta-enabled-crdts"
@@ -219,7 +219,7 @@ set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/incl
 
 # set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/include")
 
-# # Builds yaml-cpp
+# yaml-cpp
 ExternalProject_Add(yaml-cpp
     PREFIX yaml-cpp
     SOURCE_DIR "${THIRDPARTY_DIR}/yaml-cpp"
@@ -235,7 +235,7 @@ set(_FINDPACKAGE_YAMLCPP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/lib/cm
 set(_FINDPACKAGE_YAMLCPP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/lib")
 set(_FINDPACKAGE_YAMLCPP_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/include")
 
-# # Copies STB headers
+# Copies STB headers
 file(GLOB STB_HEADERS "${THIRDPARTY_DIR}/stb/*.h")
 
 ExternalProject_Add(STB
@@ -247,7 +247,7 @@ ExternalProject_Add(STB
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${STB_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/stb/include/
 )
 
-# # Builds cares
+# c-ares
 ExternalProject_Add(cares
     PREFIX cares
     SOURCE_DIR "${THIRDPARTY_DIR}/c-ares"
@@ -262,7 +262,7 @@ set(_FINDPACKAGE_CARES_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/cares/lib/cmake/c
 set(_FINDPACKAGE_CARES_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/cares/lib")
 set(_FINDPACKAGE_CARES_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/cares/include")
 
-# # Builds soralog
+# soralog
 ExternalProject_Add(soralog
     PREFIX soralog
     SOURCE_DIR "${THIRDPARTY_DIR}/soralog"
@@ -274,6 +274,7 @@ ExternalProject_Add(soralog
     -DTESTING:BOOL=OFF
     -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
     -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
+    -DCMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}
     ${_CMAKE_COMMON_BUILD_PARAMS}
     DEPENDS fmt yaml-cpp
 )
@@ -282,7 +283,7 @@ set(_FINDPACKAGE_SORALOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/soralog/lib/cma
 set(_FINDPACKAGE_SORALOG_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/soralog/lib")
 set(_FINDPACKAGE_SORALOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/soralog/include")
 
-# # Builds sqlite3
+# SQLite3
 ExternalProject_Add(sqlite3
     PREFIX sqlite3
     SOURCE_DIR "${THIRDPARTY_DIR}/sqlite3"
@@ -295,7 +296,7 @@ set(_FINDPACKAGE_SQLITE3_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/lib/cma
 set(_FINDPACKAGE_SQLITE3_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/lib")
 set(_FINDPACKAGE_SQLITE3_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/include")
 
-# # Builds SQLiteModernCpp
+# SQLiteModernCpp
 ExternalProject_Add(SQLiteModernCpp
     PREFIX SQLiteModernCpp
     SOURCE_DIR "${THIRDPARTY_DIR}/libp2p-sqlite-modern-cpp"
@@ -311,7 +312,7 @@ set(_FINDPACKAGE_SQLITECPP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/SQLiteModernC
 set(_FINDPACKAGE_SQLITECPP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/SQLiteModernCpp/lib")
 set(_FINDPACKAGE_SQLITECPP_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/SQLiteModernCpp/include")
 
-# Builds libp2p
+# libp2p
 ExternalProject_Add(libp2p
     PREFIX libp2p
     SOURCE_DIR "${THIRDPARTY_DIR}/libp2p"
@@ -346,13 +347,14 @@ ExternalProject_Add(libp2p
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SPDLOG_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_BOOST_DI_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_CARES_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_FMT_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_YAMLCPP_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SORALOG_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SQLITECPP_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SQLITE3_INCLUDE_DIR}
     -DFORCE_MULTIPLE:BOOL=${_FORCE_MULTIPLE}
     -DMULTIPLE_OPTION:STRING=${MULTIPLE_OPTION}
+    -DCMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}
     DEPENDS GTest grpc ${_PROTOBUF_TARGET} spdlog tsl_hat_trie Boost.DI Microsoft.GSL Boost openssl cares fmt yaml-cpp soralog SQLiteModernCpp
 )
 set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p")
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
 set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include")
 
-# Builds MNN
+# MNN
 set(MNN_METAL OFF)
 
 if(APPLE)
@@ -381,7 +383,7 @@ set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
 set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
 include_directories(${_FINDPACKAGE_MNN_INCLUDE_DIR})
 
-# builds ipfs-lite-cpp
+# ipfs-lite-cpp
 ExternalProject_Add(ipfs-lite-cpp
     PREFIX ipfs-lite-cpp
     SOURCE_DIR "${THIRDPARTY_DIR}/ipfs-lite-cpp"
@@ -418,7 +420,7 @@ set(_FINDPACKAGE_IPFS_LITE_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cp
 set(_FINDPACKAGE_IPFS_LITE_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp/include")
 set(_FINDPACKAGE_CBOR_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp/include/deps/tinycbor/src")
 
-# builds ipfs-pubsub
+# ipfs-pubsub
 ExternalProject_Add(ipfs-pubsub
     PREFIX ipfs-pubsub
     SOURCE_DIR "${THIRDPARTY_DIR}/ipfs-pubsub"
@@ -455,7 +457,7 @@ set(_FINDPACKAGE_IPFS_PUBSUB_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-pubsub
 set(_FINDPACKAGE_IPFS_PUBSUB_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-pubsub/lib")
 set(_FINDPACKAGE_IPFS_PUBSUB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-pubsub/include")
 
-# builds ipfs-bitswap-cpp
+# ipfs-bitswap-cpp
 ExternalProject_Add(ipfs-bitswap-cpp
     PREFIX ipfs-bitswap-cpp
     SOURCE_DIR "${THIRDPARTY_DIR}/ipfs-bitswap-cpp"
@@ -490,7 +492,7 @@ set(_FINDPACKAGE_IPFS_BITSWAP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitsw
 set(_FINDPACKAGE_IPFS_BITSWAP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp/lib")
 set(_FINDPACKAGE_IPFS_BITSWAP_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp/include")
 
-# Builds ed25519
+# ed25519
 ExternalProject_Add(ed25519
     PREFIX ed25519
     SOURCE_DIR "${THIRDPARTY_DIR}/ed25519"
@@ -507,7 +509,7 @@ ExternalProject_Add(ed25519
 )
 set(_FINDPACKAGE_ed25519_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ed25519/lib/cmake/ed25519")
 
-# Builds sr25519-donna
+# sr25519-donna
 ExternalProject_Add(sr25519-donna
     PREFIX sr25519-donna
     SOURCE_DIR "${THIRDPARTY_DIR}/sr25519-donna"
@@ -519,7 +521,7 @@ ExternalProject_Add(sr25519-donna
     ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
-# Builds rapidjson
+# RapidJSON
 ExternalProject_Add(rapidjson
     PREFIX rapidjson
     SOURCE_DIR "${THIRDPARTY_DIR}/rapidjson"
@@ -533,7 +535,7 @@ ExternalProject_Add(rapidjson
     ${_CMAKE_COMMON_BUILD_PARAMS}
 )
 
-# Builds libsecp256k1
+# libsecp256k1
 ExternalProject_Add(libsecp256k1
     PREFIX libsecp256k1
     SOURCE_DIR "${THIRDPARTY_DIR}/libsecp256k1"
@@ -545,7 +547,7 @@ ExternalProject_Add(libsecp256k1
 
 # For Android use NDK builtin vulkan header, otherwise add as an external project
 if(FALSE) # NOT ANDROID)
-    # Builds Vulkan-Headers
+    # Vulkan-Headers
     ExternalProject_Add(Vulkan-Headers
         PREFIX Vulkan-Headers
         SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Headers"
@@ -554,7 +556,7 @@ if(FALSE) # NOT ANDROID)
         ${_CMAKE_COMMON_BUILD_PARAMS}
     )
 
-    # Builds Vulkan-Loader
+    # Vulkan-Loader
     ExternalProject_Add(Vulkan-Loader
         PREFIX Vulkan-Loader
         SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Loader"
@@ -571,7 +573,7 @@ if(FALSE) # NOT ANDROID)
     )
 endif()
 
-# Builds xxhash
+# xxhash
 ExternalProject_Add(xxhash
     PREFIX xxhash
     SOURCE_DIR "${THIRDPARTY_DIR}/xxhash"
@@ -637,7 +639,7 @@ set(_FINDPACKAGE_ZLIB_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/zlib/lib")
 set(_FINDPACKAGE_ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/zlib/include")
 
 # ----------------------BUILD EXTERNAL PROJECT------------------
-# Builds LIBSSH2
+# LIBSSH2
 ExternalProject_Add(
     libssh2
     PREFIX libssh2
