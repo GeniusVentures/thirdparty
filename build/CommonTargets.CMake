@@ -4,9 +4,6 @@ find_path(JSON_FOR_MODERN_CXX_INCLUDE_DIR NAMES nlohmann/json.hpp)
 include_directories(${JSON_FOR_MODERN_CXX_INCLUDE_DIR})
 mark_as_advanced(JSON_FOR_MODERN_CXX_INCLUDE_DIR)
 
-# Set config for spdlog config path
-set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
-
 # absl
 ExternalProject_Add(absl
     PREFIX absl
@@ -37,29 +34,24 @@ if(NOT DEFINED _PROTOBUF_CONFIG_DIR)
 endif()
 
 set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${_PROTOBUF_CONFIG_DIR}")
-print("PROTOBUF_CONFIG_DIR: ${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}")
 
 if(NOT DEFINED _PROTOBUF_INCLUDE_DIR)
     set(_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/include")
 endif()
 
 set(_FINDPACKAGE_PROTOBUF_INCLUDE_DIR "${_PROTOBUF_INCLUDE_DIR}")
-print("PROTOBUF_INCLUDE_DIR: ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}")
 
 if(NOT DEFINED _PROTOBUF_LIB_DIR)
     set(_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib")
 endif()
 
 set(_FINDPACKAGE_PROTOBUF_LIB_DIR "${_PROTOBUF_LIB_DIR}")
-print("PROTOBUF_LIB_DIR: ${_FINDPACKAGE_PROTOBUF_LIB_DIR}")
 
 if(NOT DEFINED PROTOC_EXECUTABLE)
     set(PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/protoc${CMAKE_EXECUTABLE_SUFFIX}")
 endif()
 
 set(_PROTOBUF_PROTOC_EXEC "${PROTOC_EXECUTABLE}")
-print("PROTOBUF_PROTOC_EXECUTABLE: ${_PROTOBUF_PROTOC_EXEC}")
-print("CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 
 # Protobuf HOST library path
 if(NOT DEFINED _PROTOBUF_HOST_CONFIG_DIR)
@@ -67,28 +59,24 @@ if(NOT DEFINED _PROTOBUF_HOST_CONFIG_DIR)
 endif()
 
 set(_FINDPACKAGE_PROTOBUF_HOST_CONFIG_DIR "${_PROTOBUF_HOST_CONFIG_DIR}")
-print("PROTOBUF_HOST_CONFIG_DIR: ${_FINDPACKAGE_PROTOBUF_HOST_CONFIG_DIR}")
 
 if(NOT DEFINED _PROTOBUF_HOST_INCLUDE_DIR)
     set(_PROTOBUF_HOST_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/include")
 endif()
 
 set(_FINDPACKAGE_PROTOBUF_HOST_INCLUDE_DIR "${_PROTOBUF_HOST_INCLUDE_DIR}")
-print("PROTOBUF_HOST_INCLUDE_DIR: ${_FINDPACKAGE_PROTOBUF_HOST_INCLUDE_DIR}")
 
 if(NOT DEFINED _PROTOBUF_HOST_LIB_DIR)
     set(_PROTOBUF_HOST_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib")
 endif()
 
 set(_FINDPACKAGE_PROTOBUF_HOST_LIB_DIR "${_PROTOBUF_HOST_LIB_DIR}")
-print("_PROTOBUF_HOST_LIB_DIR: ${_FINDPACKAGE_PROTOBUF_HOST_LIB_DIR}")
 
 if(NOT DEFINED _PROTOBUF_HOST_DIR)
     set(_PROTOBUF_HOST_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc")
 endif()
 
 set(_FINDPACKAGE_PROTOBUF_HOST_DIR "${_PROTOBUF_HOST_DIR}")
-print("_PROTOBUF_HOST_DIR: ${_FINDPACKAGE_PROTOBUF_HOST_DIR}")
 
 set(_PROTOBUF_BINARY_DIR "${_PROTOBUF_HOST_DIR}/bin")
 
@@ -132,7 +120,6 @@ ExternalProject_Add(rocksdb
     -DROCKSDB_INSTALL_ON_WINDOWS:BOOL=ON
     -DWITH_GFLAGS:BOOL=OFF
     -DPORTABLE:BOOL=ON
-    -DWITH_GFLAGS:BOOL=OFF
     -DFAIL_ON_WARNINGS:BOOL=OFF
     ${_rocksdb_EXTRA_PARAM}
     ${_CMAKE_COMMON_BUILD_PARAMS}
@@ -151,6 +138,7 @@ ExternalProject_Add(Microsoft.GSL
 )
 set(_FINDPACKAGE_GSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Microsoft.GSL/include")
 
+# fmt
 ExternalProject_Add(fmt
     PREFIX fmt
     SOURCE_DIR "${THIRDPARTY_DIR}/fmt"
@@ -204,20 +192,6 @@ ExternalProject_Add(Boost.DI
 )
 set(_FINDPACKAGE_BOOST_DI_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/lib/cmake/Boost.DI")
 set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/include")
-
-# delta-enabled-crdts
-# ExternalProject_Add(delta-enabled-crdts
-# PREFIX delta-enabled-crdts
-# SOURCE_DIR "${THIRDPARTY_DIR}/delta-enabled-crdts"
-# CMAKE_CACHE_ARGS
-# -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts
-# -DELTACRDTS_BUILD_TESTS:BOOL=ON
-# -DELTACRDTS_INSTALL:BOOL=ON
-# PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-# "${PROJECT_BUILD_FOLDER}/cmake.in/delta-enabled-crdts-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
-# )
-
-# set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/include")
 
 # yaml-cpp
 ExternalProject_Add(yaml-cpp
@@ -717,43 +691,8 @@ ExternalProject_Add(
 set(_FINDPACKAGE_ASIOMGR_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/lib/cmake/AsyncIOManager")
 set(_FINDPACKAGE_ASIOMGR_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/lib")
 set(_FINDPACKAGE_ASIOMGR_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/include")
-
 # jsonrpc-lean
 install(
     DIRECTORY ${THIRDPARTY_DIR}/jsonrpc-lean
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/jsonrpc-lean
 )
-
-# ExternalProject_Add( hawktracer
-# PREFIX hawktracer
-# URL https://github.com/amzn/hawktracer/archive/v0.10.0.zip
-# # GIT_TAG           "v0.10.0"
-# # GIT_SHALLOW TRUE
-# #URL_HASH    SHA1=179e316b0fe5150f1b05ca70ec2ac1490fe2cb3b
-# CMAKE_CACHE_ARGS
-# -DBUILD_STATIC_LIB:BOOL=ON
-# -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/hawktracer
-# ${_CMAKE_COMMON_BUILD_PARAMS}
-# )
-
-#
-# # build third party for grpc
-# ExternalProject_Add(gnostic
-# PREFIX gnostic
-# URL https://github.com/googleapis/gnostic/archive/v0.5.1.zip
-# CONFIGURE_COMMAND  ""
-# BUILD_COMMAND go install .
-# INSTALL_COMMAND  ""
-# BUILD_IN_SOURCE  TRUE
-# )
-
-#
-# # build third party for grpc
-# ExternalProject_ADd(gnostic-grpc
-# PREFIX gnostic-grpc
-# URL https://github.com/googleapis/gnostic-grpc/archive/v0.1.0.zip
-# CONFIGURE_COMMAND  ""
-# BUILD_COMMAND go install .
-# INSTALL_COMMAND  ""
-# BUILD_IN_SOURCE  TRUE
-# )
