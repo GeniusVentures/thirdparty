@@ -5,7 +5,7 @@ if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
     message(FATAL_ERROR "${CMAKE_HOST_SYSTEM_NAME} host system name does not match Linux - Please select the correct folder for configuring project")
 endif()
 
-project(LINUX_SHARED_THIRD_PARTY)
+project(LINUX_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
 # Build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
