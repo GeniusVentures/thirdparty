@@ -52,15 +52,15 @@ set(_BOOST_CACHE_ARGS
     -Dboost_unit_test_framework_DIR:PATH=${BOOST_LIB_CMAKE_DIR}/boost_unit_test_framework-${BOOST_VERSION}
 )
 
-# build openssl
+# OpenSSL
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 
-set(OPENSSL_VARIANT $<$<CONFIG:Debug>:-d>)
+set(OPENSSL_VARIANT "$<$<CONFIG:Debug>:-d >")
 
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND <SOURCE_DIR>/config ${OPENSSL_VARIANT} -fPIC --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+    CONFIGURE_COMMAND <SOURCE_DIR>/config ${OPENSSL_VARIANT}-fPIC --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
     BUILD_COMMAND make build_libs
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND make install_dev
@@ -73,7 +73,7 @@ set(_OPENSSL_CACHE_ARGS
 )
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 
-# set config for grpc
+# GRPC
 set(_grpc_EXTRA_PARAM
     -D_gRPC_PROTOBUF_PROTOC_EXECUTABLE:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/protoc
     -D_gRPC_CPP_PLUGIN:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/grpc_cpp_plugin
@@ -104,5 +104,4 @@ set(MULTIPLE_OPTION "-z muldefs")
 
 set(CPPRESTSDK_NOWARN "-Wno-format-truncation" CACHE INTERNAL "")
 
-# build common targets
 include(../CommonTargets.CMake)
