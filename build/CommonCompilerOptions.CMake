@@ -18,7 +18,7 @@ include(ExternalProject)
 
 set(BOOST_VARIANT $<IF:$<CONFIG:Debug>,debug,release>)
 
-# Workaournd for on GitHub actions, probably permission error - get_BOOST_version(BOOST_VERSION "${THIRDPARTY_DIR}/boost/boost/version.hpp")
+# Workaround for on GitHub actions, probably permission error - get_BOOST_version(BOOST_VERSION "${THIRDPARTY_DIR}/boost/boost/version.hpp")
 set(BOOST_MAJOR_VERSION "1" CACHE STRING "Boost Major Version")
 set(BOOST_MINOR_VERSION "80" CACHE STRING "Boost Minor Version")
 set(BOOST_PATCH_VERSION "0" CACHE STRING "Boost Patch Version")
@@ -39,31 +39,9 @@ endif()
 
 set(CMAKE_MESSAGE_LOG_LEVEL "Warning" CACHE STRING "Quiets Down the build to just warnings/errors")
 
-set(_MSVC_RUNTIME_LIBRARY)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS} ")
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
-
-    set(CMAKE_C_FLAGS "$<IF:$<CONFIG:Debug>,${CMAKE_C_FLAGS} /MTd,${CMAKE_C_FLAGS} /MTd>")
-    set(CMAKE_CXX_FLAGS "$<IF:$<CONFIG:Debug>,${CMAKE_CXX_FLAGS} /MT,${CMAKE_CXX_FLAGS} /MT>")
-
-    set(CompilerFlags
-        CMAKE_CXX_FLAGS
-        CMAKE_CXX_FLAGS_DEBUG
-        CMAKE_CXX_FLAGS_RELEASE
-        CMAKE_C_FLAGS
-        CMAKE_C_FLAGS_DEBUG
-        CMAKE_C_FLAGS_RELEASE
-    )
-
-    foreach(CompilerFlag ${CompilerFlags})
-        string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
-    endforeach()
-
     set(_MSVC_RUNTIME_LIBRARY
         -DCMAKE_POLICY_DEFAULT_CMP0091:STRING=NEW
         -DCMAKE_MSVC_RUNTIME_LIBRARY:STRING=MultiThreaded$<$<CONFIG:Debug>:Debug>
@@ -71,7 +49,6 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif()
 
 set(CMAKE_CACHE_ARGS_CFLAGS_ADD
-    -DCMAKE_SYSTEM_VERSION:STRING=${CMAKE_SYSTEM_VERSION}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
     -DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}
     -DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}
