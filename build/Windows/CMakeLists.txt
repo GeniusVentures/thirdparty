@@ -6,9 +6,6 @@ endif()
 
 project(WINDOWS_SHARED_THIRD_PARTY)
 
-# Enable c++ exceptions
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP")
-
 # Build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 

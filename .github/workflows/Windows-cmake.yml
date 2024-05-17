@@ -42,7 +42,6 @@ jobs:
           source-dir: build/Windows
           build-dir: build/Windows/Release
           options: "CMAKE_BUILD_TYPE=Release"
-      
+
       - name: Build project
-        run: cmake --build build/Windows/Release --config Release
-        
+        run: cmake --build build/Windows/Release --config Release --parallel
