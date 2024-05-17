@@ -19,7 +19,7 @@ jobs:
           update-alternatives --set c++ $(which clang++)
 
       - name: Add rust target
-        run: rustup add wasm32-unknown-emscripten
+        run: rustup target add wasm32-unknown-emscripten
 
       - name: Install bindgen
         run: cargo install cbindgen
