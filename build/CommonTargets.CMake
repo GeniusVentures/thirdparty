@@ -84,6 +84,14 @@ if(NOT DEFINED _WALLET_CORE_GENERATE_SCRIPT)
     set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/generate-files")
 endif()
 
+find_program(CBINDGEN NAMES cbindgen)
+
+if(CBINDGEN)
+    message(STATUS "cbindgen found: ${CBINDGEN}")
+else()
+    message(FATAL_ERROR "cbindgen not found")
+endif()
+
 # gRPC
 ExternalProject_Add(grpc
     PREFIX grpc
