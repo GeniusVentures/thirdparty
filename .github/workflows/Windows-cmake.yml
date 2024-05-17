@@ -1,7 +1,5 @@
 name: Windows Build
 
-# Controls when the workflow will run
-# Triggers the workflow on push or pull request events and manually from the Actions tab
 on:
   push:
     branches:
@@ -17,8 +15,8 @@ jobs:
   build:
     runs-on: windows-2022
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4.1.5
+      - name: Checkout
+        uses: actions/checkout@v4.1.5
         with:
           submodules: "recursive"
 
@@ -32,19 +30,19 @@ jobs:
         with:
           arch: amd64
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: "x86_64-pc-windows-msvc, wasm32-unknown-emscripten"
+      - name: Add rust target
+        run: rustup add wasm32-unknown-emscripten
 
       - name: Install bindgen
         run: cargo install cbindgen
 
-      - name: Run CMake
+      - name: Configure CMake
         uses: threeal/cmake-action@v1.3.0
         with:
-          run-build: true
           source-dir: build/Windows
           build-dir: build/Windows/Release
           options: "CMAKE_BUILD_TYPE=Release"
-          build-args: "--config Release"
+      
+      - name: Build project
+        run: cmake --build build/Windows/Release --config Release
+        

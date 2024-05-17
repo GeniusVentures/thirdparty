@@ -8,30 +8,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: "Checkout"
+      - name: Checkout
         uses: actions/checkout@v4.1.3
         with:
           submodules: "recursive"
 
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v2.0.2
-        with:
-          version: "14"
-          env: true
+      - name: Set clang as the default compiler
+        run: >
+          update-alternatives --set cc $(which clang)
+          update-alternatives --set c++ $(which clang++)
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: "x86_64-pc-windows-msvc, wasm32-unknown-emscripten"
+      - name: Add rust target
+        run: rustup add wasm32-unknown-emscripten
 
       - name: Install bindgen
         run: cargo install cbindgen
 
-      - name: Run CMake
+      - name: Configure CMake
         uses: threeal/cmake-action@v1.3.0
         with:
-          run-build: true
           source-dir: build/Linux
           build-dir: build/Linux/Release
           options: "CMAKE_BUILD_TYPE=Release"
-          build-args: "--config Release"
+      
+      - name: Build project
+        run: cmake --build build/Linux/Release --config Release
+        
