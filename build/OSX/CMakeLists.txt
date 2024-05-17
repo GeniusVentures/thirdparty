@@ -184,8 +184,6 @@ set(_libp2p_BUILD_EXAMPLES ON)
 set(_MNN_WIN_RUNTIME_MT OFF)
 
 # Allow multiple definitions
-set(FORCE_MULTILE ON)
 set(MULTIPLE_OPTION "-Xlink=-force:multiple")
-
 # build common targets
 include(../CommonTargets.CMake)

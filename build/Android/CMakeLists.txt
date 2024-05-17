@@ -252,8 +252,5 @@ set(_KOMPUTE_EXTRA_PARAM
     -DCMAKE_ANDROID_STL_TYPE:STRING=c++_static
 )
 
-# Allow multiple definitions
-set(FORCE_MULTILE OFF)
-
 # build common targets
 include(../CommonTargets.CMake)

@@ -45,8 +45,6 @@ ExternalProject_Add(Boost
     LOG_CONFIGURE ON
     LOG_BUILD OFF
     LOG_INSTALL ON
-
-    # UPDATE_COMMAND ${CMAKE_COMMAND} -E copy ${THIRDPARTY_DIR}/build/cmake.in/boost-patch/system_category_win32.hpp ${THIRDPARTY_DIR}/boost/libs/system/include/boost/system/detail/system_category_win32.hpp
     PATCH_COMMAND ./bootstrap.bat ${VC_PLATFORMTOOLSET}
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ./b2.exe headers
@@ -174,7 +172,6 @@ set(ipfs-bitswap-cpp_EXTRA_PARAM
 set(_MNN_WIN_RUNTIME_MT ON)
 
 # Allow multiple definitions
-set(FORCE_MULTILE ON)
 set(MULTIPLE_OPTION /FORCE:MULTIPLE)
 
 # build common targets

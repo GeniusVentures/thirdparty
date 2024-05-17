@@ -99,7 +99,6 @@ set(_libp2p_BUILD_EXAMPLES ON)
 set(_MNN_WIN_RUNTIME_MT OFF)
 
 # Allow multiple definitions
-set(FORCE_MULTILE ON)
 set(MULTIPLE_OPTION "-z muldefs")
 
 set(CPPRESTSDK_NOWARN "-Wno-format-truncation" CACHE INTERNAL "")

@@ -211,7 +211,6 @@ set(_MNN_EXTRA_PARAM
 # PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/ssl_transport_security.cc" <SOURCE_DIR>/src/core/tsi/ssl_transport_security.cc)
 
 # Allow multiple definitions
-set(FORCE_MULTILE ON)
 set(MULTIPLE_OPTION "-Xlink=-force:multiple")
 
 # build common targets
