@@ -168,14 +168,6 @@ set(_OPENSSL_CACHE_ARGS
 
 # set config for grpc
 set(_grpc_EXTRA_PARAM
-    -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_PHP_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_NODE_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_CSHARP_EXT:BOOL=OFF
     -DgRPC_BUILD_CODEGEN:BOOL=OFF
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -llog\ -Wno-unused-command-line-argument
 )
@@ -193,7 +185,6 @@ set(_rocksdb_EXTRA_PARAM
 )
 
 # Build protobuf project from the git submodule for local executation of protoc.
-# set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
 set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake")
 
 # Build protobuf project from the git submodule.
@@ -250,7 +241,5 @@ set(_MNN_EXTRA_PARAM
 set(_KOMPUTE_EXTRA_PARAM
     -DKOMPUTE_OPT_ANDROID_BUILD:BOOL=ON
     -DCMAKE_ANDROID_STL_TYPE:STRING=c++_static
-)
-
-# build common targets
+)# build common targets
 include(../CommonTargets.CMake)

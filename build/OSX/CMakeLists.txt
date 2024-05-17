@@ -137,14 +137,6 @@ ExternalProject_Add(MoltenVK
 set(_grpc_EXTRA_PARAM
     -D_gRPC_PROTOBUF_PROTOC_EXECUTABLE:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/third_party/protobuf/protoc
     -D_gRPC_CPP_PLUGIN:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/grpc_cpp_plugin
-    -DgRPC_SSL_PROVIDER:STRING=package
-    -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_PHP_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=ON
-    -DgRPC_BUILD_GRPC_NODE_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
 )
 
 # Build protobuf project from the git submodule
@@ -185,5 +177,6 @@ set(_MNN_WIN_RUNTIME_MT OFF)
 
 # Allow multiple definitions
 set(MULTIPLE_OPTION "-Xlink=-force:multiple")
+
 # build common targets
 include(../CommonTargets.CMake)
