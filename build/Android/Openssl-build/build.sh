@@ -14,7 +14,7 @@ BUILD_DIR=""
 LOCAL_PATH=""
 LOCAL_ANDROID_NDK=""
 LOCAL_ANDROID_TOOLCHAIN=""
-DEBUG_FLAGS=""
+DEBUG_BUILD=""
 
 # Process command line arguments
 for i in "$@"
@@ -45,7 +45,7 @@ case $i in
     shift
     ;;
   --debug)
-    DEBUG_FLAGS="-g"
+    DEBUG_BUILD="--debug"
     shift
     ;;
   *)
@@ -60,7 +60,12 @@ export PATH=$LOCAL_ANDROID_NDK:$LOCAL_ANDROID_TOOLCHAIN:$LOCAL_PATH
 export CC=clang
 CONFIGDIR=`dirname $0`/../../../openssl
 REALCONFIGDIR=`realpath ${CONFIGDIR}`
-OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure $DEBUG_FLAGS no-asm no-shared $ABI --prefix=$BUILD_DIR --openssldir=$BUILD_DIR"
+
+if [ -n "$DEBUG_FLAGS" ]; then
+  OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure $DEBUG_FLAGS no-asm no-shared $ABI --prefix=$BUILD_DIR --openssldir=$BUILD_DIR"
+else
+  OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure no-asm no-shared $ABI --prefix=$BUILD_DIR --openssldir=$BUILD_DIR"
+fi
 
 echo "Building OpenSSL"
 echo $OPENSSL_CONFIGURE_CMD
@@ -70,4 +75,4 @@ which clang
 
 $OPENSSL_CONFIGURE_CMD
 
-make -j 8 build_libs
+make build_libs
