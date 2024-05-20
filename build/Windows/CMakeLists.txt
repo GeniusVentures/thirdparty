@@ -72,7 +72,7 @@ set(_BOOST_CACHE_ARGS
 # builds openssl
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 
-set(OPENSSL_CONFIG_MODE VC-WIN64A $<$<CONFIG:Debug>:--debug>)
+set(OPENSSL_CONFIG_MODE "VC-WIN64A$<$<CONFIG:Debug>: --debug>")
 
 ExternalProject_Add(openssl
     PREFIX openssl

@@ -37,8 +37,6 @@ else()
     set(TP_BUILD_SUBDIR ${CMAKE_SYSTEM_NAME})
 endif()
 
-set(CMAKE_MESSAGE_LOG_LEVEL "Warning" CACHE STRING "Quiets Down the build to just warnings/errors")
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS} ")
 
 if(MSVC)
@@ -47,13 +45,6 @@ if(MSVC)
         -DCMAKE_MSVC_RUNTIME_LIBRARY:STRING=MultiThreaded$<$<CONFIG:Debug>:Debug>
     )
 endif()
-
-print("C flags: ${CMAKE_C_FLAGS}")
-print("CXX flags: ${CMAKE_CXX_FLAGS}")
-print("C Debug flags: ${CMAKE_C_FLAGS_DEBUG}")
-print("CXX Debug flags: ${CMAKE_CXX_FLAGS_DEBUG}")
-print("C Release flags: ${CMAKE_C_FLAGS_RELEASE}")
-print("CXX Release flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 
 set(_CMAKE_COMMON_CACHE_ARGS
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}

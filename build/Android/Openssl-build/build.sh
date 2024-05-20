@@ -70,4 +70,4 @@ which clang
 
 $OPENSSL_CONFIGURE_CMD
 
-make -j 8 build_libs
+make build_libs
