@@ -16,17 +16,34 @@ jobs:
       env:
         MAKEFLAGS: "-j 8"
       steps:
+        - name: Configure clang
+          run: |
+            sudo apt-get update && sudo apt install -y clang
+            sudo apt install -y libc++-dev libc++abi-dev
+            sudo update-alternatives --set cc /usr/bin/clang
+            sudo update-alternatives --set c++ /usr/bin/clang++
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         - uses: actions/checkout@v2
           with:
             submodules: 'recursive'
 
-        - name: Create Build Directory
+        - name: Install Rust dependencies
           run: |
-            mkdir -p ${{github.workspace}}/Linux/build/Release/
-            update-alternatives --set c++ /usr/bin/clang++
-            update-alternatives --set cc /usr/bin/clang
-            cd ${{github.workspace}}/Linux/build/Release/
-            cmake .. -DCMAKE_BUILD_TYPE=Release
-            make
+            rustup update
+            rustup toolchain install stable
+            rustup default stable
+            rustup target add x86_64-unknown-linux-gnu
+            rustup target add wasm32-unknown-emscripten
+            cargo install cbindgen
+
+        - name: Create Build Directory
+          run: cmake -E make_directory ${{github.workspace}}/.build
+
+        - name: Configure CMake
+          working-directory: ${{github.workspace}}/.build
+          run: cmake -S ../build/Linux/ -DCMAKE_BUILD_TYPE=Release
+
+        - name: Compile
+          working-directory: ${{github.workspace}}/.build
+          run: make
 

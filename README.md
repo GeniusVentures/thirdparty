@@ -26,21 +26,28 @@ Set two environment variables
   - Rust, cargo
     - ```rustup set default-host x86_64-pc-windows-msvc```
     - ```rustup target add x86_64-pc-windows-msvc```
+	- ```cargo install cbindgen cargo-lipo```
+  	- ```rustup target add wasm32-unknown-emscripten``` (to be deprecated)
 ## Building
-    ○ git submodule update --init --recursive
-    ○ cd ./build/Windows
-    ○ mkdir Release
-    ○ cd Release
-    ○ cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
-    ○ cmake --build . --config Release
+```bash
+git submodule update --init --recursive
+cd ./build/Windows
+mkdir Release
+cd Release
+cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+cmake --build . --config Release
+```
+
 ### Building for debugging
-	○ git pull
-	○ git submodule update --init --recursive
-	○ cd ./build/Windows
-	○ mkdir Debug
-	○ cd Debug
-	○ cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug
-	○ cmake --build . --config Debug
+```bash
+git pull
+git submodule update --init --recursive
+cd ./build/Windows
+mkdir Debug
+cd Debug
+cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug
+cmake --build . --config Debug
+```
 # Build on Linux
 ## Preinstall
 	
@@ -100,13 +107,15 @@ The following Rust target is needed for now but will be deprecated soon:
 - ```rustup target add wasm32-unknown-emscripten```	 # this will be deprecated on wallet-core soon
 ## Building
 
-	○ export CMAKE_BUILD_PARALLEL_LEVEL=8
-	○ export MAKEFLAGS="-j8"
-	○ cd ./build/Linux
-	○ mkdir Release
-	○ cd Release
-	○ cmake .. -DCMAKE_BUILD_TYPE=Release
-	○ make
+```bash
+export CMAKE_BUILD_PARALLEL_LEVEL=8
+export MAKEFLAGS="-j8"
+cd ./build/Linux
+mkdir Release
+cd Release
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make
+```
 
 # Build/Cross-Compile Android on Linux/OSX/Windows Hosts 
 ## Preinstall Host tools
@@ -123,7 +132,7 @@ The following Rust target is needed for now but will be deprecated soon:
 	○ export PATH="$ANDROID_TOOLCHAIN":"$PATH"
 # Building
 * armeabi-v7a
-```
+```bash
 ○ cd build/Android
 ○ mkdir -p Release/armeabi-v7a
 ○ cd Release/armeabi-v7a
@@ -131,7 +140,7 @@ The following Rust target is needed for now but will be deprecated soon:
 ○ make
 ```
 * arm64-v8a
-```
+```bash
 ○ cd build/Android
 ○ mkdir -p Release/arm64-v8a
 ○ cd Release/arm64-v8a
@@ -139,7 +148,7 @@ The following Rust target is needed for now but will be deprecated soon:
 ○ make
 ```
 * x86
-```
+```bash
 ○ cd build/Android
 ○ mkdir -p Release/x86
 ○ cd Release/x86
@@ -147,7 +156,7 @@ The following Rust target is needed for now but will be deprecated soon:
 ○ make
 ```
 * x86_64
-```
+```bash
 ○ cd build/Android
 ○ mkdir -p Release/x86_64
 ○ cd Release/x86_64
@@ -169,16 +178,16 @@ The following Rust target is needed for now but will be deprecated soon:
     rustup default stable
     rustup target add x86_64-apple-darwin
     rustup target add aarch64-apple-darwin
-    rustup component add rust-src --toolchain nightly-x86_64-apple-darwin
+    rustup target add wasm32-unknown-emscripten
     cargo install cbindgen cargo-lipo
     ```
  ## Building
-```
-○ cd build/OSX
-○ mkdir Release
-○ cd Release
-○ cmake .. -DCMAKE_BUILD_TYPE=Release
-○ make
+```bash
+cd build/OSX
+mkdir Release
+cd Release
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make
 ```
 # Build for iOS
 ## Preinstall
@@ -192,14 +201,16 @@ The following Rust target is needed for now but will be deprecated soon:
     rustup toolchain install stable
     rustup default stable
     rustup toolchain install stable-x86_64-apple-darwin
+    rustup toolchain install nightly-x86_64-apple-darwin
+    rustup component add rust-src --toolchain nightly-x86_64-apple-darwin
     rustup target add x86_64-apple-ios aarch64-apple-ios-sim aarch64-apple-ios
     cargo install cbindgen cargo-lipo
     ```
 
 ## Building
-```
-○ cd build/iOS
-○ mkdir Release/
-○ cmake .. -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=$PWD/../iOS.cmake
-○ make
+``` bash
+cd build/iOS
+mkdir Release/
+cmake .. -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=$PWD/../iOS.cmake
+make
 ```

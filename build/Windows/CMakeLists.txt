@@ -18,6 +18,8 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
     set(MSVC_RUNTIME_LIBRARY_OPTION "MultiThreaded$<$<CONFIG:Realease>:Release>")
 endif()
 
+
+
 # ------------------------------------------
 # Enable c++ exceptions
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP")
@@ -26,6 +28,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP")
 # build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
+set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/win-generate-files.bat")
 # ------------------------------------------
 # Set Windows specific protobuf options
 set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/cmake")
@@ -145,6 +148,28 @@ set(_grpc_EXTRA_PARAM
 	-DBUILD_SHARED_LIBS:BOOL=OFF
 
 )
+
+# --------------------------------------------------------
+# Build protobuf project from the git submodule
+set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake")
+
+# Build protobuf project from the git submodule.
+ExternalProject_Add(protobuf
+		PREFIX protobuf
+		SOURCE_DIR "${PROTOBUF_SRC_DIR}"
+		CMAKE_CACHE_ARGS
+		-Dprotobuf_BUILD_TESTS:BOOL=OFF
+		-Dprotobuf_WITH_ZLIB:BOOL=OFF
+		-Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
+		-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
+		-Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
+)
+
+set(PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
+set(_PROTOBUF_TARGET protobuf)
+set(_PROTOBUF_HOST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/cmake")
+set(_PROTOBUF_HOST_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
+set(_PROTOBUF_HOST_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
 
 # --------------------------------------------------------
 # Set ed25519 OS specific configurations
