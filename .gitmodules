@@ -46,9 +46,6 @@
     path = Boost.DI
     url = https://github.com/masterjedy/di
     branch = cpp14
-[submodule "cryptopp"]
-    path = cryptopp
-    url = https://github.com/weidai11/cryptopp
 [submodule "cpp-ipfs-http-client"]
     path = cpp-ipfs-http-client
     url = https://github.com/vasild/cpp-ipfs-http-client
@@ -143,7 +140,23 @@
 	url = ../wallet-core.git
 [submodule "MNN"]
 	path = MNN
-	url = https://github.com/alibaba/MNN.git
+	url = https://github.com/GeniusVentures/MNN.git
 [submodule "zlib"]
 	path = zlib
 	url = https://github.com/madler/zlib.git
+[submodule "libssh2"]
+	path = libssh2
+	url = https://github.com/libssh2/libssh2.git
+[submodule "AsyncIOManager"]
+	path = AsyncIOManager
+	url = https://github.com/GeniusVentures/AsyncIOManager.git
+	branch = refactor_async_mnnloader
+[submodule "cryptopp-cmake"]
+	path = cryptopp-cmake
+	url = https://github.com/abdes/cryptopp-cmake.git
+[submodule "zkLLVM"]
+	path = zkLLVM
+	url = ../zkLLVM.git
+[submodule "stb"]
+	path = stb
+	url = https://github.com/nothings/stb.git

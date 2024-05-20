@@ -44,13 +44,13 @@ fi
 
 echo "Bootstapping..."
 cd $SRC_DIR
-./bootstrap.sh cxxflags="-arch x86_64 -arch arm64" cflags="-arch x86_64 -arch arm64" linkflags="-arch x86_64 -arch arm64" > $X86_64_DIR/boostbuild.log 2>&1 || (echo "Error in Building Boost!" && cat $X86_64_DIR/boostbuild.log)
+./bootstrap.sh cxxflags="-arch x86_64 -arch arm64 -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION" cflags="-arch x86_64 -arch arm64" linkflags="-arch x86_64 -arch arm64" > $X86_64_DIR/boostbuild.log 2>&1 || (echo "Error in Building Boost!" && cat $X86_64_DIR/boostbuild.log)
 
 COMMOM_PARAMS="toolset=clang -a target-os=darwin visibility=global address-model=64 binary-format=mach-o runtime-link=static link=static threading=multi --build-type=minimal --with-log --with-thread --with-program_options --with-system --with-date_time --with-regex --with-chrono --with-atomic --with-random --with-filesystem --with-container --with-test --withvariant=${VARIANT} --stagedir=stage/x64"
 
 echo "building for X86_64..."
 cd $SRC_DIR
-./b2 -j8 cxxflags="-arch x86_64 -std=c++17" $COMMOM_PARAMS --build-dir=$X86_64_DIR --prefix=$X86_64_DIR --libdir=$X86_64_DIR/lib install > $X86_64_DIR/boostbuild.log 2>&1 || (echo "Error in Building Boost!" && cat $X86_64_DIR/boostbuild.log)
+./b2 -j8 cxxflags="-arch x86_64 -std=c++17 -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION" $COMMOM_PARAMS --build-dir=$X86_64_DIR --prefix=$X86_64_DIR --libdir=$X86_64_DIR/lib install > $X86_64_DIR/boostbuild.log 2>&1 || (echo "Error in Building Boost!" && cat $X86_64_DIR/boostbuild.log)
 
 if [ ! -d "$LIB_DIR" ]; then
   mkdir -p "$LIB_DIR"
@@ -66,10 +66,10 @@ fi
 
 echo "Bootstapping... for arm64"
 cd $SRC_DIR
-./bootstrap.sh cxxflags="-arch arm64" cflags="-arch arm64" linkflags="-arch arm64" > $ARM64_DIR/boostbuild.log 2>&1 || (echo "Error in Building Boost!" && cat $ARM64_DIR/boostbuild.log)
+./bootstrap.sh cxxflags="-arch arm64 -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION" cflags="-arch arm64" linkflags="-arch arm64" > $ARM64_DIR/boostbuild.log 2>&1 || (echo "Error in Building Boost!" && cat $ARM64_DIR/boostbuild.log)
 
 cd $SRC_DIR
-./b2 -j8 cxxflags="-arch arm64 -stdlib=libc++ -isysroot $MACOS_SDK_PATH -std=c++17" cflags="-arch arm64" linkflags="-arch arm64" abi=aapcs -mmacosx-version-min=12.1 $COMMOM_PARAMS architecture=arm --build-dir=$ARM64_DIR --prefix=$ARM64_DIR --libdir=$ARM64_DIR/lib install > $ARM64_DIR/boostbuild.log 2>&1 || (echo "Error in Building Boost!" && cat $ARM64_DIR/boostbuild.log)
+./b2 -j8 cxxflags="-arch arm64 -stdlib=libc++ -isysroot $MACOS_SDK_PATH -std=c++17 -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION" cflags="-arch arm64" linkflags="-arch arm64" abi=aapcs -mmacosx-version-min=12.1 $COMMOM_PARAMS architecture=arm --build-dir=$ARM64_DIR --prefix=$ARM64_DIR --libdir=$ARM64_DIR/lib install > $ARM64_DIR/boostbuild.log 2>&1 || (echo "Error in Building Boost!" && cat $ARM64_DIR/boostbuild.log)
 
 for lib in $X86_64_DIR/lib/*.a; do
   lipo -create $lib $ARM64_DIR/lib/$(basename $lib) -output $LIB_DIR/$(basename $lib);
