@@ -1,9 +1,7 @@
-
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20)
 
 project(ANDROID_SHARED_THIRD_PARTY)
 
-# Include common compiler options
 include(../CommonCompilerOptions.CMake)
 
 # Set Android cross compile specific options
@@ -241,5 +239,5 @@ set(_MNN_EXTRA_PARAM
 set(_KOMPUTE_EXTRA_PARAM
     -DKOMPUTE_OPT_ANDROID_BUILD:BOOL=ON
     -DCMAKE_ANDROID_STL_TYPE:STRING=c++_static
-)# build common targets
+) # build common targets
 include(../CommonTargets.CMake)

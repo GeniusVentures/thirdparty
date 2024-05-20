@@ -6,7 +6,6 @@ endif()
 
 project(WINDOWS_SHARED_THIRD_PARTY)
 
-# Build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
 set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/win-generate-files.bat")
