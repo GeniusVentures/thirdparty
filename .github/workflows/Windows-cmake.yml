@@ -30,7 +30,7 @@ jobs:
         with:
           arch: amd64
 
-      - name: Add rust target
+      - name: Add Rust target
         run: rustup target add wasm32-unknown-emscripten
 
       - name: Install bindgen
@@ -40,8 +40,8 @@ jobs:
         uses: threeal/cmake-action@v1.3.0
         with:
           source-dir: build/Windows
-          build-dir: build/Windows/Debug
-          options: "CMAKE_BUILD_TYPE=Debug"
+          build-dir: build/Windows/Release
+          options: "CMAKE_BUILD_TYPE=Release"
 
       - name: Build project
-        run: cmake --build build/Windows/Debug --config Debug --parallel
+        run: cmake --build build/Windows/Release --config Release --parallel
