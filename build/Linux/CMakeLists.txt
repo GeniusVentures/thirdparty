@@ -7,10 +7,9 @@ endif()
 
 project(LINUX_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
-# Build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
-# Build boost
+# Boost
 set(_BOOST_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 set(Boost_NO_SYSTEM_PATHS ON)
 set(Boost_USE_STATIC_LIBS ON)
@@ -73,7 +72,7 @@ set(_OPENSSL_CACHE_ARGS
 )
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 
-# GRPC
+# gRPC
 set(_grpc_EXTRA_PARAM
     -D_gRPC_PROTOBUF_PROTOC_EXECUTABLE:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/protoc
     -D_gRPC_CPP_PLUGIN:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/grpc_cpp_plugin
@@ -85,7 +84,7 @@ set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
 
 # Set config for libp2p
-set(_libp2p_BUILD_EXAMPLES ON)
+set(_libp2p_BUILD_EXAMPLES OFF)
 
 # Set config for MNN modules
 set(_MNN_WIN_RUNTIME_MT OFF)
