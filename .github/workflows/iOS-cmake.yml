@@ -26,11 +26,6 @@ jobs:
           sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_*[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
           sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.5.10"
-          cache: "pip"
-
       - name: Install Rust dependencies
         run: |
           rustup target add x86_64-apple-ios aarch64-apple-ios-sim aarch64-apple-ios aarch64-apple-darwin x86_64-apple-darwin

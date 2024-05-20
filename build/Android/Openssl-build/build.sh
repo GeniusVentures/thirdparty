@@ -61,8 +61,8 @@ export CC=clang
 CONFIGDIR=`dirname $0`/../../../openssl
 REALCONFIGDIR=`realpath ${CONFIGDIR}`
 
-if [ -n "$DEBUG_FLAGS" ]; then
-  OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure $DEBUG_FLAGS no-asm no-shared $ABI --prefix=$BUILD_DIR --openssldir=$BUILD_DIR"
+if [ -n "$DEBUG_BUILD" ]; then
+  OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure $DEBUG_BUILD no-asm no-shared $ABI --prefix=$BUILD_DIR --openssldir=$BUILD_DIR"
 else
   OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure no-asm no-shared $ABI --prefix=$BUILD_DIR --openssldir=$BUILD_DIR"
 fi
