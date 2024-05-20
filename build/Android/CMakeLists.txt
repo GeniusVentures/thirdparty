@@ -144,7 +144,6 @@ set(OPENSSL_VARIANT "$<$<CONFIG:Debug>:--debug >")
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Android/${ANDROID_ABI}")
 ExternalProject_Add(openssl
     PREFIX openssl
-    GIT_SHALLOW TRUE
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT}--abi=${_abi} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${_openssl_BUILD_ROOT} --env_path=$ENV{PATH} --env_android_ndk=$ENV{ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
