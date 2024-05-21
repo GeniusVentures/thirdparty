@@ -53,4 +53,4 @@ jobs:
         run: cmake -S build/Android/ -DANDROID_ABI="arm64-v8a" -B build/Android/Release -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang -DCMAKE_BUILD_TYPE=Release
 
       - name: Build project
-        run: cmake --build build/Android/Release --config Release --parallel
+        run: cmake --build build/Android/Release --config Release

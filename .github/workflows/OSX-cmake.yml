@@ -39,4 +39,4 @@ jobs:
         run: cmake -S build/OSX -B build/OSX/Release -DCMAKE_BUILD_TYPE=Release
 
       - name: Compile
-        run: cmake --build build/OSX/Release --config Release --parallel
+        run: cmake --build build/OSX/Release --config Release
