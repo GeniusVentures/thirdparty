@@ -238,5 +238,6 @@ set(_MNN_EXTRA_PARAM
 set(_KOMPUTE_EXTRA_PARAM
     -DKOMPUTE_OPT_ANDROID_BUILD:BOOL=ON
     -DCMAKE_ANDROID_STL_TYPE:STRING=c++_static
-) # build common targets
+)
+
 include(../CommonTargets.CMake)

@@ -6,6 +6,15 @@ endif()
 
 project(WINDOWS_SHARED_THIRD_PARTY)
 
+# This speeds up build time when using `--parallel`
+if(NOT CMAKE_VS_GLOBALS MATCHES "(^|;)UseMultiToolTask=")
+    list(APPEND CMAKE_VS_GLOBALS UseMultiToolTask=true)
+endif()
+
+if(NOT CMAKE_VS_GLOBALS MATCHES "(^|;)EnforceProcessCountAcrossBuilds=")
+    list(APPEND CMAKE_VS_GLOBALS EnforceProcessCountAcrossBuilds=true)
+endif()
+
 include(../CommonCompilerOptions.CMake)
 
 set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/win-generate-files.bat")
