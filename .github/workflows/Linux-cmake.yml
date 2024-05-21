@@ -34,4 +34,4 @@ jobs:
           options: "CMAKE_BUILD_TYPE=Release"
 
       - name: Build project
-        run: cmake --build build/Linux/Release --config Release --parallel
+        run: cmake --build build/Linux/Release --config Release
