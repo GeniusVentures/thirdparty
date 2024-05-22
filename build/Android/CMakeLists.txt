@@ -11,10 +11,28 @@ set(CMAKE_SYSTEM_VERSION 28) # API level
 set(ANDROID_PLATFORM_LEVEL 28)
 set(ANDROID_NATIVE_API_LEVEL ${ANDROID_PLATFORM_LEVEL})
 set(ANDROID_PLATFORM ${ANDROID_PLATFORM_LEVEL})
+
+if(NOT ANDROID_ABI)
+    message(WARNING "ANDROID_ABI not provided. Setting to `arm64-v8a`.")
+    set(ANDROID_ABI arm64-v8a)
+endif()
+
 set(_ARCH_ABI ${ANDROID_ABI})
 
 if(NOT CMAKE_ANDROID_NDK)
-    message(FATAL_ERROR "Cannot find Android NDK, make sure you pass -DCMAKE_ANDROID_NDK=[path_to_NDK]")
+    if(DEFINED ENV{ANDROID_NDK_HOME})
+        message(WARNING "Cannot find Android NDK, setting to $ENV{ANDROID_NDK_HOME}")
+        set(CMAKE_ANDROID_NDK $ENV{ANDROID_NDK_HOME})
+    else()
+        message(FATAL_ERROR "Cannot find Android NDK, make sure you pass -DCMAKE_ANDROID_NDK=[path_to_NDK]")
+    endif()
+endif()
+
+include(${CMAKE_ANDROID_NDK}/build/cmake/android.toolchain.cmake)
+
+if(NOT DEFINED ENV{ANDROID_TOOLCHAIN})
+    message(WARNING "ANDROID_TOOLCHAIN not set in the environment variables. Setting to ${ANDROID_TOOLCHAIN_ROOT}")
+    set(ANDROID_TOOLCHAIN ${ANDROID_TOOLCHAIN_ROOT})
 endif()
 
 file(READ "${CMAKE_ANDROID_NDK}/source.properties" SOURCE_PROPERTIES_CONTENT)
@@ -60,7 +78,7 @@ ExternalProject_Add(Boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh" "${CMAKE_ANDROID_NDK}" --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${_BOOST_ROOT}" --with-libraries="thread,program_options,system,date_time,regex,chrono,atomic,random,filesystem,log,container,test" --extra="--build-type=minimal,visibility=global,cxxflags=-std=c++17"
+    BUILD_COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh" ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${_BOOST_ROOT}" --with-libraries="thread,program_options,system,date_time,regex,chrono,atomic,random,filesystem,log,container,test" --extra="--build-type=minimal,visibility=global,cxxflags=-std=c++17"
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
@@ -128,31 +146,30 @@ set(_BOOST_CACHE_ARGS
 
 # build OpenSSL
 if(ANDROID_ABI STREQUAL "arm64-v8a")
-    set(_abi android-arm64)
+    set(OPENSSL_ABI android-arm64)
 elseif(ANDROID_ABI STREQUAL "armeabi-v7a")
-    set(_abi android-arm)
+    set(OPENSSL_ABI android-arm)
 elseif(ANDROID_ABI STREQUAL "x86")
-    set(_abi android-x86)
+    set(OPENSSL_ABI android-x86)
 elseif(ANDROID_ABI STREQUAL "x86_64")
-    set(_abi android-x86_64)
+    set(OPENSSL_ABI android-x86_64)
 endif()
 
-message("android abi is ${_abi}")
+message("android abi is ${OPENSSL_ABI}")
 
-set(OPENSSL_VARIANT "$<$<CONFIG:Debug>:--debug >")
+set(OPENSSL_VARIANT "$<$<CONFIG:Debug>:--debug>")
 
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Android/${ANDROID_ABI}")
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT}--abi=${_abi} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${_openssl_BUILD_ROOT} --env_path=$ENV{PATH} --env_android_ndk=$ENV{ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh "${OPENSSL_VARIANT}" --abi=${OPENSSL_ABI} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${_openssl_BUILD_ROOT} --env_path=$ENV{PATH} --env_android_ndk=${CMAKE_ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
     BUILD_IN_SOURCE FALSE
     UPDATE_COMMAND ""
     INSTALL_COMMAND make install_dev
 )
 
-print("openssl ${_openssl_BUILD_ROOT}")
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
