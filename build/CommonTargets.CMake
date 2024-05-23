@@ -574,8 +574,8 @@ set(_PROTOBUF_PLUGIN_DIR "${_PROTOBUF_BINARY_DIR}/protobuf-plugin")
 ExternalProject_Add(protobuf-plugin
     PREFIX protobuf-plugin
     SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core/protobuf-plugin"
-    CMAKE_CACHE_ARGS
     INSTALL_DIR ${_PROTOBUF_PLUGIN_DIR}
+    CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_HOST_CONFIG_DIR}
     -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_HOST_INCLUDE_DIR}
@@ -607,7 +607,7 @@ ExternalProject_Add(wallet-core
     ${_OPENSSL_CACHE_ARGS}
     ${_GRPC_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_Boost_INCLUDE_DIR}\ -I\ ${_OPENSSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_PROTOBUF_INCLUDE_DIR}
-    PATCH_COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${_ARCH_ABI} --protobuf-dir=${_FINDPACKAGE_PROTOBUF_HOST_DIR} --out-dir=${CMAKE_CURRENT_BINARY_DIR}/wallet-core --plugin-dir=${_PROTOBUF_PLUGIN_DIR}/bin
+    PATCH_COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${_ARCH_ABI} --protobuf-dir=${_FINDPACKAGE_PROTOBUF_HOST_DIR} --out-dir=<INSTALL_DIR> --plugin-dir=${_PROTOBUF_PLUGIN_DIR}/bin
     DEPENDS Boost grpc openssl protobuf-plugin
 )
 

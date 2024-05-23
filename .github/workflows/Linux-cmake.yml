@@ -26,12 +26,11 @@ jobs:
       - name: Install bindgen
         run: cargo install cbindgen
 
+      - name: Install Ninja
+        run: sudo apt install ninja-build -y
+
       - name: Configure CMake
-        uses: threeal/cmake-action@v1.3.0
-        with:
-          source-dir: build/Linux
-          build-dir: build/Linux/Release
-          options: "CMAKE_BUILD_TYPE=Release"
+        run: cmake -S build/Linux/ -B build/Linux/Release -DCMAKE_BUILD_TYPE=Release -G Ninja
 
       - name: Build project
-        run: cmake --build build/Linux/Release --config Release
+        run: cmake --build build/Linux/Release --config Release -j
