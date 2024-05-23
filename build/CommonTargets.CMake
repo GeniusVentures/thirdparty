@@ -570,10 +570,12 @@ ExternalProject_Add(xxhash
     ${_CMAKE_COMMON_CACHE_ARGS}
 )
 
+set(_PROTOBUF_PLUGIN_DIR "${_PROTOBUF_BINARY_DIR}/protobuf-plugin")
 ExternalProject_Add(protobuf-plugin
     PREFIX protobuf-plugin
     SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core/protobuf-plugin"
     CMAKE_CACHE_ARGS
+    INSTALL_DIR ${_PROTOBUF_PLUGIN_DIR}
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_HOST_CONFIG_DIR}
     -DProtobuf_INCLUDE_DIR:PATH=${_FINDPACKAGE_PROTOBUF_HOST_INCLUDE_DIR}
@@ -583,7 +585,6 @@ ExternalProject_Add(protobuf-plugin
     # ${_CMAKE_COMMON_CACHE_ARGS}
     DEPENDS grpc ${_PROTOBUF_TARGET}
 )
-set(_PROTOBUF_PLUGIN_DIR "${_PROTOBUF_BINARY_DIR}/protobuf-plugin")
 
 STRING(TOLOWER ${CMAKE_SYSTEM_NAME} _WALLET_CORE_ARCH)
 
