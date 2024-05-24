@@ -41,7 +41,7 @@ if [ ! -d "$X86_64_DIR" ]; then
 fi
 cd $X86_64_DIR
 if [ ! -f "Makefile" ]; then
-  $SRC_DIR/Configure $DEBUG_FLAGS darwin64-x86_64-cc no-asm shared --prefix=$X86_64_DIR --openssldir=$X86_64_DIR
+  $SRC_DIR/Configure $DEBUG_FLAGS darwin64-x86_64-cc no-asm shared --prefix=$INSTALL_DIR --openssldir=$INSTALL_DIR
 fi
 make build_libs
 
