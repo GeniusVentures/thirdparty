@@ -101,27 +101,31 @@ set(_BOOST_CACHE_ARGS
 
 # build OpenSSL
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(OPENSSL_VARIANT "-g")
+else()
+    set(OPENSSL_VARIANT "")
+endif()
+
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND ""
-    PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh ${BUILD_VARIANT} --build-dir=${_openssl_BUILD_ROOT} --src-dir=${THIRDPARTY_DIR}/openssl --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
-    INSTALL_COMMAND ""
-    UPDATE_COMMAND ""
+    CONFIGURE_COMMAND <SOURCE_DIR>/Configure darwin64-x86_64-cc ${OPENSSL_VARIANT} -static --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+    BUILD_COMMAND make build_libs
+    BUILD_IN_SOURCE FALSE
+    INSTALL_COMMAND make install_dev
 )
-set(OPENSSL_USE_STATIC_LIBS ON)
-set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
-
 set(_OPENSSL_CACHE_ARGS
+    -DCMAKE_OSX_ARCHITECTURES:STRING=x86_64
     -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
     -DOPENSSL_ROOT_DIR:STRING=${_openssl_BUILD_ROOT}
-    -DOPENSSL_INCLUDE_DIR:PATH=${_OPENSSL_INCLUDE_DIR}
-    -DOPENSSL_CRYPTO_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}
-    -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
+    -DOPENSSL_INCLUDE_DIR:PATH=${_openssl_BUILD_ROOT}/include
+    -DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
 )
+set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 
-# build MoltenVK
+# MoltenVK
 set(_MVK_ROOT "${CMAKE_CURRENT_BINARY_DIR}/MoltenVK/build/")
 ExternalProject_Add(MoltenVK
     PREFIX moltenvk
@@ -177,6 +181,5 @@ set(_MNN_WIN_RUNTIME_MT OFF)
 
 # Allow multiple definitions
 set(MULTIPLE_OPTION "-Xlink=-force:multiple")
-
 # build common targets
 include(../CommonTargets.CMake)
