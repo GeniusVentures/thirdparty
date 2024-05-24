@@ -4,7 +4,9 @@ if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
     message(FATAL_ERROR "${CMAKE_HOST_SYSTEM_NAME} host system name does not match Windows - Please select the correct folder for configuring project")
 endif()
 
-project(WINDOWS_SHARED_THIRD_PARTY)
+cmake_policy(SET CMP0091 NEW)
+
+project(WINDOWS_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
 # This speeds up build time when using `--parallel`
 if(NOT CMAKE_VS_GLOBALS MATCHES "(^|;)UseMultiToolTask=")
@@ -171,10 +173,10 @@ set(_MNN_WIN_RUNTIME_MT ON)
 # Allow multiple definitions
 set(MULTIPLE_OPTION /FORCE:MULTIPLE)
 
-# build common targets
-include(../CommonTargets.CMake)
-
 # for rocksdb windows needs > windows 8
 set(rocksdb_EXTRA_PARAM
     -D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN8
 )
+
+# build common targets
+include(../CommonTargets.CMake)

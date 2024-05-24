@@ -43,7 +43,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS} ")
 if(MSVC)
     set(_MSVC_RUNTIME_LIBRARY
         -DCMAKE_POLICY_DEFAULT_CMP0091:STRING=NEW
-        -DCMAKE_MSVC_RUNTIME_LIBRARY:STRING=MultiThreaded$<$<CONFIG:Debug>:Debug>
+        -DCMAKE_MSVC_RUNTIME_LIBRARY:STRING=MultiThreaded$<$<CONFIG:Debug>:Debug>DLL
     )
 endif()
 
@@ -67,7 +67,6 @@ else()
     set(CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT ml)
 endif()
 
-# define third party directory
 set(THIRDPARTY_DIR "${PROJECT_SRC_FOLDER}")
 
 if(NOT EXISTS "${THIRDPARTY_DIR}/build")
