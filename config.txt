@@ -1,0 +1,5 @@
+OWNER,GeniusVentures
+REPO,thirdparty
+RELEASE_REGEX,(.*)\sdevelop-release.*\b(Release|Debug)\b
+.*-lib.*,build/{0}/{1},loadlib
+# Add more patterns, directories, functions, and prefixes as needed
