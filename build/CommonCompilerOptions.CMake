@@ -73,6 +73,6 @@ if(NOT EXISTS "${THIRDPARTY_DIR}/build")
     message(FATAL_ERROR "Unable to find thirdparty source folder ${THIRDPARTY_DIR}")
 endif()
 
-set(BOOST_INCLUDE_LIBRARIES date_time filesystem log program_options random system test)
+set(BOOST_INCLUDE_LIBRARIES date_time filesystem log program_options random regex system test)
 
 list(JOIN BOOST_INCLUDE_LIBRARIES "," BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED)

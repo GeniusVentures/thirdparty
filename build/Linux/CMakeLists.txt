@@ -22,12 +22,12 @@ ExternalProject_Add(Boost
     LOG_CONFIGURE ON
     LOG_BUILD OFF
     LOG_INSTALL ON
-    CONFIGURE_COMMAND ""
     PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}
+
     BUILD_COMMAND <SOURCE_DIR>/b2 headers
     BUILD_IN_SOURCE TRUE
-    INSTALL_COMMAND <SOURCE_DIR>/b2 "cxxflags=-fPIC" cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static toolset=clang threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --stagedir=stage/x64 --build-dir=${_BOOST_BUILD_ROOT} --prefix=${_BOOST_BUILD_ROOT} --libdir=${_BOOST_BUILD_ROOT}/lib install
-    UPDATE_COMMAND ""
+
+    INSTALL_COMMAND <SOURCE_DIR>/b2 cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --stagedir=stage/x64 --build-dir=${_BOOST_BUILD_ROOT} --prefix=${_BOOST_BUILD_ROOT} --libdir=${_BOOST_BUILD_ROOT}/lib install
 )
 
 set(boost_DIR "${_BOOST_BUILD_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
