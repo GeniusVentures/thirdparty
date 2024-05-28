@@ -59,7 +59,7 @@ set(OPENSSL_VARIANT "$<$<CONFIG:Debug>:-d >")
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND <SOURCE_DIR>/config ${OPENSSL_VARIANT}-fPIC --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+    CONFIGURE_COMMAND <SOURCE_DIR>/config ${OPENSSL_VARIANT}-fPIC --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT} --static -static
     BUILD_COMMAND make build_libs
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND make install_dev
