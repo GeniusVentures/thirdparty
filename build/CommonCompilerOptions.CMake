@@ -38,6 +38,10 @@ else()
     set(TP_BUILD_SUBDIR ${CMAKE_SYSTEM_NAME})
 endif()
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-constexpr-conversion")
+endif()
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS} ")
 
 if(MSVC)
