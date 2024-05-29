@@ -84,12 +84,10 @@ set(_BOOST_CACHE_ARGS
 # builds openssl
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 
-set(OPENSSL_CONFIG_MODE "VC-WIN64A$<$<CONFIG:Debug>: --debug>")
-
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND perl ${THIRDPARTY_DIR}/openssl/Configure ${OPENSSL_CONFIG_MODE} enable-capieng no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+    CONFIGURE_COMMAND perl ${THIRDPARTY_DIR}/openssl/Configure $<IF:$<CONFIG:Debug>,--debug,--release> enable-capieng no-shared no-asm --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT} VC-WIN64A
     BUILD_COMMAND nmake build_libs
     BUILD_IN_SOURCE false
     INSTALL_COMMAND nmake install_dev
