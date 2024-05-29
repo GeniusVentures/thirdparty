@@ -63,7 +63,7 @@ ExternalProject_Add(Boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/build.sh ${BUILD_VARIANT} --build-dir=${_BOOST_ROOT} --src-dir=${THIRDPARTY_DIR}/boost --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/build.sh ${BUILD_VARIANT} --build-dir=${_BOOST_ROOT} --src-dir=${THIRDPARTY_DIR}/boost --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET} --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
@@ -181,5 +181,6 @@ set(_MNN_WIN_RUNTIME_MT OFF)
 
 # Allow multiple definitions
 set(MULTIPLE_OPTION "-Xlink=-force:multiple")
+
 # build common targets
 include(../CommonTargets.CMake)
