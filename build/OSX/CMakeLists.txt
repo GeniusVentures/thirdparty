@@ -6,12 +6,10 @@ if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 if(POLICY CMP0025)
-    # NEW: report OS X version of Clang as "AppleClang"
     cmake_policy(SET CMP0025 NEW)
 endif()
 
 if(POLICY CMP0042)
-    # NEW: set TARGET PROPERTY MACOSX_RPATH to on by default
     cmake_policy(SET CMP0042 NEW)
 endif()
 
@@ -19,17 +17,13 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "12.1" CACHE STRING "Minimum OS X deployment ver
 
 project(OSX_SHARED_THIRD_PARTY)
 
-# build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
-# Set OSX specific runtime options
-
-# TODO: use single architecture to avoid Crypto3 error - removed ";arm64"
+# OSX specific runtime options
 set(CMAKE_OSX_ARCHITECTURES "x86_64")
-set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
 
-set(BUILD_VARIANT $<$<CONFIG:Debug>:--debug>)
+set(BOOST_BUILD_VARIANT $<$<CONFIG:Debug>:--debug>)
 
 # Assuming that xcode 12.0 is installed you most probably have ios sdk 14.0 or later installed (tested on Big Sur)
 # if you don't set a deployment target it will be set the way you only get 64-bit builds
@@ -48,22 +42,13 @@ set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -D"CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*]":STRING=arm64
 )
 
-# print("CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS: ${'CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*]'}")
-
-# build boost
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    set(address_model 32)
-else()
-    set(address_model 64)
-endif()
-
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add(Boost
     PREFIX boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/build.sh ${BUILD_VARIANT} --build-dir=${_BOOST_ROOT} --src-dir=${THIRDPARTY_DIR}/boost --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET} --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/build.sh ${BOOST_BUILD_VARIANT} --build-dir=${_BOOST_ROOT} --src-dir=${THIRDPARTY_DIR}/boost --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET} --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
@@ -102,16 +87,10 @@ set(_BOOST_CACHE_ARGS
 # build OpenSSL
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(OPENSSL_VARIANT "-g")
-else()
-    set(OPENSSL_VARIANT "")
-endif()
-
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND <SOURCE_DIR>/Configure darwin64-x86_64-cc ${OPENSSL_VARIANT} -static --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+    CONFIGURE_COMMAND <SOURCE_DIR>/Configure darwin64-x86_64-cc $<IF:$<CONFIG:Debug>,--debug,--release> -static --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
     BUILD_COMMAND make build_libs
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND make install_dev
@@ -132,7 +111,7 @@ ExternalProject_Add(MoltenVK
     SOURCE_DIR "${THIRDPARTY_DIR}/MoltenVK"
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/MoltenVK-build/build.sh ${BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/MoltenVK-build/build.sh ${BOOST_BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
@@ -153,7 +132,6 @@ ExternalProject_Add(protobuf
     CMAKE_CACHE_ARGS
     -Dprotobuf_BUILD_TESTS:BOOL=OFF
     -Dprotobuf_WITH_ZLIB:BOOL=OFF
-    -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
     -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
     -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
 )
@@ -164,23 +142,17 @@ set(_PROTOBUF_HOST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/pr
 set(_PROTOBUF_HOST_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
 set(_PROTOBUF_HOST_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
 
-# set config for rocksdb
 set(_rocksdb_EXTRA_PARAM
     -DHAS_ARMV8_CRC:BOOL=ON)
 
-# set config for ed25519 crypto
 set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
 
-# Set config for libp2p
 set(_libp2p_BUILD_EXAMPLES ON)
 
-# Set config for MNN modules
 set(_MNN_WIN_RUNTIME_MT OFF)
 
-# Allow multiple definitions
 set(MULTIPLE_OPTION "-Xlink=-force:multiple")
 
-# build common targets
 include(../CommonTargets.CMake)

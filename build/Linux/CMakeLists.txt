@@ -18,16 +18,13 @@ set(Boost_USE_STATIC_RUNTIME ON)
 ExternalProject_Add(Boost
     PREFIX boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
-    LOG_OUTPUT_ON_FAILURE TRUE
-    LOG_CONFIGURE ON
-    LOG_BUILD OFF
-    LOG_INSTALL ON
-    PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}
+
+    PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${_BOOST_BUILD_ROOT}
 
     BUILD_COMMAND <SOURCE_DIR>/b2 headers
     BUILD_IN_SOURCE TRUE
 
-    INSTALL_COMMAND <SOURCE_DIR>/b2 cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --stagedir=stage/x64 --build-dir=${_BOOST_BUILD_ROOT} --prefix=${_BOOST_BUILD_ROOT} --libdir=${_BOOST_BUILD_ROOT}/lib install
+    INSTALL_COMMAND <SOURCE_DIR>/b2 cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --stagedir=stage/x64 --build-dir=${_BOOST_BUILD_ROOT} --libdir=${_BOOST_BUILD_ROOT}/lib cxxflags="-Wno-enum-constexpr-conversion" install
 )
 
 set(boost_DIR "${_BOOST_BUILD_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
