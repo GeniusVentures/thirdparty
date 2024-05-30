@@ -23,9 +23,6 @@ jobs:
       - name: Add Rust target
         run: rustup target add wasm32-unknown-emscripten
 
-      - name: Install bindgen
-        run: cargo install cbindgen
-
       - name: Install Ninja
         run: sudo apt install ninja-build -y
 

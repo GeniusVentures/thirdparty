@@ -20,21 +20,8 @@ jobs:
         with:
           submodules: "recursive"
 
-    #   - name: Configure Windows SDK
-    #     uses: GuillaumeFalourd/setup-windows10-sdk-action@v2
-    #     with:
-    #       sdk-version: 22000
-
-    #   - name: Configure MSVC
-    #     uses: ilammy/msvc-dev-cmd@v1
-    #     with:
-    #       arch: amd64
-
       - name: Add Rust target
         run: rustup target add wasm32-unknown-emscripten
-
-      - name: Install bindgen
-        run: cargo install cbindgen
 
       - name: Install ccache
         run: choco install ccache -y

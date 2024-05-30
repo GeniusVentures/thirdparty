@@ -25,9 +25,6 @@ jobs:
           rustup target add aarch64-apple-darwin
           rustup target add wasm32-unknown-emscripten
 
-      - name: Install bindgen
-        run: cargo install cbindgen
-
       - name: Install ccache
         run: brew install ccache
 
