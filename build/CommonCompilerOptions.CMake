@@ -32,17 +32,17 @@ set(_BOOST_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NA
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(TP_BUILD_SUBDIR "OSX")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION")
+
+    # This really should be done for any target using LLVM's libc++, we are only targeting mac due to its default use of it. This must be removed once we update Boost.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION")
 else()
     set(TP_BUILD_SUBDIR ${CMAKE_SYSTEM_NAME})
 endif()
 
+# This is a workaround that should be removed once we update Boost.
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-constexpr-conversion")
 endif()
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS} ")
 
 if(MSVC)
     set(_MSVC_RUNTIME_LIBRARY
