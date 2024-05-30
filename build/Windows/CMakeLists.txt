@@ -38,7 +38,7 @@ if(MSVC_VERSION AND MSVC_VERSION GREATER_EQUAL 1930) # v143 toolset
     set(BOOST_TOOLSET "msvc-14.3")
 endif()
 
-# builds boost
+# Boost
 set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 set(Boost_NO_SYSTEM_PATHS ON)
 set(Boost_USE_STATIC_LIBS ON)
@@ -48,15 +48,14 @@ list(TRANSFORM BOOST_INCLUDE_LIBRARIES PREPEND "--with-" OUTPUT_VARIABLE BOOST_I
 ExternalProject_Add(Boost
     PREFIX boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
-    LOG_MERGED_STDOUTERR TRUE
-    LOG_OUTPUT_ON_FAILURE TRUE
-    LOG_CONFIGURE ON
-    LOG_BUILD OFF
-    LOG_INSTALL ON
+
     PATCH_COMMAND ./bootstrap.bat ${VC_PLATFORMTOOLSET}
+
     CONFIGURE_COMMAND ""
+
     BUILD_COMMAND ./b2.exe headers
     BUILD_IN_SOURCE TRUE
+
     INSTALL_COMMAND ./b2.exe cxxstd=${CMAKE_CXX_STANDARD} runtime-link=static visibility=global --build-type=minimal ${BOOST_INCLUDE_LIBRARIES_EXPANDED} address-model=64 architecture=x86 variant=${BOOST_VARIANT} link=static threading=multi --stagedir=stage/x64 --build-dir=${_BOOST_ROOT} --prefix=${_BOOST_ROOT} --libdir=${_BOOST_ROOT}/lib install
 )
 set(BOOST_LIB_CMAKE_DIR "${_BOOST_ROOT}/lib/cmake")
