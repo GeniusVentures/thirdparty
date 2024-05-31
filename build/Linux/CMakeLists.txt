@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.22)
 
 # if on Linux system, build the Linux executables
 if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
