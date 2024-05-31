@@ -40,7 +40,7 @@ else()
 endif()
 
 # This is a workaround that should be removed once we update Boost.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-constexpr-conversion")
 endif()
 
@@ -81,3 +81,7 @@ endif()
 set(BOOST_INCLUDE_LIBRARIES date_time filesystem log program_options random regex system test)
 
 list(JOIN BOOST_INCLUDE_LIBRARIES "," BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED)
+
+string(STRIP ${CMAKE_CXX_FLAGS} CMAKE_CXX_FLAGS)
+string(REPLACE " " ";" BOOST_B2_FLAGS "${CMAKE_CXX_FLAGS}")
+list(TRANSFORM BOOST_B2_FLAGS PREPEND "cxxflags=")
