@@ -25,11 +25,17 @@ jobs:
           rustup target add aarch64-apple-darwin
           rustup target add wasm32-unknown-emscripten
 
+      - name: Install bindgen
+        run: cargo install cbindgen
+          
+      - name: Install Ninja
+        run: brew install ninja
+
       - name: Install ccache
         run: brew install ccache
 
       - name: Configure CMake
-        run: cmake -S build/OSX -B build/OSX/Release -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S build/OSX -B build/OSX/Release -DCMAKE_BUILD_TYPE=Release -G Ninja
 
       - name: Compile
-        run: cmake --build build/OSX/Release --config Release
+        run: cmake --build build/OSX/Release --config Release -j
