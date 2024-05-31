@@ -11,9 +11,6 @@ include(../CommonCompilerOptions.CMake)
 
 # Boost
 set(_BOOST_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
-set(Boost_NO_SYSTEM_PATHS ON)
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_STATIC_RUNTIME ON)
 
 ExternalProject_Add(Boost
     PREFIX boost
@@ -21,10 +18,10 @@ ExternalProject_Add(Boost
 
     PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${_BOOST_BUILD_ROOT}
 
-    BUILD_COMMAND <SOURCE_DIR>/b2 headers
+    BUILD_COMMAND <SOURCE_DIR>/b2 headers && <SOURCE_DIR>/b2 cxxstd=${CMAKE_CXX_STANDARD} runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --build-dir=${_BOOST_BUILD_ROOT} --libdir=${_BOOST_BUILD_ROOT}/lib cxxflags="-Wno-enum-constexpr-conversion" install
     BUILD_IN_SOURCE TRUE
 
-    INSTALL_COMMAND <SOURCE_DIR>/b2 cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --stagedir=stage/x64 --build-dir=${_BOOST_BUILD_ROOT} --libdir=${_BOOST_BUILD_ROOT}/lib cxxflags="-Wno-enum-constexpr-conversion" install
+    INSTALL_COMMAND ""
 )
 
 set(boost_DIR "${_BOOST_BUILD_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")

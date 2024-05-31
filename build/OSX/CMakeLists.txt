@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20)
 
 # if on OSX Darwin system, build the OSX executables
 if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
@@ -46,14 +46,13 @@ set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add(Boost
     PREFIX boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
-    CONFIGURE_COMMAND ""
-    PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/build.sh ${BOOST_BUILD_VARIANT} --build-dir=${_BOOST_ROOT} --src-dir=${THIRDPARTY_DIR}/boost --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET} --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}
-    INSTALL_COMMAND ""
-    UPDATE_COMMAND ""
+
+    PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${_BOOST_BUILD_ROOT}
+
+    BUILD_COMMAND <SOURCE_DIR>/b2 headers && <SOURCE_DIR>/b2 cxxstd=${CMAKE_CXX_STANDARD} runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --build-dir=${_BOOST_BUILD_ROOT} --libdir=${_BOOST_BUILD_ROOT}/lib cxxflags="${CMAKE_CXX_FLAGS}" install
+    BUILD_IN_SOURCE TRUE
 )
 
-print("BOOST_VERSION: ${BOOST_VERSION}")
 set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}")
 set(boost_random_DIR "${_BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
 set(boost_system_DIR "${_BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
@@ -62,7 +61,6 @@ set(boost_program_options_DIR "${_BOOST_ROOT}/lib/cmake/boost_program_options-${
 set(boost_regex_DIR "${_BOOST_ROOT}/lib/cmake/boost_regex-${BOOST_VERSION}")
 set(boost_date_time_DIR "${_BOOST_ROOT}/lib/cmake/boost_date_time-${BOOST_VERSION}")
 set(boost_DIR "${_BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
-set(Boost_USE_STATIC_RUNTIME ON)
 print("boost_DIR: ${boost_DIR}")
 set(_Boost_INCLUDE_DIR "${_BOOST_ROOT}/include")
 set(_FINDPACKAGE_BOOST_CONFIG_DIR ${boost_DIR})
