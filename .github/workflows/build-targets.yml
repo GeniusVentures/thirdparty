@@ -256,6 +256,7 @@ jobs:
         run: |
           cmake -S build/Linux -B build/Linux/Release -DCMAKE_BUILD_TYPE=Release
           
+          cd build
           declare -A cMakeNamesRepos
           while IFS=',' read -r cmakeName repoDir; do
             echo -e "cmakeName: $cmakeName, repoDir: $repoDir"
@@ -263,7 +264,7 @@ jobs:
           done < <(sed -nE 's/^ExternalProject_Add\(([^)]*).*/\1/p; s/^[[:space:]]*SOURCE_DIR[[:space:]]+"([^/]*\/)*(.*)".*/\2/p' CommonTargets.CMake Linux/CMakeLists.txt |
             paste -d ',' - -)
 
-          cd build/Linux/Release/CMakeFiles
+          cd Linux/Release/CMakeFiles
           declare -A cMakeBuildDir
           while IFS=',' read -r cmakeName buildDir; do
             echo -e "cmakeName: $cmakeName, buildDir: $buildDir"
