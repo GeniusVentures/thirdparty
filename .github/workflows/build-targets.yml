@@ -2,17 +2,11 @@
 
 name: Cache Sources and build Artifact Libraries per OS
 
-# Controls when the workflow will run
-# Triggers the workflow on push or pull request events and manually from the Actions tab
 on:
   workflow_dispatch:
 
 env:
-  #GITHUB_TOKEN: ${{ github.token }}
   GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN_1 }}
-  #MAKEFLAGS: "-j8"
-  #CMAKE_BUILD_PARALLEL_LEVEL: 8
-
 jobs:
   setup-src-cache:
     runs-on: ubuntu-latest
@@ -25,21 +19,13 @@ jobs:
       CACHE_MULTI_PARAMETER_PATHS: ${{ steps.set-cache-matrix.outputs.CACHE_MULTI_PARAMETER_PATHS }}
     steps:
       - name: Check out main third party without submodules
-        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          path: .
+            submodules: false
 
-      - name: Install gh cli extension actions-cache
+      - name: Install GH cli extension actions-cache
         run: |
-          type -p gh >/dev/null || {
-            type -p curl >/dev/null || sudo apt install curl -y
-            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-            sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-            sudo apt update
-            sudo apt install gh zstd jo -y  
-          }
+          gh extension install actions/gh-actions-cache
 
           # get currently authenticated user rate limit info
           rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
@@ -49,11 +35,12 @@ jobs:
           echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
           echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
 
-      - name: Find cache and Clean out old caches of thirdparty
+      - name: Find cache and clean out old caches of `thirdparty`
         id: tp-check
         run: |
           echo "Fetching list of thirdparty cache keys to check if any old ones need deleting"
-          cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="${BRANCH}/thirdparty" | jq -r ".actions_caches[].key" | sort)
+          cacheList=$(gh cache list -k ${BRANCH}/thirdparty --json key --jq ".[].key")
+
           longSHA="${{ github.sha }}"
           shortSHA="${longSHA:0:7}"
           tpCacheNameSHA="$BRANCH/thirdparty-$shortSHA"
@@ -71,10 +58,10 @@ jobs:
             foundThirdPartyCurrent="false"
           fi
 
-          ## Setting this to not fail the workflow while deleting cache keys.
+          # Allows the script to continue even if the cache deletion commands fail
           set +e
 
-          #Set the field separator to new line
+          # Set the field separator to new line
           IFS=$'\n'
           for oldCache in $oldCaches; do
             echo -e "Deleting old cache $oldCache"
@@ -86,7 +73,7 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}
 
-      - name: Cache main Source Files without .git, if not already cached
+      - name: Cache source files
         if: ( steps.tp-check.outputs.FOUND_THIRD_PARTY_CURRENT == 'false' )
         uses: GeniusVentures/cache-multi@v3.3.1
         id: cache-source-directory
@@ -182,7 +169,7 @@ jobs:
     needs: setup-src-cache
     if: (needs.setup-src-cache.outputs.NEEDS_CACHE == 'true')
     runs-on: ubuntu-latest
-    strategy: 
+    strategy:
       fail-fast: true
       matrix:
         include: ${{ fromJson(needs.setup-src-cache.outputs.CACHE_MATRIX) }}
@@ -224,7 +211,7 @@ jobs:
             ./${{ matrix.name }}/**
 
   create-targets-matrix:
-    needs: [ setup-src-cache, cache-src ]
+    needs: [setup-src-cache, cache-src]
     if: |
       always() &&
       needs.setup-src-cache.result == 'success' &&
@@ -237,8 +224,7 @@ jobs:
       TARGET_REPO_NAMES: ${{ steps.create-target-info.outputs.TARGET_REPO_NAMES }}
     steps:
       - name: Setup
-        run: |
-          sudo apt install zstd -y
+        run: sudo apt install zstd -y
 
       - name: Cache Third Party Directory
         uses: GeniusVentures/cache-multi/restore@v3.3.1
@@ -271,7 +257,6 @@ jobs:
           if [[ ! -d CMakeFiles ]]; then
             cmake .. -DCMAKE_BUILD_TYPE=Release
           fi
-
 
           cd ../../
           declare -A cMakeNamesRepos
@@ -322,18 +307,18 @@ jobs:
         working-directory: ${{github.workspace}}
 
   save-target-sources:
-    needs: [ setup-src-cache, cache-src, create-targets-matrix ]
+    needs: [setup-src-cache, cache-src, create-targets-matrix]
     if: |
       always() &&
       needs.setup-src-cache.result == 'success' &&
       needs.create-targets-matrix.result == 'success' &&
       (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped') &&
-      needs.create-targets-matrix.result == 'success'    
+      needs.create-targets-matrix.result == 'success'
     strategy:
       fail-fast: false
       matrix:
         target-os: [Linux, Windows, OSX, iOS, Android]
-        build-type: [ Release, Debug ]
+        build-type: [Release, Debug]
     runs-on: ubuntu-latest
     steps:
       - name: Setup
@@ -362,12 +347,12 @@ jobs:
           path: |
             !.git/**
             ./**
-  
+
       - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
         run: |
           echo "Couldn't find cached thirdparty code, ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
           exit 1
-  
+
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
         uses: GeniusVentures/cache-multi/restoremulti@v3.3.1
@@ -382,19 +367,19 @@ jobs:
           set +e
           echo "Check if github release tag ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} available."
           gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}
-          
+
           releaseFound=$?
           if [[ $releaseFound -ne 0 ]];
           then
             echo "gh release view return value: ${releaseFound}"
             echo "Creating github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
-          
+
             RELEASE_TYPE="--latest"
             if [[ "${{ steps.create-src-cache-keys.outputs.BUILD_TYPE }}" != "Release" ]]; 
             then
               RELEASE_TYPE="--prerelease"
             fi
-          
+
             # Create release on github
             gh release create ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} \
             -n "${{ steps.create-src-cache-keys.outputs.BRANCH }} branch" \
@@ -411,7 +396,7 @@ jobs:
               exit 1
             fi
           fi
-  
+
           set -e
 
       - name: Compress and upload targets source folder
@@ -443,7 +428,7 @@ jobs:
           # get currently authenticated user rate limit info
           rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
           echo "Rate limit remaining is $rateRemaining"
-          
+
           # if we don't have at least 50 requests left, wait until reset
           if [[ $rateRemaining -lt 50 ]]; 
           then
@@ -479,9 +464,9 @@ jobs:
           done
           set -e
 
-
   build-targets-matrix:
-    needs: [ setup-src-cache, cache-src, create-targets-matrix, save-target-sources ]
+    needs:
+      [setup-src-cache, cache-src, create-targets-matrix, save-target-sources]
     if: |
       always() &&
       needs.setup-src-cache.result == 'success' &&
@@ -491,7 +476,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        build-type: [ Release, Debug ]
+        build-type: [Release, Debug]
         target-build-data:
           # --------------------------------------------------------------------------
           - target-os: Linux
@@ -511,7 +496,7 @@ jobs:
               make $TARGET_NAME -j$(nproc)
               make install
 
-          # --------------------------------------------------------------------------    
+          # --------------------------------------------------------------------------
           - target-os: Android
             runs-on: ubuntu-latest
             shell: bash
@@ -539,9 +524,9 @@ jobs:
             cmake-compile-script: |
               echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
               make $TARGET_NAME -j$(nproc)
-              make install  
+              make install
 
-          # --------------------------------------------------------------------------    
+          # --------------------------------------------------------------------------
           - target-os: OSX
             runs-on: macos-latest
             shell: bash
@@ -569,8 +554,8 @@ jobs:
             init-script:
               uses: actions/setup-python@v2
               with:
-                python-version: '3.5' 
-            setup-script: | 
+                python-version: "3.5"
+            setup-script: |
               echo "Setup for iOS Build"
               find /Applications/Xcode* -maxdepth 0 -ls
               sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_*[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
@@ -582,11 +567,11 @@ jobs:
               mkdir $BUILD_TYPE
               cd $BUILD_TYPE
               cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${WORKSPACE}/build/iOS/iOS.cmake
-            cmake-compile-script: |  
+            cmake-compile-script: |
               echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
               make $TARGET_NAME -j$(nproc)
               make install
-    
+
           # --------------------------------------------------------------------------
           - target-os: Windows
             runs-on: windows-2022
@@ -600,7 +585,7 @@ jobs:
             setup-script: |
               echo "Setup for Windows Build"
               echo "Adding GNU tar to PATH"
-              echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%" 
+              echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
             cmake-init-script: |
               cd build/$TARGET_OS
               mkdir $BUILD_TYPE
@@ -611,13 +596,13 @@ jobs:
               cmake --build . --target $TARGET_NAME --config $BUILD_TYPE -j$(nproc)
               cmake --install $TARGET_NAME
 
-        target-save-data: 
+        target-save-data:
           - target-os: $TARGET_OS
             runs-on: $TARGET_RUNS_ON
             shell: bash
             upload-release-json: |
               GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
-              
+
               retValue=1
               numberOfTries=1
               until [[ $retValue -eq 0 ]]
@@ -667,11 +652,11 @@ jobs:
                   exit 1
                 fi
               fi
-              
+
               COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
               echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode (target build folder: ${TARGET_DIRECTORY})"
               tar -zcf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
-              
+
               retValue=1
               numberOfTries=1
               until [[ $retValue -eq 0 ]]
@@ -700,7 +685,7 @@ jobs:
 
     runs-on: ${{ matrix.target-build-data.runs-on }}
     outputs:
-        TARGET_BUILT: ${{ steps.cache-library-directory.outputs.TARGET_BUILT }}
+      TARGET_BUILT: ${{ steps.cache-library-directory.outputs.TARGET_BUILT }}
     steps:
       - name: Create library Keys and Paths to Cache/build
         id: create-lib-cache-keys
@@ -767,7 +752,7 @@ jobs:
       - name: Run setup script for target OS
         shell: bash
         run: |
-          
+
           echo "Running init script"
           set +e
           ${{ matrix.target-build-data.init-script }}
@@ -793,11 +778,11 @@ jobs:
           BRANCH=${{ github.ref_name }}
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
-          
+
           set +e
-          
+
           GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
-          
+
           # check if release.json file already available
           jsonStr="[]"
           jsonFound=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
@@ -828,7 +813,7 @@ jobs:
             echo "Check if ${COMPRESSED_TARGET} found on ${GITHUB_RELEASE_NAME}: ${targetBuilt}"
             targetBuiltList+="${targetBuilt}\n"
           done
-          
+
           echo "TARGET_BUILT=$targetBuiltList" >> $GITHUB_OUTPUT
 
       - name: Build any updated libraries
@@ -840,18 +825,18 @@ jobs:
           BUILD_TYPE="${{ matrix.build-type }}"
           BRANCH=${{ github.ref_name }}
           WORKSPACE=${{ github.workspace }}
-          
+
           GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
-          
+
           IFS=$'\n' read -d '|' -ra TARGET_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_NAMES }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
-          
+
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
-          
+
           set +e
-          
+
           jsonStr=""
           declare -a listOfTargetNamesToBuild
           declare -a listOfTargetSHAsToBuild
@@ -890,13 +875,13 @@ jobs:
               listOfTargetDirToBuild+=("${TARGET_DIRECTORY}")
             fi
           done
-          
+
           # Print hash JSON file 
           jq <<< $jsonStr
-          
+
           # save hash JSON file  
           jq <<< $jsonStr > hash.json
-          
+
           # check if release.json file already available
           releaseJsonStr=""
           jsonFound=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
@@ -960,7 +945,7 @@ jobs:
           TARGET_OS="${{ matrix.target-build-data.target-os }}"
           BUILD_TYPE="${{ matrix.build-type }}"
           BRANCH=${{ github.ref_name }}
-          
+
           GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
 
           retValue=1
@@ -983,7 +968,7 @@ jobs:
             ((numberOfTries++))
           done
 
-      - name:  Save target OS SDK as github release
+      - name: Save target OS SDK as github release
         shell: bash
         run: |
           TARGET_OS="${{ matrix.target-build-data.target-os }}"
@@ -994,12 +979,12 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
-          
+
           ## Setting this to not fail the workflow while checking release tag 
           set +e
-          
+
           GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
-          
+
           RELEASE_ASSETS=`gh release view ${GITHUB_RELEASE_NAME} --json assets`
 
           jsonStr=""           
@@ -1035,12 +1020,11 @@ jobs:
             jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : ${TARGET_SOURCE}, \"binary\" : ${TARGET_BINARY} }" <<< "{}"`
             jsonStr+=`echo ${jsonStrTarget}`
           done
-          
+
           # Print final JSON file 
           jq <<< $jsonStr
-          
+
           # Upload JSON file release 
           jq <<< $jsonStr > release.json
 
           ${{ matrix.target-save-data.upload-release-json }}
-          
