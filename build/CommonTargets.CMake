@@ -6,12 +6,12 @@ mark_as_advanced(JSON_FOR_MODERN_CXX_INCLUDE_DIR)
 
 # absl - Excluded from build since gRPC uses its own absl
 # ExternalProject_Add(absl
-#     PREFIX absl
-#     SOURCE_DIR "${THIRDPARTY_DIR}/abseil-cpp"
-#     CMAKE_CACHE_ARGS
-#     -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/absl
-#     -DABSL_PROPAGATE_CXX_STD:BOOL=ON
-#     ${_CMAKE_COMMON_CACHE_ARGS}
+# PREFIX absl
+# SOURCE_DIR "${THIRDPARTY_DIR}/abseil-cpp"
+# CMAKE_CACHE_ARGS
+# -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/absl
+# -DABSL_PROPAGATE_CXX_STD:BOOL=ON
+# ${_CMAKE_COMMON_CACHE_ARGS}
 # )
 
 # set(_FINDPACKAGE_ABSL_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/absl/lib/cmake/absl")
@@ -623,8 +623,7 @@ set(_FINDPACKAGE_ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/zlib/include")
 
 # ----------------------BUILD EXTERNAL PROJECT------------------
 # LIBSSH2
-ExternalProject_Add(
-    libssh2
+ExternalProject_Add(libssh2
     PREFIX libssh2
     SOURCE_DIR "${THIRDPARTY_DIR}/libssh2"
     CMAKE_CACHE_ARGS
@@ -644,8 +643,7 @@ set(_FINDPACKAGE_LIBSSH2_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libssh2/lib/cma
 set(_FINDPACKAGE_LIBSSH2_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libssh2/lib")
 set(_FINDPACKAGE_LIBSSH2_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libssh2/include")
 
-ExternalProject_Add(
-    AsyncIOManager
+ExternalProject_Add(AsyncIOManager
     PREFIX AsyncIOManager
     SOURCE_DIR "${THIRDPARTY_DIR}/AsyncIOManager"
     CMAKE_CACHE_ARGS

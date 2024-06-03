@@ -21,7 +21,7 @@ jobs:
       - name: Check out main third party without submodules
         uses: actions/checkout@v4
         with:
-            submodules: false
+          submodules: false
 
       - name: Install GH cli extension actions-cache
         run: |
@@ -111,12 +111,14 @@ jobs:
             startPos=$((len - 7))
             shortSHA="${toCache:$startPos:7}"
             lenBranch=${#BRANCH}
+
             # - 10 - lenBranch - 1 for s/$BRANCH/ + '-' + shortSHA
             name="${toCache:$((2 + lenBranch + 1)):$((len - 10 - lenBranch - 1))}"
             if [[ "$first" != "true" ]]; then
               matrixJson+=", "
             fi
             first=false
+
             matrixJson+="{ \"name\":  \"$name\", \"cache-name\": \"$toCache\" }"
           done
           matrixJson+=" ]"
@@ -124,7 +126,7 @@ jobs:
           ## Setting this to not fail the workflow while deleting cache keys.
           set +e
 
-          # delete old caches
+          # Delete old caches
           for oldCache in $oldCaches; do
             echo "Deleting old cache $oldCache"
             gh actions-cache delete $oldCache -R $REPO -B $BRANCH --confirm
@@ -200,7 +202,7 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}
 
-      - name: Cache Submodule Source Files without .git
+      - name: Cache submodule source files
         id: cache-source-directory
         uses: GeniusVentures/cache-multi@v3.3.1
         with:
@@ -226,7 +228,7 @@ jobs:
       - name: Setup
         run: sudo apt install zstd -y
 
-      - name: Cache Third Party Directory
+      - name: Restore cache third party directory
         uses: GeniusVentures/cache-multi/restore@v3.3.1
         id: cache-tp-source-directory
         with:
@@ -241,7 +243,7 @@ jobs:
           echo "Couldn't find cached thirdparty code, ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
           exit 1
 
-      - name: Cache Submodule Source Files without .git
+      - name: Restore submodule source files
         id: cache-source-directory
         uses: GeniusVentures/cache-multi/restoremulti@v3.3.1
         with:
@@ -252,13 +254,8 @@ jobs:
       - name: Create base target library names for target cache to create
         id: create-target-info
         run: |
-          mkdir -p build/Linux/Release >/dev/null
-          cd build/Linux/Release
-          if [[ ! -d CMakeFiles ]]; then
-            cmake .. -DCMAKE_BUILD_TYPE=Release
-          fi
-
-          cd ../../
+          cmake -S build/Linux -B build/Linux/Release -DCMAKE_BUILD_TYPE=Release
+          
           declare -A cMakeNamesRepos
           while IFS=',' read -r cmakeName repoDir; do
             echo -e "cmakeName: $cmakeName, repoDir: $repoDir"
@@ -266,7 +263,7 @@ jobs:
           done < <(sed -nE 's/^ExternalProject_Add\(([^)]*).*/\1/p; s/^[[:space:]]*SOURCE_DIR[[:space:]]+"([^/]*\/)*(.*)".*/\2/p' CommonTargets.CMake Linux/CMakeLists.txt |
             paste -d ',' - -)
 
-          cd Linux/Release/CMakeFiles
+          cd build/Linux/Release/CMakeFiles
           declare -A cMakeBuildDir
           while IFS=',' read -r cmakeName buildDir; do
             echo -e "cmakeName: $cmakeName, buildDir: $buildDir"
