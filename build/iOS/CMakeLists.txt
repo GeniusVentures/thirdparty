@@ -52,12 +52,13 @@ set(BUILD_VARIANT $<$<CONFIG:Debug>:--debug>)
 ExternalProject_Add(Boost
     PREFIX boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
-    DOWNLOAD_COMMAND ""
-    CONFIGURE_COMMAND ""
-    PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build
-    BUILD_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/boost/src/Boost-build/build.sh -ios --boost-version ${BOOST_VERSION} ${BUILD_VARIANT} --src-dir ${THIRDPARTY_DIR}/boost --build-dir ${BOOST_ROOT}
+
+    PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${_BOOST_BUILD_ROOT}
+
+    BUILD_COMMAND <SOURCE_DIR>/b2 headers && <SOURCE_DIR>/b2 ${BOOST_B2_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} toolset=darwin target-os=iphone visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=arm variant=${BOOST_VARIANT} --build-dir=${_BOOST_BUILD_ROOT} --libdir=${_BOOST_BUILD_ROOT}/lib install
+    BUILD_IN_SOURCE TRUE
+
     INSTALL_COMMAND ""
-    UPDATE_COMMAND ""
 )
 
 print("boost dir ${BOOST_ROOT}")

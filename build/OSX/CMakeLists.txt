@@ -49,7 +49,7 @@ ExternalProject_Add(Boost
 
     PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${_BOOST_BUILD_ROOT}
 
-    BUILD_COMMAND <SOURCE_DIR>/b2 headers && <SOURCE_DIR>/b2 ${BOOST_B2_FLAGS} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --build-dir=${_BOOST_BUILD_ROOT} --libdir=${_BOOST_BUILD_ROOT}/lib cxxflags="${CMAKE_CXX_FLAGS}" install
+    BUILD_COMMAND <SOURCE_DIR>/b2 headers && <SOURCE_DIR>/b2 ${BOOST_B2_FLAGS} toolset=darwin visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --build-dir=${_BOOST_BUILD_ROOT} --libdir=${_BOOST_BUILD_ROOT}/lib cxxflags="${CMAKE_CXX_FLAGS}" install
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
