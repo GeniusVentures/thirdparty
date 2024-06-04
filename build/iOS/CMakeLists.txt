@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.22)
 
 # if on OSX Darwin system, build the iOS executables
 if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
@@ -19,7 +19,6 @@ set(IOS_DEPLOYMENT_TARGET 16.2)
 
 project(iOS_SHARED_THIRD_PARTY)
 
-# build common libraries by platforms
 include(../CommonCompilerOptions.CMake)
 
 set(_PKG_CONFIG_EXECUTABLE -DPKG_CONFIG_EXECUTABLE:PATH=/usr/local/bin/pkg-config)
@@ -28,9 +27,6 @@ set(_PKG_CONFIG_EXECUTABLE -DPKG_CONFIG_EXECUTABLE:PATH=/usr/local/bin/pkg-confi
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
 set(CMAKE_SYSTEM_NAME "iOS")
 set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
-    -DBoost_NO_SYSTEM_PATHS:BOOL=ON
-    -DBoost_USE_STATIC_LIBS:BOOL=ON
-    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
     -DOPENSSL_USE_STATIC_LIBS:BOOL=TRUE
     -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
@@ -46,20 +42,13 @@ set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DCMAKE_POLICY_DEFAULT_CMP0042:STRING=NEW
 )
 
-# build boost
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    set(address_model 32)
-else()
-    set(address_model 64)
-endif()
-
 set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/iOS/${iOS_ABI}")
 set(Boost_NO_SYSTEM_PATHS ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_RUNTIME ON)
 
+# Boost
 set(BUILD_VARIANT $<$<CONFIG:Debug>:--debug>)
-
 ExternalProject_Add(Boost
     PREFIX boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
@@ -93,7 +82,7 @@ set(_BOOST_CACHE_ARGS
     -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
 )
 
-# build OpenSSL
+# OpenSSL
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}/${iOS_ABI}")
 ExternalProject_Add(openssl
     PREFIX openssl
@@ -183,9 +172,6 @@ set(tsl_hat_trie_patch
     "${PROJECT_BUILD_FOLDER}/cmake.in/hat-trie-patch/CMakeLists.foriOS.txt" <SOURCE_DIR>/CMakeLists.txt
 )
 
-# Set config for libp2p
-set(_libp2p_BUILD_EXAMPLES OFF)
-
 # Set config for MNN modules
 set(_MNN_WIN_RUNTIME_MT OFF)
 set(_MNN_EXTRA_PARAM
@@ -199,11 +185,7 @@ set(_MNN_EXTRA_PARAM
     -DMNN_BUILD_FOR_ANDROID_COMMAND:BOOL=ON
 )
 
-# Set o iOS specific configurations
-# set(grpc_patch
-# PATCH_COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/ssl_transport_security.cc" <SOURCE_DIR>/src/core/tsi/ssl_transport_security.cc)
-
 # Allow multiple definitions
 set(MULTIPLE_OPTION "-Xlink=-force:multiple")
-# build common targets
+
 include(../CommonTargets.CMake)
