@@ -145,9 +145,6 @@ set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM bcryptgen)
 
-# Set config for libp2p/ifps modules
-set(_libp2p_BUILD_EXAMPLES OFF)
-
 # eliminates some warnings on windows
 set(libp2_EXTRA_PARAM
     -D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN7

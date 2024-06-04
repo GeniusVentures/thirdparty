@@ -149,8 +149,6 @@ set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
 
-set(_libp2p_BUILD_EXAMPLES ON)
-
 set(_MNN_WIN_RUNTIME_MT OFF)
 
 set(MULTIPLE_OPTION "-Xlink=-force:multiple")
