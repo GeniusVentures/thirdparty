@@ -160,3 +160,6 @@
 [submodule "stb"]
 	path = stb
 	url = https://github.com/nothings/stb.git
+[submodule "sqlite3"]
+	path = sqlite3
+	url = https://github.com/rhuijben/sqlite-amalgamation.git
