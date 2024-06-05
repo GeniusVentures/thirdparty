@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
 
-# if on OSX Darwin system, build the iOS executables
 if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
     message(FATAL_ERROR "${CMAKE_HOST_SYSTEM_NAME} host system name does not match OSX Darwin for iOS cross compiling - Please select the correct folder for configuring project")
 endif()
@@ -18,6 +17,10 @@ endif()
 set(IOS_DEPLOYMENT_TARGET 16.2)
 
 project(iOS_SHARED_THIRD_PARTY)
+
+# TODO - remove manual include of toolchain once we start using
+set(PLATFORM OS64)
+include(./ios.toolchain.cmake)
 
 include(../CommonCompilerOptions.CMake)
 
