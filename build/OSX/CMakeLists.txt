@@ -15,7 +15,7 @@ endif()
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "12.1" CACHE STRING "Minimum OS X deployment version" FORCE)
 
-project(OSX_SHARED_THIRD_PARTY)
+project(OSX_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
 include(../CommonCompilerOptions.CMake)
 

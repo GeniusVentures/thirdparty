@@ -16,7 +16,7 @@ endif()
 
 set(IOS_DEPLOYMENT_TARGET 16.2)
 
-project(iOS_SHARED_THIRD_PARTY)
+project(iOS_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
 # TODO - remove manual include of toolchain once we start using
 set(PLATFORM OS64)

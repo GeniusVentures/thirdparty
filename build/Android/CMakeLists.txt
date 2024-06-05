@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(ANDROID_SHARED_THIRD_PARTY)
+project(ANDROID_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
 include(../CommonCompilerOptions.CMake)
 
