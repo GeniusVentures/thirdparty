@@ -103,9 +103,6 @@
     path = soralog
     url = ../soralog
     branch = c17
-[submodule "libp2p-sqlite-modern-cpp"]
-    path = libp2p-sqlite-modern-cpp
-    url = https://github.com/soramitsu/libp2p-sqlite-modern-cpp.git
 [submodule "ipfs-bitswap-cpp"]
     path = ipfs-bitswap-cpp
     url = ../ipfs-bitswap-cpp.git
@@ -163,3 +160,6 @@
 [submodule "sqlite3"]
 	path = sqlite3
 	url = https://github.com/rhuijben/sqlite-amalgamation.git
+[submodule "SQLiteModernCpp"]
+	path = SQLiteModernCpp
+	url = https://github.com/GeniusVentures/sqlite_modern_cpp.git
