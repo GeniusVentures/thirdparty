@@ -159,7 +159,7 @@
 	url = https://github.com/nothings/stb.git
 [submodule "sqlite3"]
 	path = sqlite3
-	url = https://github.com/rhuijben/sqlite-amalgamation.git
+	url = https://github.com/GeniusVentures/sqlite-amalgamation
 [submodule "SQLiteModernCpp"]
 	path = SQLiteModernCpp
 	url = https://github.com/GeniusVentures/sqlite_modern_cpp.git
