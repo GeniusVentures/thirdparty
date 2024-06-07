@@ -113,7 +113,7 @@
 	branch = OpenSSL_1_1_1-stable
 [submodule "libsecp256k1"]
 	path = libsecp256k1
-	url = https://github.com/GeniusVentures/soramitsu-libsecp256k1.git
+	url = https://github.com/bitcoin-core/secp256k1.git
 [submodule "xxhash"]
 	path = xxhash
 	url = https://github.com/hunter-packages/xxHash.git
