@@ -32,11 +32,13 @@ set(_BOOST_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NA
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(TP_BUILD_SUBDIR "OSX")
-
-    # This really should be done for any target using LLVM's libc++, we are only targeting mac due to its default use of it. This must be removed once we update Boost.
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION")
 else()
     set(TP_BUILD_SUBDIR ${CMAKE_SYSTEM_NAME})
+endif()
+
+if(${CMAKE_HOST_APPLE})
+    # This really should be done for any target using LLVM's libc++, we are only targeting mac due to its default use of it. This must be removed once we update Boost.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION")
 endif()
 
 # This is a workaround that should be removed once we update Boost.

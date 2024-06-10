@@ -5,42 +5,30 @@ if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 if(POLICY CMP0025)
-    # NEW: report OS X version of Clang as "AppleClang"
     cmake_policy(SET CMP0025 NEW)
 endif()
 
 if(POLICY CMP0042)
-    # NEW: set TARGET PROPERTY MACOSX_RPATH to on by default
     cmake_policy(SET CMP0042 NEW)
 endif()
-
-set(IOS_DEPLOYMENT_TARGET 16.2)
 
 project(iOS_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(PLATFORM OS64)
-    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ios.toolchain.cmake" CACHE STRING "Toolchain file")
+    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../ios.toolchain.cmake" CACHE STRING "Toolchain file")
 endif()
 
 include(../CommonCompilerOptions.CMake)
 
-set(_PKG_CONFIG_EXECUTABLE -DPKG_CONFIG_EXECUTABLE:PATH=/usr/local/bin/pkg-config)
-
-# Set OSX specific runtime options
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
-set(CMAKE_SYSTEM_NAME "iOS")
+# OSX specific runtime options
 set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DPLATFORM:STRING=${PLATFORM}
 )
 
-set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/iOS/${iOS_ABI}")
-set(Boost_NO_SYSTEM_PATHS ON)
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_STATIC_RUNTIME ON)
-
 # Boost
-set(BUILD_VARIANT $<$<CONFIG:Debug>:--debug>)
+set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}/${iOS_ABI}")
+set(BOOST_BUILD_VARIANT $<$<CONFIG:Debug>:--debug>)
 ExternalProject_Add(Boost
     PREFIX boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
@@ -53,21 +41,27 @@ ExternalProject_Add(Boost
     INSTALL_COMMAND ""
 )
 
-print("boost dir ${BOOST_ROOT}")
 set(boost_headers_DIR "${BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}")
 set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
 set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
 set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-${BOOST_VERSION}")
 set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-${BOOST_VERSION}")
-set(_Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
+set(boost_regex_DIR "${BOOST_ROOT}/lib/cmake/boost_regex-${BOOST_VERSION}")
+set(boost_date_time_DIR "${BOOST_ROOT}/lib/cmake/boost_date_time-${BOOST_VERSION}")
+set(boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
+set(_Boost_INCLUDE_DIR "${BOOST_ROOT}/include")
+set(FINDPACKAGE_BOOST_CONFIG_DIR ${boost_DIR})
+
 set(_BOOST_CACHE_ARGS
-    -DBoost_DIR:PATH=${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}
+    -DBoost_DIR:PATH=${boost_DIR}
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
     -Dboost_headers_DIR:PATH=${boost_headers_DIR}
     -Dboost_random_DIR:PATH=${boost_random_DIR}
     -Dboost_system_DIR:PATH=${boost_system_DIR}
     -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
     -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
+    -Dboost_regex_DIR:PATH=${boost_regex_DIR}
+    -Dboost_date_time_DIR:PATH=${boost_date-time_DIR}
     -DBoost_USE_MULTITHREADED:BOOL=ON
     -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
@@ -77,18 +71,18 @@ set(_BOOST_CACHE_ARGS
 
 # OpenSSL
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}/${iOS_ABI}")
+
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    DOWNLOAD_COMMAND ""
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build-libssl.sh ${BUILD_VARIANT} --version=1.1.1g --targets=ios64-cross-arm64 --src-dir=${THIRDPARTY_DIR}/openssl --build-dir=${_openssl_BUILD_ROOT}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build-libssl.sh ${BOOST_BUILD_VARIANT} --version=1.1.1g --targets=ios64-cross-arm64 --src-dir=${THIRDPARTY_DIR}/openssl --build-dir=${_openssl_BUILD_ROOT}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
 
-print("openssl ${_openssl_BUILD_ROOT}")
 set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
+
 set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
     -DOPENSSL_ROOT_DIR:STRING=${_openssl_BUILD_ROOT}
@@ -97,7 +91,7 @@ set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
-# Build protobuf project from the git submodule for local executation of protoc.
+# Protobuf
 set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
 set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake")
 
@@ -134,12 +128,11 @@ ExternalProject_Add(protobuf-host
 
 set(PROTOC_EXECUTABLE "${_PROTOBUF_HOST_DIR}/bin/protoc")
 set(_PROTOBUF_TARGET protobuf protobuf-host)
-
 set(_PROTOBUF_HOST_CONFIG_DIR "${_PROTOBUF_HOST_DIR}/lib/cmake/protobuf")
 set(_PROTOBUF_HOST_INCLUDE_DIR "${_PROTOBUF_HOST_DIR}/include")
 set(_PROTOBUF_HOST_LIB_DIR "${_PROTOBUF_HOST_DIR}/lib")
 
-# set config for grpc
+# gRPC
 set(_grpc_EXTRA_PARAM
     -DgRPC_BUILD_CODEGEN:BOOL=OFF
     -DHAVE_LIBNSL:BOOL=FALSE
@@ -153,19 +146,18 @@ set(_grpc_EXTRA_PARAM
     -DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}\ -Wno-unused-command-line-argument
 )
 
-# set config for ed25519 crypto
+# ed25519 crypto
 set(_ED25519_EDIIMPL ref10)
 set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
-print("target platform IOS=${IOS}")
 
-# Set tsl_hat_trie iOS specific configurations
+# tsl_hat_trie
 set(tsl_hat_trie_patch
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy
     "${PROJECT_BUILD_FOLDER}/cmake.in/hat-trie-patch/CMakeLists.foriOS.txt" <SOURCE_DIR>/CMakeLists.txt
 )
 
-# Set config for MNN modules
+# MNN
 set(_MNN_WIN_RUNTIME_MT OFF)
 set(_MNN_EXTRA_PARAM
     -DMNN_METAL:BOOL=ON
@@ -178,7 +170,6 @@ set(_MNN_EXTRA_PARAM
     -DMNN_BUILD_FOR_ANDROID_COMMAND:BOOL=ON
 )
 
-# Allow multiple definitions
 set(MULTIPLE_OPTION "-Xlink=-force:multiple")
 
 include(../CommonTargets.CMake)
