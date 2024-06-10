@@ -12,12 +12,12 @@ if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
 endif()
 
-project(OSX_SHARED_THIRD_PARTY LANGUAGES C CXX)
-
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(PLATFORM MAC)
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../ios.toolchain.cmake" CACHE STRING "Toolchain file")
 endif()
+
+project(OSX_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
 include(../CommonCompilerOptions.CMake)
 
@@ -135,7 +135,5 @@ set(_ED25519_RANDOM dev_urandom)
 
 # MNN
 set(_MNN_WIN_RUNTIME_MT OFF)
-
-set(MULTIPLE_OPTION "-Xlink=-force:multiple")
 
 include(../CommonTargets.CMake)

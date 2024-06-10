@@ -1,13 +1,5 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.22)
 
-project(ANDROID_SHARED_THIRD_PARTY LANGUAGES C CXX)
-
-include(../CommonCompilerOptions.CMake)
-
-# Set Android cross compile specific options
-find_program(MAKE_EXE NAMES make)
-set(CMAKE_SYSTEM_NAME Android)
-set(CMAKE_SYSTEM_VERSION 28) # API level
 set(ANDROID_PLATFORM_LEVEL 28)
 set(ANDROID_NATIVE_API_LEVEL ${ANDROID_PLATFORM_LEVEL})
 set(ANDROID_PLATFORM ${ANDROID_PLATFORM_LEVEL})
@@ -24,42 +16,28 @@ if(NOT CMAKE_ANDROID_NDK)
         message(WARNING "Cannot find Android NDK, setting to $ENV{ANDROID_NDK_HOME}")
         set(CMAKE_ANDROID_NDK $ENV{ANDROID_NDK_HOME})
     else()
-        message(FATAL_ERROR "Cannot find Android NDK, make sure you pass -DCMAKE_ANDROID_NDK=[path_to_NDK]")
+        message(FATAL_ERROR "Cannot find Android NDK, make sure you pass -DCMAKE_ANDROID_NDK=[path_to_NDK].")
     endif()
 endif()
 
-include(${CMAKE_ANDROID_NDK}/build/cmake/android.toolchain.cmake)
-
 if(NOT DEFINED ENV{ANDROID_TOOLCHAIN})
-    message(WARNING "ANDROID_TOOLCHAIN not set in the environment variables. Setting to ${ANDROID_TOOLCHAIN_ROOT}")
+    message(WARNING "ANDROID_TOOLCHAIN not set in the environment variables. Setting to ${ANDROID_TOOLCHAIN_ROOT}.")
     set(ANDROID_TOOLCHAIN ${ANDROID_TOOLCHAIN_ROOT})
 endif()
 
-file(READ "${CMAKE_ANDROID_NDK}/source.properties" SOURCE_PROPERTIES_CONTENT)
-string(REGEX MATCH "Pkg\\.Revision = ([0-9]+)\\.([0-9]+)\\." NDK_VERSION_MATCH "${SOURCE_PROPERTIES_CONTENT}")
-set(CMAKE_ANDROID_NDK_VERSION ${CMAKE_MATCH_1})
-set(CMAKE_ANDROID_NDK_VERSION_MINOR ${CMAKE_MATCH_2})
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_ANDROID_NDK}/build/cmake/android.toolchain.cmake")
+project(ANDROID_SHARED_THIRD_PARTY LANGUAGES C CXX)
+
+include(../CommonCompilerOptions.CMake)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
-print("Android NDK version: ${CMAKE_ANDROID_NDK_VERSION}.${CMAKE_ANDROID_NDK_VERSION_MINOR}")
 
-if(NOT CMAKE_ANDROID_NDK_VERSION EQUAL 25)
+if(NOT ANDROID_NDK_MAJOR EQUAL 25)
     message(FATAL_ERROR "Android NDK LTS Version (r25b) stable long term support version required")
 endif()
 
-set(CMAKE_TOOLCHAIN_FILE "${CMAKE_ANDROID_NDK}/build/cmake/android.toolchain.cmake")
-
-if(NOT EXISTS ${CMAKE_TOOLCHAIN_FILE})
-    message(FATAL_ERROR "Android NDK toolchain file ${CMAKE_TOOLCHAIN_FILE} not found")
-endif()
-
-if("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
-    set(LINUX_TARGET_ARCHITECTURES "${CMAKE_HOST_SYSTEM_PROCESSOR}")
-endif("${LINUX_TARGET_ARCHITECTURES}" STREQUAL "")
-
 # Config param for android
 set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
-    -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
     -DCMAKE_ANDROID_NDK:PATH=${CMAKE_ANDROID_NDK}
     -DANDROID_ABI:STRING=${ANDROID_ABI}
     -DANDROID_PLATFORM_LEVEL:STRING=${ANDROID_PLATFORM_LEVEL}
@@ -67,28 +45,24 @@ set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DANDROID_PLATFORM:STRING=${ANDROID_PLATFORM}
     -DANDROID_TOOLCHAIN:STRING=${ANDROID_TOOLCHAIN}
     -DANDROID_STL:STRING=c++_static
-    -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
     -DOPENSSL_USE_STATIC_LIBS:BOOL=TRUE
 )
 
-# build boost
-set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/Android")
+# Boost
+set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add(Boost
     PREFIX boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh" ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${_BOOST_ROOT}" --with-libraries="thread,program_options,system,date_time,regex,chrono,atomic,random,filesystem,log,container,test" --extra="--build-type=minimal,visibility=global,cxxflags=-std=c++17"
+    BUILD_COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh" ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${BOOST_ROOT}" --with-libraries="thread,program_options,system,date_time,regex,chrono,atomic,random,filesystem,log,container,test" --extra="--build-type=minimal,visibility=global,cxxflags=-std=c++17"
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
 
-set(Boost_NO_SYSTEM_PATHS ON)
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_STATIC_RUNTIME ON)
-set(BOOST_LIB_CMAKE_DIR "${_BOOST_ROOT}/lib/cmake")
+set(BOOST_LIB_CMAKE_DIR "${BOOST_ROOT}/lib/cmake")
 
-set(BOOST_ROOT ${_BOOST_ROOT})
+set(BOOST_ROOT ${BOOST_ROOT})
 set(_Boost_INCLUDE_DIR ${BOOST_ROOT}/include/boost-${BOOST_VERSION_2U})
 set(BOOST_LIBRARYDIR ${BOOST_ROOT}/lib)
 set(Boost_DIR "${BOOST_LIBRARYDIR}/cmake/Boost-${BOOST_VERSION}")
@@ -106,8 +80,6 @@ set(boost_log_DIR "${BOOST_LIBRARYDIR}/cmake/boost_log-${BOOST_VERSION}")
 set(boost_container_DIR "${BOOST_LIBRARYDIR}/cmake/boost_container-${BOOST_VERSION}")
 set(boost_unit_test_framework_DIR "${BOOST_LIBRARYDIR}/cmake/boost_unit_test_framework-${BOOST_VERSION}")
 set(Boost-COMPILTER "clang")
-print("boost dir ${_BOOST_ROOT}")
-print("boost lib ${BOOST_LIBRARYDIR}")
 
 if(_BOOST_INCLUDE_DIR)
 else()
@@ -118,16 +90,15 @@ endif()
 set(BOOST_INCLUDE_DIR ${_Boost_INCLUDE_DIR})
 
 set(_BOOST_CACHE_ARGS
-    -DBOOST_LIB_CMAKE_DIR:PATH=${_BOOST_ROOT}/lib/cmake
-    -DBOOST_ROOT:PATH=${BOOST_ROOT}
+    -DBoost_DIR:PATH=${Boost_DIR}
     -DBoost_USE_MULTITHREADED:BOOL=ON
-    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
+    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
+    -DBOOST_ROOT:PATH=${BOOST_ROOT}
     -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
     -DBOOST_LIBRARYDIR:PATH=${BOOST_LIBRARYDIR}
     -DBOOST_MIN_VERSION:STRING=1.80.0
-    -DBoost_DIR:PATH=${Boost_DIR}
     -Dboost_headers_DIR:PATH=${boost_headers_DIR}
     -Dboost_regex_DIR:PATH=${boost_regex_DIR}
     -Dboost_chrono_DIR:PATH=${boost_chrono_DIR}
@@ -155,8 +126,6 @@ elseif(ANDROID_ABI STREQUAL "x86_64")
     set(OPENSSL_ABI android-x86_64)
 endif()
 
-message("android abi is ${OPENSSL_ABI}")
-
 set(OPENSSL_VARIANT "$<$<CONFIG:Debug>:--debug>")
 
 set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Android/${ANDROID_ABI}")
@@ -180,10 +149,11 @@ set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
-# set config for grpc
+# gRPC
 set(_grpc_EXTRA_PARAM
-    -DgRPC_BUILD_CODEGEN:BOOL=OFF
-    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -llog\ -Wno-unused-command-line-argument
+
+    # -DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=OFF
+    # -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -llog\ -Wno-unused-command-line-argument
 )
 
 # Set Android specific configurations
@@ -198,27 +168,14 @@ set(_rocksdb_EXTRA_PARAM
     -DROCKSDB_LITE:BOOL=ON
 )
 
-# Build protobuf project from the git submodule for local executation of protoc.
-set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake")
-
-# Build protobuf project from the git submodule.
-# ExternalProject_Add(protobuf
-# PREFIX protobuf
-# SOURCE_DIR "${PROTOBUF_SRC_DIR}"
-# CMAKE_CACHE_ARGS
-# -Dprotobuf_BUILD_TESTS:BOOL=OFF
-# -Dprotobuf_WITH_ZLIB:BOOL=OFF
-# -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
-# -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
-# -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=OFF
-# ${_CMAKE_COMMON_CACHE_ARGS}
-# )
-
-# set(_PROTOBUF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
-# set(_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
-set(_PROTOBUF_HOST_DIR "${THIRDPARTY_DIR}/build/${TP_BUILD_SUBDIR}/${CMAKE_BUILD_TYPE}/protobuf/${ANDROID_ABI}")
-
 # Build protoc for host OS
+set(_PROTOBUF_HOST_DIR "${THIRDPARTY_DIR}/build/${TP_BUILD_SUBDIR}/${CMAKE_BUILD_TYPE}/protobuf/${ANDROID_ABI}")
+set(_PROTOBUF_HOST_CONFIG_DIR "${PROTOBUF_HOST_DIR}/lib/cmake/protobuf")
+set(_PROTOBUF_HOST_INCLUDE_DIR "${PROTOBUF_HOST_DIR}/include")
+set(_PROTOBUF_HOST_LIB_DIR "${PROTOBUF_HOST_DIR}/lib")
+
+set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf")
+
 ExternalProject_Add(protobuf-host
     PREFIX ${_PROTOBUF_HOST_DIR}
     SOURCE_DIR ${PROTOBUF_SRC_DIR}
@@ -230,26 +187,16 @@ ExternalProject_Add(protobuf-host
     -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
 )
 
-set(PROTOC_EXECUTABLE "${_PROTOBUF_HOST_DIR}/bin/protoc")
-set(_PROTOBUF_TARGET protobuf-host)
+set(PROTOC_EXECUTABLE "${PROTOBUF_HOST_DIR}/bin/protoc")
+set(PROTOBUF_TARGET protobuf-host)
 
-set(_PROTOBUF_HOST_CONFIG_DIR "${_PROTOBUF_HOST_DIR}/lib/cmake/protobuf")
-set(_PROTOBUF_HOST_INCLUDE_DIR "${_PROTOBUF_HOST_DIR}/include")
-set(_PROTOBUF_HOST_LIB_DIR "${_PROTOBUF_HOST_DIR}/lib")
-
-# set config for ed25519 crypto
+# ed25519 crypto
 set(_ED25519_RANDOM dev_urandom)
 
-# Set config for MNN modules
+# MNN
 set(_MNN_WIN_RUNTIME_MT OFF)
 set(_MNN_EXTRA_PARAM
     -DMNN_BUILD_FOR_ANDROID_COMMAND:BOOL=ON
-)
-
-# Set config for kompute
-set(_KOMPUTE_EXTRA_PARAM
-    -DKOMPUTE_OPT_ANDROID_BUILD:BOOL=ON
-    -DCMAKE_ANDROID_STL_TYPE:STRING=c++_static
 )
 
 include(../CommonTargets.CMake)
