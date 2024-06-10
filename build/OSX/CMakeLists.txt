@@ -131,8 +131,6 @@ set(_grpc_EXTRA_PARAM
 )
 
 # ed25519 crypto
-set(_ED25519_EDIIMPL ref10)
-set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
 
 # MNN

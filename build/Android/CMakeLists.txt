@@ -238,8 +238,6 @@ set(_PROTOBUF_HOST_INCLUDE_DIR "${_PROTOBUF_HOST_DIR}/include")
 set(_PROTOBUF_HOST_LIB_DIR "${_PROTOBUF_HOST_DIR}/lib")
 
 # set config for ed25519 crypto
-set(_ED25519_EDIIMPL ref10)
-set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM dev_urandom)
 
 # Set config for MNN modules

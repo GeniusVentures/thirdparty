@@ -141,8 +141,6 @@ set(_PROTOBUF_HOST_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
 set(_PROTOBUF_HOST_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
 
 # Set ed25519 OS specific configurations
-set(_ED25519_EDIIMPL ref10)
-set(_ED25519_HASH sha3_brainhub)
 set(_ED25519_RANDOM bcryptgen)
 
 # eliminates some warnings on windows

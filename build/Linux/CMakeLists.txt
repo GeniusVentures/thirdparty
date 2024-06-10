@@ -72,9 +72,7 @@ set(_grpc_EXTRA_PARAM
     -D_gRPC_CPP_PLUGIN:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/grpc_cpp_plugin
 )
 
-# Set ed25519 OS specific configurations
-set(_ED25519_EDIIMPL ref10)
-set(_ED25519_HASH sha3_brainhub)
+# ed25519 crypto
 set(_ED25519_RANDOM dev_urandom)
 
 # Set config for MNN modules
