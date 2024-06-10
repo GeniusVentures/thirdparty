@@ -115,7 +115,7 @@ ExternalProject_Add(grpc
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_grpc_EXTRA_PARAM}
     ${grpc_patch}
-    DEPENDS openssl
+    DEPENDS openssl protobuf
 )
 
 # RocksDB
