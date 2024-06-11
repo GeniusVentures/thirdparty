@@ -65,20 +65,11 @@ set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
 )
 
-# gRPC
-set(_grpc_EXTRA_PARAM
-
-    # -D_gRPC_PROTOBUF_PROTOC_EXECUTABLE:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/protoc
-    # -D_gRPC_CPP_PLUGIN:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/grpc_cpp_plugin
-)
-
 # ed25519 crypto
 set(_ED25519_RANDOM dev_urandom)
 
 # MNN
 set(_MNN_WIN_RUNTIME_MT OFF)
-
-
 
 set(CPPRESTSDK_NOWARN "-Wno-format-truncation" CACHE INTERNAL "")
 
