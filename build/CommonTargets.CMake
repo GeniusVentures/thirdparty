@@ -215,19 +215,19 @@ set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/incl
 
 # --------------------------------------------------------
 ## Builds delta-enabled-crdts
-ExternalProject_Add(delta-enabled-crdts
-  PREFIX delta-enabled-crdts
-  SOURCE_DIR "${THIRDPARTY_DIR}/delta-enabled-crdts"
-  CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts
-        -DELTACRDTS_BUILD_TESTS:BOOL=ON
-        -DELTACRDTS_INSTALL:BOOL=ON
-		${_CMAKE_COMMON_BUILD_PARAMS}
-		#PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-        #"${PROJECT_BUILD_FOLDER}/cmake.in/delta-enabled-crdts-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
-)
+# ExternalProject_Add(delta-enabled-crdts
+  # PREFIX delta-enabled-crdts
+  # SOURCE_DIR "${THIRDPARTY_DIR}/delta-enabled-crdts"
+  # CMAKE_CACHE_ARGS
+        # -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts
+        # -DELTACRDTS_BUILD_TESTS:BOOL=ON
+        # -DELTACRDTS_INSTALL:BOOL=ON
+		# ${_CMAKE_COMMON_BUILD_PARAMS}
+		# #PATCH_COMMAND ${CMAKE_COMMAND} -E copy
+        # #"${PROJECT_BUILD_FOLDER}/cmake.in/delta-enabled-crdts-patch/CMakeLists.txt" <SOURCE_DIR>/CMakeLists.txt
+# )
 
-set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/include")
+# set(_FINDPACKAGE_DELTA_ENABLED_CRDTS_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/delta-enabled-crdts/include")
 
 # --------------------------------------------------------
 ## Builds yaml-cpp
