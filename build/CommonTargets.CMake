@@ -52,6 +52,7 @@ if(CMAKE_CROSSCOMPILING)
         -DgRPC_BUILD_GRPC_PHP_PLUGIN:BOOL=OFF
         -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
         -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
+        -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=ON
         DEPENDS openssl
     )
 
@@ -65,7 +66,13 @@ else()
 endif()
 
 set(PROTOBUF_HOST_PREFIX "${GRPC_HOST_PREFIX}")
-set(PROTOBUF_HOST_CONFIG_DIR "${PROTOBUF_HOST_PREFIX}/lib/cmake/protobuf")
+
+if(MSVC)
+    set(PROTOBUF_HOST_CONFIG_DIR "${PROTOBUF_HOST_PREFIX}/cmake")
+else()
+    set(PROTOBUF_HOST_CONFIG_DIR "${PROTOBUF_HOST_PREFIX}/lib/cmake/protobuf")
+endif()
+
 set(PROTOBUF_HOST_INCLUDE_DIR "${PROTOBUF_HOST_PREFIX}/include")
 set(PROTOBUF_HOST_LIB_DIR "${PROTOBUF_HOST_PREFIX}/lib")
 set(PROTOC_EXECUTABLE "${PROTOBUF_HOST_PREFIX}/bin/protoc${CMAKE_EXECUTABLE_SUFFIX}")
@@ -117,6 +124,7 @@ ExternalProject_Add(grpc
     -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
     -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
     -DgRPC_ZLIB_PROVIDER:STRING=package
+    -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=ON
     -DZLIB_ROOT:PATH=${ZLIB_ROOT}
     -DZLIB_USE_STATIC_LIBS:BOOL=ON
     ${_CMAKE_COMMON_CACHE_ARGS}
@@ -128,7 +136,13 @@ ExternalProject_Add(grpc
 
 # Protobuf
 ExternalProject_Get_Property(grpc INSTALL_DIR)
-set(Protobuf_DIR "${INSTALL_DIR}/lib/cmake/protobuf")
+
+if(MSVC)
+    set(Protobuf_DIR "${INSTALL_DIR}/cmake")
+else()
+    set(Protobuf_DIR "${INSTALL_DIR}/lib/cmake/protobuf")
+endif()
+
 set(Protobuf_LIBRARIES "${INSTALL_DIR}/lib")
 set(Protobuf_INCLUDE_DIR "${INSTALL_DIR}/include")
 
