@@ -149,46 +149,10 @@ set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
-# gRPC
-set(_grpc_EXTRA_PARAM
-
-    # -DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=OFF
-    # -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -llog\ -Wno-unused-command-line-argument
-)
-
-# Set Android specific configurations
-message(WARNING "Patching grpc module - update with caution")
-set(grpc_patch
-    PATCH_COMMAND
-    ${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch/patching.sh --patch-dir=${PROJECT_BUILD_FOLDER}/cmake.in/grpc-patch --grpc-dir=${THIRDPARTY_DIR}/grpc
-)
-
-# set config for rocksdb
+# rocksdb
 set(_rocksdb_EXTRA_PARAM
     -DROCKSDB_LITE:BOOL=ON
 )
-
-# Build protoc for host OS
-set(_PROTOBUF_HOST_DIR "${THIRDPARTY_DIR}/build/${TP_BUILD_SUBDIR}/${CMAKE_BUILD_TYPE}/protobuf/${ANDROID_ABI}")
-set(_PROTOBUF_HOST_CONFIG_DIR "${PROTOBUF_HOST_DIR}/lib/cmake/protobuf")
-set(_PROTOBUF_HOST_INCLUDE_DIR "${PROTOBUF_HOST_DIR}/include")
-set(_PROTOBUF_HOST_LIB_DIR "${PROTOBUF_HOST_DIR}/lib")
-
-set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf")
-
-ExternalProject_Add(protobuf-host
-    PREFIX ${_PROTOBUF_HOST_DIR}
-    SOURCE_DIR ${PROTOBUF_SRC_DIR}
-    CMAKE_CACHE_ARGS
-    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    -Dprotobuf_BUILD_TESTS:BOOL=OFF
-    -Dprotobuf_WITH_ZLIB:BOOL=OFF
-    -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
-    -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
-)
-
-set(PROTOC_EXECUTABLE "${PROTOBUF_HOST_DIR}/bin/protoc")
-set(PROTOBUF_TARGET protobuf-host)
 
 # ed25519 crypto
 set(_ED25519_RANDOM dev_urandom)

@@ -113,7 +113,7 @@ set(_PROTOBUF_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
 set(_PROTOBUF_HOST_DIR "${THIRDPARTY_DIR}/build/${TP_BUILD_SUBDIR}/${CMAKE_BUILD_TYPE}/protobuf")
 
 # Build protoc for host OS
-ExternalProject_Add(protobuf-host
+ExternalProject_Add(gRPC-host
     PREFIX ${_PROTOBUF_HOST_DIR}
     SOURCE_DIR "${PROTOBUF_SRC_DIR}"
     CMAKE_CACHE_ARGS
@@ -127,7 +127,7 @@ ExternalProject_Add(protobuf-host
 )
 
 set(PROTOC_EXECUTABLE "${_PROTOBUF_HOST_DIR}/bin/protoc")
-set(_PROTOBUF_TARGET protobuf protobuf-host)
+set(_PROTOBUF_TARGET protobuf gRPC-host)
 set(_PROTOBUF_HOST_CONFIG_DIR "${_PROTOBUF_HOST_DIR}/lib/cmake/protobuf")
 set(_PROTOBUF_HOST_INCLUDE_DIR "${_PROTOBUF_HOST_DIR}/include")
 set(_PROTOBUF_HOST_LIB_DIR "${_PROTOBUF_HOST_DIR}/lib")

@@ -71,6 +71,4 @@ set(_ED25519_RANDOM dev_urandom)
 # MNN
 set(_MNN_WIN_RUNTIME_MT OFF)
 
-set(CPPRESTSDK_NOWARN "-Wno-format-truncation" CACHE INTERNAL "")
-
 include(../CommonTargets.CMake)
