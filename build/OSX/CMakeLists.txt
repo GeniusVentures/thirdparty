@@ -100,10 +100,6 @@ ExternalProject_Add(MoltenVK
     UPDATE_COMMAND ""
 )
 
-# rocksdb
-set(_rocksdb_EXTRA_PARAM
-    -DHAS_ARMV8_CRC:BOOL=ON)
-
 # gRPC
 set(_grpc_EXTRA_PARAM
 

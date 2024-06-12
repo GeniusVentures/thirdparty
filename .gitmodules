@@ -61,7 +61,7 @@
     url = https://github.com/google/googletest
 [submodule "ed25519"]
     path = ed25519
-    url = ../ed25519.git
+	url = https://github.com/hyperledger/iroha-ed25519.git
     branch = master
 [submodule "rapidjson"]
     path = rapidjson

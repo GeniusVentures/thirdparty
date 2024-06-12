@@ -89,6 +89,11 @@ set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_SSL_LIBRARY:FILEPATH=${OPENSSL_ROOT_DIR}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
+# rocksdb
+set(_rocksdb_EXTRA_PARAM
+    -DROCKSDB_LITE:BOOL=ON
+)
+
 # ed25519 crypto
 set(_ED25519_RANDOM dev_urandom)
 
