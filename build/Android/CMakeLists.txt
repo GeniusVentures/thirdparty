@@ -26,11 +26,10 @@ if(NOT DEFINED ENV{ANDROID_TOOLCHAIN})
 endif()
 
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_ANDROID_NDK}/build/cmake/android.toolchain.cmake")
+
 project(ANDROID_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
 include(../CommonCompilerOptions.CMake)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
 
 if(NOT ANDROID_NDK_MAJOR EQUAL 25)
     message(FATAL_ERROR "Android NDK LTS Version (r25b) stable long term support version required")
@@ -55,67 +54,54 @@ ExternalProject_Add(Boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh" ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${BOOST_ROOT}" --with-libraries="thread,program_options,system,date_time,regex,chrono,atomic,random,filesystem,log,container,test" --extra="--build-type=minimal,visibility=global,cxxflags=-std=c++17"
+    BUILD_COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh" ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${BOOST_ROOT}" --with-libraries="${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}" --extra="--build-type=minimal,visibility=global,cxxstd=${CMAKE_CXX_STANDARD}"
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
 
-set(BOOST_LIB_CMAKE_DIR "${BOOST_ROOT}/lib/cmake")
-
-set(BOOST_ROOT ${BOOST_ROOT})
-set(_Boost_INCLUDE_DIR ${BOOST_ROOT}/include/boost-${BOOST_VERSION_2U})
-set(BOOST_LIBRARYDIR ${BOOST_ROOT}/lib)
-set(Boost_DIR "${BOOST_LIBRARYDIR}/cmake/Boost-${BOOST_VERSION}")
-set(boost_headers_DIR "${BOOST_LIBRARYDIR}/cmake/boost_headers-${BOOST_VERSION}")
-set(boost_thread_DIR "${BOOST_LIBRARYDIR}/cmake/boost_thread-${BOOST_VERSION}")
-set(boost_program_options_DIR "${BOOST_LIBRARYDIR}/cmake/boost_program_options-${BOOST_VERSION}")
-set(boost_system_DIR "${BOOST_LIBRARYDIR}/cmake/boost_system-${BOOST_VERSION}")
-set(boost_date_time_DIR "${BOOST_LIBRARYDIR}/cmake/boost_date_time-${BOOST_VERSION}")
-set(boost_regex_DIR "${BOOST_LIBRARYDIR}/cmake/boost_regex-${BOOST_VERSION}")
-set(boost_chrono_DIR "${BOOST_LIBRARYDIR}/cmake/boost_chrono-${BOOST_VERSION}")
-set(boost_atomic_DIR "${BOOST_LIBRARYDIR}/cmake/boost_atomic-${BOOST_VERSION}")
-set(boost_random_DIR "${BOOST_LIBRARYDIR}/cmake/boost_random-${BOOST_VERSION}")
-set(boost_filesystem_DIR "${BOOST_LIBRARYDIR}/cmake/boost_filesystem-${BOOST_VERSION}")
-set(boost_log_DIR "${BOOST_LIBRARYDIR}/cmake/boost_log-${BOOST_VERSION}")
-set(boost_container_DIR "${BOOST_LIBRARYDIR}/cmake/boost_container-${BOOST_VERSION}")
-set(boost_unit_test_framework_DIR "${BOOST_LIBRARYDIR}/cmake/boost_unit_test_framework-${BOOST_VERSION}")
-set(Boost-COMPILTER "clang")
-
-if(_BOOST_INCLUDE_DIR)
-else()
-    set(_BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
-    set(BOOST_LIBRARY_DIR "${Boost_LIBRARIES}")
-endif()
-
-set(BOOST_INCLUDE_DIR ${_Boost_INCLUDE_DIR})
+set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
+set(Boost_INCLUDE_DIR "${BOOST_ROOT}/include/boost-${BOOST_VERSION_2U}")
+set(boost_headers_DIR "${BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}")
+set(boost_thread_DIR "${BOOST_ROOT}/lib/cmake/boost_thread-${BOOST_VERSION}")
+set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-${BOOST_VERSION}")
+set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
+set(boost_date_time_DIR "${BOOST_ROOT}/lib/cmake/boost_date_time-${BOOST_VERSION}")
+set(boost_regex_DIR "${BOOST_ROOT}/lib/cmake/boost_regex-${BOOST_VERSION}")
+set(boost_chrono_DIR "${BOOST_ROOT}/lib/cmake/boost_chrono-${BOOST_VERSION}")
+set(boost_atomic_DIR "${BOOST_ROOT}/lib/cmake/boost_atomic-${BOOST_VERSION}")
+set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
+set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-${BOOST_VERSION}")
+set(boost_log_DIR "${BOOST_ROOT}/lib/cmake/boost_log-${BOOST_VERSION}")
+set(boost_log_setup_DIR "${BOOST_ROOT}/lib/cmake/boost_log_setup-${BOOST_VERSION}")
+set(boost_container_DIR "${BOOST_ROOT}/lib/cmake/boost_container-${BOOST_VERSION}")
+set(boost_unit_test_framework_DIR "${BOOST_ROOT}/lib/cmake/boost_unit_test_framework-${BOOST_VERSION}")
 
 set(_BOOST_CACHE_ARGS
+    -DBOOST_ROOT:PATH=${BOOST_ROOT}
     -DBoost_DIR:PATH=${Boost_DIR}
     -DBoost_USE_MULTITHREADED:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
     -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
-    -DBOOST_ROOT:PATH=${BOOST_ROOT}
-    -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
-    -DBOOST_LIBRARYDIR:PATH=${BOOST_LIBRARYDIR}
-    -DBOOST_MIN_VERSION:STRING=1.80.0
+    -DBoost_INCLUDE_DIR:PATH=${Boost_INCLUDE_DIR}
     -Dboost_headers_DIR:PATH=${boost_headers_DIR}
-    -Dboost_regex_DIR:PATH=${boost_regex_DIR}
-    -Dboost_chrono_DIR:PATH=${boost_chrono_DIR}
     -Dboost_atomic_DIR:PATH=${boost_atomic_DIR}
-    -Dboost_thread_DIR:PATH=${boost_thread_DIR}
-    -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
-    -Dboost_system_DIR:PATH=${boost_system_DIR}
+    -Dboost_chrono_DIR:PATH=${boost_chrono_DIR}
+    -Dboost_container_DIR:PATH=${boost_container_DIR}
     -Dboost_date_time_DIR:PATH=${boost_date_time_DIR}
     -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
     -Dboost_log_DIR:PATH=${boost_log_DIR}
+    -Dboost_log_setup_DIR:PATH=${boost_log_setup_DIR}
+    -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
     -Dboost_random_DIR:PATH=${boost_random_DIR}
-    -Dboost_container_DIR:PATH=${boost_container_DIR}
+    -Dboost_regex_DIR:PATH=${boost_regex_DIR}
+    -Dboost_system_DIR:PATH=${boost_system_DIR}
+    -Dboost_thread_DIR:PATH=${boost_thread_DIR}
     -Dboost_unit_test_framework_DIR:PATH=${boost_unit_test_framework_DIR}
     -DBoost_COMPILER:STRING=clang
 )
 
-# build OpenSSL
+# OpenSSL
 if(ANDROID_ABI STREQUAL "arm64-v8a")
     set(OPENSSL_ABI android-arm64)
 elseif(ANDROID_ABI STREQUAL "armeabi-v7a")
@@ -128,25 +114,25 @@ endif()
 
 set(OPENSSL_VARIANT "$<$<CONFIG:Debug>:--debug>")
 
-set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Android/${ANDROID_ABI}")
+set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/")
+
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh "${OPENSSL_VARIANT}" --abi=${OPENSSL_ABI} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${_openssl_BUILD_ROOT} --env_path=$ENV{PATH} --env_android_ndk=${CMAKE_ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --abi=${OPENSSL_ABI} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${OPENSSL_ROOT_DIR} --env_path=$ENV{PATH} --env_android_ndk=${CMAKE_ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
     BUILD_IN_SOURCE FALSE
-    UPDATE_COMMAND ""
     INSTALL_COMMAND make install_dev
 )
 
-set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
+set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
 set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
-    -DOPENSSL_ROOT_DIR:PATH=${_openssl_BUILD_ROOT}
-    -DOPENSSL_INCLUDE_DIR:PATH=${_OPENSSL_INCLUDE_DIR}
-    -DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
-    -DOPENSSL_CRYPTO_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}
-    -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
+    -DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}
+    -DOPENSSL_INCLUDE_DIR:PATH=${OPENSSL_INCLUDE_DIR}
+    -DOPENSSL_LIBRARIES:PATH=${OPENSSL_ROOT_DIR}/lib
+    -DOPENSSL_CRYPTO_LIBRARY:FILEPATH=${OPENSSL_ROOT_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}
+    -DOPENSSL_SSL_LIBRARY:FILEPATH=${OPENSSL_ROOT_DIR}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
 # rocksdb

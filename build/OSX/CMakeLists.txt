@@ -33,61 +33,59 @@ ExternalProject_Add(Boost
     PREFIX boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
 
-    PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${_BOOST_BUILD_ROOT}
+    PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
 
-    BUILD_COMMAND <SOURCE_DIR>/b2 headers && <SOURCE_DIR>/b2 ${BOOST_B2_FLAGS} toolset=darwin visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --build-dir=${_BOOST_BUILD_ROOT} --libdir=${_BOOST_BUILD_ROOT}/lib cxxflags="${CMAKE_CXX_FLAGS}" install
+    BUILD_COMMAND <SOURCE_DIR>/b2 headers && <SOURCE_DIR>/b2 ${BOOST_B2_FLAGS} toolset=darwin cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --build-dir=${BOOST_ROOT} --libdir=${BOOST_ROOT}/lib cxxflags="${CMAKE_CXX_FLAGS}" install
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
 )
 
+set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
+set(Boost_INCLUDE_DIR "${BOOST_ROOT}/include")
 set(boost_headers_DIR "${BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}")
-set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
-set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
+set(boost_date_time_DIR "${BOOST_ROOT}/lib/cmake/boost_date_time-${BOOST_VERSION}")
 set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-${BOOST_VERSION}")
 set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-${BOOST_VERSION}")
+set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
 set(boost_regex_DIR "${BOOST_ROOT}/lib/cmake/boost_regex-${BOOST_VERSION}")
-set(boost_date_time_DIR "${BOOST_ROOT}/lib/cmake/boost_date_time-${BOOST_VERSION}")
-set(boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
-set(_Boost_INCLUDE_DIR "${BOOST_ROOT}/include")
-set(FINDPACKAGE_BOOST_CONFIG_DIR ${boost_DIR})
+set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
 
 set(_BOOST_CACHE_ARGS
-    -DBoost_DIR:PATH=${boost_DIR}
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
-    -Dboost_headers_DIR:PATH=${boost_headers_DIR}
-    -Dboost_random_DIR:PATH=${boost_random_DIR}
-    -Dboost_system_DIR:PATH=${boost_system_DIR}
-    -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
-    -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
-    -Dboost_regex_DIR:PATH=${boost_regex_DIR}
+    -DBoost_DIR:PATH=${Boost_DIR}
+    -DBoost_INCLUDE_DIR:PATH=${Boost_INCLUDE_DIR}
     -Dboost_date_time_DIR:PATH=${boost_date-time_DIR}
-    -DBoost_USE_MULTITHREADED:BOOL=ON
-    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
-    -DBoost_USE_STATIC_LIBS:BOOL=ON
+    -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
+    -Dboost_headers_DIR:PATH=${boost_headers_DIR}
+    -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
+    -Dboost_random_DIR:PATH=${boost_random_DIR}
+    -Dboost_regex_DIR:PATH=${boost_regex_DIR}
+    -Dboost_system_DIR:PATH=${boost_system_DIR}
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
-    -DBoost_INCLUDE_DIR:PATH=${_Boost_INCLUDE_DIR}
+    -DBoost_USE_MULTITHREADED:BOOL=ON
+    -DBoost_USE_STATIC_LIBS:BOOL=ON
+    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
 )
 
 # OpenSSL
-set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
+set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND <SOURCE_DIR>/Configure darwin64-x86_64-cc $<IF:$<CONFIG:Debug>,--debug,--release> -static --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+    CONFIGURE_COMMAND <SOURCE_DIR>/Configure darwin64-x86_64-cc $<IF:$<CONFIG:Debug>,--debug,--release> -static --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR}
     BUILD_COMMAND make build_libs
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND make install_dev
 )
 
-set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
-
+set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
 set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
-    -DOPENSSL_ROOT_DIR:STRING=${_openssl_BUILD_ROOT}
-    -DOPENSSL_INCLUDE_DIR:PATH=${_OPENSSL_INCLUDE_DIR}
-    -DOPENSSL_LIBRARIES:PATH=${_openssl_BUILD_ROOT}/lib
+    -DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}
+    -DOPENSSL_INCLUDE_DIR:PATH=${OPENSSL_INCLUDE_DIR}
+    -DOPENSSL_LIBRARIES:PATH=${OPENSSL_ROOT_DIR}/lib
 )
 
 # MoltenVK
@@ -102,32 +100,15 @@ ExternalProject_Add(MoltenVK
     UPDATE_COMMAND ""
 )
 
-# Protobuf
-set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake")
-
-ExternalProject_Add(protobuf
-    PREFIX protobuf
-    SOURCE_DIR "${PROTOBUF_SRC_DIR}"
-    CMAKE_CACHE_ARGS
-    -Dprotobuf_BUILD_TESTS:BOOL=OFF
-    -Dprotobuf_WITH_ZLIB:BOOL=OFF
-    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
-    -Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
-)
-
-set(PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
-set(_PROTOBUF_TARGET protobuf)
-set(_PROTOBUF_HOST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
-set(_PROTOBUF_HOST_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
-set(_PROTOBUF_HOST_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
-
+# rocksdb
 set(_rocksdb_EXTRA_PARAM
     -DHAS_ARMV8_CRC:BOOL=ON)
 
 # gRPC
 set(_grpc_EXTRA_PARAM
-    -D_gRPC_PROTOBUF_PROTOC_EXECUTABLE:STRING=${PROTOC_EXECUTABLE}
-    -D_gRPC_CPP_PLUGIN:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/grpc_cpp_plugin
+
+    # -D_gRPC_PROTOBUF_PROTOC_EXECUTABLE:STRING=${PROTOC_EXECUTABLE}
+    # -D_gRPC_CPP_PLUGIN:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/grpc_cpp_plugin
 )
 
 # ed25519 crypto
