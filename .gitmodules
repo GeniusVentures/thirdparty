@@ -160,3 +160,6 @@
 [submodule "stb"]
 	path = stb
 	url = https://github.com/nothings/stb.git
+[submodule "gnus_upnp"]
+	path = gnus_upnp
+	url = https://github.com/GeniusVentures/gnus_upnp.git
