@@ -26,31 +26,29 @@ set(BOOST_TOOLSET "msvc-14.1")
 
 if(MSVC_VERSION AND MSVC_VERSION GREATER_EQUAL 1920) # v142 toolset
     set(VC_PLATFORMTOOLSET "vc142")
-    set(BOOST_TOOLSET "msvc-14.2")
 endif()
 
 if(MSVC_VERSION AND MSVC_VERSION GREATER_EQUAL 1930) # v143 toolset
     set(VC_PLATFORMTOOLSET "vc143")
-    set(BOOST_TOOLSET "msvc-14.3")
 endif()
 
 # Boost
 set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 
-list(TRANSFORM BOOST_INCLUDE_LIBRARIES PREPEND "--with-" OUTPUT_VARIABLE BOOST_INCLUDE_LIBRARIES_EXPANDED)
+list(TRANSFORM BOOST_INCLUDE_LIBRARIES PREPEND --with- OUTPUT_VARIABLE BOOST_INCLUDE_LIBRARIES_EXPANDED)
 ExternalProject_Add(Boost
     PREFIX boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
+    INSTALL_DIR "${BOOST_ROOT}"
 
-    PATCH_COMMAND ./bootstrap.bat ${VC_PLATFORMTOOLSET}
+    CONFIGURE_COMMAND ./bootstrap.bat ${VC_PLATFORMTOOLSET}
 
-    CONFIGURE_COMMAND ""
-
-    BUILD_COMMAND ./b2.exe headers
+    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal ${BOOST_INCLUDE_LIBRARIES_EXPANDED} address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} install
     BUILD_IN_SOURCE TRUE
 
-    INSTALL_COMMAND ./b2.exe cxxstd=${CMAKE_CXX_STANDARD} runtime-link=static visibility=global --build-type=minimal ${BOOST_INCLUDE_LIBRARIES_EXPANDED} address-model=64 architecture=x86 variant=${BOOST_VARIANT} link=static threading=multi --stagedir=stage/x64 --build-dir=${BOOST_ROOT} --prefix=${BOOST_ROOT} --libdir=${BOOST_ROOT}/lib install
+    INSTALL_COMMAND ""
 )
+
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake")
 
 # not sure why this can't match the exaxt ${BOOST_VERSION} string of everything else.

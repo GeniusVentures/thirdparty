@@ -28,14 +28,14 @@ set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
 
 # Boost
 set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}/${iOS_ABI}")
-set(BOOST_BUILD_VARIANT $<$<CONFIG:Debug>:--debug>)
 ExternalProject_Add(Boost
     PREFIX boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
+    INSTALL_DIR
 
-    PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
+    CONFIGURE_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
 
-    BUILD_COMMAND <SOURCE_DIR>/b2 headers && <SOURCE_DIR>/b2 ${BOOST_B2_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} toolset=darwin target-os=iphone visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=arm variant=${BOOST_BUILD_VARIANT} --build-dir=${BOOST_BUILD_ROOT} --libdir=${BOOST_ROOT}/lib install
+    BUILD_COMMAND <SOURCE_DIR>/b2 ${BOOST_B2_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} toolset=darwin target-os=iphone visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=arm variant=${BOOST_VARIANT} --prefix=<INSTALL_DIR> install
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
@@ -54,14 +54,14 @@ set(boost_date_time_DIR "${BOOST_ROOT}/lib/cmake/boost_date_time-${BOOST_VERSION
 set(_BOOST_CACHE_ARGS
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
     -DBoost_DIR:PATH=${Boost_DIR}
+    -DBoost_INCLUDE_DIR:PATH=${Boost_INCLUDE_DIR}
+    -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_USE_MULTITHREADED:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
     -DBoost_USE_STATIC_RUNTIME:BOOL=ON
-    -DBoost_NO_SYSTEM_PATHS:BOOL=ON
-    -DBoost_INCLUDE_DIR:PATH=${Boost_INCLUDE_DIR}
-    -Dboost_headers_DIR:PATH=${boost_headers_DIR}
     -Dboost_date_time_DIR:PATH=${boost_date_time_DIR}
     -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
+    -Dboost_headers_DIR:PATH=${boost_headers_DIR}
     -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
     -Dboost_random_DIR:PATH=${boost_random_DIR}
     -Dboost_regex_DIR:PATH=${boost_regex_DIR}
