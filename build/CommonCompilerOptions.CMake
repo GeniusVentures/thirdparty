@@ -12,8 +12,6 @@ endif()
 get_filename_component(PROJECT_BUILD_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}" DIRECTORY ABSOLUTE)
 get_filename_component(PROJECT_SRC_FOLDER "${PROJECT_BUILD_FOLDER}" DIRECTORY ABSOLUTE)
 
-include(GNUInstallDirs)
-include(CheckCXXCompilerFlag)
 include(${PROJECT_BUILD_FOLDER}/cmake.in/functions.cmake)
 include(ExternalProject)
 

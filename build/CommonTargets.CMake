@@ -1,9 +1,3 @@
-# Find json library
-set(JSON_FOR_MODERN_CXX_INCLUDE_DIR "${THIRDPARTY_DIR}/json")
-find_path(JSON_FOR_MODERN_CXX_INCLUDE_DIR NAMES nlohmann/json.hpp)
-include_directories(${JSON_FOR_MODERN_CXX_INCLUDE_DIR})
-mark_as_advanced(JSON_FOR_MODERN_CXX_INCLUDE_DIR)
-
 # absl - Excluded from build since gRPC uses its own absl
 # ExternalProject_Add(absl
 # PREFIX absl
@@ -399,7 +393,6 @@ ExternalProject_Add(MNN
 set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/mnn")
 set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
 set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
-include_directories(${_FINDPACKAGE_MNN_INCLUDE_DIR})
 
 # ipfs-lite-cpp
 ExternalProject_Add(ipfs-lite-cpp
