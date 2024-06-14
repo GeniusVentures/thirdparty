@@ -13,7 +13,7 @@ if(POLICY CMP0042)
 endif()
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    set(PLATFORM MAC)
+    set(PLATFORM MAC CACHE STRING "Toolchain platform parameter")
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../ios.toolchain.cmake" CACHE STRING "Toolchain file")
 endif()
 
@@ -33,9 +33,9 @@ ExternalProject_Add(Boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
     INSTALL_DIR ${BOOST_ROOT}
 
-    PATCH_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
+    CONFIGURE_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
 
-    BUILD_COMMAND <SOURCE_DIR>/b2 ${BOOST_B2_FLAGS} toolset=darwin cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} cxxflags="${CMAKE_CXX_FLAGS}" install
+    BUILD_COMMAND <SOURCE_DIR>/b2 ${BOOST_B2_FLAGS} toolset=darwin cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} install
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
@@ -98,13 +98,6 @@ ExternalProject_Add(MoltenVK
     BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/MoltenVK-build/build.sh ${BOOST_BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
-)
-
-# gRPC
-set(_grpc_EXTRA_PARAM
-
-    # -D_gRPC_PROTOBUF_PROTOC_EXECUTABLE:STRING=${PROTOC_EXECUTABLE}
-    # -D_gRPC_CPP_PLUGIN:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/grpc_cpp_plugin
 )
 
 # ed25519 crypto

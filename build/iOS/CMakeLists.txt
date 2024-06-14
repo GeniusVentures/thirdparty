@@ -13,7 +13,7 @@ if(POLICY CMP0042)
 endif()
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    set(PLATFORM OS64)
+    set(PLATFORM OS64 CACHE STRING "Toolchain platform parameter")
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../ios.toolchain.cmake" CACHE STRING "Toolchain file")
 endif()
 

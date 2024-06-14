@@ -625,7 +625,7 @@ ExternalProject_Add(wallet-core
     ${_OPENSSL_CACHE_ARGS}
     ${_GRPC_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${Boost_INCLUDE_DIR}\ -I\ ${OPENSSL_INCLUDE_DIR}\ -I\ ${Protobuf_INCLUDE_DIR}
-    PATCH_COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin
+    PATCH_COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${WALLET_CORE_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin
     DEPENDS Boost grpc openssl protobuf-plugin
 )
 
