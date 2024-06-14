@@ -97,13 +97,6 @@ set(_rocksdb_EXTRA_PARAM
 # ed25519 crypto
 set(_ED25519_RANDOM dev_urandom)
 
-# tsl_hat_trie
-set(tsl_hat_trie_patch
-
-    # PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-    # "${PROJECT_BUILD_FOLDER}/cmake.in/hat-trie-patch/CMakeLists.foriOS.txt" <SOURCE_DIR>/CMakeLists.txt
-)
-
 # MNN
 set(_MNN_WIN_RUNTIME_MT OFF)
 set(_MNN_EXTRA_PARAM

@@ -214,7 +214,7 @@ ExternalProject_Add(tsl_hat_trie
     SOURCE_DIR "${THIRDPARTY_DIR}/hat-trie"
     CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    ${_tsl_hat_trie_patch}
+    ${_CMAKE_COMMON_CACHE_ARGS}
 )
 set(_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/tsl_hat_trie/lib/cmake/tsl_hat_trie")
 set(_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/tsl_hat_trie/include")
