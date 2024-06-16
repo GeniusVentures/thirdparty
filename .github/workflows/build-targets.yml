@@ -182,7 +182,7 @@ jobs:
     needs: setup-src-cache
     if: (needs.setup-src-cache.outputs.NEEDS_CACHE == 'true')
     runs-on: ubuntu-latest
-    strategy: 
+    strategy:
       fail-fast: true
       matrix:
         include: ${{ fromJson(needs.setup-src-cache.outputs.CACHE_MATRIX) }}
@@ -328,7 +328,7 @@ jobs:
       needs.setup-src-cache.result == 'success' &&
       needs.create-targets-matrix.result == 'success' &&
       (needs.cache-src.result == 'success' || needs.cache-src.result == 'skipped') &&
-      needs.create-targets-matrix.result == 'success'    
+      needs.create-targets-matrix.result == 'success'
     strategy:
       fail-fast: false
       matrix:
@@ -362,12 +362,12 @@ jobs:
           path: |
             !.git/**
             ./**
-  
+
       - if: (steps.cache-tp-source-directory.outputs.cache-hit != 'true')
         run: |
           echo "Couldn't find cached thirdparty code, ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
           exit 1
-  
+
       - name: Cache Submodule Source Files without .git
         id: cache-source-directory
         uses: GeniusVentures/cache-multi/restoremulti@v3.3.1
@@ -511,7 +511,7 @@ jobs:
               make $TARGET_NAME -j$(nproc)
               make install
 
-          # --------------------------------------------------------------------------    
+          # --------------------------------------------------------------------------
           - target-os: Android
             runs-on: ubuntu-latest
             shell: bash
@@ -541,7 +541,7 @@ jobs:
               make $TARGET_NAME -j$(nproc)
               make install  
 
-          # --------------------------------------------------------------------------    
+          # --------------------------------------------------------------------------
           - target-os: OSX
             runs-on: macos-latest
             shell: bash
@@ -569,7 +569,7 @@ jobs:
             init-script:
               uses: actions/setup-python@v2
               with:
-                python-version: '3.5' 
+                python-version: '3.5'
             setup-script: | 
               echo "Setup for iOS Build"
               find /Applications/Xcode* -maxdepth 0 -ls
@@ -586,7 +586,7 @@ jobs:
               echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
               make $TARGET_NAME -j$(nproc)
               make install
-    
+
           # --------------------------------------------------------------------------
           - target-os: Windows
             runs-on: windows-2022
@@ -600,7 +600,7 @@ jobs:
             setup-script: |
               echo "Setup for Windows Build"
               echo "Adding GNU tar to PATH"
-              echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%" 
+              echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
             cmake-init-script: |
               cd build/$TARGET_OS
               mkdir $BUILD_TYPE
@@ -611,7 +611,7 @@ jobs:
               cmake --build . --target $TARGET_NAME --config $BUILD_TYPE -j$(nproc)
               cmake --install $TARGET_NAME
 
-        target-save-data: 
+        target-save-data:
           - target-os: $TARGET_OS
             runs-on: $TARGET_RUNS_ON
             shell: bash
@@ -670,7 +670,7 @@ jobs:
               
               COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
               echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode (target build folder: ${TARGET_DIRECTORY})"
-              tar -zcf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
+              tar --exclude="src/" --exclude"tmp/" --exclude="build/" -zcf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
               
               retValue=1
               numberOfTries=1
@@ -1043,4 +1043,3 @@ jobs:
           jq <<< $jsonStr > release.json
 
           ${{ matrix.target-save-data.upload-release-json }}
-          
