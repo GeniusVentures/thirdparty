@@ -101,6 +101,21 @@ ExternalProject_Add(zlib
 ExternalProject_Get_Property(zlib INSTALL_DIR)
 set(ZLIB_ROOT ${INSTALL_DIR})
 
+# c-ares
+ExternalProject_Add(cares
+    PREFIX cares
+    SOURCE_DIR "${THIRDPARTY_DIR}/c-ares"
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    -DCARES_STATIC:BOOL=ON
+    -DCARES_SHARED:BOOL=OFF
+    ${_CMAKE_COMMON_CACHE_ARGS}
+)
+ExternalProject_Get_Property(cares INSTALL_DIR)
+set(_FINDPACKAGE_CARES_CONFIG_DIR "${INSTALL_DIR}/lib/cmake/c-ares")
+set(_FINDPACKAGE_CARES_LIBRARY_DIR "${INSTALL_DIR}/lib")
+set(_FINDPACKAGE_CARES_INCLUDE_DIR "${INSTALL_DIR}/include")
+
 # gRPC
 ExternalProject_Add(grpc
     PREFIX grpc
@@ -118,15 +133,17 @@ ExternalProject_Add(grpc
     -DgRPC_BUILD_GRPC_PHP_PLUGIN:BOOL=OFF
     -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
     -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
-    -DgRPC_ZLIB_PROVIDER:STRING=package
     -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=ON
+    -DgRPC_ZLIB_PROVIDER:STRING=package
     -DZLIB_ROOT:PATH=${ZLIB_ROOT}
     -DZLIB_USE_STATIC_LIBS:BOOL=ON
     ${_CMAKE_COMMON_CACHE_ARGS}
     -DgRPC_SSL_PROVIDER:STRING=package
+    -DgRPC_CARES_PROVIDER:STRING=package
+    -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
     ${_OPENSSL_CACHE_ARGS}
     ${_grpc_EXTRA_PARAM}
-    DEPENDS openssl ${GRPC_HOST_TARGET}
+    DEPENDS openssl ${GRPC_HOST_TARGET} zlib cares
 )
 
 # Protobuf
@@ -261,21 +278,6 @@ ExternalProject_Add(STB
     INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/stb/include
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${STB_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/stb/include/
 )
-
-# c-ares
-ExternalProject_Add(cares
-    PREFIX cares
-    SOURCE_DIR "${THIRDPARTY_DIR}/c-ares"
-    CMAKE_CACHE_ARGS
-    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    -DCARES_STATIC:BOOL=ON
-    -DCARES_SHARED:BOOL=OFF
-    ${_CMAKE_COMMON_CACHE_ARGS}
-)
-
-set(_FINDPACKAGE_CARES_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/cares/lib/cmake/c-ares")
-set(_FINDPACKAGE_CARES_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/cares/lib")
-set(_FINDPACKAGE_CARES_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/cares/include")
 
 # soralog
 ExternalProject_Add(soralog
