@@ -178,8 +178,16 @@ make
 - CMake    
 - Python >=3.5
 - xCode Command line Tools & SDK
-- rvm/Ruby 2.7.8
-  - ```rvm --default use ruby-2.7.8```
+- rvm/Ruby 2.7.8 install
+  - Undo OpenSSL 3 install 
+    - ```brew unlink openssl@3```
+    - ```brew link openssl@1.1 --force```
+  - Install RVM
+    - ```curl -sSL https://get.rvm.io | bash -s stable```
+  - Install version 2.7.8
+    - ```rvm install ruby-2.7.8```
+  - use 2.7.8 as default
+    - ```rvm --default use ruby-2.7.8```
 - wallet-core dependency tools
   - Rust, cargo
     ```bash
