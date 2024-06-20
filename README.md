@@ -13,6 +13,16 @@ Set two environment variables
 - CMAKE_BUILD_PARALLEL_LEVEL=8
 - MAKEFLAGS="-j8"  # this errors on Windows nmake, so don't use on Windows
 
+# Download Prebuilt libs
+
+Requirements:
+- Python3 (3.7+)
+- pip install tqdm
+- pip install aiohttp
+
+In thirdparty root directory, with GeniusNetwork as root directory
+python ../util/install_from_github.py build/tp-dl-prebuilt-config.txt
+
 # Build on Windows
 
 ## Preinstall

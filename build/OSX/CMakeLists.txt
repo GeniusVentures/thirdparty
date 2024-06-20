@@ -140,7 +140,7 @@ ExternalProject_Add(MoltenVK
     SOURCE_DIR    "${THIRDPARTY_DIR}/MoltenVK"
 	CONFIGURE_COMMAND  ""
 	PATCH_COMMAND ""
- 	BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/MoltenVK-build/build.sh ${BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
+ 	BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/MoltenVK-build/build.sh ${BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )

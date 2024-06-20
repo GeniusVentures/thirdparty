@@ -116,7 +116,7 @@
 	branch = OpenSSL_1_1_1-stable
 [submodule "libsecp256k1"]
 	path = libsecp256k1
-	url = https://github.com/GeniusVentures/soramitsu-libsecp256k1.git
+	url = ../soramitsu-libsecp256k1.git
 [submodule "xxhash"]
 	path = xxhash
 	url = https://github.com/hunter-packages/xxHash.git
@@ -140,7 +140,7 @@
 	url = ../wallet-core.git
 [submodule "MNN"]
 	path = MNN
-	url = https://github.com/GeniusVentures/MNN.git
+	url = ../MNN.git
 [submodule "zlib"]
 	path = zlib
 	url = https://github.com/madler/zlib.git
@@ -149,7 +149,7 @@
 	url = https://github.com/libssh2/libssh2.git
 [submodule "AsyncIOManager"]
 	path = AsyncIOManager
-	url = https://github.com/GeniusVentures/AsyncIOManager.git
+	url = ../AsyncIOManager.git
 	branch = refactor_async_mnnloader
 [submodule "cryptopp-cmake"]
 	path = cryptopp-cmake
@@ -162,4 +162,4 @@
 	url = https://github.com/nothings/stb.git
 [submodule "gnus_upnp"]
 	path = gnus_upnp
-	url = https://github.com/GeniusVentures/gnus_upnp.git
+	url = ../gnus_upnp.git
