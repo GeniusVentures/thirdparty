@@ -124,6 +124,20 @@ set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
+# ------------------------------------------
+# build MoltenVK
+set(_MVK_ROOT "${CMAKE_CURRENT_BINARY_DIR}/MoltenVK/build/")
+ExternalProject_Add(MoltenVK
+	PREFIX  moltenvk
+ 	SOURCE_DIR    "${THIRDPARTY_DIR}/MoltenVK"
+	CONFIGURE_COMMAND  ""
+	PATCH_COMMAND ""
+ 	BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/MoltenVK-build/build.sh ${BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK 
+	INSTALL_COMMAND ""
+	UPDATE_COMMAND ""
+)
+
+
 # --------------------------------------------------------
 # Build protobuf project from the git submodule for local executation of protoc.
 set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
