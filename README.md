@@ -213,6 +213,7 @@ make
     rustup toolchain install stable-x86_64-apple-darwin
     rustup toolchain install nightly-x86_64-apple-darwin
     rustup component add rust-src --toolchain nightly-x86_64-apple-darwin
+    rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
     rustup target add x86_64-apple-ios aarch64-apple-ios-sim aarch64-apple-ios
     cargo install cbindgen cargo-lipo
     ```
