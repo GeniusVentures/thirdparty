@@ -31,8 +31,7 @@
     url = https://github.com/gcesarmza/curl-android-ios.git
 [submodule "grpc"]
     path = grpc
-    url = https://github.com/grpc/grpc
-    branch = v1.39.1
+	url = ../grpc
 [submodule "GSL"]
     path = GSL
     url = https://github.com/Microsoft/GSL
@@ -141,6 +140,7 @@
 [submodule "zlib"]
 	path = zlib
 	url = https://github.com/madler/zlib.git
+    ignore = dirty
 [submodule "libssh2"]
 	path = libssh2
 	url = https://github.com/libssh2/libssh2.git

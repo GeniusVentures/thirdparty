@@ -982,7 +982,7 @@ if(CMAKE_GENERATOR MATCHES "Xcode")
     message(STATUS "Not setting any manual command-line buildflags, since Xcode is selected as the generator. Modifying the Xcode build-settings directly instead.")
 
     set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++${CMAKE_CXX_STANDARD}")
-else()
+elseif(NOT DEFINED TOOLCHAIN_FILE_PROCESSED)
     set(CMAKE_C_FLAGS "${C_TARGET_FLAGS} ${APPLE_TARGET_TRIPLE_FLAG} ${SDK_NAME_VERSION_FLAGS} ${OBJC_LEGACY_VARS} ${BITCODE} ${VISIBILITY} ${CMAKE_C_FLAGS}" CACHE INTERNAL
         "Flags used by the compiler during all C build types.")
     set(CMAKE_C_FLAGS_DEBUG "-O0 -g ${CMAKE_C_FLAGS_DEBUG}")
@@ -1025,6 +1025,8 @@ else()
 
     set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp -arch ${CMAKE_OSX_ARCHITECTURES} ${APPLE_TARGET_TRIPLE_FLAG}" CACHE INTERNAL
         "Flags used by the compiler for all ASM build types.")
+
+    set(TOOLCHAIN_FILE_PROCESSED ON CACHE INTERNAL "Toolchain file has already set the necessary flags.")
 endif()
 
 # # Print status messages to inform of the current state
