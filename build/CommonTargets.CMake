@@ -375,9 +375,9 @@ set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include"
 # --------------------------------------------------------
 # Builds MNN
 set(MNN_METAL OFF)
-if(APPLE)
-    set(MNN_METAL ON)
-endif()
+# if(APPLE)
+    # set(MNN_METAL ON)
+# endif()
 ExternalProject_Add(MNN
   PREFIX MNN
   SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
