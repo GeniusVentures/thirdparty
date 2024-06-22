@@ -225,16 +225,16 @@ set(_libp2p_BUILD_EXAMPLES OFF)
 # ---------------------------------------------------------
 # Set config for MNN modules
 set(_MNN_WIN_RUNTIME_MT OFF)
-set(_MNN_EXTRA_PARAM
-    -DMNN_METAL:BOOL=ON 
-    -DARCHS:STRING="arm64" 
-    -DENABLE_BITCODE:BOOL=OFF 
-    -DMNN_SEP_BUILD:BOOL=OFF 
-    -DMNN_USE_LOGCAT:BOOL=OFF
-    -DMNN_USE_SSE:BOOL=OFF
-    -DMNN_SUPPORT_BF16:BOOL=OFF
-    -DMNN_BUILD_FOR_ANDROID_COMMAND:BOOL=ON
-)
+# set(_MNN_EXTRA_PARAM
+    # -DMNN_METAL:BOOL=ON 
+    # -DARCHS:STRING="arm64" 
+    # -DENABLE_BITCODE:BOOL=OFF 
+    # -DMNN_SEP_BUILD:BOOL=OFF 
+    # -DMNN_USE_LOGCAT:BOOL=OFF
+    # -DMNN_USE_SSE:BOOL=OFF
+    # -DMNN_SUPPORT_BF16:BOOL=OFF
+    # -DMNN_BUILD_FOR_ANDROID_COMMAND:BOOL=ON
+# )
 
 # --------------------------------------------------------
 # Set o iOS specific configurations
