@@ -24,8 +24,7 @@ project(OSX_SHARED_THIRD_PARTY)
 include(../CommonCompilerOptions.CMake)
 
 # ------------------------------------------
-# Set OSX specific runtime options
-
+# Set OSX specific runtime options∑
 # TODO: use single architecture to avoid Crypto3 error - removed ";arm64"  
 set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(CMAKE_MACOSX_RPATH 1)
@@ -118,7 +117,7 @@ endif()
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR  "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND  <SOURCE_DIR>/Configure darwin64-x86_64-cc ${OPENSSL_VARIANT} -static --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT}
+    CONFIGURE_COMMAND  <SOURCE_DIR>/Configure darwin64-x86_64-cc ${OPENSSL_VARIANT} -static --prefix=${_openssl_BUILD_ROOT} --openssldir=${_openssl_BUILD_ROOT} -mmacosx-version-min=12.1
     BUILD_COMMAND make build_libs
     BUILD_IN_SOURCE  FALSE
     INSTALL_COMMAND make install_dev
