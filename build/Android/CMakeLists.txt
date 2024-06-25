@@ -61,7 +61,7 @@ set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
 
 # --------------------------------------------------------
 # build boost
-set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/Android")
+set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/Android/${ANDROID_ABI}")
 ExternalProject_Add( Boost
 	PREFIX boost
 	SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
