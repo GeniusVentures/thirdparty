@@ -120,9 +120,6 @@ set(ipfs-bitswap-cpp_EXTRA_PARAM
     -D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN7
 )
 
-# MNN
-set(_MNN_WIN_RUNTIME_MT ON)
-
 # Allow multiple definitions
 set(MULTIPLE_OPTION /FORCE:MULTIPLE)
 

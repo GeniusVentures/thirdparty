@@ -103,7 +103,4 @@ ExternalProject_Add(MoltenVK
 # ed25519 crypto
 set(_ED25519_RANDOM dev_urandom)
 
-# MNN
-set(_MNN_WIN_RUNTIME_MT OFF)
-
 include(../CommonTargets.CMake)

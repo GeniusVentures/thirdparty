@@ -98,7 +98,6 @@ set(_rocksdb_EXTRA_PARAM
 set(_ED25519_RANDOM dev_urandom)
 
 # MNN
-set(_MNN_WIN_RUNTIME_MT OFF)
 set(_MNN_EXTRA_PARAM
     -DMNN_METAL:BOOL=ON
     -DARCHS:STRING="arm64"
