@@ -51,6 +51,7 @@ if(CMAKE_CROSSCOMPILING)
         -DgRPC_INSTALL:BOOL=ON
         -Dprotobuf_ABSL_PROVIDER:STRING=package
         -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=ON
+        ${_MSVC_RUNTIME_LIBRARY}
     )
 
     set(_grpc_EXTRA_PARAM
@@ -67,13 +68,12 @@ set(PROTOBUF_HOST_PREFIX "${GRPC_HOST_PREFIX}")
 
 if(MSVC)
     set(Protobuf_HOST_DIR "${PROTOBUF_HOST_PREFIX}/cmake")
-    set(absl_HOST_DIR "${Protobuf_HOST_DIR}")
-    set(utf8_range_HOST_DIR "${Protobuf_HOST_DIR}")
 else()
     set(Protobuf_HOST_DIR "${PROTOBUF_HOST_PREFIX}/lib/cmake/protobuf")
-    set(absl_HOST_DIR "${Protobuf_HOST_DIR}/../absl")
-    set(utf8_range_HOST_DIR "${Protobuf_HOST_DIR}/../utf8_range")
 endif()
+
+set(absl_HOST_DIR "${GRPC_HOST_PREFIX}/lib/cmake/absl")
+set(utf8_range_HOST_DIR "${GRPC_HOST_PREFIX}/lib/cmake/utf8_range")
 
 set(PROTOBUF_HOST_INCLUDE_DIR "${PROTOBUF_HOST_PREFIX}/include")
 set(PROTOBUF_HOST_LIB_DIR "${PROTOBUF_HOST_PREFIX}/lib")
@@ -205,6 +205,7 @@ ExternalProject_Add(fmt
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     ${_CMAKE_COMMON_CACHE_ARGS}
     -DBUILD_SHARED_LIBS:BOOL=OFF
+    -DFMT_DOC:BOOL=OFF
     -DFMT_TEST:BOOL=OFF
 )
 
@@ -610,6 +611,7 @@ ExternalProject_Add(protobuf-plugin
     -DProtobuf_DIR:PATH=${Protobuf_HOST_DIR}
     -DTW_USE_EXTERNAL_PROTOC:BOOL=TRUE
     -Dutf8_range_DIR:PATH=${utf8_range_HOST_DIR}
+    ${_MSVC_RUNTIME_LIBRARY}
     DEPENDS ${PROTOBUF_TARGET}
 )
 ExternalProject_Get_Property(protobuf-plugin INSTALL_DIR)
