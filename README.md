@@ -13,6 +13,16 @@ Set two environment variables
 - CMAKE_BUILD_PARALLEL_LEVEL=8
 - MAKEFLAGS="-j8"  # this errors on Windows nmake, so don't use on Windows
 
+# Download Prebuilt libs
+
+Requirements:
+- Python3 (3.7+)
+- pip install tqdm
+- pip install aiohttp
+
+In thirdparty root directory, with GeniusNetwork as root directory
+python ../util/install_from_github.py build/tp-dl-prebuilt-config.txt
+
 # Build on Windows
 
 ## Preinstall
@@ -168,8 +178,16 @@ make
 - CMake    
 - Python >=3.5
 - xCode Command line Tools & SDK
-- rvm/Ruby 2.7.8
-  - ```rvm --default use ruby-2.7.8```
+- rvm/Ruby 2.7.8 install
+  - Undo OpenSSL 3 install 
+    - ```brew unlink openssl@3```
+    - ```brew link openssl@1.1 --force```
+  - Install RVM
+    - ```curl -sSL https://get.rvm.io | bash -s stable```
+  - Install version 2.7.8
+    - ```rvm install ruby-2.7.8```
+  - use 2.7.8 as default
+    - ```rvm --default use ruby-2.7.8```
 - wallet-core dependency tools
   - Rust, cargo
     ```bash
@@ -203,6 +221,7 @@ make
     rustup toolchain install stable-x86_64-apple-darwin
     rustup toolchain install nightly-x86_64-apple-darwin
     rustup component add rust-src --toolchain nightly-x86_64-apple-darwin
+    rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
     rustup target add x86_64-apple-ios aarch64-apple-ios-sim aarch64-apple-ios
     cargo install cbindgen cargo-lipo
     ```

@@ -74,7 +74,7 @@ set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_N
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND <SOURCE_DIR>/Configure darwin64-x86_64-cc $<IF:$<CONFIG:Debug>,--debug,--release> -static --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR}
+    CONFIGURE_COMMAND <SOURCE_DIR>/Configure darwin64-x86_64-cc $<IF:$<CONFIG:Debug>,--debug,--release> -static --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} -mmacosx-version-min=12.1
     BUILD_COMMAND make build_libs
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND make install_dev
@@ -95,7 +95,7 @@ ExternalProject_Add(MoltenVK
     SOURCE_DIR "${THIRDPARTY_DIR}/MoltenVK"
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/MoltenVK-build/build.sh ${BOOST_BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
+    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/MoltenVK-build/build.sh ${BOOST_BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )

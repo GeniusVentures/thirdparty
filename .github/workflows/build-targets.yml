@@ -255,7 +255,7 @@ jobs:
         id: create-target-info
         run: |
           cmake -S build/Linux -B build/Linux/Release -DCMAKE_BUILD_TYPE=Release
-          
+
           cd build
           declare -A cMakeNamesRepos
           while IFS=',' read -r cmakeName repoDir; do
@@ -655,7 +655,7 @@ jobs:
 
               COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
               echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode (target build folder: ${TARGET_DIRECTORY})"
-              tar -zcf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
+              tar --exclude="src/" --exclude"tmp/" --exclude="build/" -zcf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
 
               retValue=1
               numberOfTries=1
