@@ -14,6 +14,7 @@ endif()
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(PLATFORM OS64 CACHE STRING "Toolchain platform parameter")
+    set(DEPLOYMENT_TARGET "16" CACHE STRING "Minimum iOS version")
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../apple.toolchain.cmake" CACHE STRING "Toolchain file")
 endif()
 
@@ -24,6 +25,7 @@ include(../CommonCompilerOptions.CMake)
 # OSX specific runtime options
 set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DPLATFORM:STRING=${PLATFORM}
+    -DDEPLOYMENT_TARGET:STRING=${DEPLOYMENT_TARGET}
 )
 
 # Boost

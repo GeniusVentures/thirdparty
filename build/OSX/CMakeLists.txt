@@ -13,7 +13,16 @@ if(POLICY CMP0042)
 endif()
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    set(PLATFORM MAC CACHE STRING "Toolchain platform parameter")
+    cmake_host_system_information(RESULT HOST_SYSTEM_PROCESSOR QUERY OS_PLATFORM)
+
+    if(HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
+        set(_PLATFORM "MAC")
+    elseif(HOST_SYSTEM_PROCESSOR STREQUAL "arm")
+        set(_PLATFORM "MAC_ARM64")
+    endif()
+
+    set(PLATFORM ${_PLATFORM} CACHE STRING "Toolchain platform parameter")
+    set(DEPLOYMENT_TARGET "12.1" CACHE STRING "Minimum OSX version")
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../apple.toolchain.cmake" CACHE STRING "Toolchain file")
 endif()
 
@@ -24,6 +33,7 @@ include(../CommonCompilerOptions.CMake)
 # OSX specific runtime options
 set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DPLATFORM:STRING=${PLATFORM}
+    -DDEPLOYMENT_TARGET:STRING=${DEPLOYMENT_TARGET}
 )
 
 # Boost
@@ -70,11 +80,12 @@ set(_BOOST_CACHE_ARGS
 
 # OpenSSL
 set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
+set(OPENSSL_VARIANT "$<IF:$<CONFIG:Debug>,--debug,--release>")
 
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND <SOURCE_DIR>/Configure darwin64-x86_64-cc $<IF:$<CONFIG:Debug>,--debug,--release> -static --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} -mmacosx-version-min=12.1
+    CONFIGURE_COMMAND <SOURCE_DIR>/Configure darwin64-x86_64-cc ${OPENSSL_VARIANT} -static --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} -mmacosx-version-min=12.1
     BUILD_COMMAND make build_libs
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND make install_dev

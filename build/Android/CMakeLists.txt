@@ -116,7 +116,7 @@ endif()
 
 set(OPENSSL_VARIANT "$<$<CONFIG:Debug>:--debug>")
 
-set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/")
+set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Android/${ANDROID_ABI}")
 
 ExternalProject_Add(openssl
     PREFIX openssl

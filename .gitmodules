@@ -42,9 +42,9 @@
     path = hat-trie
     url = https://github.com/masterjedy/hat-trie
 [submodule "Boost.DI"]
-    path = Boost.DI
-    url = https://github.com/masterjedy/di
-    branch = cpp14
+	path = Boost.DI
+	url = ../Boost.DI
+	branch = cpp14
 [submodule "cpp-ipfs-http-client"]
     path = cpp-ipfs-http-client
     url = https://github.com/vasild/cpp-ipfs-http-client
@@ -162,7 +162,7 @@
     url = ../gnus_upnp.git
 [submodule "sqlite3"]
     path = sqlite3
-    url = https://github.com/GeniusVentures/sqlite-amalgamation
+	url = ../sqlite-amalgamation
 [submodule "SQLiteModernCpp"]
     path = SQLiteModernCpp
     url = https://github.com/GeniusVentures/sqlite_modern_cpp.git
