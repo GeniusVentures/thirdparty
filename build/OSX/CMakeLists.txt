@@ -15,10 +15,10 @@ endif()
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     cmake_host_system_information(RESULT HOST_SYSTEM_PROCESSOR QUERY OS_PLATFORM)
 
-    if(HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
-        set(_PLATFORM "MAC")
-    elseif(HOST_SYSTEM_PROCESSOR STREQUAL "arm")
+    if(HOST_SYSTEM_PROCESSOR STREQUAL "arm")
         set(_PLATFORM "MAC_ARM64")
+    else()
+        set(_PLATFORM "MAC")
     endif()
 
     set(PLATFORM ${_PLATFORM} CACHE STRING "Toolchain platform parameter")
