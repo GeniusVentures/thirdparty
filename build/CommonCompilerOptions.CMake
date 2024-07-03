@@ -15,6 +15,7 @@ get_filename_component(PROJECT_SRC_FOLDER "${PROJECT_BUILD_FOLDER}" DIRECTORY AB
 include(${PROJECT_BUILD_FOLDER}/cmake.in/functions.cmake)
 include(ExternalProject)
 
+# Boost
 set(BOOST_VARIANT $<IF:$<CONFIG:Debug>,debug,release>)
 
 # Workaround for on GitHub actions, probably permission error - get_BOOST_version(BOOST_VERSION "${THIRDPARTY_DIR}/boost/boost/version.hpp")

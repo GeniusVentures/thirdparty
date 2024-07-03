@@ -56,7 +56,7 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh" ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${BOOST_ROOT}" --with-libraries="${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}" --extra="--build-type=minimal,visibility=global,cxxstd=${CMAKE_CXX_STANDARD}"
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${BOOST_ROOT}" --with-libraries="${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}" --extra="--build-type=minimal,visibility=global,cxxstd=${CMAKE_CXX_STANDARD}"
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
@@ -114,7 +114,7 @@ elseif(ANDROID_ABI STREQUAL "x86_64")
     set(OPENSSL_ABI android-x86_64)
 endif()
 
-set(OPENSSL_VARIANT "$<$<CONFIG:Debug>:--debug>")
+set(OPENSSL_VARIANT $<$<CONFIG:Debug>:--debug>)
 
 set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/Android/${ANDROID_ABI}")
 

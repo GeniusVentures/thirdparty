@@ -5,11 +5,13 @@ on:
 
 jobs:
   build:
+    env:
+      GRPC_BUILD_ENABLE_CCACHE: "ON"
     runs-on: ${{matrix.host}}
     strategy:
       fail-fast: false
       matrix:
-        target: [Linux, Windows, OSX]
+        target: [Linux, Windows, OSX, Android, iOS]
         build_type: [Debug, Release]
         include:
           - target: Linux
@@ -17,6 +19,10 @@ jobs:
           - target: Windows
             host: windows-latest
           - target: OSX
+            host: macos-latest
+          - target: Android
+            host: ubuntu-latest
+          - target: iOS
             host: macos-latest
     steps:
       - name: Checkout
@@ -32,22 +38,37 @@ jobs:
           sudo update-alternatives --set cc $(which clang)
           sudo update-alternatives --set c++ $(which clang++)
 
-      - name: Install Linux dependencies
+      - name: Install Linux host dependencies
         if: ${{ matrix.host == 'ubuntu-latest'}}
         run: |
           sudo apt install ccache -y
           sudo apt install ninja-build -y
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
-      - name: Install Windows dependencies
+      - name: Install Windows host dependencies
         if: ${{ matrix.host == 'windows-latest'}}
         run: |
           choco install ccache -A
 
-      - name: Install Darwin dependencies
+      - name: Install Darwin host dependencies
         if: ${{ matrix.host == 'macos-latest'}}
         run: |
-            brew install ccache
+          brew install ccache
+
+      - name: Add Darwin toolchain
+        run: rustup target add x86_64-apple-darwin
+
+      - name: Add iOS toolchain
+        if: ${{ matrix.target == 'iOS' }}
+        run: |
+          rustup toolchain install nightly-aarch64-apple-darwin
+          rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
+          rustup target add aarch64-apple-ios
+
+      - name: Add Android toolchain
+        if: ${{ matrix.target == 'Android' }}
+        run: |
+          rustup target add aarch64-linux-android
 
       - name: Install bindgen
         run: cargo install cbindgen
@@ -59,4 +80,4 @@ jobs:
         run: cmake -S build/${{matrix.target}} -B build/${{matrix.target}}/${{matrix.build_type}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
 
       - name: Build project
-        run: cmake --build build/${{matrix.target}}/${{matrix.build_type}} --config ${{matrix.build_type}}
+        run: cmake --build build/${{matrix.target}}/${{matrix.build_type}} --config ${{matrix.build_type}} --target wallet-core --verbose
