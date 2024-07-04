@@ -20,11 +20,6 @@ if(NOT CMAKE_ANDROID_NDK)
     endif()
 endif()
 
-if(NOT DEFINED ENV{ANDROID_TOOLCHAIN})
-    message(WARNING "ANDROID_TOOLCHAIN not set in the environment variables. Setting to ${ANDROID_TOOLCHAIN_ROOT}.")
-    set(ANDROID_TOOLCHAIN ${ANDROID_TOOLCHAIN_ROOT})
-endif()
-
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_ANDROID_NDK}/build/cmake/android.toolchain.cmake")
 
 project(ANDROID_SHARED_THIRD_PARTY LANGUAGES C CXX)
@@ -122,7 +117,7 @@ ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --abi=${OPENSSL_ABI} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${OPENSSL_ROOT_DIR} --env_path=$ENV{PATH} --env_android_ndk=${CMAKE_ANDROID_NDK} --env_android_toolchain=$ENV{ANDROID_TOOLCHAIN}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --abi=${OPENSSL_ABI} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${OPENSSL_ROOT_DIR} --env_path=$ENV{PATH} --env_android_ndk=${CMAKE_ANDROID_NDK} --env_android_toolchain=${ANDROID_TOOLCHAIN_ROOT}/bin
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND make install_dev
 )

@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [Linux, Windows, OSX, Android, iOS]
+        target: [Android, iOS, OSX, Linux, Windows]
         build_type: [Debug, Release]
         include:
           - target: Linux
@@ -80,4 +80,4 @@ jobs:
         run: cmake -S build/${{matrix.target}} -B build/${{matrix.target}}/${{matrix.build_type}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
 
       - name: Build project
-        run: cmake --build build/${{matrix.target}}/${{matrix.build_type}} --config ${{matrix.build_type}} --target wallet-core --verbose
+        run: cmake --build build/${{matrix.target}}/${{matrix.build_type}} --config ${{matrix.build_type}} -j
