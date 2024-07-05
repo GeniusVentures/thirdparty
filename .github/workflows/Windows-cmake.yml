@@ -1,58 +1,25 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Windows Build
 
-# Controls when the workflow will run
-# Triggers the workflow on push or pull request events and manually from the Actions tab
 on:
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - 'README.md'
-      - '.github/workflows/**'
-      - '.gitignore'
-  pull_request:
   workflow_dispatch:
 
-env:
-  CMAKE_BUILD_PARALLEL_LEVEL: 8
-
 jobs:
-  Windows:
+  build:
     runs-on: windows-2022
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          submodules: 'recursive'
-      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1
-        with:
-          sdk-version: 22000
+          submodules: "recursive"
 
-      # Sets up the visual studio environment to build x64
-      - name: Configure build for Windows 10 x64
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: amd64
-      - name: Install Rust dependencies
-        run: |
-            rustup update
-            rustup toolchain install stable
-            rustup default stable
-            rustup set default-host x86_64-pc-windows-msvc
-            rustup target add x86_64-pc-windows-msvc
-            rustup target add wasm32-unknown-emscripten
-            cargo install cbindgen
+      - name: Add Rust target
+        run: rustup target add wasm32-unknown-emscripten
 
-      - name: Create Build Directory
-        run: cmake -E make_directory ${{github.workspace}}/.build
+      - name: Install ccache
+        run: choco install ccache -y
 
       - name: Configure CMake
-        working-directory: ${{github.workspace}}/.build
-        run: cmake -S ../build/Windows/ -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_VERSION="10.0"
+        run: cmake -S build/Windows -B build/Windows/Release -DCMAKE_BUILD_TYPE=Release
 
-      - name: Compile
-        working-directory: ${{github.workspace}}/.build
-        run: cmake --build . --config Release
-
+      - name: Build project
+        run: cmake --build build/Windows/Release --config Release -j
