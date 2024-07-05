@@ -123,7 +123,7 @@ jobs:
           done
           matrixJson+=" ]"
 
-          ## Setting this to not fail the workflow while deleting cache keys.
+          # Setting this to not fail the workflow while deleting cache keys.
           set +e
 
           # Delete old caches
@@ -180,7 +180,7 @@ jobs:
         run: |
           sudo apt install zstd -y
 
-      - name: Cache Third Party Directory
+      - name: Cache third party directory
         uses: GeniusVentures/cache-multi/restore@v3.3.1
         id: cache-tp-source-directory
         with:
@@ -198,7 +198,7 @@ jobs:
       - name: Git clone submodule source code
         run: |
           echo "Cloning source for ${{ matrix.name }}"
-          git submodule update --init --recursive -- ${{ matrix.name }}
+          git submodule update --init --recursive --recommend-shallow -- ${{ matrix.name }}
         shell: bash
         working-directory: ${{github.workspace}}
 
@@ -256,29 +256,26 @@ jobs:
         run: |
           cmake -S build/Linux -B build/Linux/Release -DCMAKE_BUILD_TYPE=Release
 
-          cd build
-          declare -A cMakeNamesRepos
-          while IFS=',' read -r cmakeName repoDir; do
-            echo -e "cmakeName: $cmakeName, repoDir: $repoDir"
-            cMakeNamesRepos["$cmakeName"]="$repoDir"
-          done < <(sed -nE 's/^ExternalProject_Add\(([^)]*).*/\1/p; s/^[[:space:]]*SOURCE_DIR[[:space:]]+"([^/]*\/)*(.*)".*/\2/p' CommonTargets.CMake Linux/CMakeLists.txt |
-            paste -d ',' - -)
-
-          cd Linux/Release/CMakeFiles
+          cd build/Linux/Release/CMakeFiles
           declare -A cMakeBuildDir
           while IFS=',' read -r cmakeName buildDir; do
-            echo -e "cmakeName: $cmakeName, buildDir: $buildDir"
-            cMakeBuildDir["$cmakeName"]="$buildDir"
+              cMakeBuildDir["$cmakeName"]="$buildDir"
           done < <(grep -m1 -R --include "build.make" -e ".*-complete:.*-build" * |
-            sed -E -n 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2/p')
+              sed -E -n 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2/p')
+
+          cd ..
+          declare -A cMakeNamesRepos
+          for key in "${!cMakeBuildDir[@]}"; do
+              sourceDir=$(find . -type f -name "${key}-source_dirinfo.txt" -exec sed -n 's/^source_dir=\(.*\)\/\(.*\)/\2/p' {} \;)
+              cMakeNamesRepos["$key"]=$sourceDir
+          done
 
           declare -A gitLibModules
-          cd ../../../../
-          while IFS=',' read -r longSHA repoDir; do
-            echo -e "repoDir: $repoDir, longSHA: $longSHA"
-            gitLibModules["$repoDir"]="$longSHA"
-          done < <(git ls-tree HEAD | grep -E "160000 commit|040000 tree" |
-            sed -E -n 's/^.*(commit|tree) ([a-f0-9]+)[ \t]+([^ ]+)$/\2,\3/p')
+          cd ../../..
+          while IFS=',' read -r longSHA sourceDir; do
+              gitLibModules["$sourceDir"]="$longSHA"
+          done < <(git ls-tree HEAD |
+              sed -E -n 's/^(160000 commit|040000 tree) ([a-f0-9]+)[ \t]+([^ ]+)$/\2,\3/p')
 
           # Initialize the variables
           cMakeNames=""
@@ -286,14 +283,22 @@ jobs:
           repoNames=""
           shortSHAs=""
 
+          # Define column widths
+          name_width=20
+          build_dir_width=20
+          source_dir_width=20
+
+          # Print header
+          printf "%-${name_width}s | %-${build_dir_width}s | %-${source_dir_width}s | %-${sha_width}s\n" "Name" "Build dir" "Source dir" "SHA"
           for key in "${!cMakeBuildDir[@]}"; do
-            buildDir="${cMakeBuildDir[$key]}"
-            repoDir="${cMakeNamesRepos[$key]}"
-            shortSHA="${gitLibModules[$repoDir]:0:7}"
-            cMakeNames+="${key}\n"
-            buildDirectoryNames+="${buildDir}\n"
-            repoNames+="${repoDir}\n"
-            shortSHAs+="${shortSHA}\n"
+              buildDir="${cMakeBuildDir[$key]}"
+              sourceDir="${cMakeNamesRepos[$key]}"
+              shortSHA="${gitLibModules[$sourceDir]:0:7}"
+              cMakeNames+="${key}\n"
+              buildDirectoryNames+="${buildDir}\n"
+              repoNames+="${sourceDir}\n"
+              shortSHAs+="${shortSHA}\n"
+              printf "%-${name_width}s | %-${build_dir_width}s | %-${source_dir_width}s | %s\n" "${key}" "${buildDir}" "${sourceDir}" "${shortSHA}"
           done
 
           echo "TARGET_NAMES=$cMakeNames" >> $GITHUB_OUTPUT
@@ -980,7 +985,7 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
 
-          ## Setting this to not fail the workflow while checking release tag 
+          # Setting this to not fail the workflow while checking release tag 
           set +e
 
           GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
