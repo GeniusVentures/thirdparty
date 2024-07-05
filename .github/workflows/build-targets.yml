@@ -487,17 +487,9 @@ jobs:
             shell: bash
             init-script:
             setup-script: |
-              echo "Setup for Linux Build"
               sudo apt install zstd -y
             cmake-init-script: |
-              cd build/$TARGET_OS
-              mkdir $BUILD_TYPE
-              cd $BUILD_TYPE
-              cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-            cmake-compile-script: |
-              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
-              make $TARGET_NAME -j$(nproc)
-              make install
+              cmake -B $BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
           # --------------------------------------------------------------------------
           - target-os: Android
@@ -507,10 +499,8 @@ jobs:
               CC: clang
             init-script:
             setup-script: |
-              echo "Setup for Android Build"
               git config --global core.autocrlf false
               git config --global core.eol lf
-              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
               echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
               echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
               sudo apt install zstd -y
@@ -520,14 +510,7 @@ jobs:
               x86
               armeabi-v7a
             cmake-init-script: |
-              cd build/$TARGET_OS
-              mkdir $BUILD_TYPE
-              cd $BUILD_TYPE
-              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-            cmake-compile-script: |
-              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
-              make $TARGET_NAME -j$(nproc)
-              make install
+              cmake -B $BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
 
           # --------------------------------------------------------------------------
           - target-os: OSX
@@ -535,21 +518,13 @@ jobs:
             shell: bash
             init-script:
             setup-script: |
-              echo "Setup for OSX Build"
               find /Applications/Xcode* -maxdepth 0 -ls
               sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
               sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/* 
               brew install zstd
               cargo install cbindgen
             cmake-init-script: |
-              cd build/$TARGET_OS
-              mkdir $BUILD_TYPE
-              cd $BUILD_TYPE
-              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-            cmake-compile-script: |
-              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
-              make $TARGET_NAME -j$(nproc)
-              make install
+              cmake -B $BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
           # --------------------------------------------------------------------------
           - target-os: iOS
@@ -560,7 +535,6 @@ jobs:
               with:
                 python-version: "3.5"
             setup-script: |
-              echo "Setup for iOS Build"
               find /Applications/Xcode* -maxdepth 0 -ls
               sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_*[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
               sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
@@ -568,14 +542,7 @@ jobs:
               cargo install cbindgen
 
             cmake-init-script: |
-              cd build/$TARGET_OS
-              mkdir $BUILD_TYPE
-              cd $BUILD_TYPE
-              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${WORKSPACE}/build/iOS/iOS.cmake
-            cmake-compile-script: |
-              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
-              make $TARGET_NAME -j$(nproc)
-              make install
+              cmake -B $BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1 -DCMAKE_TOOLCHAIN_FILE=${WORKSPACE}/build/iOS/iOS.cmake
 
           # --------------------------------------------------------------------------
           - target-os: Windows
@@ -588,18 +555,10 @@ jobs:
                 sdk: 10.0.22621.0
                 vsversion: 17
             setup-script: |
-              echo "Setup for Windows Build"
               echo "Adding GNU tar to PATH"
               echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
             cmake-init-script: |
-              cd build/$TARGET_OS
-              mkdir $BUILD_TYPE
-              cd $BUILD_TYPE
-              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 17 2022" -A x64 -DCMAKE_SYSTEM_VERSION="10.0"
-            cmake-compile-script: |
-              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
-              cmake --build . --target $TARGET_NAME --config $BUILD_TYPE -j$(nproc)
-              cmake --install $TARGET_NAME
+              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
         target-save-data:
           - target-os: $TARGET_OS
@@ -766,12 +725,13 @@ jobs:
           echo "Running setup script"
           ${{ matrix.target-build-data.setup-script }}
 
-      - name: Init the CMake build files
+      - name: Configure CMake
         shell: bash
         run: |
           TARGET_OS="${{ matrix.target-build-data.target-os }}"
           BUILD_TYPE="${{ matrix.build-type }}"
           WORKSPACE=${{ github.workspace }}
+          cd build/$TARGET_OS
           ${{ matrix.target-build-data.cmake-init-script }}
 
       - name: Load built library caches if any
@@ -907,8 +867,10 @@ jobs:
             TARGET_DIRECTORY="${listOfTargetDirToBuild[i]}"
             COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
             COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
-            echo "Starting to compile target: ${TARGET_NAME}"
-            ${{ matrix.target-build-data.cmake-compile-script }}
+            
+            echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
+            cmake --build . --target $TARGET_NAME --config $BUILD_TYPE -j
+            cmake --install $TARGET_NAME
             
             echo "Starting to upload target: ${COMPRESSED_TARGET}"
             # Upload released target 
