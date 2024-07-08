@@ -35,16 +35,6 @@ else()
     set(TP_BUILD_SUBDIR ${CMAKE_SYSTEM_NAME})
 endif()
 
-if(${CMAKE_HOST_APPLE})
-    # This really should be done for any target using LLVM's libc++, we are only targeting mac due to its default use of it. This must be removed once we update Boost.
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION")
-endif()
-
-# This is a workaround that should be removed once we update Boost.
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-constexpr-conversion")
-endif()
-
 if(MSVC)
     set(_MSVC_RUNTIME_LIBRARY
         -DCMAKE_POLICY_DEFAULT_CMP0091:STRING=NEW
