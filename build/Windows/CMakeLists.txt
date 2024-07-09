@@ -77,7 +77,7 @@ set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_N
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND perl ${THIRDPARTY_DIR}/openssl/Configure $<IF:$<CONFIG:Debug>,--debug,--release> enable-capieng no-shared no-asm --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} VC-WIN64A
+    CONFIGURE_COMMAND perl ${THIRDPARTY_DIR}/openssl/Configure ${OPENSSL_VARIANT} enable-capieng no-shared no-asm --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} --libdir=lib -static VC-WIN64A
     BUILD_COMMAND nmake build_libs
     BUILD_IN_SOURCE false
     INSTALL_COMMAND nmake install_dev
@@ -96,8 +96,7 @@ set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
     -DOPENSSL_MSVC_STATIC_RT:BOOL=ON
     -DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}
-    -DOPENSSL_INCLUDE_DIR:PATH=${OPENSSL_INCLUDE_DIR}
-    -DOPENSSL_LIBRARIES:PATH=${OPENSSL_ROOT_DIR}/lib
+    -DOpenSSL_DIR:PATH=${OPENSSL_ROOT_DIR}/lib/cmake/OpenSSL
 )
 
 # ed25519 crypto

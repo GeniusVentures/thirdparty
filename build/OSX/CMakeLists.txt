@@ -89,12 +89,11 @@ set(_BOOST_CACHE_ARGS
 
 # OpenSSL
 set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
-set(OPENSSL_VARIANT "$<IF:$<CONFIG:Debug>,--debug,--release>")
 
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND <SOURCE_DIR>/Configure darwin64-x86_64-cc ${OPENSSL_VARIANT} -static --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} -mmacosx-version-min=12.1
+    CONFIGURE_COMMAND <SOURCE_DIR>/Configure ${OPENSSL_VARIANT} --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} -mmacosx-version-min=12.1 --libdir=lib -static darwin64-${CMAKE_SYSTEM_PROCESSOR}-cc
     BUILD_COMMAND make build_libs
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND make install_dev
@@ -104,8 +103,7 @@ set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
 set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
     -DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}
-    -DOPENSSL_INCLUDE_DIR:PATH=${OPENSSL_INCLUDE_DIR}
-    -DOPENSSL_LIBRARIES:PATH=${OPENSSL_ROOT_DIR}/lib
+    -DOpenSSL_DIR:PATH=${OPENSSL_ROOT_DIR}/lib/cmake/OpenSSL
 )
 
 # MoltenVK

@@ -60,7 +60,7 @@ export PATH=$LOCAL_ANDROID_NDK:$LOCAL_ANDROID_TOOLCHAIN:$LOCAL_PATH
 CONFIGDIR=$(dirname $0)/../../../openssl
 REALCONFIGDIR=$(realpath ${CONFIGDIR})
 
-OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure $ABI $BUILD_TYPE no-asm no-shared --prefix=$BUILD_DIR --openssldir=$BUILD_DIR"
+OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure $ABI $BUILD_TYPE no-asm no-shared --prefix=$BUILD_DIR --openssldir=$BUILD_DIR --libdir=lib"
 
 echo "Building OpenSSL"
 echo $OPENSSL_CONFIGURE_CMD
