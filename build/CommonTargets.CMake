@@ -1,17 +1,3 @@
-# absl - Excluded from build since gRPC uses its own absl
-# ExternalProject_Add(absl
-# PREFIX absl
-# SOURCE_DIR "${THIRDPARTY_DIR}/abseil-cpp"
-# CMAKE_CACHE_ARGS
-# -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/absl
-# -DABSL_PROPAGATE_CXX_STD:BOOL=ON
-# ${_CMAKE_COMMON_CACHE_ARGS}
-# )
-
-# set(_FINDPACKAGE_ABSL_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/absl/lib/cmake/absl")
-# set(_FINDPACKAGE_ABSL_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/absl/lib")
-# set(_FINDPACKAGE_ABSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/absl/include")
-
 # GTest
 ExternalProject_Add(GTest
     PREFIX GTest
