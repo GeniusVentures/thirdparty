@@ -13,6 +13,11 @@ if(POLICY CMP0042)
 endif()
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    set(NAMED_LANGUAGE_SUPPORT OFF CACHE BOOL "Toolchain named language support parameter")
+    set(ENABLE_BITCODE OFF CACHE BOOL "Toolchain bitcode enable parameter")
+    set(ENABLE_ARC OFF CACHE BOOL "Toolchain enable arc parameter")
+    set(ENABLE_VISIBILITY ON CACHE BOOL "Toolchain visibility parameter")
+    set(ENABLE_STRICT_TRY_COMPILE OFF CACHE BOOL "Toolchain try_compile enable parameter")
     set(PLATFORM OS64 CACHE STRING "Toolchain platform parameter")
     set(DEPLOYMENT_TARGET "16" CACHE STRING "Minimum iOS version")
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../apple.toolchain.cmake" CACHE STRING "Toolchain file")
@@ -24,9 +29,11 @@ include(../CommonCompilerOptions.CMake)
 
 # OSX specific runtime options
 set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
-    -DENABLE_ARC:BOOL=OFF
-    -DENABLE_BITCODE:BOOL=OFF
-    -DENABLE_VISIBILITY:BOOL=OFF
+    -DNAMED_LANGUAGE_SUPPORT:BOOL=${NAMED_LANGUAGE_SUPPORT}
+    -DENABLE_BITCODE:BOOL=${ENABLE_BITCODE}
+    -DENABLE_ARC:BOOL=${ENABLE_ARC}
+    -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
+    -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
     -DPLATFORM:STRING=${PLATFORM}
     -DDEPLOYMENT_TARGET:STRING=${DEPLOYMENT_TARGET}
 )
