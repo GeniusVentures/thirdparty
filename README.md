@@ -23,11 +23,25 @@ Requirements:
 In thirdparty root directory, with GeniusNetwork as root directory
 python ../util/install_from_github.py build/tp-dl-prebuilt-config.txt
 
-# Build on Windows
+# Download thirdparty project for development
 
-## Preinstall
+```bash
+git clone git@github.com:GeniusVentures/thirdparty.git
+cd thirdparty
+git checkout develop
+git submodule update --init --recursive
+```
+# Building 
+
+Chose the CMAKE_BUILD_TYPE according to the desired configuration (Debug or Release).
+
+## Windows
+
+Using Visual Studio 17 2022 to compile thirdparty project.
+
+### Requirements
 - CMake
-- Visual Studio 2015, 2017, 2019 or 2022
+- Visual Studio 2019 or 2022
 - Strawberry Perl (https://strawberryperl.com/)
 - Python >=3.5
 - rvm/Ruby 2.7.8
@@ -38,28 +52,18 @@ python ../util/install_from_github.py build/tp-dl-prebuilt-config.txt
     - ```rustup target add x86_64-pc-windows-msvc```
 	- ```cargo install cbindgen cargo-lipo```
   	- ```rustup target add wasm32-unknown-emscripten``` (to be deprecated)
-## Building
+   - 
+### Build instructions
 ```bash
-git submodule update --init --recursive
-cd ./build/Windows
-mkdir Release
-cd Release
-cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
-cmake --build . --config Release
+cd build/Windows
+mkdir [Debug or Release] 
+cd [Debug or Release]
+cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=[Debug or Release]
+cmake --build . --config [Debug or Release]
 ```
 
-### Building for debugging
-```bash
-git pull
-git submodule update --init --recursive
-cd ./build/Windows
-mkdir Debug
-cd Debug
-cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug
-cmake --build . --config Debug
-```
-# Build on Linux
-## Preinstall
+## Linux
+### Requirements
 	
 - Ubuntu 22.04 (or compatible) recommended
 
@@ -115,66 +119,58 @@ These steps were extracted from the bootstrap.sh script on TestVMS [**(here)**](
 The following Rust target is needed for now but will be deprecated soon:
 
 - ```rustup target add wasm32-unknown-emscripten```	 # this will be deprecated on wallet-core soon
-## Building
+  
+### Build instructions
 
 ```bash
-export CMAKE_BUILD_PARALLEL_LEVEL=8
-export MAKEFLAGS="-j8"
-cd ./build/Linux
-mkdir Release
-cd Release
-cmake .. -DCMAKE_BUILD_TYPE=Release
+cd build/Linux
+mkdir [Debug or Release]
+cd [Debug or Release]
+cmake .. -DCMAKE_BUILD_TYPE=[Debug or Release]
 make
 ```
 
-# Build/Cross-Compile Android on Linux/OSX/Windows Hosts 
-## Preinstall Host tools
+## Android Cross-Compile on Linux/OSX Hosts
+
+### Requirements
 - CMake
-- Android NDK Latest LTS Version (r25b) [(link)](https://developer.android.com/ndk/downloads#lts-downloads)
+- Android NDK r25b Version [(link)](https://github.com/android/ndk/wiki/Unsupported-Downloads)
 - rvm/Ruby 2.7.8
   - ```rvm --default use ruby-2.7.8``` 
 - wallet-core dependency tools
   - Rust, cargo
     - ```rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android```
-## Host settings in .bash_profile (ex.)
+#### Host settings in .bash_profile (ex.)
 	○ export ANDROID_NDK=/path/to/android-ndk-r25b
 	○ export ANDROID_TOOLCHAIN="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
 	○ export PATH="$ANDROID_TOOLCHAIN":"$PATH"
-# Building
+### Build instructions
 * armeabi-v7a
 ```bash
-○ cd build/Android
-○ mkdir -p Release/armeabi-v7a
-○ cd Release/armeabi-v7a
-○ cmake ../../ -DANDROID_ABI="armeabi-v7a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-○ make
+cd build/Android
+mkdir -p [Debug or Release]/armeabi-v7a
+cd [Debug or Release]/armeabi-v7a
+cmake ../../ -DCMAKE_BUILD_TYPE=[Debug or Release] -DANDROID_ABI="armeabi-v7a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang 
+make 
 ```
 * arm64-v8a
 ```bash
-○ cd build/Android
-○ mkdir -p Release/arm64-v8a
-○ cd Release/arm64-v8a
-○ cmake ../../ -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-○ make
-```
-* x86
-```bash
-○ cd build/Android
-○ mkdir -p Release/x86
-○ cd Release/x86
-○ cmake ../../ -DANDROID_ABI="x86" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-○ make
+cd build/Android
+mkdir -p [Debug or Release]/arm64-v8a
+cd [Debug or Release]/arm64-v8a
+cmake ../../ -DCMAKE_BUILD_TYPE=[Debug or Release] -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang 
+make 
 ```
 * x86_64
 ```bash
-○ cd build/Android
-○ mkdir -p Release/x86_64
-○ cd Release/x86_64
-○ cmake ../../ -DANDROID_ABI="x86_64" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-○ make
+cd build/Android
+mkdir -p [Debug or Release]/x86_64
+cd [Debug or Release]/x86_64
+cmake ../../ -DCMAKE_BUILD_TYPE=[Debug or Release] -DANDROID_ABI="x86_64" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang 
+make 
 ```
-# Build on OSX (Builds x86_64 & Arm64)
-## Preinstall
+## OSX
+### Requirements
 - CMake    
 - Python >=3.5
 - xCode Command line Tools & SDK
@@ -199,16 +195,18 @@ make
     rustup target add wasm32-unknown-emscripten
     cargo install cbindgen cargo-lipo
     ```
- ## Building
+    
+### Build instructions
 ```bash
 cd build/OSX
-mkdir Release
-cd Release
-cmake .. -DCMAKE_BUILD_TYPE=Release
+mkdir [Debug or Release]
+cd [Debug or Release] 
+cmake .. -DCMAKE_BUILD_TYPE=[Debug or Release]
 make
 ```
-# Build for iOS
-## Preinstall
+
+## iOS cross compile 
+### Requirements
 - CMake
 - xCode Command line Tools & SDK
 - rvm/Ruby 2.7.8
@@ -226,10 +224,11 @@ make
     cargo install cbindgen cargo-lipo
     ```
 
-## Building
+### Build instructions
 ``` bash
 cd build/iOS
-mkdir Release/
-cmake .. -DCMAKE_BUILD_TYPE=Release -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=$PWD/../iOS.cmake
+mkdir [Debug or Release]
+cd [Debug or Release] 
+cmake .. -DCMAKE_BUILD_TYPE=[Debug or Release]
 make
 ```
