@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
 
-if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
-    message(FATAL_ERROR "${CMAKE_HOST_SYSTEM_NAME} host system name does not match OSX Darwin - Please select the correct folder for configuring project")
-endif()
-
 if(POLICY CMP0025)
     cmake_policy(SET CMP0025 NEW)
 endif()
@@ -15,7 +11,7 @@ endif()
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     cmake_host_system_information(RESULT HOST_SYSTEM_PROCESSOR QUERY OS_PLATFORM)
 
-    if(HOST_SYSTEM_PROCESSOR STREQUAL "arm")
+    if(HOST_SYSTEM_PROCESSOR MATCHES "arm")
         set(_PLATFORM "MAC_ARM64")
     else()
         set(_PLATFORM "MAC")

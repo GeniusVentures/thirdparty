@@ -875,6 +875,10 @@ else()
     set(CMAKE_SYSTEM_PROCESSOR "arm")
 endif()
 
+if(NOT ${CMAKE_SYSTEM_PROCESSOR} STREQUAL ${CMAKE_HOST_SYSTEM_PROCESSOR})
+    set(CMAKE_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME})
+endif()
+
 # Note that only Xcode 7+ supports the newer more specific:
 # -m${SDK_NAME}-version-min flags, older versions of Xcode use:
 # -m(ios/ios-simulator)-version-min instead.

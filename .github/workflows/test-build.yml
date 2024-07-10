@@ -77,7 +77,16 @@ jobs:
       - name: Add Rust target
         run: rustup target add wasm32-unknown-emscripten
 
+      - name: Configure CMake for Mac x86
+        if: ${{ matrix.target == 'OSX'}}
+        run: cmake -S build/${{matrix.target}} -B build/${{matrix.target}}/${{matrix.build_type}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DPLATFORM=MAC
+
+      - name: Configure CMake for iOS
+        if: ${{ matrix.target == 'iOS'}}
+        run: cmake -S build/${{matrix.target}} -B build/${{matrix.target}}/${{matrix.build_type}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DPLATFORM=OS64
+
       - name: Configure CMake
+        if: ${{ matrix.target != 'OSX' && matrix.target != 'iOS' }}
         run: cmake -S build/${{matrix.target}} -B build/${{matrix.target}}/${{matrix.build_type}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
 
       - name: Build project
