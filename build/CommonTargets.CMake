@@ -566,6 +566,7 @@ ExternalProject_Add(protobuf-plugin
     CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     -Dabsl_DIR:PATH=${absl_HOST_DIR}
+    -DCMAKE_BUILD_TYPE:STRING=Release
     -DProtobuf_DIR:PATH=${Protobuf_HOST_DIR}
     -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
     -DTW_USE_EXTERNAL_PROTOC:BOOL=TRUE
@@ -596,6 +597,7 @@ ExternalProject_Add(wallet-core
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     -Dabsl_DIR:PATH=${absl_DIR}
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
+    -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
     -DTESTING:BOOL=${TESTING}
     -DTW_STATIC_LIBRARY:BOOL=TRUE
     -DTW_UNIT_TESTS:BOOL=FALSE
@@ -604,7 +606,6 @@ ExternalProject_Add(wallet-core
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
-    ${_GRPC_CACHE_ARGS}
     PATCH_COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${WALLET_CORE_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin
     DEPENDS Boost grpc openssl protobuf-plugin
 )
@@ -621,7 +622,6 @@ ExternalProject_Add(libssh2
     -DCRYPTO_BACKEND:STRING=OpenSSL
     -DZLIB_ROOT:PATH=${ZLIB_ROOT}
     -DZLIB_USE_STATIC_LIBS:BOOL=ON
-    -DCRYPTO_BACKEND:STRING=OpenSSL
     ${_OPENSSL_CACHE_ARGS}
     DEPENDS openssl zlib
 )

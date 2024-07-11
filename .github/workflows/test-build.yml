@@ -7,6 +7,7 @@ jobs:
   build:
     env:
       GRPC_BUILD_ENABLE_CCACHE: "ON"
+      CMAKE_NO_VERBOSE: "ON"
     runs-on: ${{matrix.host}}
     strategy:
       fail-fast: false
@@ -55,7 +56,9 @@ jobs:
           brew install ccache ninja
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
-          rustup target add x86_64-apple-darwin
+      - name: Add Darwin toolchain
+        if: ${{ matrix.target == 'OSX'}}
+        run: rustup target add x86_64-apple-darwin
 
       - name: Add iOS toolchain
         if: ${{ matrix.target == 'iOS' }}

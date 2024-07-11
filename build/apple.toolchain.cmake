@@ -887,11 +887,11 @@ if(${CMAKE_VERSION} VERSION_LESS "3.11")
         if(XCODE_VERSION_INT VERSION_LESS 7.0)
             set(SDK_NAME_VERSION_FLAGS
                 "-mios-version-min=${DEPLOYMENT_TARGET}")
-    else()
+        else()
             # Xcode 7.0+ uses flags we can build directly from SDK_NAME.
             set(SDK_NAME_VERSION_FLAGS
                 "-m${SDK_NAME}-version-min=${DEPLOYMENT_TARGET}")
-    endif()
+        endif()
     elseif(PLATFORM_INT STREQUAL "TVOS")
         set(SDK_NAME_VERSION_FLAGS
             "-mtvos-version-min=${DEPLOYMENT_TARGET}")
