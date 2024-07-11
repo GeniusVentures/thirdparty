@@ -62,7 +62,7 @@ REALCONFIGDIR=$(realpath ${CONFIGDIR})
 
 OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure $ABI $BUILD_TYPE no-asm no-shared --prefix=$BUILD_DIR --openssldir=$BUILD_DIR --libdir=lib"
 
-echo "Building OpenSSL"
+echo "Configuring OpenSSL"
 echo $OPENSSL_CONFIGURE_CMD
 echo
 
@@ -72,4 +72,5 @@ echo
 
 $OPENSSL_CONFIGURE_CMD
 
+echo "Building OpenSSL"
 make build_libs

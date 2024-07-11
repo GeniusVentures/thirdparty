@@ -90,7 +90,7 @@ ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND <SOURCE_DIR>/Configure ${OPENSSL_VARIANT} --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} -mmacosx-version-min=12.1 --libdir=lib -static darwin64-${CMAKE_SYSTEM_PROCESSOR}-cc
-    BUILD_COMMAND make build_libs
+    BUILD_COMMAND make build_libs -j${PROCESSOR_COUNT}
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND make install_dev
 )

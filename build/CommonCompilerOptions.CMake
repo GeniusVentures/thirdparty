@@ -3,6 +3,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# ProcessorCount
+include(ProcessorCount)
+ProcessorCount(PROCESSOR_COUNT)
+
 # Convenience settings
 if(NOT DEFINED CMAKE_COLOR_DIAGNOSTICS)
     set(CMAKE_COLOR_DIAGNOSTICS ON)
