@@ -55,9 +55,7 @@ jobs:
           brew install ccache ninja
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
-      - name: Add Darwin toolchain
-        if: ${{ matrix.target == 'OSX'}}
-        run: rustup target add x86_64-apple-darwin
+          rustup target add x86_64-apple-darwin
 
       - name: Add iOS toolchain
         if: ${{ matrix.target == 'iOS' }}
