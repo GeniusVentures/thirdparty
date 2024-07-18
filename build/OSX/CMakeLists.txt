@@ -40,10 +40,11 @@ set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
     -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
 )
+# for now until we get fat libraries working with Boost
 set(BOOST_ARCH "x86")
-if(PLATFORM STREQUAL "MAC_ARM64")
-    set(BOOST_ARCH "arm")
-endif()
+#if(PLATFORM STREQUAL "MAC_ARM64")
+#    set(BOOST_ARCH "arm")
+#endif()
 # Boost
 set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add(Boost
@@ -87,7 +88,7 @@ set(_BOOST_CACHE_ARGS
 )
 
 # OpenSSL
-set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl")
+set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 set(OPENSSL_VARIANT "$<IF:$<CONFIG:Debug>,--debug,--release>")
 set(OPENSSL_ARCH "darwin64-x86_64-cc")
 if(PLATFORM STREQUAL "MAC_ARM64")
@@ -99,7 +100,7 @@ ExternalProject_Add(openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --deployment-target="12.1" --src-dir=<SOURCE_DIR> --build-dir=${OPENSSL_ROOT_DIR}/build/Darwin
+    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --deployment-target="12.1" --src-dir=<SOURCE_DIR> --build-dir=${OPENSSL_ROOT_DIR}
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
