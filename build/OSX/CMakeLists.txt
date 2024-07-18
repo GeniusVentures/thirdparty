@@ -87,7 +87,7 @@ set(_BOOST_CACHE_ARGS
 )
 
 # OpenSSL
-set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
+set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl")
 set(OPENSSL_VARIANT "$<IF:$<CONFIG:Debug>,--debug,--release>")
 set(OPENSSL_ARCH "darwin64-x86_64-cc")
 if(PLATFORM STREQUAL "MAC_ARM64")
@@ -97,10 +97,12 @@ endif()
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND <SOURCE_DIR>/Configure ${OPENSSL_ARCH} ${OPENSSL_VARIANT} -static --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} -mmacosx-version-min=12.1
-    BUILD_COMMAND make build_libs
+    CONFIGURE_COMMAND ""
+    PATCH_COMMAND ""
+    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --deployment-target="12.1" --src-dir=<SOURCE_DIR> --build-dir=${OPENSSL_ROOT_DIR}
     BUILD_IN_SOURCE FALSE
-    INSTALL_COMMAND make install_dev
+    INSTALL_COMMAND ""
+    UPDATE_COMMAND ""
 )
 
 set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
