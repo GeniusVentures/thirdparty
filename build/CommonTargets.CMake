@@ -395,7 +395,7 @@ ExternalProject_Add(ipfs-lite-cpp
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
     DEPENDS Microsoft.GSL spdlog tsl_hat_trie libp2p grpc ${PROTOBUF_TARGET} rocksdb Boost.DI
 )
-set(_FINDPACKAGE_IPFS_LITE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp/cmake/ipfs-lite-cpp")
+set(_FINDPACKAGE_IPFS_LITE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp/lib/cmake/ipfs-lite-cpp")
 set(_FINDPACKAGE_IPFS_LITE_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp/lib")
 set(_FINDPACKAGE_IPFS_LITE_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp/include")
 set(_FINDPACKAGE_CBOR_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp/include/deps/tinycbor/src")
