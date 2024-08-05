@@ -9,13 +9,9 @@ if(POLICY CMP0042)
 endif()
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    cmake_host_system_information(RESULT HOST_SYSTEM_PROCESSOR QUERY OS_PLATFORM)
+    #set(_PLATFORM "MAC_UNIVERSAL" CACHE STRING "Setting the build for both x86_64 and arm64")
+    set(_PLATFORM "MAC" CACHE STRING "Setting the default build for x86_64")
 
-    if(HOST_SYSTEM_PROCESSOR MATCHES "arm")
-        set(_PLATFORM "MAC_ARM64")
-    else()
-        set(_PLATFORM "MAC")
-    endif()
     set(NAMED_LANGUAGE_SUPPORT OFF CACHE BOOL "Toolchain named language support parameter")
     set(ENABLE_BITCODE OFF CACHE BOOL "Toolchain bitcode enable parameter")
     set(ENABLE_ARC OFF CACHE BOOL "Toolchain enable arc parameter")
@@ -40,7 +36,11 @@ set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
     -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
 )
-
+# for now until we get fat libraries working with Boost
+set(BOOST_ARCH "x86")
+#if(PLATFORM STREQUAL "MAC_ARM64")
+#    set(BOOST_ARCH "arm")
+#endif()
 # Boost
 set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 ExternalProject_Add(Boost
@@ -50,7 +50,7 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
 
-    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} toolset=darwin cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} -d0 install
+    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} toolset=darwin cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=${BOOST_ARCH} variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} install
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
@@ -85,14 +85,21 @@ set(_BOOST_CACHE_ARGS
 
 # OpenSSL
 set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
+set(OPENSSL_VARIANT "$<IF:$<CONFIG:Debug>,--debug,--release>")
+set(OPENSSL_ARCH "darwin64-x86_64-cc")
+if(PLATFORM STREQUAL "MAC_ARM64")
+    set(OPENSSL_ARCH "darwin64-arm64-cc")
+endif()
 
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND <SOURCE_DIR>/Configure ${OPENSSL_VARIANT} --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} -mmacosx-version-min=12.1 --libdir=lib -static darwin64-${CMAKE_SYSTEM_PROCESSOR}-cc
-    BUILD_COMMAND make build_libs -j${PROCESSOR_COUNT}
+    CONFIGURE_COMMAND ""
+    PATCH_COMMAND ""
+    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --deployment-target="12.1" --src-dir=<SOURCE_DIR> --build-dir=${OPENSSL_ROOT_DIR} --arch=${OSX_ARCHITECTURES_DASH_SEPARATED}
     BUILD_IN_SOURCE FALSE
-    INSTALL_COMMAND make install_dev
+    INSTALL_COMMAND ""
+    UPDATE_COMMAND ""
 )
 
 set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
