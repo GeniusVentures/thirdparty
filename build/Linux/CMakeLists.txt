@@ -54,4 +54,10 @@ set(_OPENSSL_CACHE_ARGS
 # ed25519 crypto
 set(_ED25519_RANDOM dev_urandom)
 
+set(_MNN_EXTRA_PARAM
+    -DMNN_USE_SYSTEM_LIB:BOOL=ON 
+    -DMNN_SEP_BUILD:BOOL=OFF
+)
+
+
 include(../CommonTargets.CMake)
