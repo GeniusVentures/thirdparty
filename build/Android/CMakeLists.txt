@@ -28,10 +28,6 @@ project(ANDROID_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
 include(../CommonCompilerOptions.CMake)
 
-if(NOT ANDROID_NDK_MAJOR EQUAL 25)
-    message(FATAL_ERROR "Android NDK LTS Version (r25b) stable long term support version required")
-endif()
-
 # Config param for android
 set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DCMAKE_ANDROID_NDK:PATH=${CMAKE_ANDROID_NDK}
