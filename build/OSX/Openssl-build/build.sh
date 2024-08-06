@@ -62,7 +62,7 @@ if $X86_64_PRESENT; then
   if [ ! -f "Makefile" ]; then
     $SRC_DIR/Configure $DEBUG_FLAGS darwin64-x86_64-cc -static --prefix=$LIB_DIR --openssldir=$X86_64_DIR -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET
   fi
-  make -j`nproc` build_generated libcrypto.a libssl.a
+  make build_generated libcrypto.a libssl.a
   OUT_DIR=$X86_64_DIR
 fi
 
@@ -76,11 +76,11 @@ if $ARM64_PRESENT; then
     $SRC_DIR/Configure $DEBUG_FLAGS darwin64-arm64-cc no-asm -static --prefix=$LIB_DIR --openssldir=$ARM64_DIR -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET
   fi
 
-  make -j`nproc` build_generated libcrypto.a libssl.a
+  make build_generated libcrypto.a libssl.a
   OUT_DIR=$ARM64_DIR
 fi
 
-make -j`nproc` build_generated libcrypto.pc libssl.pc openssl.pc
+make build_generated libcrypto.pc libssl.pc openssl.pc
 if [ ! -d "$LIB_DIR/pkgconfig/" ]; then
   mkdir -p "$LIB_DIR/pkgconfig/"
 fi
