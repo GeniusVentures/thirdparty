@@ -13,7 +13,7 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
 
-    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=<INSTALL_DIR> install
+    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=<INSTALL_DIR> -d0 install
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
@@ -35,13 +35,11 @@ set(_BOOST_CACHE_ARGS
 # OpenSSL
 set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 
-set(OPENSSL_VARIANT "$<$<CONFIG:Debug>:-d >")
-
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND <SOURCE_DIR>/config ${OPENSSL_VARIANT} -fPIC --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} --static -static
-    BUILD_COMMAND make build_libs
+    CONFIGURE_COMMAND <SOURCE_DIR>/Configure ${OPENSSL_VARIANT} -fPIC --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} --libdir=lib -static linux-${CMAKE_SYSTEM_PROCESSOR}-clang
+    BUILD_COMMAND make build_libs -j${PROCESSOR_COUNT}
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND make install_dev
 )
@@ -50,11 +48,16 @@ set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
 set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
     -DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}
-    -DOPENSSL_INCLUDE_DIR:PATH=${OPENSSL_INCLUDE_DIR}
-    -DOPENSSL_LIBRARIES:PATH=${OPENSSL_ROOT_DIR}/lib
+    -DOpenSSL_DIR:PATH=${OPENSSL_ROOT_DIR}/lib/cmake/OpenSSL
 )
 
 # ed25519 crypto
 set(_ED25519_RANDOM dev_urandom)
+
+set(_MNN_EXTRA_PARAM
+    -DMNN_USE_SYSTEM_LIB:BOOL=ON 
+    -DMNN_SEP_BUILD:BOOL=OFF
+)
+
 
 include(../CommonTargets.CMake)

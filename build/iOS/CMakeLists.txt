@@ -47,7 +47,7 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
 
-    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} toolset=darwin target-os=iphone visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=arm variant=${BOOST_VARIANT} --prefix=<INSTALL_DIR> install
+    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} toolset=darwin target-os=iphone visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=arm variant=${BOOST_VARIANT} --prefix=<INSTALL_DIR> -d0 install
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
@@ -87,7 +87,7 @@ ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build-libssl.sh ${BOOST_BUILD_VARIANT} --version=1.1.1g --targets=ios64-cross-arm64 --src-dir=${THIRDPARTY_DIR}/openssl --build-dir=${OPENSSL_ROOT_DIR}
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build-libssl.sh $<$<CONFIG:Debug>:--debug> --version=3.3.1 --targets=ios64-cross-arm64 --src-dir=${THIRDPARTY_DIR}/openssl --build-dir=${OPENSSL_ROOT_DIR} --deprecated
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
@@ -96,9 +96,7 @@ set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
 set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
     -DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}
-    -DOPENSSL_INCLUDE_DIR:PATH=${OPENSSL_INCLUDE_DIR}
-    -DOPENSSL_CRYPTO_LIBRARY:FILEPATH=${OPENSSL_ROOT_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}
-    -DOPENSSL_SSL_LIBRARY:FILEPATH=${OPENSSL_ROOT_DIR}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
+    -DOpenSSL_DIR:PATH=${OPENSSL_ROOT_DIR}/lib/cmake/OpenSSL
 )
 
 # MoltenVK

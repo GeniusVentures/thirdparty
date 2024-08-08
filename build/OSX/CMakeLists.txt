@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
 
-if(NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
-    message(FATAL_ERROR "${CMAKE_HOST_SYSTEM_NAME} host system name does not match OSX Darwin - Please select the correct folder for configuring project")
-endif()
-
 if(POLICY CMP0025)
     cmake_policy(SET CMP0025 NEW)
 endif()
@@ -110,8 +106,7 @@ set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
 set(_OPENSSL_CACHE_ARGS
     -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
     -DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}
-    -DOPENSSL_INCLUDE_DIR:PATH=${OPENSSL_INCLUDE_DIR}
-    -DOPENSSL_LIBRARIES:PATH=${OPENSSL_ROOT_DIR}/lib
+    -DOpenSSL_DIR:PATH=${OPENSSL_ROOT_DIR}/lib/cmake/OpenSSL
 )
 
 # MoltenVK

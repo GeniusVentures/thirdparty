@@ -31,7 +31,6 @@ jobs:
           rateRemaining=`gh api rate_limit --jq ".rate | .remaining"`
           echo "Rate limit remaining is $rateRemaining"
 
-          gh extension install actions/gh-actions-cache
           echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
           echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
 
@@ -57,9 +56,6 @@ jobs:
           if [[ $notCached == "$tpCacheNameSHA" ]]; then
             foundThirdPartyCurrent="false"
           fi
-
-          # Allows the script to continue even if the cache deletion commands fail
-          set +e
 
           # Set the field separator to new line
           IFS=$'\n'
@@ -92,7 +88,7 @@ jobs:
           while read -r mode stage longsha location; do
             shortSHA="${longsha:0:7}"
             cacheNames+="s/$BRANCH/$location-$shortSHA\n"
-          done <<< $(git ls-tree HEAD | grep "160000 commit")
+          done <<< $(git ls-tree -r HEAD | grep "160000 commit")
 
           cacheNames="$(echo -en "$cacheNames" | sort)"
           cachesList=$(gh api -H "Accept: application/vnd.github+json" --paginate repos/GeniusVentures/thirdparty/actions/caches?key="s/${BRANCH}" | jq -r ".actions_caches[].key" | sort)
@@ -101,30 +97,26 @@ jobs:
           oldCaches="$(comm -13 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$notMatched"))"
           notCached="$(comm -12 --output-delimiter="" <(echo -en "$cacheNames") <(echo -en "$notMatched"))"
 
-          # matrixJson = matrix of source code to cache, that isn't already cached
-          matrixJson="[ "
-          first=true
+          # Matrix of source code to cache
+          cacheMatrix="[]"
+
           # Set the field separator to new line
           IFS=$'\n'
           for toCache in $notCached; do
             len=${#toCache}
             startPos=$((len - 7))
-            shortSHA="${toCache:$startPos:7}"
             lenBranch=${#BRANCH}
-
-            # - 10 - lenBranch - 1 for s/$BRANCH/ + '-' + shortSHA
-            name="${toCache:$((2 + lenBranch + 1)):$((len - 10 - lenBranch - 1))}"
-            if [[ "$first" != "true" ]]; then
-              matrixJson+=", "
-            fi
-            first=false
-
-            matrixJson+="{ \"name\":  \"$name\", \"cache-name\": \"$toCache\" }"
+            matrixItem=$(jq -n \
+              --arg cacheName "${toCache}" \
+              --arg name "${toCache:$((2 + lenBranch + 1)):$((len - 10 - lenBranch - 1))}" \
+              '{name: $name, cacheName: $cacheName}'
+            )
+            
+            cacheMatrix=$(jq -c --argjson obj "$matrixItem" '. + [$obj]' <<<"$cacheMatrix")
           done
-          matrixJson+=" ]"
 
-          ## Setting this to not fail the workflow while deleting cache keys.
-          set +e
+          echo "Cache matrix:"
+          jq <<<"$cacheMatrix"
 
           # Delete old caches
           for oldCache in $oldCaches; do
@@ -132,7 +124,7 @@ jobs:
             gh actions-cache delete $oldCache -R $REPO -B $BRANCH --confirm
           done
 
-          echo "CACHE_MATRIX=$matrixJson" >> $GITHUB_OUTPUT
+          echo "CACHE_MATRIX=$cacheMatrix" >> $GITHUB_OUTPUT
           if [[ "$notCached" != "" ]]; then
             echo "NEEDS_CACHE=true" >> $GITHUB_OUTPUT
           else
@@ -180,7 +172,7 @@ jobs:
         run: |
           sudo apt install zstd -y
 
-      - name: Cache Third Party Directory
+      - name: Cache third party directory
         uses: GeniusVentures/cache-multi/restore@v3.3.1
         id: cache-tp-source-directory
         with:
@@ -198,7 +190,7 @@ jobs:
       - name: Git clone submodule source code
         run: |
           echo "Cloning source for ${{ matrix.name }}"
-          git submodule update --init --recursive -- ${{ matrix.name }}
+          git submodule update --init --recommend-shallow --recursive -- ${{ matrix.name }}
         shell: bash
         working-directory: ${{github.workspace}}
 
@@ -206,7 +198,7 @@ jobs:
         id: cache-source-directory
         uses: GeniusVentures/cache-multi@v3.3.1
         with:
-          key: ${{ matrix.cache-name }}
+          key: ${{ matrix.cacheName }}
           enableCrossOsArchive: true
           path: |
             !./${{ matrix.name }}/.git/**
@@ -256,47 +248,52 @@ jobs:
         run: |
           cmake -S build/Linux -B build/Linux/Release -DCMAKE_BUILD_TYPE=Release
 
-          cd build
-          declare -A cMakeNamesRepos
-          while IFS=',' read -r cmakeName repoDir; do
-            echo -e "cmakeName: $cmakeName, repoDir: $repoDir"
-            cMakeNamesRepos["$cmakeName"]="$repoDir"
-          done < <(sed -nE 's/^ExternalProject_Add\(([^)]*).*/\1/p; s/^[[:space:]]*SOURCE_DIR[[:space:]]+"([^/]*\/)*(.*)".*/\2/p' CommonTargets.CMake Linux/CMakeLists.txt |
-            paste -d ',' - -)
-
-          cd Linux/Release/CMakeFiles
-          declare -A cMakeBuildDir
+          cd build/Linux/Release/CMakeFiles
+          declare -A cmakeBuildDir
           while IFS=',' read -r cmakeName buildDir; do
-            echo -e "cmakeName: $cmakeName, buildDir: $buildDir"
-            cMakeBuildDir["$cmakeName"]="$buildDir"
+              cmakeBuildDir["$cmakeName"]="$buildDir"
           done < <(grep -m1 -R --include "build.make" -e ".*-complete:.*-build" * |
-            sed -E -n 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2/p')
+              sed -E -n 's/^(.*)\.dir.*-complete: ([^/]*?)\/src.*/\1,\2/p')
+
+          cd ..
+          declare -A cmakeNamesRepos
+          for key in "${!cmakeBuildDir[@]}"; do
+              sourceDir=$(find . -type f -name "${key}-source_dirinfo.txt" -exec sed -n "s|^source_dir=$GITHUB_WORKSPACE\/\(.*\)|\1|p" {} \;)
+              cmakeNamesRepos["$key"]=$sourceDir
+              echo "cmakeNameRepos = ${sourceDir}"
+          done
 
           declare -A gitLibModules
-          cd ../../../../
-          while IFS=',' read -r longSHA repoDir; do
-            echo -e "repoDir: $repoDir, longSHA: $longSHA"
-            gitLibModules["$repoDir"]="$longSHA"
-          done < <(git ls-tree HEAD | grep -E "160000 commit|040000 tree" |
-            sed -E -n 's/^.*(commit|tree) ([a-f0-9]+)[ \t]+([^ ]+)$/\2,\3/p')
+          cd $GITHUB_WORKSPACE
+          while IFS=',' read -r longSHA sourceDir; do
+              gitLibModules["$sourceDir"]="$longSHA"
+          done < <(git ls-tree -r HEAD | sed -E -n 's/^.*(commit|tree)\s+([a-f0-9]+)\s+(\S+)/\2,\3/p')
 
           # Initialize the variables
-          cMakeNames=""
+          cmakeNames=""
           buildDirectoryNames=""
           repoNames=""
           shortSHAs=""
 
-          for key in "${!cMakeBuildDir[@]}"; do
-            buildDir="${cMakeBuildDir[$key]}"
-            repoDir="${cMakeNamesRepos[$key]}"
-            shortSHA="${gitLibModules[$repoDir]:0:7}"
-            cMakeNames+="${key}\n"
-            buildDirectoryNames+="${buildDir}\n"
-            repoNames+="${repoDir}\n"
-            shortSHAs+="${shortSHA}\n"
+          # Define column widths
+          name_width=20
+          build_dir_width=20
+          source_dir_width=20
+
+          # Print header
+          printf "%-${name_width}s | %-${build_dir_width}s | %-${source_dir_width}s | %-${sha_width}s\n" "Name" "Build dir" "Source dir" "SHA"
+          for key in "${!cmakeBuildDir[@]}"; do
+              buildDir="${cmakeBuildDir[$key]}"
+              sourceDir="${cmakeNamesRepos[$key]}"
+              shortSHA="${gitLibModules[$sourceDir]:0:7}"
+              cmakeNames+="${key}\n"
+              buildDirectoryNames+="${buildDir}\n"
+              repoNames+="${sourceDir}\n"
+              shortSHAs+="${shortSHA}\n"
+              printf "%-${name_width}s | %-${build_dir_width}s | %-${source_dir_width}s | %s\n" "${key}" "${buildDir}" "${sourceDir}" "${shortSHA}"
           done
 
-          echo "TARGET_NAMES=$cMakeNames" >> $GITHUB_OUTPUT
+          echo "TARGET_NAMES=$cmakeNames" >> $GITHUB_OUTPUT
           echo "TARGET_SHAS=$shortSHAs" >> $GITHUB_OUTPUT
           echo "TARGET_DIRECTORIES=$buildDirectoryNames" >> $GITHUB_OUTPUT
           echo "TARGET_REPO_NAMES=$repoNames" >> $GITHUB_OUTPUT
@@ -351,7 +348,7 @@ jobs:
           echo "Couldn't find cached thirdparty code, ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
           exit 1
 
-      - name: Cache Submodule Source Files without .git
+      - name: Cache Submodule source files without .git
         id: cache-source-directory
         uses: GeniusVentures/cache-multi/restoremulti@v3.3.1
         with:
@@ -362,11 +359,13 @@ jobs:
       - name: Creating github release tag
         id: create-github-release-tag
         run: |
-          set +e
           echo "Check if github release tag ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} available."
-          gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}
 
+          set +e
+          gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}
           releaseFound=$?
+          set -e
+
           if [[ $releaseFound -ne 0 ]];
           then
             echo "gh release view return value: ${releaseFound}"
@@ -388,14 +387,11 @@ jobs:
             releaseCreated=$?
             if [[ $releaseCreated -ne 0 ]];
             then
-              set -e
               echo "gh release create return value: ${releaseCreated}"
               echo "Failed to create github release with tag: ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }}"
               exit 1
             fi
           fi
-
-          set -e
 
       - name: Compress and upload targets source folder
         id: compress-targets-source
@@ -406,19 +402,20 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_SHAS <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_SHAS }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_REPO_NAMES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_REPO_NAMES }}|')"
 
-          set +e
-          # check if release.json file already available
+          # Check if release.json file already available
           jsonStr="[]"
           jsonFound=`gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
           if [ $? -eq 0 ]
           then
             echo "Downloading release.json file"
+            set +e
             gh release download ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --pattern "release.json" --clobber
             if [ $? -eq 0 ]
             then
               echo "Loading release.json file"
               jsonStr=`cat release.json`
             fi
+            set -e
           fi
 
           RELEASE_ASSETS=`gh release view ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} --json assets`
@@ -450,8 +447,8 @@ jobs:
             TARGET_SHA="${TARGET_SHAS[i]}"
             COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
 
-            shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< ${jsonStr}`
-            COMPRESSED_TARGET_SRC_URL=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET_SRC}\") | .url" <<< ${RELEASE_ASSETS}`
+            shaFound=$(jq ".[] | select(.name == \"${TARGET_NAME}\") | .sha" <<<${jsonStr})
+            COMPRESSED_TARGET_SRC_URL=$(jq '.assets[] | select(.name == "${COMPRESSED_TARGET_SRC}") | .url' <<<${RELEASE_ASSETS})
             if [ -z "$COMPRESSED_TARGET_SRC_URL" ] || [[ "${shaFound}" != \"${TARGET_SHA}\" ]]; 
             then
               echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_REPO_NAME} source folder"
@@ -460,7 +457,6 @@ jobs:
               gh release upload --clobber ${{ steps.create-src-cache-keys.outputs.GITHUB_RELEASE_NAME }} ${COMPRESSED_TARGET_SRC}
             fi
           done
-          set -e
 
   build-targets-matrix:
     needs:
@@ -476,125 +472,87 @@ jobs:
       matrix:
         build-type: [Release, Debug]
         target-build-data:
-          # --------------------------------------------------------------------------
           - target-os: Linux
             runs-on: ubuntu-latest
             shell: bash
-            init-script:
             setup-script: |
-              echo "Setup for Linux Build"
-              sudo apt install zstd -y
-            cmake-init-script: |
-              cd build/$TARGET_OS
-              mkdir $BUILD_TYPE
-              cd $BUILD_TYPE
-              cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-            cmake-compile-script: |
-              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
-              make $TARGET_NAME -j$(nproc)
-              make install
+              # Set clang as cc
+              sudo update-alternatives --install /usr/bin/cc cc $(which clang) 100
+              sudo update-alternatives --install /usr/bin/c++ c++ $(which clang++) 100
+              sudo update-alternatives --set cc $(which clang)
+              sudo update-alternatives --set c++ $(which clang++)
 
-          # --------------------------------------------------------------------------
+              sudo apt install vulkan-tools vulkan-validationlayers-dev libvulkan-dev -y
+              sudo apt install zstd ninja-build ccache -y
+              echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
+            cmake-init-script: |
+              cmake -B $BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
           - target-os: Android
             runs-on: ubuntu-latest
             shell: bash
             env:
               CC: clang
-            init-script:
             setup-script: |
-              echo "Setup for Android Build"
-              git config --global core.autocrlf false
-              git config --global core.eol lf
-              echo "ANDROID_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_ENV
+              # Set clang as cc
+              sudo update-alternatives --install /usr/bin/cc cc $(which clang) 100
+              sudo update-alternatives --install /usr/bin/c++ c++ $(which clang++) 100
+              sudo update-alternatives --set cc $(which clang)
+              sudo update-alternatives --set c++ $(which clang++)
+
               echo "ANDROID_NDK=$ANDROID_NDK_HOME" >> $GITHUB_ENV
               echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-              sudo apt install zstd -y
+
+              sudo apt install zstd ninja-build ccache -y
+              echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
+
+              rustup target add aarch64-linux-android
             arch: |
               arm64-v8a
               x86_64
               x86
               armeabi-v7a
             cmake-init-script: |
-              cd build/$TARGET_OS
-              mkdir $BUILD_TYPE
-              cd $BUILD_TYPE
-              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
-            cmake-compile-script: |
-              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
-              make $TARGET_NAME -j$(nproc)
-              make install
+              cmake -B $BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK -DANDROID_TOOLCHAIN=clang
 
-          # --------------------------------------------------------------------------
           - target-os: OSX
             runs-on: macos-latest
             shell: bash
-            init-script:
             setup-script: |
-              echo "Setup for OSX Build"
-              find /Applications/Xcode* -maxdepth 0 -ls
-              sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
-              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/* 
-              brew install zstd
-              cargo install cbindgen
-            cmake-init-script: |
-              cd build/$TARGET_OS
-              mkdir $BUILD_TYPE
-              cd $BUILD_TYPE
-              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-            cmake-compile-script: |
-              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
-              make $TARGET_NAME -j$(nproc)
-              make install
+              brew install zstd ninja md5sha1sum ccache
+              echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
-          # --------------------------------------------------------------------------
+              cargo install cbindgen
+
+              rustup target add x86_64-apple-darwin
+            cmake-init-script: |
+              cmake -B $BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DPLATFORM=MAC
+
           - target-os: iOS
             runs-on: macos-latest
             shell: bash
-            init-script:
-              uses: actions/setup-python@v2
-              with:
-                python-version: "3.5"
             setup-script: |
-              echo "Setup for iOS Build"
-              find /Applications/Xcode* -maxdepth 0 -ls
-              sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_*[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
-              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
-              brew install zstd
+              brew install zstd ninja md5sha1sum ccache
+              echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
+
               cargo install cbindgen
 
-            cmake-init-script: |
-              cd build/$TARGET_OS
-              mkdir $BUILD_TYPE
-              cd $BUILD_TYPE
-              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1  -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_TOOLCHAIN_FILE=${WORKSPACE}/build/iOS/iOS.cmake
-            cmake-compile-script: |
-              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
-              make $TARGET_NAME -j$(nproc)
-              make install
+              rustup toolchain install nightly-aarch64-apple-darwin
+              rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
+              rustup target add aarch64-apple-ios
 
-          # --------------------------------------------------------------------------
+            cmake-init-script: |
+              cmake -B $BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DiOS_ABI=arm64-v8a -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1 -DPLATFORM=OS64
+
           - target-os: Windows
             runs-on: windows-2022
             shell: bash
-            init-script:
-              uses: ilammy/msvc-dev-cmd@v1
-              with:
-                arch: amd64
-                sdk: 10.0.22621.0
-                vsversion: 17
             setup-script: |
-              echo "Setup for Windows Build"
-              echo "Adding GNU tar to PATH"
-              echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+              choco install ccache -A
+              echo "C:\Strawberry\perl\bin" >> $GITHUB_PATH
+              echo "C:\Perl64\bin" >> $GITHUB_PATH
             cmake-init-script: |
-              cd build/$TARGET_OS
-              mkdir $BUILD_TYPE
-              cd $BUILD_TYPE
-              cmake -S .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 17 2022" -A x64 -DCMAKE_SYSTEM_VERSION="10.0"
-            cmake-compile-script: |
-              echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
-              cmake --build . --target $TARGET_NAME --config $BUILD_TYPE -j$(nproc)
-              cmake --install $TARGET_NAME
+              cmake -B $BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
         target-save-data:
           - target-os: $TARGET_OS
@@ -624,7 +582,6 @@ jobs:
               done
 
               if [[ $retValue -ne 0 ]]; then
-                set -e
                 echo "Failed to upload release.json to github release ${GITHUB_RELEASE_NAME}"
                 exit 1
               fi
@@ -647,7 +604,6 @@ jobs:
                 gh release create ${GITHUB_RELEASE_NAME} -n "${BRANCH} branch" --target ${BRANCH} ${RELEASE_TYPE} -t "${TARGET_OS} ${BRANCH} branch ${BUILD_TYPE} build"
                 if [ $? -ne 0 ]
                 then
-                  set -e
                   echo "Failed to create github release with tag: ${GITHUB_RELEASE_NAME}"
                   exit 1
                 fi
@@ -655,7 +611,7 @@ jobs:
 
               COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
               echo "Compressing ${TARGET_OS} version ${TARGET_SHA} of ${TARGET_NAME} ${BUILD_TYPE} mode (target build folder: ${TARGET_DIRECTORY})"
-              tar --exclude="src/" --exclude"tmp/" --exclude="build/" -zcf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
+              tar --exclude="$TARGET_NAME/src" --exclude="$TARGET_NAME/tmp" -zcf ${COMPRESSED_TARGET} ${TARGET_DIRECTORY} 
 
               retValue=1
               numberOfTries=1
@@ -678,7 +634,6 @@ jobs:
               done
 
               if [[ $retValue -ne 0 ]]; then
-                  set -e
                   echo "Failed to upload target ${COMPRESSED_TARGET} to github release ${GITHUB_RELEASE_NAME}"
                   exit 1
               fi
@@ -687,7 +642,7 @@ jobs:
     outputs:
       TARGET_BUILT: ${{ steps.cache-library-directory.outputs.TARGET_BUILT }}
     steps:
-      - name: Create library Keys and Paths to Cache/build
+      - name: Create library keys and paths to cache/build
         id: create-lib-cache-keys
         shell: bash
         run: |
@@ -741,7 +696,7 @@ jobs:
           echo "Couldn't find cached thirdparty code, ${{ needs.setup-src-cache.outputs.THIRD_PARTY_CACHE_NAME_KEY }} fatal error!"
           exit 1
 
-      - name: Cache Submodule Source Files without .git
+      - name: Cache Submodule source files without .git
         id: cache-source-directory
         uses: GeniusVentures/cache-multi/restoremulti@v3.3.1
         with:
@@ -752,21 +707,15 @@ jobs:
       - name: Run setup script for target OS
         shell: bash
         run: |
-
-          echo "Running init script"
-          set +e
-          ${{ matrix.target-build-data.init-script }}
-          set -e
-
-          echo "Running setup script"
           ${{ matrix.target-build-data.setup-script }}
 
-      - name: Init the CMake build files
+      - name: Configure CMake
         shell: bash
         run: |
           TARGET_OS="${{ matrix.target-build-data.target-os }}"
           BUILD_TYPE="${{ matrix.build-type }}"
           WORKSPACE=${{ github.workspace }}
+          cd build/$TARGET_OS
           ${{ matrix.target-build-data.cmake-init-script }}
 
       - name: Load built library caches if any
@@ -797,6 +746,8 @@ jobs:
             fi
           fi
 
+          set -e
+
           targetBuiltList=""
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
@@ -804,7 +755,7 @@ jobs:
             COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
                         
             targetBuilt=false
-            shaFound=`jq ". | select(.name == \"${TARGET_NAME}\") | .sha" <<< ${jsonStr}`
+            shaFound=`jq ".[] | select(.name == \"${TARGET_NAME}\") | .sha" <<< ${jsonStr}`
             if [[ "${shaFound}" == \"${TARGET_SHA}\" ]]; 
             then
               targetBuilt=true
@@ -815,6 +766,19 @@ jobs:
           done
 
           echo "TARGET_BUILT=$targetBuiltList" >> $GITHUB_OUTPUT
+
+      - name: Install Rust target for wasm
+        run: rustup target add wasm32-unknown-emscripten
+
+        # Workaround GitHub shell
+      - name: Build OpenSSL
+        if: ${{ matrix.target-build-data.target-os == 'Windows' }}
+        shell: cmd
+        run: |
+          set TARGET_OS=${{ matrix.target-build-data.target-os }}
+          set TARGET_RUNS_ON=${{ matrix.target-build-data.runs-on }}
+          set BUILD_TYPE=${{ matrix.build-type }}
+          cmake --build "%GITHUB_WORKSPACE%\build\%TARGET_OS%\%BUILD_TYPE%" --target openssl --config %BUILD_TYPE% -j
 
       - name: Build any updated libraries
         id: build-updated-libraries
@@ -835,18 +799,19 @@ jobs:
 
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
 
-          set +e
-
-          jsonStr=""
+          jsonStr="[]"
           declare -a listOfTargetNamesToBuild
           declare -a listOfTargetSHAsToBuild
           declare -a listOfTargetDirToBuild
+
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
             COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
+
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]} (Target direcory: $TARGET_DIRECTORY)"
+
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
               echo "Downloading cached target: $TARGET_NAME, sha: $TARGET_SHA"
               gh release download ${GITHUB_RELEASE_NAME} --pattern "${COMPRESSED_TARGET}" --clobber
@@ -854,10 +819,17 @@ jobs:
               then
                 echo "Extracting cached target: ${COMPRESSED_TARGET}"
                 tar -xf ${COMPRESSED_TARGET}
-                FOLDER_HASH=`find ./${TARGET_DIRECTORY} -xdev -type f -print0 | LC_COLLATE=C sort -z | xargs -0 cat | md5sum | awk '{print $1}'`
+                FOLDER_HASH=$(find ./${TARGET_DIRECTORY} -xdev -type f -exec cat {} + | md5sum | awk '{print $1}')
+
                 echo "Cached target folder hash: ${FOLDER_HASH}"
-                jsonStrHash=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"binFolderHash\" : \"${FOLDER_HASH}\" }" <<< "{}"`
-                jsonStr+=`echo ${jsonStrHash}`
+                jsonStrHash=$(jq -n \
+                --arg name "$TARGET_NAME" \
+                --arg sha "$TARGET_SHA" \
+                --arg binFolderName "$TARGET_DIRECTORY" \
+                --arg binFolderHash "$FOLDER_HASH" \
+                '{name: $name, sha: $sha, binFolderName: $binFolderName, binFolderHash: $binFolderHash}')
+
+                jsonStr=$(jq -c --argjson obj "$jsonStrHash" '. + [$obj]' <<< "$jsonStr")
                 
                 echo "Target extracted to `pwd`/${TARGET_DIRECTORY}"
                 echo "Contents of target folder `pwd`/${TARGET_DIRECTORY}"
@@ -883,7 +855,10 @@ jobs:
           jq <<< $jsonStr > hash.json
 
           # check if release.json file already available
-          releaseJsonStr=""
+          releaseJsonStr="[]"
+
+          set +e
+
           jsonFound=`gh release view ${GITHUB_RELEASE_NAME} --json assets --jq "any(.assets[]; .name == \"release.json\")"`
           if [ $? -eq 0 ]
           then
@@ -896,14 +871,17 @@ jobs:
             fi
           fi
 
+          set -e
+
           for i in "${!listOfTargetNamesToBuild[@]}"; do
             TARGET_NAME="${listOfTargetNamesToBuild[i]}"
             TARGET_SHA="${listOfTargetSHAsToBuild[i]}"
             TARGET_DIRECTORY="${listOfTargetDirToBuild[i]}"
             COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
             COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
-            echo "Starting to compile target: ${TARGET_NAME}"
-            ${{ matrix.target-build-data.cmake-compile-script }}
+            
+            echo "Compiling $TARGET_OS version $TARGET_SHA of $TARGET_NAME $BUILD_TYPE mode"
+            cmake --build . --target $TARGET_NAME --config $BUILD_TYPE -j
             
             echo "Starting to upload target: ${COMPRESSED_TARGET}"
             # Upload released target 
@@ -917,23 +895,34 @@ jobs:
             # Get target url
             TARGET_BINARY=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url" <<< ${RELEASE_ASSETS}`
 
-            releaseFound=`jq "(. | select(.name == \"${TARGET_NAME}\")" <<< ${releaseJsonStr}`
+            releaseFound=$(jq ".[] | select(.name == \"${TARGET_NAME}\")" <<<${releaseJsonStr})
             if [ ${#releaseFound} -gt 0 ]
             then 
               echo "Updating release.json file with target ${TARGET_NAME}"
-              releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).sha |= \"${TARGET_SHA}\" " <<< ${releaseJsonStr}`
-              releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).binFolderName |= \"${TARGET_DIRECTORY}\" " <<< ${releaseJsonStr}`
-              releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).source |= \"${TARGET_SOURCE}\" " <<< ${releaseJsonStr}`
-              releaseJsonStr=`jq "(. | select(.name == \"${TARGET_NAME}\")).binary |= \"${TARGET_BINARY}\" " <<< ${releaseJsonStr}`
+              releaseJsonStr=$(jq --arg name "${TARGET_NAME}" \
+                     --arg sha "${TARGET_SHA}" \
+                     --arg binFolderName "${TARGET_DIRECTORY}" \
+                     --arg source "${TARGET_SOURCE}" \
+                     --arg binary "${TARGET_BINARY}" \
+                     '(.[] | select(.name == $name)) |= (.sha = $sha | .binFolderName = $binFolderName | .source = $source | .binary = $binary)' <<<"${releaseJsonStr}")
+
             else
               echo "Adding target ${TARGET_NAME} to release.json file"
-              jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : ${TARGET_SOURCE}, \"binary\" : ${TARGET_BINARY} }" <<< "{}"`
-              releaseJsonStr+=`echo ${jsonStrTarget}`
+              jsonStrTarget=$(jq -n \
+                --arg name "${TARGET_NAME}" \
+                --arg sha "${TARGET_SHA}" \
+                --arg binFolderName "${TARGET_DIRECTORY}" \
+                --arg source "${TARGET_SOURCE}" \
+                --arg binary "${TARGET_BINARY}" \
+                '{name: $name, sha: $sha, binFolderName: $binFolderName, source: $source, binary: $binary}')
+              
+              releaseJsonStr=$(jq -c --argjson obj "$jsonStrTarget" '. + [$obj]' <<<"$releaseJsonStr")
             fi
 
             # Upload JSON file release 
             jq <<< $releaseJsonStr > release.json
 
+            echo "Uploading JSON file release"
             ${{ matrix.target-save-data.upload-release-json }}
 
           done
@@ -980,27 +969,25 @@ jobs:
           IFS=$'\n' read -d '|' -ra TARGET_BUILT <<< "$(echo -ne '${{ steps.cache-library-directory.outputs.TARGET_BUILT }}|')"
           IFS=$'\n' read -d '|' -ra TARGET_DIRECTORIES <<< "$(echo -ne '${{ needs.create-targets-matrix.outputs.TARGET_DIRECTORIES }}|')"
 
-          ## Setting this to not fail the workflow while checking release tag 
-          set +e
-
           GITHUB_RELEASE_NAME=${TARGET_OS}-${BRANCH}-${BUILD_TYPE}
 
           RELEASE_ASSETS=`gh release view ${GITHUB_RELEASE_NAME} --json assets`
 
-          jsonStr=""           
+          jsonStr="[]"
           cd "build/${TARGET_OS}/${BUILD_TYPE}"
           for i in "${!TARGET_NAMES[@]}"; do
             TARGET_NAME="${TARGET_NAMES[i]}"
             TARGET_SHA="${TARGET_SHAS[i]}"
             TARGET_DIRECTORY="${TARGET_DIRECTORIES[i]}"
+
             COMPRESSED_TARGET="${TARGET_NAME}-lib.tar.gz"
             COMPRESSED_TARGET_SRC="${TARGET_NAME}-src.tar.gz"
             echo "${TARGET_NAME} release found: ${TARGET_BUILT[i]}"
             
             if [ "${TARGET_BUILT[i]}" == "true" ]; then
               # Compare uncompressed original hash of the binary folder with current to see if any changes has been made
-              originalHash=`jq "select(.name == \"${TARGET_NAME}\") | .binFolderHash" hash.json`
-              currentHash=`find ./${TARGET_DIRECTORY} -xdev -type f -print0 | LC_COLLATE=C sort -z | xargs -0 cat | md5sum | awk '{print $1}'`
+              originalHash=`jq ".[] | select(.name == \"${TARGET_NAME}\") | .binFolderHash" hash.json`
+              currentHash=$(find ./${TARGET_DIRECTORY} -xdev -type f -exec cat {} + | md5sum | awk '{print $1}')
               if [[ "${originalHash}" != \"${currentHash}\" ]]; 
               then
                 echo "originalHash: ${originalHash}"
@@ -1018,7 +1005,7 @@ jobs:
             # Get target url
             TARGET_BINARY=`jq ".assets[] | select(.name == \"${COMPRESSED_TARGET}\") | .url" <<< ${RELEASE_ASSETS}`
             jsonStrTarget=`jq ". + { \"name\": \"${TARGET_NAME}\", \"sha\" : \"${TARGET_SHA}\", \"binFolderName\" : \"${TARGET_DIRECTORY}\", \"source\" : ${TARGET_SOURCE}, \"binary\" : ${TARGET_BINARY} }" <<< "{}"`
-            jsonStr+=`echo ${jsonStrTarget}`
+            jsonStr=$(jq -c --argjson obj "$jsonStrTarget" '. + [$obj]' <<<"$jsonStr")
           done
 
           # Print final JSON file 
