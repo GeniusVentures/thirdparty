@@ -695,3 +695,14 @@ install(
     DIRECTORY ${THIRDPARTY_DIR}/jsonrpc-lean
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/jsonrpc-lean
 )
+
+# crypto3
+ExternalProject_Add(crypto3
+    PREFIX crypto3
+    SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/crypto3"
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    ${_CMAKE_COMMON_CACHE_ARGS}
+    ${_BOOST_CACHE_ARGS}
+    DEPENDS Boost 
+)
