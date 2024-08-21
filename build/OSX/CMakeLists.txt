@@ -124,4 +124,12 @@ ExternalProject_Add(MoltenVK
 # ed25519 crypto
 set(_ED25519_RANDOM dev_urandom)
 
+# MNN
+set(_MNN_EXTRA_PARAM
+    -DMNN_USE_SYSTEM_LIB:BOOL=ON
+    -DVulkan_INCLUDE_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/include
+    -DVulkan_LIBRARY:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/lib/MoltenVK.xcframework
+)
+message(WARNING "MNN Extra Param ${_MNN_EXTRA_PARAM}")
+
 include(../CommonTargets.CMake)
