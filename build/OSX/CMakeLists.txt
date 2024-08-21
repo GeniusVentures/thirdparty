@@ -130,6 +130,6 @@ set(_MNN_EXTRA_PARAM
     -DVulkan_INCLUDE_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/include
     -DVulkan_LIBRARY:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/lib/MoltenVK.xcframework
 )
-message(WARNING "MNN Extra Param ${_MNN_EXTRA_PARAM}")
+set(_MNN_DEPENDS MoltenVK)
 
 include(../CommonTargets.CMake)
