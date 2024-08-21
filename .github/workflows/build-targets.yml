@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN_1 }}
+  GH_TOKEN: ${{ secrets.GNUS_TOKEN_1 }}
 jobs:
   setup-src-cache:
     runs-on: ubuntu-latest
