@@ -90,7 +90,7 @@ export CC=clang
 SCRIPT_PATH="${0%/*}"
 CONFIGDIR="$SCRIPT_PATH/../../../openssl"
 REALCONFIGDIR=$(cd "$CONFIGDIR" && pwd)
-OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure $DEBUG_FLAGS no-asm no-shared $ABI --prefix=$BUILD_DIR --openssldir=$BUILD_DIR"
+OPENSSL_CONFIGURE_CMD="${REALCONFIGDIR}/Configure $DEBUG_FLAGS no-asm no-shared $ABI --prefix=$BUILD_DIR --openssldir=$BUILD_DIR" --libdir=lib android-arm64
 
 echo "Building OpenSSL"
 echo $OPENSSL_CONFIGURE_CMD

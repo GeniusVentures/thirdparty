@@ -1,15 +1,14 @@
 [submodule "boost"]
     path = boost
     url = https://github.com/boostorg/boost.git
-    branch = boost-1.80.0
+    branch = boost-1.85.0
+    ignore = dirty
 [submodule "libp2p"]
     path = libp2p
     url = ../libp2p.git
-    branch = master
 [submodule "ipfs-lite-cpp"]
     path = ipfs-lite-cpp
     url = ../ipfs-lite-cpp.git
-    branch = master
 [submodule "restclient-cpp"]
     path = restclient-cpp
     url = https://github.com/mrtazz/restclient-cpp.git
@@ -54,14 +53,12 @@
 [submodule "ipfs-pubsub"]
     path = ipfs-pubsub
     url = ../ipfs-pubsub.git
-    branch = master
 [submodule "GTest"]
     path = GTest
     url = https://github.com/google/googletest
 [submodule "ed25519"]
     path = ed25519
     url = https://github.com/hyperledger/iroha-ed25519.git
-    branch = master
 [submodule "rapidjson"]
     path = rapidjson
     url = https://github.com/Tencent/rapidjson
@@ -78,14 +75,12 @@
 [submodule "delta-enabled-crdts"]
     path = delta-enabled-crdts
     url = ../delta-enabled-crdts.git
-    branch = master
 [submodule "rocksdb"]
     path = rocksdb
     url = ../rocksdb.git
 [submodule "sr25519-donna"]
     path = sr25519-donna
     url = ../sr25519-donna.git
-    branch = master
 [submodule "fmt"]
     path = fmt
     url = https://github.com/fmtlib/fmt.git
@@ -105,11 +100,9 @@
 [submodule "ipfs-bitswap-cpp"]
     path = ipfs-bitswap-cpp
     url = ../ipfs-bitswap-cpp.git
-    branch = master
 [submodule "openssl"]
     path = openssl
     url = https://github.com/openssl/openssl.git
-    branch = OpenSSL_1_1_1-stable
 [submodule "libsecp256k1"]
     path = libsecp256k1
 	url = ../secp256k1
@@ -125,15 +118,13 @@
 [submodule "Vulkan-Loader"]
     path = Vulkan-Loader
     url = https://github.com/KhronosGroup/Vulkan-Loader.git
-[submodule "abseil-cpp"]
-    path = abseil-cpp
-    url = https://github.com/abseil/abseil-cpp.git
 [submodule "Boost-for-Android"]
     url = ../Boost-for-Android.git
     path = build/Android/Boost-for-Android
 [submodule "wallet-core"]
     path = wallet-core
     url = ../wallet-core.git
+    ignore = dirty
 [submodule "MNN"]
     path = MNN
     url = ../MNN.git
@@ -147,7 +138,6 @@
 [submodule "AsyncIOManager"]
     path = AsyncIOManager
     url = ../AsyncIOManager.git
-    branch = refactor_async_mnnloader
 [submodule "cryptopp-cmake"]
     path = cryptopp-cmake
     url = https://github.com/abdes/cryptopp-cmake.git
