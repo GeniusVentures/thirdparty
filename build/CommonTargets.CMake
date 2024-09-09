@@ -708,4 +708,44 @@ if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
         ${_BOOST_CACHE_ARGS}
         DEPENDS Boost
     )
+    set(crypto3_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/crypto3/include")
+    ExternalProject_Add(blueprint
+    PREFIX blueprint
+    SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/blueprint"
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    ${_CMAKE_COMMON_CACHE_ARGS}
+    ${_BOOST_CACHE_ARGS}
+    DEPENDS Boost crypto3
+    )
+    set(blueprint_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/blueprint/include")
+    ExternalProject_Add(circifier
+        PREFIX circifier
+        SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/circifier/llvm"
+        CMAKE_CACHE_ARGS
+        -Dcrypto3_INCLUDE_DIR:PATH=${crypto3_INCLUDE_DIR}
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        ${_CMAKE_COMMON_CACHE_ARGS}
+        ${_BOOST_CACHE_ARGS}
+        DEPENDS blueprint 
+    )
+    ExternalProject_Add(assigner
+        PREFIX assigner
+        SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/assigner"
+        CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        ${_CMAKE_COMMON_CACHE_ARGS}
+        ${_BOOST_CACHE_ARGS}
+        DEPENDS blueprint Boost
+    )
+    #ExternalProject_Add(zkLLVM
+    #    PREFIX zkLLVM
+    #    SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/"
+    #    CMAKE_CACHE_ARGS
+    #    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    #    ${_CMAKE_COMMON_CACHE_ARGS}
+    #    ${_BOOST_CACHE_ARGS}
+    #    DEPENDS Boost 
+    #)
+
 endif()
