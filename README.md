@@ -92,7 +92,7 @@ cargo install cbindgen >rust-install.log
 rustup target add x86_64-unknown-linux-gnu >rust-install.log 
 cp -R /root/.cargo /home/$SUDO_USER 
 cp -R /root/.rustup /home/$SUDO_USER 
-chown -R /$SUDO_USER:/$SUDO_USER /home//$SUDO_USER/.cargo /home//$SUDO_USER/.rustup
+chown -R $SUDO_USER:$SUDO_USER /home//$SUDO_USER/.cargo /home//$SUDO_USER/.rustup
 apt-get -y install gnupg2
 curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
 curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import -
