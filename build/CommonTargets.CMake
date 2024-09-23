@@ -723,6 +723,7 @@ if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
         PREFIX circifier
         SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/circifier/llvm"
         CMAKE_CACHE_ARGS
+        -DLLVM_ENABLE_PROJECTS:STRING=clang
         -Dcrypto3_INCLUDE_DIR:PATH=${crypto3_INCLUDE_DIR}
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         ${_CMAKE_COMMON_CACHE_ARGS}
