@@ -730,6 +730,17 @@ if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
         ${_BOOST_CACHE_ARGS}
         DEPENDS blueprint 
     )
+    ExternalProject_Add(stdlib
+        PREFIX stdlib
+        SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/stdlib"
+        CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        -DCMAKE_INSTALL_INCLUDEDIR:PATH=<INSTALL_DIR>
+        -DZKLLVM_STDLIB_DIR:PATH=lib
+        ${_CMAKE_COMMON_CACHE_ARGS}
+        ${_BOOST_CACHE_ARGS}
+        DEPENDS circifier 
+    )
     ExternalProject_Add(assigner
         PREFIX assigner
         SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/assigner"
