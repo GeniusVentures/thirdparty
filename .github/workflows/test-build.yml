@@ -7,7 +7,6 @@ jobs:
   build:
     env:
       GRPC_BUILD_ENABLE_CCACHE: "ON"
-      CMAKE_NO_VERBOSE: "ON"
     runs-on: ${{matrix.host}}
     strategy:
       fail-fast: false
