@@ -81,7 +81,7 @@ set(BOOST_INCLUDE_LIBRARIES container date_time filesystem log program_options r
 list(JOIN BOOST_INCLUDE_LIBRARIES "," BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED)
 separate_arguments(BOOST_B2_FLAGS NATIVE_COMMAND "${CMAKE_CXX_FLAGS}")
 list(APPEND BOOST_B2_FLAGS "-fPIC")
-list(APPEND BOOST_B2_FLAGS "--with-test")
+#list(APPEND BOOST_B2_FLAGS "--with-test")
 list(TRANSFORM BOOST_B2_FLAGS PREPEND "cxxflags=")
 
 # OpenSSL
