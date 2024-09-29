@@ -155,4 +155,4 @@
 	url = ../sqlite-amalgamation
 [submodule "SQLiteModernCpp"]
     path = SQLiteModernCpp
-    url = https://github.com/GeniusVentures/sqlite_modern_cpp.git
+    url = ../sqlite_modern_cpp.git
