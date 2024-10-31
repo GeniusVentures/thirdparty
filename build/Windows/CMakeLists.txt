@@ -20,18 +20,6 @@ set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/win-genera
 # Set Windows specific protobuf options
 set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/cmake")
 
-# Set Boost Windows specific configurations
-set(VC_PLATFORMTOOLSET "vc193")
-set(BOOST_TOOLSET "msvc-14.1")
-
-if(MSVC_VERSION AND MSVC_VERSION GREATER_EQUAL 1920) # v142 toolset
-    set(VC_PLATFORMTOOLSET "vc142")
-endif()
-
-if(MSVC_VERSION AND MSVC_VERSION GREATER_EQUAL 1930) # v143 toolset
-    set(VC_PLATFORMTOOLSET "vc143")
-endif()
-
 # Boost
 set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
 
@@ -41,7 +29,7 @@ ExternalProject_Add(Boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
     INSTALL_DIR "${BOOST_ROOT}"
 
-    CONFIGURE_COMMAND ./bootstrap.bat ${VC_PLATFORMTOOLSET}
+    CONFIGURE_COMMAND ./bootstrap.bat vc143
 
     BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal ${BOOST_INCLUDE_LIBRARIES_EXPANDED} address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} -d0 install
     BUILD_IN_SOURCE TRUE
