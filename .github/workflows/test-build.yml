@@ -1,4 +1,4 @@
-name: Build per OS
+name: Multiplatform build
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ jobs:
             host: macos-latest
           - target: Android
             host: ubuntu-latest
-            android_abi: arm64-v8a
+            abi: arm64-v8a
           - target: iOS
             host: macos-latest
     steps:
@@ -31,28 +31,24 @@ jobs:
         with:
           submodules: "recursive"
 
-      - name: Set clang as the default compiler
-        if: ${{ matrix.host == 'ubuntu-latest' }}
+      - name: Configure Linux host
+        if: ${{ matrix.host == 'ubuntu-latest'}}
         run: |
           sudo update-alternatives --install /usr/bin/cc cc $(which clang) 100
           sudo update-alternatives --install /usr/bin/c++ c++ $(which clang++) 100
           sudo update-alternatives --set cc $(which clang)
           sudo update-alternatives --set c++ $(which clang++)
 
-      - name: Install Linux host dependencies
-        if: ${{ matrix.host == 'ubuntu-latest' }}
-        run: |
-          sudo apt install ccache ninja-build -y
-          sudo apt install vulkan-tools vulkan-utility-libraries-dev libvulkan-dev -y
+          sudo apt install ccache ninja-build libvulkan-dev -y
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
-      - name: Install Windows host dependencies
-        if: ${{ matrix.host == 'windows-latest' }}
+      - name: Configure Windows host
+        if: ${{ matrix.host == 'windows-latest'}}
         run: |
           choco install ccache -A
 
-      - name: Install Darwin host dependencies
-        if: ${{ matrix.host == 'macos-latest' }}
+      - name: Configure macOS host
+        if: ${{ matrix.host == 'macos-latest'}}
         run: |
           brew install ccache ninja
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
@@ -76,33 +72,34 @@ jobs:
       - name: Install bindgen
         run: cargo install cbindgen
 
-      - name: Add Rust target
+      - name: Add wasm Rust target
         run: rustup target add wasm32-unknown-emscripten
 
-      - name: Set ABI specific path based on target
-        if: ${{ matrix.host != 'windows-latest' }}
+      - name: Set build directory
         run: |
-          if [ "${{ matrix.target }}" = "Android" ]; then
-            echo "ABI_DIR=/${{ matrix.android_abi }}" >> $GITHUB_ENV
+          if [ '${{matrix.target}}' == 'Android' ] ; then
+            BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build_type}}/${{matrix.abi}}
           else
-            echo "ABI_DIR=" >> $GITHUB_ENV
+            BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build_type}}
           fi
+          echo "BUILD_DIRECTORY=$BUILD_DIRECTORY" >> $GITHUB_ENV
+        shell: bash
 
       - name: Configure CMake for Mac x86
-        if: ${{ matrix.target == 'OSX' }}
-        run: cmake -S build/${{ matrix.target }} -B build/${{ matrix.target }}/${{ matrix.build_type }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DPLATFORM=MAC
+        if: ${{ matrix.target == 'OSX'}}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DPLATFORM=MAC
 
       - name: Configure CMake for iOS
-        if: ${{ matrix.target == 'iOS' }}
-        run: cmake -S build/${{ matrix.target }} -B build/${{ matrix.target }}/${{ matrix.build_type }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DPLATFORM=OS64
+        if: ${{ matrix.target == 'iOS'}}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DPLATFORM=OS64
 
-      - name: Configure CMake for Android
-        if: ${{ matrix.target == 'Android' }}
-        run: cmake -S build/${{ matrix.target }} -B build/${{ matrix.target }}/${{ matrix.build_type }}$ABI_DIR  -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DANDROID_ABI=${{ matrix.android_abi }}
+      - name: Configure SuperGenius CMake for Android
+        if: ${{ matrix.target == 'Android'}}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DANDROID_ABI=${{matrix.abi}}
 
-      - name: Configure CMake for other platforms
+      - name: Configure CMake
         if: ${{ matrix.target != 'OSX' && matrix.target != 'iOS' && matrix.target != 'Android' }}
-        run: cmake -S build/${{ matrix.target }} -B build/${{ matrix.target }}/${{ matrix.build_type }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
 
       - name: Build project
-        run: cmake --build build/${{ matrix.target }}/${{ matrix.build_type }}${{ env.ABI_DIR }} --config ${{ matrix.build_type }} -j
+        run: cmake --build $BUILD_DIRECTORY --config ${{matrix.build_type}} -j
