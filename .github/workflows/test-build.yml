@@ -67,6 +67,12 @@ jobs:
       - name: Add Android toolchain
         if: ${{ matrix.target == 'Android' }}
         run: |
+          NDK_VERSION="r27b"
+          wget https://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux-x86_64.zip -O ndk.zip
+          unzip ndk.zip -d $HOME
+        
+          echo "ANDROID_NDK_HOME=$HOME/android-ndk-$NDK_VERSION" >> $GITHUB_ENV
+
           rustup target add aarch64-linux-android
 
       - name: Install bindgen
