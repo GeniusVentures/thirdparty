@@ -699,15 +699,15 @@ install(
 
 #if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     # crypto3
-   # ExternalProject_Add(crypto3
-   #     PREFIX crypto3
-   #     SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/crypto3"
-   #     CMAKE_CACHE_ARGS
-   #     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-   #     ${_CMAKE_COMMON_CACHE_ARGS}
-   #     ${_BOOST_CACHE_ARGS}
-   #     DEPENDS Boost
-   # )
+    ExternalProject_Add(crypto3
+        PREFIX crypto3
+        SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/crypto3"
+        CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        ${_CMAKE_COMMON_CACHE_ARGS}
+        ${_BOOST_CACHE_ARGS}
+        DEPENDS Boost
+    )
    # set(crypto3_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/crypto3/include")
    # ExternalProject_Add(blueprint
    # PREFIX blueprint
@@ -761,11 +761,12 @@ install(
         -DZKLLVM_STDLIB_DIR:PATH=lib
         -DZKLLVM_DEV_ENVIRONMENT:BOOL=true
         -DZKLLVM_VERSION:STRING=v0.1.18-22-gf095fb0
+        -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF
         ${_CMAKE_COMMON_CACHE_ARGS}
         ${_BOOST_CACHE_ARGS}
         DEPENDS Boost 
         BUILD_COMMAND 
-        ${CMAKE_COMMAND} --build <BINARY_DIR> --target assigner clang
+        ${CMAKE_COMMAND} --build <BINARY_DIR>
     )
 
 #endif()
