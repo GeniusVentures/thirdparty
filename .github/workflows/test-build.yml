@@ -72,6 +72,10 @@ jobs:
         if: ${{ matrix.target == 'Android' }}
         run: |
           rustup target add aarch64-linux-android
+          wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+          unzip android-ndk-r25c-linux.zip
+          echo "ANDROID_NDK_HOME=$PWD/android-ndk-r25c" >> $GITHUB_ENV
+          echo "CMAKE_TOOLCHAIN_FILE=$PWD/android-ndk-r25c/build/cmake/android
 
       - name: Install bindgen
         run: cargo install cbindgen
@@ -87,8 +91,12 @@ jobs:
         if: ${{ matrix.target == 'iOS'}}
         run: cmake -S build/${{matrix.target}} -B build/${{matrix.target}}/${{matrix.build_type}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DPLATFORM=OS64
 
+      - name: Configure CMake for Android
+        if: ${{ matrix.target == 'Android'}}
+        run: cmake -S build/${{matrix.target}} -B build/${{matrix.target}}/${{matrix.build_type}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DANDROID_ABI="arm64-v8a" -DCMAKE_ANDROID_NDK=$ANDROID_NDK_HOME -DANDROID_TOOLCHAIN=clang
+
       - name: Configure CMake
-        if: ${{ matrix.target != 'OSX' && matrix.target != 'iOS' }}
+        if: ${{ matrix.target != 'OSX' && matrix.target != 'iOS'  && matrix.target != 'Android'}}
         run: cmake -S build/${{matrix.target}} -B build/${{matrix.target}}/${{matrix.build_type}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
 
       - name: Build project
