@@ -764,6 +764,7 @@ install(
         -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF
         ${_CMAKE_COMMON_CACHE_ARGS}
         ${_BOOST_CACHE_ARGS}
+        ${_ZKLLVM_EXTRA_PARAM}
         DEPENDS Boost 
         BUILD_COMMAND 
         ${CMAKE_COMMAND} --build <BINARY_DIR>
