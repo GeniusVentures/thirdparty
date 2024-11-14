@@ -34,7 +34,7 @@ jobs:
           submodules: "recursive"
 
       - name: Configure Linux host
-        if: ${{ matrix.host == 'ubuntu-latest'}}
+        if: ${{ runner.os == 'Linux'}}
         run: |
           sudo update-alternatives --install /usr/bin/cc cc $(which clang) 100
           sudo update-alternatives --install /usr/bin/c++ c++ $(which clang++) 100
@@ -45,12 +45,12 @@ jobs:
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
       - name: Configure Windows host
-        if: ${{ matrix.host == 'windows-latest'}}
+        if: ${{ runner.os == 'Windows'}}
         run: |
           choco install ccache ripgrep -A
 
       - name: Configure macOS host
-        if: ${{ matrix.host == 'macos-latest'}}
+        if: ${{ runner.os == 'macOS'}}
         run: |
           brew install ccache ninja ripgrep bash
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
@@ -153,7 +153,7 @@ jobs:
           echo Detecting targets:
 
           while IFS=':' read -r file src_dir; do
-              if ${{matrix.host == 'windows-latest'}}; then
+              if ${{runner.os == 'Windows'}}; then
                   file=$(cygpath -u ${file})
                   src_dir=$(cygpath -u ${src_dir})
               fi
@@ -169,7 +169,7 @@ jobs:
               target_build_directories[$target]=$build_directory
           done < <(rg 'source_dir=(.*)' -u -r '$1' -g '*-source_dirinfo.txt' .)
 
-          echo "\nDownloading release.json file"
+          echo "Downloading release.json file"
           set +e
           gh release download $RELEASE_TAG --pattern "release.json" --clobber
           set -e
@@ -178,7 +178,8 @@ jobs:
 
           if [[ -f "release.json" ]]; then
               while IFS="=" read -r target sha; do
-                  release_shas[$target]=$sha
+                  # We remove the carriage return because `jq` adds them on Windows
+                  release_shas[$target]="${sha//$'\r'/}"
               done < <(jq -r '.[] | "\(.name)=\(.sha)"' release.json)
           fi
 
@@ -187,7 +188,7 @@ jobs:
           build_directories_of_targets_to_update=()
           up_to_date_targets=()
 
-          echo "\nChecking SHAs:"
+          echo "Checking SHAs:"
 
           for target in "${!target_shas[@]}"; do
               if [[ -v release_shas["$target"] && "${target_shas[$target]}" == "${release_shas[$target]}" ]]; then
@@ -219,30 +220,15 @@ jobs:
               tar -xzf ${compressed_target}
           done
         shell: bash
-
-      - name: Build targets in POSIX hosts
+      
+        # Workaround GitHub shell
+      - name: Build OpenSSL
+        if: ${{ runner.os == 'Windows' }}
         working-directory: ${{env.BUILD_DIRECTORY}}
-        if: ${{matrix.host != 'windows-latest'}}
-        run: |
-          targets_to_update=(${{steps.check-targets.outputs.TARGETS_TO_UPDATE}})
+        shell: cmd
+        run: cmake --build . --target openssl
 
-          for target in "${targets_to_update[@]}"; do
-              echo Building ${target}
-              cmake --build . --target ${target} -j
-          done
-
-      - name: Build targets in Windows host
-        working-directory: ${{env.BUILD_DIRECTORY}}
-        if: ${{matrix.host == 'windows-latest'}}
-        run: |
-          $targets_to_update = "${{steps.check-targets.outputs.TARGETS_TO_UPDATE}}" -split ' '
-
-          foreach ($target in $targets_to_update) {
-              Write-Host "Building $target"
-              cmake --build . --target $target -j
-          }
-
-      - name: Compress and upload targets
+      - name: Build, compress and upload targets
         working-directory: ${{env.BUILD_DIRECTORY}}
         run: |
           targets_to_update=(${{steps.check-targets.outputs.TARGETS_TO_UPDATE}})
@@ -253,30 +239,30 @@ jobs:
 
           if [[ -f "release.json" ]]; then
               while IFS="=" read -r target sha; do
-                  release_shas[$target]=$sha
+                  release_shas[$target]="${sha//$'\r'/}"
               done < <(jq -r '.[] | "\(.name)=\(.sha)"' release.json)
           fi
-
-          echo Compressing targets
 
           for i in "${!targets_to_update[@]}"; do
               target=${targets_to_update[$i]}
               compressed_file="${target}-lib.tar.gz"
               directory_to_compress=$(basename "${build_directories[$i]}")
 
+              cmake --build . --target $target -j
+
               echo ${target}: $directory_to_compress
               tar --exclude="${directory_to_compress}/src" --exclude="${directory_to_compress}/tmp" -czf ${compressed_file} ${directory_to_compress}
 
-              echo -e "Uploading ${compressed_file}\n"
+              echo -e "Uploading ${compressed_file}"
               gh release upload --clobber ${RELEASE_TAG} ${compressed_file}
 
               release_shas[${target}]="${sha_of_targets[i]}"
+
+              json_data=$(for key in "${!release_shas[@]}"; do
+                  printf '{"name": "%s", "sha": "%s"}\n' "$key" "${release_shas[$key]}"
+              done | jq -s '.')
+
+              echo "$json_data" >release.json
+              gh release upload --clobber ${RELEASE_TAG} release.json
           done
-
-          json_data=$(for key in "${!release_shas[@]}"; do
-              printf '{"name": "%s", "sha": "%s"}\n' "$key" "${release_shas[$key]}"
-          done | jq -s '.')
-
-          echo "$json_data" >release.json
-          gh release upload --clobber ${RELEASE_TAG} release.json
         shell: bash
