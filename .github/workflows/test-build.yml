@@ -4,108 +4,55 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    env:
-      GRPC_BUILD_ENABLE_CCACHE: "ON"
-    runs-on: ${{matrix.host}}
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [Android, iOS, OSX, Linux, Windows]
-        build_type: [Debug, Release]
-        include:
-          - target: Linux
-            host: ubuntu-latest
-          - target: Windows
-            host: windows-latest
-          - target: OSX
-            host: macos-latest
-          - target: Android
-            host: ubuntu-latest
-            abi: arm64-v8a
-          - target: iOS
-            host: macos-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: "recursive"
-
-      - name: Configure Linux host
-        if: ${{ matrix.host == 'ubuntu-latest'}}
-        run: |
-          sudo update-alternatives --install /usr/bin/cc cc $(which clang) 100
-          sudo update-alternatives --install /usr/bin/c++ c++ $(which clang++) 100
-          sudo update-alternatives --set cc $(which clang)
-          sudo update-alternatives --set c++ $(which clang++)
-
-          sudo apt install ccache ninja-build libvulkan-dev -y
-          echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
-
-      - name: Configure Windows host
-        if: ${{ matrix.host == 'windows-latest'}}
-        run: |
-          choco install ccache -A
-
-      - name: Configure macOS host
-        if: ${{ matrix.host == 'macos-latest'}}
-        run: |
-          brew install ccache ninja
-          echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
-
-      - name: Add Darwin toolchain
-        if: ${{ matrix.target == 'OSX' }}
-        run: rustup target add x86_64-apple-darwin
-
-      - name: Add iOS toolchain
-        if: ${{ matrix.target == 'iOS' }}
-        run: |
-          rustup toolchain install nightly-aarch64-apple-darwin
-          rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
-          rustup target add aarch64-apple-ios
-
-      - name: Add Android toolchain
-        if: ${{ matrix.target == 'Android' }}
-        run: |
-          NDK_VERSION="r27b"
-          wget https://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux-x86_64.zip -O ndk.zip
-          unzip ndk.zip -d $HOME
-        
-          echo "ANDROID_NDK_HOME=$HOME/android-ndk-$NDK_VERSION" >> $GITHUB_ENV
-
-          rustup target add aarch64-linux-android
-
-      - name: Install bindgen
-        run: cargo install cbindgen
-
-      - name: Add wasm Rust target
-        run: rustup target add wasm32-unknown-emscripten
-
-      - name: Set build directory
-        run: |
-          if [ '${{matrix.target}}' == 'Android' ] ; then
-            BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build_type}}/${{matrix.abi}}
-          else
-            BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build_type}}
-          fi
-          echo "BUILD_DIRECTORY=$BUILD_DIRECTORY" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Configure CMake for Mac x86
-        if: ${{ matrix.target == 'OSX'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DPLATFORM=MAC
-
-      - name: Configure CMake for iOS
-        if: ${{ matrix.target == 'iOS'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DPLATFORM=OS64
-
-      - name: Configure SuperGenius CMake for Android
-        if: ${{ matrix.target == 'Android'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DANDROID_ABI=${{matrix.abi}}
-
-      - name: Configure CMake
-        if: ${{ matrix.target != 'OSX' && matrix.target != 'iOS' && matrix.target != 'Android' }}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
-
-      - name: Build project
-        run: cmake --build $BUILD_DIRECTORY --config ${{matrix.build_type}} -j
+  android-debug:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: Android
+      build-type: Debug
+      abi: arm64
+  ios-debug:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: iOS
+      build-type: Debug
+  linux-debug:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: Linux
+      build-type: Debug
+  macos-debug:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: OSX
+      build-type: Debug
+  windows-debug:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: Windows
+      build-type: Debug
+  android-release:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: Android
+      build-type: Release
+      abi: arm64
+  ios-release:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: iOS
+      build-type: Release
+  linux-release:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: Linux
+      build-type: Release
+  macos-release:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: OSX
+      build-type: Release
+  windows-release:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: Windows
+      build-type: Release
