@@ -697,77 +697,19 @@ install(
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/jsonrpc-lean
 )
 
-#if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    # crypto3
-    ExternalProject_Add(crypto3
-        PREFIX crypto3
-        SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/crypto3"
-        CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        ${_CMAKE_COMMON_CACHE_ARGS}
-        ${_BOOST_CACHE_ARGS}
-        DEPENDS Boost
-    )
-   # set(crypto3_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/crypto3/include")
-   # ExternalProject_Add(blueprint
-   # PREFIX blueprint
-   # SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/blueprint"
-   # CMAKE_CACHE_ARGS
-   # -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-   # ${_CMAKE_COMMON_CACHE_ARGS}
-   # ${_BOOST_CACHE_ARGS}
-   # DEPENDS Boost crypto3
-   # )
-   # set(blueprint_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/blueprint/include")
-   # ExternalProject_Add(circifier
-   #     PREFIX circifier
-   #     SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/circifier/llvm"
-   #     CMAKE_CACHE_ARGS
-   #     -DLLVM_ENABLE_PROJECTS:STRING=clang
-   #     -Dcrypto3_INCLUDE_DIR:PATH=${crypto3_INCLUDE_DIR}
-   #     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-   #     ${_CMAKE_COMMON_CACHE_ARGS}
-   #     ${_BOOST_CACHE_ARGS}
-   #     DEPENDS blueprint 
-   # )
-   # ExternalProject_Add(stdlib
-   #     PREFIX stdlib
-   #     SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/stdlib"
-   #     CMAKE_CACHE_ARGS
-   #     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-   #     -DCMAKE_INSTALL_INCLUDEDIR:PATH=<INSTALL_DIR>
-   #     -DZKLLVM_STDLIB_DIR:PATH=lib
-   #     -DPATH_TO_CIRCUIT_FUNCTION:PATH=${THIRDPARTY_DIR}/build/circuit_functions.cmake
-   #     -D_THIRDPARTY_BUILD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}
-   #     -DZKLLVM_SRC_DIR:PATH=${THIRDPARTY_DIR}/zkLLVM
-   #     ${_CMAKE_COMMON_CACHE_ARGS}
-   #     ${_BOOST_CACHE_ARGS}
-   #     DEPENDS circifier 
-   # )
-   # ExternalProject_Add(assigner
-   #     PREFIX assigner
-   #     SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/assigner"
-   #     CMAKE_CACHE_ARGS
-   #     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-   #     ${_CMAKE_COMMON_CACHE_ARGS}
-   #     ${_BOOST_CACHE_ARGS}
-   #     DEPENDS blueprint Boost
-   # )
-    ExternalProject_Add(zkLLVM
-        PREFIX zkLLVM
-        SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/"
-        CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        -DZKLLVM_STDLIB_DIR:PATH=lib
-        -DZKLLVM_DEV_ENVIRONMENT:BOOL=true
-        -DZKLLVM_VERSION:STRING=v0.1.18-22-gf095fb0
-        -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF
-        ${_CMAKE_COMMON_CACHE_ARGS}
-        ${_BOOST_CACHE_ARGS}
-        ${_ZKLLVM_EXTRA_PARAM}
-        DEPENDS Boost 
-        BUILD_COMMAND 
-        ${CMAKE_COMMAND} --build <BINARY_DIR>
-    )
-
-#endif()
+ExternalProject_Add(zkLLVM
+    PREFIX zkLLVM
+    SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/"
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    -DZKLLVM_STDLIB_DIR:PATH=lib
+    -DZKLLVM_DEV_ENVIRONMENT:BOOL=true
+    -DZKLLVM_VERSION:STRING=v0.1.18-22-gf095fb0
+    -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF
+    ${_CMAKE_COMMON_CACHE_ARGS}
+    ${_BOOST_CACHE_ARGS}
+    ${_ZKLLVM_EXTRA_PARAM}
+    DEPENDS Boost
+    BUILD_COMMAND
+    ${CMAKE_COMMAND} --build <BINARY_DIR>
+)
