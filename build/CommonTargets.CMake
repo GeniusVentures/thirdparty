@@ -714,3 +714,20 @@ ExternalProject_Add(zkLLVM
     BUILD_COMMAND
     ${CMAKE_COMMAND} --build <BINARY_DIR>
 )
+
+if(EXT_ZKSTDLIB)
+    ExternalProject_Add(stdlib
+        PREFIX stdlib
+        SOURCE_DIR "${THIRDPARTY_DIR}/zkLLVM/libs/stdlib"
+        CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        -DCMAKE_INSTALL_INCLUDEDIR:PATH=<INSTALL_DIR>
+        -DZKLLVM_STDLIB_DIR:PATH=lib
+        -DPATH_TO_CIRCUIT_FUNCTION:PATH=${THIRDPARTY_DIR}/build/circuit_functions.cmake
+        -D_THIRDPARTY_BUILD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}
+        -DZKLLVM_SRC_DIR:PATH=${THIRDPARTY_DIR}/zkLLVM
+        ${_CMAKE_COMMON_CACHE_ARGS}
+        ${_BOOST_CACHE_ARGS}
+        DEPENDS zkLLVM
+    )
+endif()
