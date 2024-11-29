@@ -344,11 +344,45 @@ set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
 set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include")
 
+if(NOT ANDROID AND NOT IOS)
+    # Vulkan-Headers
+    ExternalProject_Add(
+        Vulkan-Headers
+        PREFIX Vulkan-Headers
+        SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Headers"
+        CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader
+        ${_CMAKE_COMMON_CACHE_ARGS}
+    )
+
+    # Vulkan-Loader
+    ExternalProject_Add(
+        Vulkan-Loader
+        PREFIX Vulkan-Loader
+        SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Loader"
+        CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        -DVulkanHeaders_DIR:PATH=<INSTALL_DIR>/share/cmake/VulkanHeaders
+        -DBUILD_WSI_XCB_SUPPORT:BOOL=OFF
+        -DBUILD_WSI_XLIB_SUPPORT:BOOL=OFF
+        -DBUILD_WSI_WAYLAND_SUPPORT:BOOL=OFF
+        -DBUILD_WSI_DIRECTFB_SUPPORT:BOOL=OFF
+        -DBUILD_WSI_SCREEN_QNX_SUPPORT:BOOL=OFF
+        ${_CMAKE_COMMON_CACHE_ARGS}
+        DEPENDS Vulkan-Headers
+    )
+
+    set(ENV{VULKAN_SDK} "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader")
+    set(vulkanTarget Vulkan-Loader)
+endif()
+
 # MNN
 ExternalProject_Add(MNN
     PREFIX MNN
     SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
-    CMAKE_CACHE_ARGS
+    CMAKE_GENERATOR ${CMAKE_GENERATOR}
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env VULKAN_SDK=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader
+    ${CMAKE_COMMAND} <SOURCE_DIR>
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     -DMNN_BUILD_SHARED_LIBS:BOOL=OFF
     -DMNN_BUILD_TESTS:BOOL=OFF
@@ -358,7 +392,9 @@ ExternalProject_Add(MNN
     -DMNN_WIN_RUNTIME_MT:BOOL=ON
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_MNN_EXTRA_PARAM}
-    DEPENDS ${_MNN_DEPENDS}
+    BUILD_COMMAND ${CMAKE_COMMAND} --build .
+    INSTALL_COMMAND ${CMAKE_COMMAND} --install .
+    DEPENDS ${_MNN_DEPENDS} ${vulkanTarget}
 )
 
 set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN")
@@ -521,34 +557,6 @@ ExternalProject_Add(libsecp256k1
     -DSECP256K1_ENABLE_MODULE_RECOVERY:BOOL=ON
     ${_CMAKE_COMMON_CACHE_ARGS}
 )
-
-# For Android use NDK builtin vulkan header, otherwise add as an external project
-if(FALSE) # NOT ANDROID)
-    # Vulkan-Headers
-    ExternalProject_Add(Vulkan-Headers
-        PREFIX Vulkan-Headers
-        SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Headers"
-        CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        ${_CMAKE_COMMON_CACHE_ARGS}
-    )
-
-    # Vulkan-Loader
-    ExternalProject_Add(Vulkan-Loader
-        PREFIX Vulkan-Loader
-        SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Loader"
-        CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        -DVULKAN_HEADERS_INSTALL_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers
-        -DBUILD_WSI_WAYLAND_SUPPORT:BOOL=OFF
-        -DBUILD_WSI_XCB_SUPPORT:BOOL=OFF
-        -DBUILD_WSI_XLIB_SUPPORT:BOOL=OFF
-        -DUSE_GAS:BOOL=OFF
-        -DUPDATE_DEPS:BOOL=ON
-        ${_CMAKE_COMMON_CACHE_ARGS}
-        DEPENDS Vulkan-Headers
-    )
-endif()
 
 # xxhash
 ExternalProject_Add(xxhash
