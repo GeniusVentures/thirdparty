@@ -346,11 +346,8 @@ set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include"
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(IS_APPLE_PLATFORM ON)
-    if(IOS)
-        set(IS_IOS_PLATFORM ON)
-    else()
-        set(IS_MACOS_PLATFORM ON)
-    endif()
+elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    set(IS_APPLE_PLATFORM ON)
 endif()
 if(NOT ANDROID AND NOT IS_APPLE_PLATFORM)
     # Vulkan-Headers
@@ -383,7 +380,6 @@ if(NOT ANDROID AND NOT IS_APPLE_PLATFORM)
     set(ENV{VULKAN_SDK} "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader")
     set(vulkanTarget Vulkan-Loader)
 endif()
-message(WARNING "MNN EXTRA ${_MNN_EXTRA_PARAM}")
 
 ExternalProject_Add(MNN
     PREFIX MNN
