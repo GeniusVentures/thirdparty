@@ -81,6 +81,7 @@ jobs:
         run: rustup target add wasm32-unknown-emscripten
 
       - name: Set ABI specific path based on target
+        if: ${{ matrix.host != 'windows-latest' }}
         run: |
           if [ "${{ matrix.target }}" = "Android" ]; then
             echo "ABI_DIR=/${{ matrix.android_abi }}" >> $GITHUB_ENV
