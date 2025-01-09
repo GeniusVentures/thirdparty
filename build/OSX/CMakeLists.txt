@@ -25,6 +25,7 @@ endif()
 set(ARCHS "x86_64" CACHE STRING "Default build for OSX is only x86_64 until boost can build universal image")
 # Set OSX specific runtime options
 set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "OSX Architectures")
+set(OSX_ARCHITECTURES_PIPE_SEPARATED "x86_64|arm64" CACHE STRING "OSX Architectures pipe separator")
 
 project(OSX_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
@@ -41,7 +42,7 @@ set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
 )
 # for now until we get fat libraries working with Boost
-set(BOOST_ARCH "x86")
+set(BOOST_ARCH "arm+x86")
 #if(PLATFORM STREQUAL "MAC_ARM64")
 #    set(BOOST_ARCH "arm")
 #endif()
@@ -100,7 +101,7 @@ ExternalProject_Add(openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --deployment-target="12.1" --src-dir=<SOURCE_DIR> --build-dir=${OPENSSL_ROOT_DIR} --arch=${OSX_ARCHITECTURES_DASH_SEPARATED}
+    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --deployment-target="12.1" --src-dir=<SOURCE_DIR> --build-dir=${OPENSSL_ROOT_DIR} --arch=${OSX_ARCHITECTURES_PIPE_SEPARATED}
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
