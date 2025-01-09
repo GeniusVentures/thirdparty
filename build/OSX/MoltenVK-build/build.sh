@@ -41,7 +41,7 @@ echo "Src Dir ${SRC_DIR}"
 
 echo "building..."
 
-xcodebuild build -quiet -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package (macOS only)" -configuration "${VARIANT}" -archivePath "${INSTALL_DIR}"
+xcodebuild build -quiet -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package (macOS only)" -configuration "${VARIANT}" -archivePath "${INSTALL_DIR} ONLY_ACTIVE_ARCH=NO -arch x86_64 -arch arm64"
 
 mkdir -p ${LIB_DIR}
 cp -R ./Package/"${VARIANT}"/MoltenVK/include "${INSTALL_DIR}"/
