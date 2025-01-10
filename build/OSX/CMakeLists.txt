@@ -9,8 +9,8 @@ if(POLICY CMP0042)
 endif()
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    #set(_PLATFORM "MAC_UNIVERSAL" CACHE STRING "Setting the build for both x86_64 and arm64")
-    set(_PLATFORM "MAC" CACHE STRING "Setting the default build for x86_64")
+    set(_PLATFORM "MAC_UNIVERSAL" CACHE STRING "Setting the build for both x86_64 and arm64")
+    #set(_PLATFORM "MAC" CACHE STRING "Setting the default build for x86_64")
 
     set(NAMED_LANGUAGE_SUPPORT OFF CACHE BOOL "Toolchain named language support parameter")
     set(ENABLE_BITCODE OFF CACHE BOOL "Toolchain bitcode enable parameter")
@@ -22,9 +22,9 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../apple.toolchain.cmake" CACHE STRING "Toolchain file")
 endif()
 
-set(ARCHS "x86_64" CACHE STRING "Default build for OSX is only x86_64 until boost can build universal image")
+set(ARCHS "x86_64;arm64" CACHE STRING "Default build for OSX is only x86_64 until boost can build universal image")
 # Set OSX specific runtime options
-set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "OSX Architectures")
+set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "OSX Architectures")
 set(OSX_ARCHITECTURES_PIPE_SEPARATED "x86_64|arm64" CACHE STRING "OSX Architectures pipe separator")
 
 project(OSX_SHARED_THIRD_PARTY LANGUAGES C CXX)
@@ -41,6 +41,7 @@ set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
     -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
 )
+
 # for now until we get fat libraries working with Boost
 set(BOOST_ARCH "arm+x86")
 #if(PLATFORM STREQUAL "MAC_ARM64")
