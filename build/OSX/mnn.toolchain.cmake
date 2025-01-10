@@ -1,0 +1,3 @@
+unset(TOOLCHAIN_FILE_PROCESSED CACHE)
+include("${CMAKE_CURRENT_LIST_DIR}/../apple.toolchain.cmake")
+unset(TOOLCHAIN_FILE_PROCESSED CACHE)

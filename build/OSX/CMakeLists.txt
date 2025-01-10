@@ -146,7 +146,6 @@ set(_ZKLLVM_EXTRA_PARAM
     -DZKLLVM_BUILD_OSX_FAT_BINARY:BOOL=ON
 )
 # MNN Has separate source files for x86 and ARM, so I think we need to build twice and lipo combine
-unset(TOOLCHAIN_FILE_PROCESSED)
 ExternalProject_Add(MNN_X86
     PREFIX MNN
     SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
@@ -160,7 +159,7 @@ ExternalProject_Add(MNN_X86
     -DENABLE_ARC:BOOL=${ENABLE_ARC}
     -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
     -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
-    -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_CURRENT_SOURCE_DIR}/../apple.toolchain.cmake
+    -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_CURRENT_SOURCE_DIR}/mnn.toolchain.cmake
     -DMNN_BUILD_SHARED_LIBS:BOOL=OFF
     -DMNN_BUILD_TESTS:BOOL=OFF
     -DMNN_BUILD_TOOLS:BOOL=OFF
@@ -171,7 +170,7 @@ ExternalProject_Add(MNN_X86
     ${_MNN_EXTRA_PARAM}
     DEPENDS ${_MNN_DEPENDS}
 )
-unset(TOOLCHAIN_FILE_PROCESSED)
+
 ExternalProject_Add(MNN_ARM
     PREFIX MNN
     SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
@@ -185,7 +184,7 @@ ExternalProject_Add(MNN_ARM
     -DENABLE_ARC:BOOL=${ENABLE_ARC}
     -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
     -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
-    -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_CURRENT_SOURCE_DIR}/../apple.toolchain.cmake
+    -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_CURRENT_SOURCE_DIR}/mnn.toolchain.cmake
     -DMNN_BUILD_SHARED_LIBS:BOOL=OFF
     -DMNN_BUILD_TESTS:BOOL=OFF
     -DMNN_BUILD_TOOLS:BOOL=OFF
@@ -203,27 +202,47 @@ set(MNN_FAT_LIB "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/libMNN.a")
 
 # Ensure the destination directory exists
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN)
+set(MNN_X86_CMAKE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/x86_64/lib/cmake/MNN")
+set(MNN_ARM_CMAKE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64/lib/cmake/MNN")
+set(MNN_FAT_CMAKE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN")
 
-# Copy CMake files from x86_64 (or arm64)
-file(COPY ${CMAKE_CURRENT_BINARY_DIR}/MNN/x86_64/lib/cmake/MNN/
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN/)
 
+# Add custom command to create fat library
 add_custom_command(
     OUTPUT ${MNN_FAT_LIB}
     COMMAND lipo -create -output ${MNN_FAT_LIB} ${MNN_X86_LIB} ${MNN_ARM_LIB}
-    DEPENDS MNN_X86 MNN_ARM
+    DEPENDS MNN_ARM MNN_X86
     COMMENT "Creating fat library for MNN..."
 )
 
-add_custom_target(MNN_Fat ALL DEPENDS ${MNN_FAT_LIB})
+# Add target for fat library
+add_custom_target(MNN_Fat ALL
+    DEPENDS ${MNN_FAT_LIB})
+
+# Ensure the destination directory exists
+file(MAKE_DIRECTORY ${MNN_FAT_CMAKE_DIR})
+
+# Copy CMake configuration files
+add_custom_command(
+    OUTPUT ${MNN_FAT_CMAKE_DIR}/MNNConfig.cmake
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${MNN_X86_CMAKE_DIR}
+            ${MNN_FAT_CMAKE_DIR}
+    DEPENDS MNN_Fat
+    COMMENT "Copying CMake configuration files for MNN..."
+)
+
+# Add target for copying CMake files
+add_custom_target(MNN_CMakeFiles ALL
+    DEPENDS ${MNN_FAT_CMAKE_DIR}/MNNConfig.cmake)
 
 set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN")
 set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
-set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
+set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64/include")
 
 
 # Define the expected `MNN` target
-add_custom_target(MNN ALL DEPENDS MNN_Fat)
+add_custom_target(MNN ALL DEPENDS MNN_Fat MNN_CMakeFiles)
 
 unset(TOOLCHAIN_FILE_PROCESSED)
 
