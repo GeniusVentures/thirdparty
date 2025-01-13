@@ -240,7 +240,7 @@ add_custom_target(MNN_CMakeFiles ALL
 
     # Copy include files from arm64 directory to base include directory
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/MNN/include/MNNDefine.h
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/MNN/include/MNN/MNNDefine.h
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64/include
             ${CMAKE_CURRENT_BINARY_DIR}/MNN/include
@@ -250,7 +250,7 @@ add_custom_command(
 
 # Add a target for copying include files
 add_custom_target(MNN_IncludeFiles ALL
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/MNN/include/MNNDefine.h)
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/MNN/include/MNN/MNNDefine.h)
 
 set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN")
 set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
