@@ -57,6 +57,8 @@ set(_ED25519_RANDOM dev_urandom)
 set(_MNN_EXTRA_PARAM
     -DMNN_USE_SYSTEM_LIB:BOOL=ON 
     -DMNN_SEP_BUILD:BOOL=OFF
+    -DVulkan_INCLUDE_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader/include
+    -DVulkan_LIBRARY:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader/lib/libvulkan.so
 )
 
 set(_ZKLLVM_EXTRA_PARAM
