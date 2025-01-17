@@ -22,6 +22,7 @@ jobs:
             host: macos-latest
           - target: Android
             host: ubuntu-latest
+            android_abi: arm64-v8a
           - target: iOS
             host: macos-latest
     steps:
@@ -39,25 +40,25 @@ jobs:
           sudo update-alternatives --set c++ $(which clang++)
 
       - name: Install Linux host dependencies
-        if: ${{ matrix.host == 'ubuntu-latest'}}
+        if: ${{ matrix.host == 'ubuntu-latest' }}
         run: |
           sudo apt install ccache ninja-build -y
-          sudo apt install vulkan-tools vulkan-validationlayers-dev libvulkan-dev -y
+          sudo apt install vulkan-tools vulkan-utility-libraries-dev libvulkan-dev -y
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
       - name: Install Windows host dependencies
-        if: ${{ matrix.host == 'windows-latest'}}
+        if: ${{ matrix.host == 'windows-latest' }}
         run: |
           choco install ccache -A
 
       - name: Install Darwin host dependencies
-        if: ${{ matrix.host == 'macos-latest'}}
+        if: ${{ matrix.host == 'macos-latest' }}
         run: |
           brew install ccache ninja
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
       - name: Add Darwin toolchain
-        if: ${{ matrix.target == 'OSX'}}
+        if: ${{ matrix.target == 'OSX' }}
         run: rustup target add x86_64-apple-darwin
 
       - name: Add iOS toolchain
@@ -78,17 +79,30 @@ jobs:
       - name: Add Rust target
         run: rustup target add wasm32-unknown-emscripten
 
+      - name: Set ABI specific path based on target
+        if: ${{ matrix.host != 'windows-latest' }}
+        run: |
+          if [ "${{ matrix.target }}" = "Android" ]; then
+            echo "ABI_DIR=/${{ matrix.android_abi }}" >> $GITHUB_ENV
+          else
+            echo "ABI_DIR=" >> $GITHUB_ENV
+          fi
+
       - name: Configure CMake for Mac x86
-        if: ${{ matrix.target == 'OSX'}}
-        run: cmake -S build/${{matrix.target}} -B build/${{matrix.target}}/${{matrix.build_type}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DPLATFORM=MAC
+        if: ${{ matrix.target == 'OSX' }}
+        run: cmake -S build/${{ matrix.target }} -B build/${{ matrix.target }}/${{ matrix.build_type }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DPLATFORM=MAC
 
       - name: Configure CMake for iOS
-        if: ${{ matrix.target == 'iOS'}}
-        run: cmake -S build/${{matrix.target}} -B build/${{matrix.target}}/${{matrix.build_type}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DPLATFORM=OS64
+        if: ${{ matrix.target == 'iOS' }}
+        run: cmake -S build/${{ matrix.target }} -B build/${{ matrix.target }}/${{ matrix.build_type }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DPLATFORM=OS64
 
-      - name: Configure CMake
-        if: ${{ matrix.target != 'OSX' && matrix.target != 'iOS' }}
-        run: cmake -S build/${{matrix.target}} -B build/${{matrix.target}}/${{matrix.build_type}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+      - name: Configure CMake for Android
+        if: ${{ matrix.target == 'Android' }}
+        run: cmake -S build/${{ matrix.target }} -B build/${{ matrix.target }}/${{ matrix.build_type }}$ABI_DIR  -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DANDROID_ABI=${{ matrix.android_abi }}
+
+      - name: Configure CMake for other platforms
+        if: ${{ matrix.target != 'OSX' && matrix.target != 'iOS' && matrix.target != 'Android' }}
+        run: cmake -S build/${{ matrix.target }} -B build/${{ matrix.target }}/${{ matrix.build_type }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build project
-        run: cmake --build build/${{matrix.target}}/${{matrix.build_type}} --config ${{matrix.build_type}} -j
+        run: cmake --build build/${{ matrix.target }}/${{ matrix.build_type }}${{ env.ABI_DIR }} --config ${{ matrix.build_type }} -j

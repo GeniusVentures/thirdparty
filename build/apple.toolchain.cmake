@@ -1025,9 +1025,12 @@ elseif(NOT DEFINED TOOLCHAIN_FILE_PROCESSED)
             "Flags used by the compiler for all OBJCXX link types.")
     endif()
 
-    set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp -arch ${CMAKE_OSX_ARCHITECTURES} ${APPLE_TARGET_TRIPLE_FLAG}" CACHE INTERNAL
-        "Flags used by the compiler for all ASM build types.")
-
+    set(ASM_ARCHES "")
+    foreach(ASM_ARCH IN LISTS CMAKE_OSX_ARCHITECTURES)
+        set(ASM_ARCHES "${ASM_ARCHES} -arch ${ASM_ARCH}")
+    endforeach()
+    set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp ${ASM_ARCHES} ${APPLE_TARGET_TRIPLE_FLAG}" CACHE INTERNAL
+            "Flags used by the compiler for all ASM build types.")
     set(TOOLCHAIN_FILE_PROCESSED ON CACHE INTERNAL "Toolchain file has already set the necessary flags.")
 endif()
 

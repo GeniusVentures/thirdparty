@@ -9,8 +9,8 @@ if(POLICY CMP0042)
 endif()
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    #set(_PLATFORM "MAC_UNIVERSAL" CACHE STRING "Setting the build for both x86_64 and arm64")
-    set(_PLATFORM "MAC" CACHE STRING "Setting the default build for x86_64")
+    set(_PLATFORM "MAC_UNIVERSAL" CACHE STRING "Setting the build for both x86_64 and arm64")
+    #set(_PLATFORM "MAC" CACHE STRING "Setting the default build for x86_64")
 
     set(NAMED_LANGUAGE_SUPPORT OFF CACHE BOOL "Toolchain named language support parameter")
     set(ENABLE_BITCODE OFF CACHE BOOL "Toolchain bitcode enable parameter")
@@ -22,16 +22,19 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../apple.toolchain.cmake" CACHE STRING "Toolchain file")
 endif()
 
-set(ARCHS "x86_64" CACHE STRING "Default build for OSX is only x86_64 until boost can build universal image")
+set(ARCHS "x86_64;arm64" CACHE STRING "Default build for OSX is only x86_64 until boost can build universal image")
 # Set OSX specific runtime options
-set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "OSX Architectures")
+#set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "OSX Architectures")
+set(OSX_ARCHITECTURES_PIPE_SEPARATED "x86_64|arm64" CACHE STRING "OSX Architectures pipe separator")
 
 project(OSX_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
 include(../CommonCompilerOptions.CMake)
 
 # OSX specific runtime options
-set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
+set(_CMAKE_COMMON_CACHE_ARGS_MINUS_ARCH ${_CMAKE_COMMON_CACHE_ARGS})
+
+set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS_MINUS_ARCH}
     -DPLATFORM:STRING=${PLATFORM}
     -DDEPLOYMENT_TARGET:STRING=${DEPLOYMENT_TARGET}
     -DNAMED_LANGUAGE_SUPPORT:BOOL=${NAMED_LANGUAGE_SUPPORT}
@@ -40,8 +43,9 @@ set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
     -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
 )
+
 # for now until we get fat libraries working with Boost
-set(BOOST_ARCH "x86")
+set(BOOST_ARCH "arm+x86")
 #if(PLATFORM STREQUAL "MAC_ARM64")
 #    set(BOOST_ARCH "arm")
 #endif()
@@ -100,7 +104,7 @@ ExternalProject_Add(openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --deployment-target="12.1" --src-dir=<SOURCE_DIR> --build-dir=${OPENSSL_ROOT_DIR} --arch=${OSX_ARCHITECTURES_DASH_SEPARATED}
+    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --deployment-target="12.1" --src-dir=<SOURCE_DIR> --build-dir=${OPENSSL_ROOT_DIR} --arch=${OSX_ARCHITECTURES_PIPE_SEPARATED}
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
@@ -135,5 +139,130 @@ set(_MNN_EXTRA_PARAM
     -DVulkan_LIBRARY:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/lib/MoltenVK.xcframework
 )
 set(_MNN_DEPENDS MoltenVK)
+
+set(_ZKLLVM_EXTRA_PARAM
+    -DZKLLVM_BUILD_TRANSPILER_LIB:BOOL=OFF
+    -DZKLLVM_BUILD_EXAMPLES:BOOL=OFF
+    -DZKLLVM_BUILD_STD_LIB:BOOL=OFF
+    -DZKLLVM_BUILD_EXECUTABLES:BOOL=OFF
+    -DZKLLVM_BUILD_OSX_FAT_BINARY:BOOL=ON
+)
+# MNN Has separate source files for x86 and ARM, so I think we need to build twice and lipo combine
+ExternalProject_Add(MNN_X86
+    PREFIX MNN
+    SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN/x86_64
+    -DCMAKE_OSX_ARCHITECTURES:STRING=x86_64
+    -DPLATFORM:STRING=MAC
+    -DDEPLOYMENT_TARGET:STRING=${DEPLOYMENT_TARGET}
+    -DNAMED_LANGUAGE_SUPPORT:BOOL=${NAMED_LANGUAGE_SUPPORT}
+    -DENABLE_BITCODE:BOOL=${ENABLE_BITCODE}
+    -DENABLE_ARC:BOOL=${ENABLE_ARC}
+    -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
+    -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
+    -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_CURRENT_SOURCE_DIR}/mnn.toolchain.cmake
+    -DMNN_BUILD_SHARED_LIBS:BOOL=OFF
+    -DMNN_BUILD_TESTS:BOOL=OFF
+    -DMNN_BUILD_TOOLS:BOOL=OFF
+    -DMNN_BUILD_PROTOBUFFER:BOOL=OFF
+    -DMNN_VULKAN:BOOL=ON
+    -DMNN_WIN_RUNTIME_MT:BOOL=ON
+    ${_CMAKE_COMMON_CACHE_ARGS_MINUS_ARCH}
+    ${_MNN_EXTRA_PARAM}
+    DEPENDS ${_MNN_DEPENDS}
+)
+
+ExternalProject_Add(MNN_ARM
+    PREFIX MNN
+    SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64
+    -DCMAKE_OSX_ARCHITECTURES:STRING=arm64
+    -DPLATFORM:STRING=MAC_ARM64
+    -DDEPLOYMENT_TARGET:STRING=${DEPLOYMENT_TARGET}
+    -DNAMED_LANGUAGE_SUPPORT:BOOL=${NAMED_LANGUAGE_SUPPORT}
+    -DENABLE_BITCODE:BOOL=${ENABLE_BITCODE}
+    -DENABLE_ARC:BOOL=${ENABLE_ARC}
+    -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
+    -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
+    -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_CURRENT_SOURCE_DIR}/mnn.toolchain.cmake
+    -DMNN_BUILD_SHARED_LIBS:BOOL=OFF
+    -DMNN_BUILD_TESTS:BOOL=OFF
+    -DMNN_BUILD_TOOLS:BOOL=OFF
+    -DMNN_BUILD_PROTOBUFFER:BOOL=OFF
+    -DMNN_VULKAN:BOOL=ON
+    -DMNN_WIN_RUNTIME_MT:BOOL=ON
+    ${_CMAKE_COMMON_CACHE_ARGS_MINUS_ARCH}
+    ${_MNN_EXTRA_PARAM}
+    DEPENDS ${_MNN_DEPENDS}
+)
+
+set(MNN_X86_LIB "${CMAKE_CURRENT_BINARY_DIR}/MNN/x86_64/lib/libMNN.a")
+set(MNN_ARM_LIB "${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64/lib/libMNN.a")
+set(MNN_FAT_LIB "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/libMNN.a")
+
+# Ensure the destination directory exists
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN)
+set(MNN_X86_CMAKE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/x86_64/lib/cmake/MNN")
+set(MNN_ARM_CMAKE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64/lib/cmake/MNN")
+set(MNN_FAT_CMAKE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN")
+
+
+# Add custom command to create fat library
+add_custom_command(
+    OUTPUT ${MNN_FAT_LIB}
+    COMMAND lipo -create -output ${MNN_FAT_LIB} ${MNN_X86_LIB} ${MNN_ARM_LIB}
+    DEPENDS MNN_ARM MNN_X86
+    COMMENT "Creating fat library for MNN..."
+)
+
+# Add target for fat library
+add_custom_target(MNN_Fat ALL
+    DEPENDS ${MNN_FAT_LIB})
+
+# Ensure the destination directory exists
+file(MAKE_DIRECTORY ${MNN_FAT_CMAKE_DIR})
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/MNN/include)
+
+# Copy CMake configuration files
+add_custom_command(
+    OUTPUT ${MNN_FAT_CMAKE_DIR}/MNNConfig.cmake
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${MNN_X86_CMAKE_DIR}
+            ${MNN_FAT_CMAKE_DIR}
+    DEPENDS MNN_Fat
+    COMMENT "Copying CMake configuration files for MNN..."
+)
+
+# Add target for copying CMake files
+add_custom_target(MNN_CMakeFiles ALL
+    DEPENDS ${MNN_FAT_CMAKE_DIR}/MNNConfig.cmake)
+
+    # Copy include files from arm64 directory to base include directory
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/MNN/include/MNN/MNNDefine.h
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64/include
+            ${CMAKE_CURRENT_BINARY_DIR}/MNN/include
+    DEPENDS MNN_Fat
+    COMMENT "Copying include files for MNN..."
+)
+
+# Add a target for copying include files
+add_custom_target(MNN_IncludeFiles ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/MNN/include/MNN/MNNDefine.h)
+
+set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN")
+set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
+set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
+
+
+# Define the expected `MNN` target
+add_custom_target(MNN ALL DEPENDS MNN_Fat MNN_CMakeFiles MNN_IncludeFiles)
+
+unset(TOOLCHAIN_FILE_PROCESSED)
+
+set(_EXT_ZKSTDLIB OFF)
 
 include(../CommonTargets.CMake)

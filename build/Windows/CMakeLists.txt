@@ -34,6 +34,8 @@ ExternalProject_Add(Boost
     BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal ${BOOST_INCLUDE_LIBRARIES_EXPANDED} address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} -d0 install
     BUILD_IN_SOURCE TRUE
 
+    PATCH_COMMAND git apply ${CMAKE_CURRENT_LIST_DIR}/boost_patch_185.diff
+
     INSTALL_COMMAND ""
 )
 
@@ -113,6 +115,15 @@ set(MULTIPLE_OPTION /FORCE:MULTIPLE)
 # for rocksdb windows needs > windows 8
 set(rocksdb_EXTRA_PARAM
     -D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN8
+)
+
+set(_ZKLLVM_EXTRA_PARAM
+    -DZKLLVM_BUILD_TRANSPILER_LIB:BOOL=OFF
+    -DZKLLVM_BUILD_EXAMPLES:BOOL=OFF
+    -DZKLLVM_BUILD_STD_LIB:BOOL=ON
+    -DZKLLVM_BUILD_EXECUTABLES:BOOL=OFF
+    -DLLVM_INCLUDE_UTILS:BOOL=OFF
+    -DLLVM_INCLUDE_TESTS:BOOL=OFF
 )
 
 # build common targets
