@@ -349,7 +349,7 @@ set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include"
 #elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
 #    set(IS_APPLE_PLATFORM ON)
 #endif()
-#if(NOT ANDROID AND NOT IS_APPLE_PLATFORM)
+if(NOT ANDROID)
     # Vulkan-Headers
     ExternalProject_Add(
         Vulkan-Headers
@@ -379,7 +379,7 @@ set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include"
 
     set(ENV{VULKAN_SDK} "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader")
     set(vulkanTarget Vulkan-Loader)
-#endif()
+endif()
 
 if(NOT APPLE OR (APPLE AND CMAKE_OSX_SYSROOT MATCHES "iPhoneOS"))
 ExternalProject_Add(MNN

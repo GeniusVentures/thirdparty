@@ -34,7 +34,8 @@ ExternalProject_Add(Boost
     BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal ${BOOST_INCLUDE_LIBRARIES_EXPANDED} address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} -d0 install
     BUILD_IN_SOURCE TRUE
 
-    PATCH_COMMAND git apply ${CMAKE_CURRENT_LIST_DIR}/boost_patch_185.diff
+    PATCH_COMMAND ${CMAKE_COMMAND} -E echo "Applying patch to Boost"
+    COMMAND ${CMAKE_COMMAND} -E chdir ${THIRDPARTY_DIR}/boost patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/boost_patch_185.diff
 
     INSTALL_COMMAND ""
 )
