@@ -484,6 +484,8 @@ jobs:
 
               sudo apt install vulkan-tools libvulkan-dev -y
               sudo apt install zstd ninja-build ccache -y
+              cargo install cbindgen
+              rustup target add wasm32-unknown-emscripten
               echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
             cmake-init-script: |
               cmake -B $BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
@@ -506,7 +508,8 @@ jobs:
               sudo apt install zstd ninja-build ccache -y
               echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
-              rustup target add aarch64-linux-android
+              rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
+              cargo install cbindgen
             arch: |
               arm64-v8a
               x86_64
@@ -551,6 +554,8 @@ jobs:
               choco install ccache -A
               echo "C:\Strawberry\perl\bin" >> $GITHUB_PATH
               echo "C:\Perl64\bin" >> $GITHUB_PATH
+              rustup target add wasm32-unknown-emscripten
+              cargo install cbindgen
             cmake-init-script: |
               cmake -B $BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
