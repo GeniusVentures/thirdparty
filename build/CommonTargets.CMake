@@ -614,11 +614,11 @@ if(NOT DEFINED _WALLET_CORE_GENERATE_SCRIPT)
     set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/generate-files")
 endif()
 
-find_program(CBINDGEN NAMES cbindgen)
+# find_program(CBINDGEN NAMES cbindgen)
 
-if(NOT CBINDGEN)
-    message(FATAL_ERROR "cbindgen not found")
-endif()
+# if(NOT CBINDGEN)
+#     message(FATAL_ERROR "cbindgen not found")
+# endif()
 
 STRING(TOLOWER ${CMAKE_SYSTEM_NAME} _WALLET_CORE_ARCH)
 
