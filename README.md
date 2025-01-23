@@ -34,7 +34,9 @@ If you want to build `thirdparty` for yourself, you'll need to recursively check
   - Rust
     - `bindgen` (install with `cargo install cbindgen`)
     - WASM target (install with `rustup target add wasm32-unknown-emscripten`)
+    - On Mac don't use homebrew to install rust, use the recommended install procedure on the official website
 - `clang` or `MSVC` as a compiler
+    - On Linux setting cc and c++ to clang might be needed (using `update-alternatives`)
 
 ### Android
 
@@ -73,11 +75,18 @@ Another example, for Windows using release mode:
 
 ```bash
 cd build/Windows
-cmake -B Release -CMAKE_BUILD_TYPE=Release
+cmake -B Release -G "Visual Studio 17 2022" -A x64 -CMAKE_BUILD_TYPE=Release
 cmake --build Release --config Release -j
 ```
 
-When building for Android, we expect each ABI to have its own subdirectory.
+When building for Android, we expect each ABI to have its own subdirectory. You need to configure the ABI to be built. The ABIs supported are:
+
+- `armeabi-v7a` for Android **x86**
+- `arm64-v8a ` for Android **arm64**
+- `x86_64` for Android **emulator**
+
+
+Example for Android arm64:
 
 ```bash
 cd build/Android
@@ -91,6 +100,7 @@ When building for Apple platforms, you'll need to configure the project with the
 - `OS64` for iOS
 - `MAC` for macOS **x86**
 - `MAC_ARM64` for macOS **arm64**
+- `MAC_UNIVERSAL` for macOS **arm64 + x86**
 
 Example for macOS x86:
 
