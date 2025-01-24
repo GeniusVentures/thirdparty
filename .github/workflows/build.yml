@@ -1,0 +1,104 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        required: true
+        type: string
+      abi:
+        required: false
+        type: string
+      build-type:
+        required: true
+        type: string
+jobs:
+  build:
+    env:
+      GRPC_BUILD_ENABLE_CCACHE: "ON"
+    runs-on: ${{ contains(fromJson('["Android", "Linux"]'), inputs.target) && 'ubuntu-latest' || contains(fromJson('["iOS", "OSX"]'), inputs.target) && 'macos-latest' || 'windows-latest' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      - name: Configure Linux host
+        if: ${{ runner.os == 'Linux'}}
+        run: |
+          sudo update-alternatives --install /usr/bin/cc cc $(which clang) 100
+          sudo update-alternatives --install /usr/bin/c++ c++ $(which clang++) 100
+          sudo update-alternatives --set cc $(which clang)
+          sudo update-alternatives --set c++ $(which clang++)
+
+          sudo apt install ccache ninja-build libvulkan-dev -y
+          echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
+
+      - name: Configure Windows host
+        if: ${{ runner.os == 'Windows'}}
+        run: |
+          choco install ccache -A
+
+      - name: Configure macOS host
+        if: ${{ runner.os == 'macOS'}}
+        run: |
+          brew install ccache ninja
+          echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
+
+      - name: Add Darwin toolchain
+        if: ${{ inputs.target == 'OSX'}}
+        run: rustup target add x86_64-apple-darwin
+
+      - name: Add iOS toolchain
+        if: ${{ inputs.target == 'iOS' }}
+        run: |
+          rustup toolchain install nightly-aarch64-apple-darwin
+          rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
+          rustup target add aarch64-apple-ios
+
+      - name: Add Android toolchain
+        if: ${{ inputs.target == 'Android' }}
+        run: |
+          NDK_VERSION="r27b"
+          wget https://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux.zip -O ndk.zip
+          unzip ndk.zip -d $HOME
+
+          echo "ANDROID_NDK_HOME=$HOME/android-ndk-$NDK_VERSION" >> $GITHUB_ENV
+
+          rustup target add aarch64-linux-android
+
+      - name: Install bindgen
+        run: cargo install cbindgen
+
+      - name: Add wasm Rust target
+        run: rustup target add wasm32-unknown-emscripten
+
+      - name: Set build directory
+        id: build-dir
+        run: |
+          if [ '${{inputs.target}}' == 'Android' ] ; then
+            BUILD_DIRECTORY=build/${{inputs.target}}/${{inputs.build-type}}/${{inputs.abi}}
+          else
+            BUILD_DIRECTORY=build/${{inputs.target}}/${{inputs.build-type}}
+          fi
+          echo "BUILD_DIRECTORY=$BUILD_DIRECTORY" >>$GITHUB_OUTPUT
+        shell: bash
+
+      - name: Configure CMake for Mac x86
+        if: ${{ inputs.target == 'OSX'}}
+        run: cmake -S build/${{inputs.target}} -B ${{steps.build-dir.outputs.BUILD_DIRECTORY}} -DCMAKE_BUILD_TYPE=${{inputs.build-type}} -DPLATFORM=MAC
+
+      - name: Configure CMake for iOS
+        if: ${{ inputs.target == 'iOS'}}
+        run: cmake -S build/${{inputs.target}} -B ${{steps.build-dir.outputs.BUILD_DIRECTORY}} -DCMAKE_BUILD_TYPE=${{inputs.build-type}} -DPLATFORM=OS64
+
+      - name: Configure SuperGenius CMake for Android
+        if: ${{ inputs.target == 'Android'}}
+        run: cmake -S build/${{inputs.target}} -B ${{steps.build-dir.outputs.BUILD_DIRECTORY}} -DCMAKE_BUILD_TYPE=${{inputs.build-type}} -DANDROID_ABI=${{inputs.abi}}
+
+      - name: Configure CMake
+        if: ${{ inputs.target != 'OSX' && inputs.target != 'iOS' && inputs.target != 'Android' }}
+        run: cmake -S build/${{inputs.target}} -B ${{steps.build-dir.outputs.BUILD_DIRECTORY}} -DCMAKE_BUILD_TYPE=${{inputs.build-type}}
+
+      - name: Build project
+        run: cmake --build ${{steps.build-dir.outputs.BUILD_DIRECTORY}} --config ${{inputs.build-type}} -j

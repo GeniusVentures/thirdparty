@@ -1,108 +1,58 @@
-name: Build per OS
+name: Multiplatform build
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
-    env:
-      GRPC_BUILD_ENABLE_CCACHE: "ON"
-    runs-on: ${{matrix.host}}
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [Android, iOS, OSX, Linux, Windows]
-        build_type: [Debug, Release]
-        include:
-          - target: Linux
-            host: ubuntu-latest
-          - target: Windows
-            host: windows-latest
-          - target: OSX
-            host: macos-latest
-          - target: Android
-            host: ubuntu-latest
-            android_abi: arm64-v8a
-          - target: iOS
-            host: macos-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: "recursive"
-
-      - name: Set clang as the default compiler
-        if: ${{ matrix.host == 'ubuntu-latest' }}
-        run: |
-          sudo update-alternatives --install /usr/bin/cc cc $(which clang) 100
-          sudo update-alternatives --install /usr/bin/c++ c++ $(which clang++) 100
-          sudo update-alternatives --set cc $(which clang)
-          sudo update-alternatives --set c++ $(which clang++)
-
-      - name: Install Linux host dependencies
-        if: ${{ matrix.host == 'ubuntu-latest' }}
-        run: |
-          sudo apt install ccache ninja-build -y
-          sudo apt install vulkan-tools vulkan-utility-libraries-dev libvulkan-dev -y
-          echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
-
-      - name: Install Windows host dependencies
-        if: ${{ matrix.host == 'windows-latest' }}
-        run: |
-          choco install ccache -A
-
-      - name: Install Darwin host dependencies
-        if: ${{ matrix.host == 'macos-latest' }}
-        run: |
-          brew install ccache ninja
-          echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
-
-      - name: Add Darwin toolchain
-        if: ${{ matrix.target == 'OSX' }}
-        run: rustup target add x86_64-apple-darwin
-
-      - name: Add iOS toolchain
-        if: ${{ matrix.target == 'iOS' }}
-        run: |
-          rustup toolchain install nightly-aarch64-apple-darwin
-          rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
-          rustup target add aarch64-apple-ios
-
-      - name: Add Android toolchain
-        if: ${{ matrix.target == 'Android' }}
-        run: |
-          rustup target add aarch64-linux-android
-
-      - name: Install bindgen
-        run: cargo install cbindgen
-
-      - name: Add Rust target
-        run: rustup target add wasm32-unknown-emscripten
-
-      - name: Set ABI specific path based on target
-        if: ${{ matrix.host != 'windows-latest' }}
-        run: |
-          if [ "${{ matrix.target }}" = "Android" ]; then
-            echo "ABI_DIR=/${{ matrix.android_abi }}" >> $GITHUB_ENV
-          else
-            echo "ABI_DIR=" >> $GITHUB_ENV
-          fi
-
-      - name: Configure CMake for Mac x86
-        if: ${{ matrix.target == 'OSX' }}
-        run: cmake -S build/${{ matrix.target }} -B build/${{ matrix.target }}/${{ matrix.build_type }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DPLATFORM=MAC
-
-      - name: Configure CMake for iOS
-        if: ${{ matrix.target == 'iOS' }}
-        run: cmake -S build/${{ matrix.target }} -B build/${{ matrix.target }}/${{ matrix.build_type }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DPLATFORM=OS64
-
-      - name: Configure CMake for Android
-        if: ${{ matrix.target == 'Android' }}
-        run: cmake -S build/${{ matrix.target }} -B build/${{ matrix.target }}/${{ matrix.build_type }}$ABI_DIR  -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DANDROID_ABI=${{ matrix.android_abi }}
-
-      - name: Configure CMake for other platforms
-        if: ${{ matrix.target != 'OSX' && matrix.target != 'iOS' && matrix.target != 'Android' }}
-        run: cmake -S build/${{ matrix.target }} -B build/${{ matrix.target }}/${{ matrix.build_type }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-
-      - name: Build project
-        run: cmake --build build/${{ matrix.target }}/${{ matrix.build_type }}${{ env.ABI_DIR }} --config ${{ matrix.build_type }} -j
+  android-debug:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: Android
+      build-type: Debug
+      abi: arm64
+  ios-debug:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: iOS
+      build-type: Debug
+  linux-debug:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: Linux
+      build-type: Debug
+  macos-debug:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: OSX
+      build-type: Debug
+  windows-debug:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: Windows
+      build-type: Debug
+  android-release:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: Android
+      build-type: Release
+      abi: arm64
+  ios-release:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: iOS
+      build-type: Release
+  linux-release:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: Linux
+      build-type: Release
+  macos-release:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: OSX
+      build-type: Release
+  windows-release:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: Windows
+      build-type: Release
