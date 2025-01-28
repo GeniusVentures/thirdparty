@@ -226,7 +226,7 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         working-directory: ${{env.BUILD_DIRECTORY}}
         shell: cmd
-        run: cmake --build . --target openssl
+        run: cmake --build . --target openssl --config ${{matrix.build-type}}
 
       - name: Build, compress and upload targets
         working-directory: ${{env.BUILD_DIRECTORY}}
@@ -248,7 +248,7 @@ jobs:
               compressed_file="${target}-lib.tar.gz"
               directory_to_compress=$(basename "${build_directories[$i]}")
 
-              cmake --build . --target $target -j
+              cmake --build . --target $target --config ${{matrix.build-type}} -j
 
               echo ${target}: $directory_to_compress
               tar --exclude="${directory_to_compress}/src" --exclude="${directory_to_compress}/tmp" -czf ${compressed_file} ${directory_to_compress}
