@@ -15,6 +15,7 @@ jobs:
       matrix:
         target: [Android, iOS, OSX, Linux, Windows]
         build-type: [Debug, Release]
+        abi: [""]
         include:
           - target: Linux
             host: ubuntu-latest
@@ -22,11 +23,19 @@ jobs:
             host: windows-latest
           - target: OSX
             host: macos-latest
-          - target: Android
-            host: ubuntu-latest
-            abi: arm64-v8a
           - target: iOS
             host: macos-latest
+          - target: Android
+            host: ubuntu-latest
+            build-type: Release
+            abi: arm64-v8a
+          - target: Android
+            host: ubuntu-latest
+            build-type: Release
+            abi: armeabi-v7a
+        exclude:
+          - target: Android
+            abi: ""
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,6 +85,7 @@ jobs:
           echo "ANDROID_NDK_HOME=$HOME/android-ndk-$NDK_VERSION" >> $GITHUB_ENV
 
           rustup target add aarch64-linux-android
+          rustup target add armv7-linux-androideabi
 
       - name: Install bindgen
         run: cargo install cbindgen
@@ -85,7 +95,7 @@ jobs:
 
       - name: Set build directory
         run: |
-          if ${{matrix.target == 'Android'}}; then
+          if [ '${{matrix.abi}}' ]; then
             BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build-type}}/${{matrix.abi}}
           else
             BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build-type}}
@@ -116,7 +126,12 @@ jobs:
       - name: Create release tag
         id: create-release-tag
         run: |
-          RELEASE_TAG='${{matrix.target}}-${{ github.ref_name }}-${{matrix.build-type}}'
+          if [ '${{matrix.abi}}' ]; then
+            RELEASE_TAG='${{matrix.target}}-${{matrix.abi}}-${{ github.ref_name }}-${{matrix.build-type}}'
+          else
+            RELEASE_TAG='${{matrix.target}}-${{ github.ref_name }}-${{matrix.build-type}}'
+          fi
+
           echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
 
           echo "Check if GitHub release tag $RELEASE_TAG available."
@@ -139,7 +154,7 @@ jobs:
                   -n '${{ github.ref_name }} branch' \
                   --target '${{ github.ref_name }}' \
                   ${RELEASE_TYPE} \
-                  -t '${{ matrix.target }} ${{ github.ref_name }} branch ${{ matrix.build-type }} build'
+                  -t '${{ matrix.target }} ${{matrix.abi && format('({0}) ', matrix.abi) || ''}}${{ github.ref_name }} branch ${{ matrix.build-type }} build'
           fi
         shell: bash
 
