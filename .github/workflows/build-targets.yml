@@ -47,7 +47,7 @@ jobs:
       - name: Configure Windows host
         if: ${{ runner.os == 'Windows'}}
         run: |
-          choco install ccache ripgrep -A
+          choco install ccache ripgrep -y
 
       - name: Configure macOS host
         if: ${{ runner.os == 'macOS'}}
@@ -205,7 +205,7 @@ jobs:
           echo "TARGETS_TO_UPDATE=${targets_to_update[@]}" >>$GITHUB_OUTPUT
           echo "SHA_OF_TARGETS_TO_UPDATE=${sha_of_targets_to_update[@]}" >>$GITHUB_OUTPUT
           echo "BUILD_DIRECTORIES_OF_TARGETS_TO_UPDATE=${build_directories_of_targets_to_update[@]}" >>$GITHUB_OUTPUT
-          echo "UP_TO_DATE_TARGETS=${up_to_date_targets}" >>$GITHUB_OUTPUT
+          echo "UP_TO_DATE_TARGETS=${up_to_date_targets[@]}" >>$GITHUB_OUTPUT
         shell: bash
 
       - name: Download up to date targets
