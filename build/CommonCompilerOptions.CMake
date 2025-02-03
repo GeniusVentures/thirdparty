@@ -76,7 +76,7 @@ if(NOT EXISTS "${THIRDPARTY_DIR}/build")
 endif()
 
 # Boost settings
-set(BOOST_INCLUDE_LIBRARIES container date_time filesystem log program_options random regex system test timer)
+set(BOOST_INCLUDE_LIBRARIES container date_time filesystem json log program_options random regex system test timer)
 
 list(JOIN BOOST_INCLUDE_LIBRARIES "," BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED)
 separate_arguments(BOOST_B2_FLAGS NATIVE_COMMAND "${CMAKE_CXX_FLAGS}")
