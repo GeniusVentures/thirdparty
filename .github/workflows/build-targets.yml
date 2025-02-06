@@ -232,11 +232,7 @@ jobs:
               compressed_target="${target}-lib.tar.gz"
               echo Downloading ${compressed_target}
               gh release download ${RELEASE_TAG} --pattern "${compressed_target}" --clobber
-              tar --exclude='zkLLVM/bin/assigner' \
-                --exclude='zkLLVM/bin/clang-zkllvm' \
-                --exclude='zkLLVM/bin/llvm-link-zkllvm' \
-                --exclude='zkLLVM/bin/transpiler' \
-                -xzf ${compressed_target}
+              tar -xzf ${compressed_target}
           done
         shell: bash
       
