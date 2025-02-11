@@ -72,7 +72,7 @@ set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_N
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND perl ${THIRDPARTY_DIR}/openssl/Configure VC-WIN64A enable-threads enable-capieng no-shared no-asm --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} --libdir=lib
+    CONFIGURE_COMMAND perl ${THIRDPARTY_DIR}/openssl/Configure ${OPENSSL_VARIANT} VC-WIN64A enable-threads enable-capieng no-shared no-asm --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} --libdir=lib
     BUILD_COMMAND nmake build_libs
     BUILD_IN_SOURCE false
     INSTALL_COMMAND nmake install_dev
