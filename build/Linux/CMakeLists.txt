@@ -38,7 +38,7 @@ set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_N
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND <SOURCE_DIR>/Configure ${OPENSSL_VARIANT} -fPIC --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} --libdir=lib -static linux-${CMAKE_SYSTEM_PROCESSOR}-clang
+    CONFIGURE_COMMAND <SOURCE_DIR>/Configure ${OPENSSL_VARIANT} enable-threads no-shared -fPIC --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} --libdir=lib linux-${CMAKE_SYSTEM_PROCESSOR}-clang
     BUILD_COMMAND make build_libs -j${PROCESSOR_COUNT}
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND make install_dev

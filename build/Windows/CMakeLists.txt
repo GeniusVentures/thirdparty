@@ -31,10 +31,15 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND ./bootstrap.bat vc143
 
+    #BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal ${BOOST_INCLUDE_LIBRARIES_EXPANDED} address-model=64 architecture=x86 variant=${BOOST_VARIANT} cxxflags="/fsanitize=address" linkflags="/fsanitize=address" --prefix=${BOOST_ROOT} -d0 install
     BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal ${BOOST_INCLUDE_LIBRARIES_EXPANDED} address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} -d0 install
     BUILD_IN_SOURCE TRUE
 
-    PATCH_COMMAND git apply ${CMAKE_CURRENT_LIST_DIR}/boost_patch_185.diff
+    PATCH_COMMAND 
+    ${CMAKE_COMMAND} -E echo "Checking if patch has already been applied... ${THIRDPARTY_DIR}/boost/tools/build/src/tools/msvc.jam" &&
+    powershell -Command "if (!(Select-String -Path '${THIRDPARTY_DIR}\\boost\\tools\\build\\src\\tools\\msvc.jam' -Pattern '14\\.4')) { git apply '${CMAKE_CURRENT_LIST_DIR}/boost_patch_185.diff' }"
+
+
 
     INSTALL_COMMAND ""
 )
@@ -67,7 +72,7 @@ set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_N
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
-    CONFIGURE_COMMAND perl ${THIRDPARTY_DIR}/openssl/Configure ${OPENSSL_VARIANT} enable-capieng no-shared no-asm --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} --libdir=lib -static VC-WIN64A
+    CONFIGURE_COMMAND perl ${THIRDPARTY_DIR}/openssl/Configure ${OPENSSL_VARIANT} VC-WIN64A enable-threads enable-capieng no-shared no-asm --prefix=${OPENSSL_ROOT_DIR} --openssldir=${OPENSSL_ROOT_DIR} --libdir=lib
     BUILD_COMMAND nmake build_libs
     BUILD_IN_SOURCE false
     INSTALL_COMMAND nmake install_dev

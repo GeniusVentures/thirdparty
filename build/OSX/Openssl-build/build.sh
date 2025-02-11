@@ -54,7 +54,7 @@ LIB_DIR="$INSTALL_DIR/lib"
 
 if $X86_64_PRESENT; then
   if [ ! -f "Makefile" ]; then
-    $SRC_DIR/Configure $DEBUG_FLAGS darwin64-x86_64-cc no-asm -static --prefix=$BUILD_DIR --openssldir=$BUILD_DIR -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET
+    $SRC_DIR/Configure $DEBUG_FLAGS darwin64-x86_64-cc no-asm enable-threads no-shared --prefix=$BUILD_DIR --openssldir=$BUILD_DIR -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET
   fi
   make build_generated libcrypto.a libssl.a
   make install_dev
@@ -70,7 +70,7 @@ if $ARM64_PRESENT; then
     cd $ARM64_DIR
   fi
 
-  $SRC_DIR/Configure $DEBUG_FLAGS darwin64-arm64-cc no-asm -static --prefix=$ARM64_DIR --openssldir=$ARM64_DIR -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET
+  $SRC_DIR/Configure $DEBUG_FLAGS darwin64-arm64-cc no-asm enable-threads no-shared --prefix=$ARM64_DIR --openssldir=$ARM64_DIR -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET
 
   make build_generated libcrypto.a libssl.a
   if ! $X86_64_PRESENT ; then
