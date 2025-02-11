@@ -12,6 +12,11 @@ if(NOT DEFINED CMAKE_COLOR_DIAGNOSTICS)
     set(CMAKE_COLOR_DIAGNOSTICS ON)
 endif()
 
+if (DEFINED SANITIZE_CODE AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    add_compile_options("-fsanitize=${SANITIZE_CODE}")
+    add_link_options("-fsanitize=${SANITIZE_CODE}")
+endif()
+
 # Set PROJECT_BUILD folder
 get_filename_component(PROJECT_BUILD_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}" DIRECTORY ABSOLUTE)
 get_filename_component(PROJECT_SRC_FOLDER "${PROJECT_BUILD_FOLDER}" DIRECTORY ABSOLUTE)

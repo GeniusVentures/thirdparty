@@ -13,7 +13,6 @@ set(WALLET_CORE_ARCH_ABI ${ANDROID_ABI})
 
 if(NOT CMAKE_ANDROID_NDK)
     if(DEFINED ENV{ANDROID_NDK_HOME})
-        message(WARNING "Cannot find Android NDK, setting to $ENV{ANDROID_NDK_HOME}")
         set(CMAKE_ANDROID_NDK $ENV{ANDROID_NDK_HOME})
     else()
         message(FATAL_ERROR "Cannot find Android NDK, make sure you pass -DCMAKE_ANDROID_NDK=[path_to_NDK].")
@@ -56,6 +55,25 @@ ExternalProject_Add(Boost
     BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${BOOST_ROOT}" --with-libraries="${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}" --extra="--build-type=minimal,visibility=global,cxxstd=${CMAKE_CXX_STANDARD},-d0"
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
+#   TODO: fix this so that ninja parallel build will work
+#     BUILD_BYPRODUCTS
+#        "${BOOST_ROOT}/lib/libboost_container.a"
+#        "${BOOST_ROOT}/lib/libboost_program_options.a"
+#        "${BOOST_ROOT}/lib/libboost_random.a"
+#        "${BOOST_ROOT}/lib/libboost_regex.a"
+#        "${BOOST_ROOT}/lib/libboost_system.a"
+#        "${BOOST_ROOT}/lib/libboost_prg_exec_monitor.a"
+#        "${BOOST_ROOT}/lib/libboost_test_exec_monitor.a"
+#        "${BOOST_ROOT}/lib/libboost_unit_test_framework.a"
+#        "${BOOST_ROOT}/lib/libboost_timer.a"
+#        "${BOOST_ROOT}/lib/libboost_date_time.a"
+#        "${BOOST_ROOT}/lib/libboost_atomic.a"
+#        "${BOOST_ROOT}/lib/libboost_filesystem.a"
+#        "${BOOST_ROOT}/lib/libboost_json.a"
+#        "${BOOST_ROOT}/lib/libboost_thread.a"
+#        "${BOOST_ROOT}/lib/libboost_chrono.a"
+#        "${BOOST_ROOT}/lib/libboost_log.a"
+#        "${BOOST_ROOT}/lib/libboost_log_setup.a"
 )
 
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
@@ -122,6 +140,9 @@ ExternalProject_Add(openssl
     BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --abi=${OPENSSL_ABI} --api-level=${ANDROID_NATIVE_API_LEVEL} --build-dir=${OPENSSL_ROOT_DIR} --env_path=$ENV{PATH} --env_android_ndk=${CMAKE_ANDROID_NDK} --env_android_toolchain=${ANDROID_TOOLCHAIN_ROOT}/bin
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND make install_dev
+    BUILD_BYPRODUCTS
+        ${OPENSSL_ROOT_DIR}/lib/libssl.a
+        ${OPENSSL_ROOT_DIR}/lib/libcrypto.a
 )
 
 set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)

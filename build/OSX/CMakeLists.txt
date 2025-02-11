@@ -62,6 +62,25 @@ ExternalProject_Add(Boost
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
+    BUILD_BYPRODUCTS
+        "${BOOST_ROOT}/lib/libboost_container.a"
+        "${BOOST_ROOT}/lib/libboost_program_options.a"
+        "${BOOST_ROOT}/lib/libboost_random.a"
+        "${BOOST_ROOT}/lib/libboost_regex.a"
+        "${BOOST_ROOT}/lib/libboost_system.a"
+        "${BOOST_ROOT}/lib/libboost_prg_exec_monitor.a"
+        "${BOOST_ROOT}/lib/libboost_test_exec_monitor.a"
+        "${BOOST_ROOT}/lib/libboost_unit_test_framework.a"
+        "${BOOST_ROOT}/lib/libboost_timer.a"
+        "${BOOST_ROOT}/lib/libboost_date_time.a"
+        "${BOOST_ROOT}/lib/libboost_atomic.a"
+        "${BOOST_ROOT}/lib/libboost_filesystem.a"
+        "${BOOST_ROOT}/lib/libboost_json.a"
+        "${BOOST_ROOT}/lib/libboost_thread.a"
+        "${BOOST_ROOT}/lib/libboost_chrono.a"
+        "${BOOST_ROOT}/lib/libboost_log.a"
+        "${BOOST_ROOT}/lib/libboost_log_setup.a"
+
 )
 
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
@@ -108,6 +127,9 @@ ExternalProject_Add(openssl
     BUILD_IN_SOURCE FALSE
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
+    BUILD_BYPRODUCTS
+        ${OPENSSL_ROOT_DIR}/lib/libssl.a
+        ${OPENSSL_ROOT_DIR}/lib/libcrypto.a
 )
 
 set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
@@ -127,6 +149,8 @@ ExternalProject_Add(MoltenVK
     BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/MoltenVK-build/build.sh ${BOOST_BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
+    BUILD_BYPRODUCTS
+        "${_MVK_ROOT}/lib/MoltenVK.xcframework"
 )
 
 # ed25519 crypto
@@ -173,6 +197,8 @@ ExternalProject_Add(MNN_X86
     ${_CMAKE_COMMON_CACHE_ARGS_MINUS_ARCH}
     ${_MNN_EXTRA_PARAM}
     DEPENDS ${_MNN_DEPENDS}
+    BUILD_BYPRODUCTS
+        "${CMAKE_CURRENT_BINARY_DIR}/MNN/x86_64/lib/libMNN.a"
 )
 
 ExternalProject_Add(MNN_ARM
@@ -198,6 +224,8 @@ ExternalProject_Add(MNN_ARM
     ${_CMAKE_COMMON_CACHE_ARGS_MINUS_ARCH}
     ${_MNN_EXTRA_PARAM}
     DEPENDS ${_MNN_DEPENDS}
+    BUILD_BYPRODUCTS
+        "${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64/lib/libMNN.a"
 )
 
 set(MNN_X86_LIB "${CMAKE_CURRENT_BINARY_DIR}/MNN/x86_64/lib/libMNN.a")
