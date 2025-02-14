@@ -103,9 +103,9 @@ jobs:
           echo "BUILD_DIRECTORY=$BUILD_DIRECTORY" >> $GITHUB_ENV
         shell: bash
 
-      - name: Configure CMake for Mac x86
+      - name: Configure CMake for Mac
         if: ${{ matrix.target == 'OSX'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=MAC
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=MAC_UNIVERSAL
 
       - name: Configure CMake for iOS
         if: ${{ matrix.target == 'iOS'}}
