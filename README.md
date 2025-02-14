@@ -38,6 +38,9 @@ If you want to build `thirdparty` for yourself, you'll need to recursively check
 - `clang` or `MSVC` as a compiler
     - On Linux setting cc and c++ to clang might be needed (using `update-alternatives`)
 
+## Optional (but recommended)
+- Ninja
+
 ### Android
 
 - NDK, preferably version 27b
@@ -63,10 +66,21 @@ In the `build` directory, there'll be a folder for every supported platform, and
 
 Our convention is to create a subdirectory inside `build/${PLATFORM}`, called either `Debug` or `Release`, depending on the `BUILD_TYPE`. So to build the debug version for Linux, you would:
 
+It is recommended that you enter into the build directory, i.e. Debug or Release, etc for ninja to work properly
+
 ```bash
-cd build/Linux
-cmake -B Debug -CMAKE_BUILD_TYPE=Debug
+cd build/Linux/Debug
+cmake .. -CMAKE_BUILD_TYPE=Debug 
 cmake --build Debug --config Debug -j
+```
+
+## Ninja (recommended)
+
+Ninja is able to use parallel builds far better than CMake and picks up on # processors automatically.
+```bash
+cd build/Linux/Debug
+cmake .. -CMAKE_BUILD_TYPE=Debug -G "Ninja"
+ninja
 ```
 
 Some CMake projects rely on having `CMAKE_BUILD_TYPE` set, so even if you're using a multi-config generator like Visual Studio, it is important to set it accordingly.
@@ -95,12 +109,21 @@ cmake -S .. -B arm64-v8a -CMAKE_BUILD_TYPE=Debug -DANDROID_ABI=arm64-v8a
 cmake --build arm64-v8a --config Debug -j
 ```
 
+Or when using Ninja
+
+```bash
+cd build/Android
+mkdir -p Debug/arm64-v8a && cd Debug/arm64-v8a
+cmake .. -CMAKE_BUILD_TYPE=Debug -DANDROID_ABI=arm64-v8a -G "Ninja"
+ninja
+```
+
 When building for Apple platforms, you'll need to configure the project with the `PLATFORM` variable set to one of these values:
 
 - `OS64` for iOS
 - `MAC` for macOS **x86**
 - `MAC_ARM64` for macOS **arm64**
-- `MAC_UNIVERSAL` for macOS **arm64 + x86**
+- `MAC_UNIVERSAL` for macOS **arm64 + x86**, (Default for Mac/OSX)
 
 Example for macOS x86:
 
@@ -108,4 +131,13 @@ Example for macOS x86:
 cd build/OSX
 cmake -B Release -CMAKE_BUILD_TYPE=Release -DPLATFORM=MAC
 cmake --build Release --config Release -j
+```
+And when using Ninja
+
+```bash
+cd build/OSX
+mkdir Release
+cd Release
+cmake .. -CMAKE_BUILD_TYPE=Release -G "Ninja" # default is MAC_UNIVERSAL
+ninja
 ```
