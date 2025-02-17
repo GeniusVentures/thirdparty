@@ -174,11 +174,11 @@ jobs:
               fi
               target="${file%-source_dirinfo.txt}"
               target="${target##*/}"
-
-              echo ${target}: ${src_dir}
-
+              
               sha=$(git -C ${src_dir} rev-parse HEAD)
               target_shas[$target]=$sha
+              
+              echo "${target} (${sha}): ${src_dir}"
 
               build_directory=$(echo $file | sed 's|^\(\./[^/]*\).*|\1|')
               target_build_directories[$target]=$build_directory
@@ -232,7 +232,7 @@ jobs:
               compressed_target="${target}-lib.tar.gz"
               echo Downloading ${compressed_target}
               gh release download ${RELEASE_TAG} --pattern "${compressed_target}" --clobber
-              tar -xzf ${compressed_target}
+              tar -xzf ${compressed_target}           
           done
         shell: bash
       
@@ -266,7 +266,7 @@ jobs:
               cmake --build . --target $target --config ${{matrix.build-type}} -j
 
               echo ${target}: $directory_to_compress
-              tar --exclude="${directory_to_compress}/src" --exclude="${directory_to_compress}/tmp" -czf ${compressed_file} ${directory_to_compress}
+              tar --exclude="${directory_to_compress}/src/${directory_to_compress}-build" -czf ${compressed_file} ${directory_to_compress}
 
               echo -e "Uploading ${compressed_file}"
               gh release upload --clobber ${RELEASE_TAG} ${compressed_file}
