@@ -152,6 +152,9 @@ ExternalProject_Add(rocksdb
     -DWITH_TOOLS:BOOL=OFF
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_rocksdb_EXTRA_PARAM}
+    # these need to be at the end to override previous cached args line
+    -DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}\ -DNDEBUG
+    -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}\ -DNDEBUG
 )
 set(_FINDPACKAGE_ROCKSDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/cmake/rocksdb")
 set(_FINDPACKAGE_ROCKSDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/include")
