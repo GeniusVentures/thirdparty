@@ -33,6 +33,14 @@ jobs:
             host: ubuntu-22.04
             build-type: Release
             abi: armeabi-v7a
+          - target: Android
+            host: GV-MacOS-Large
+            build-type: Debug
+            abi: arm64-v8a
+          - target: Android
+            host: GV-MacOS-Large
+            build-type: Debug
+            abi: armeabi-v7a
         exclude:
           - target: Android
             abi: ""
