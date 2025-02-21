@@ -41,7 +41,11 @@ echo "Src Dir ${SRC_DIR}"
 
 echo "building..."
 
-xcodebuild build -quiet -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package (macOS only)" -configuration "${VARIANT}" -archivePath "${INSTALL_DIR} ONLY_ACTIVE_ARCH=NO -arch x86_64 -arch arm64"
+if [ "$VARIANT" != "Debug" ]; then
+	xcodebuild build -quiet -project MoltenVKPackaging.xcodeproj GCC_PREPROCESSOR_DEFINITIONS='$GCC_PREPROCESSOR_DEFINITIONS MVK_CONFIG_LOG_LEVEL=1' -scheme "MoltenVK Package (macOS only)" -configuration "${VARIANT}" -archivePath "${INSTALL_DIR} ONLY_ACTIVE_ARCH=NO -arch x86_64 -arch arm64"
+else
+	xcodebuild build -quiet -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package (macOS only)" -configuration "${VARIANT}" -archivePath "${INSTALL_DIR} ONLY_ACTIVE_ARCH=NO -arch x86_64 -arch arm64"
+fi
 
 mkdir -p ${LIB_DIR}
 cp -R ./Package/"${VARIANT}"/MoltenVK/include "${INSTALL_DIR}"/
