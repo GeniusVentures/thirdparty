@@ -693,7 +693,7 @@ ExternalProject_Add(gnus_upnp
     -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
-    DEPENDS Boost fmt yaml-cpp tsl_hat_trie
+    DEPENDS Boost fmt spdlog tsl_hat_trie yaml-cpp
 )
 set(_FINDPACKAGE_GNUS_UPNP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/gnus_upnp/lib/cmake/gnus_upnp")
 set(_FINDPACKAGE_GNUS_UPNP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/gnus_upnp/lib")
