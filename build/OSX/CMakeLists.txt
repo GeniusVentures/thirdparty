@@ -125,11 +125,14 @@ ExternalProject_Add(openssl
     PATCH_COMMAND ""
     BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --deployment-target="12.1" --src-dir=<SOURCE_DIR> --build-dir=${OPENSSL_ROOT_DIR} --arch=${OSX_ARCHITECTURES_PIPE_SEPARATED}
     BUILD_IN_SOURCE FALSE
-    INSTALL_COMMAND ""
+    INSTALL_COMMAND touch ${OPENSSL_ROOT_DIR}/openssl.stamp
     UPDATE_COMMAND ""
     BUILD_BYPRODUCTS
+        ${OPENSSL_ROOT_DIR}/openssl.stamp
         ${OPENSSL_ROOT_DIR}/lib/libssl.a
         ${OPENSSL_ROOT_DIR}/lib/libcrypto.a
+        ${OPENSSL_ROOT_DIR}/include/openssl/ssl.h
+        ${OPENSSL_ROOT_DIR}/include/openssl/crypto.h
 )
 
 set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
