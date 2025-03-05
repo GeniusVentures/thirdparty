@@ -1,15 +1,14 @@
 [submodule "boost"]
     path = boost
     url = https://github.com/boostorg/boost.git
-    branch = boost-1.80.0
+    branch = boost-1.85.0
+    ignore = dirty
 [submodule "libp2p"]
     path = libp2p
     url = ../libp2p.git
-    branch = master
 [submodule "ipfs-lite-cpp"]
     path = ipfs-lite-cpp
     url = ../ipfs-lite-cpp.git
-    branch = master
 [submodule "restclient-cpp"]
     path = restclient-cpp
     url = https://github.com/mrtazz/restclient-cpp.git
@@ -31,8 +30,7 @@
     url = https://github.com/gcesarmza/curl-android-ios.git
 [submodule "grpc"]
     path = grpc
-    url = https://github.com/grpc/grpc
-    branch = v1.39.1
+    url = ../grpc
 [submodule "GSL"]
     path = GSL
     url = https://github.com/Microsoft/GSL
@@ -43,9 +41,9 @@
     path = hat-trie
     url = https://github.com/masterjedy/hat-trie
 [submodule "Boost.DI"]
-    path = Boost.DI
-    url = https://github.com/masterjedy/di
-    branch = cpp14
+	path = Boost.DI
+	url = ../Boost.DI
+	branch = cpp14
 [submodule "cpp-ipfs-http-client"]
     path = cpp-ipfs-http-client
     url = https://github.com/vasild/cpp-ipfs-http-client
@@ -55,14 +53,12 @@
 [submodule "ipfs-pubsub"]
     path = ipfs-pubsub
     url = ../ipfs-pubsub.git
-    branch = master
 [submodule "GTest"]
     path = GTest
     url = https://github.com/google/googletest
 [submodule "ed25519"]
     path = ed25519
-    url = ../ed25519.git
-    branch = master
+    url = https://github.com/hyperledger/iroha-ed25519.git
 [submodule "rapidjson"]
     path = rapidjson
     url = https://github.com/Tencent/rapidjson
@@ -79,14 +75,12 @@
 [submodule "delta-enabled-crdts"]
     path = delta-enabled-crdts
     url = ../delta-enabled-crdts.git
-    branch = master
 [submodule "rocksdb"]
     path = rocksdb
     url = ../rocksdb.git
 [submodule "sr25519-donna"]
     path = sr25519-donna
     url = ../sr25519-donna.git
-    branch = master
 [submodule "fmt"]
     path = fmt
     url = https://github.com/fmtlib/fmt.git
@@ -103,60 +97,59 @@
     path = soralog
     url = ../soralog
     branch = c17
-[submodule "libp2p-sqlite-modern-cpp"]
-    path = libp2p-sqlite-modern-cpp
-    url = https://github.com/soramitsu/libp2p-sqlite-modern-cpp.git
 [submodule "ipfs-bitswap-cpp"]
     path = ipfs-bitswap-cpp
     url = ../ipfs-bitswap-cpp.git
-    branch = master
 [submodule "openssl"]
-	path = openssl
-	url = https://github.com/openssl/openssl.git
-	branch = OpenSSL_1_1_1-stable
+    path = openssl
+    url = https://github.com/openssl/openssl.git
 [submodule "libsecp256k1"]
-	path = libsecp256k1
-	url = https://github.com/GeniusVentures/soramitsu-libsecp256k1.git
+    path = libsecp256k1
+	url = ../secp256k1
 [submodule "xxhash"]
-	path = xxhash
-	url = https://github.com/hunter-packages/xxHash.git
+    path = xxhash
+    url = https://github.com/hunter-packages/xxHash.git
 [submodule "MoltenVK"]
-	path = MoltenVK
-	url = https://github.com/KhronosGroup/MoltenVK.git
+    path = MoltenVK
+    url = https://github.com/KhronosGroup/MoltenVK.git
 [submodule "Vulkan-Headers"]
-	path = Vulkan-Headers
-	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+    path = Vulkan-Headers
+    url = https://github.com/KhronosGroup/Vulkan-Headers.git
 [submodule "Vulkan-Loader"]
-	path = Vulkan-Loader
-	url = https://github.com/KhronosGroup/Vulkan-Loader.git
-[submodule "abseil-cpp"]
-	path = abseil-cpp
-	url = https://github.com/abseil/abseil-cpp.git
+    path = Vulkan-Loader
+    url = https://github.com/KhronosGroup/Vulkan-Loader.git
 [submodule "Boost-for-Android"]
     url = ../Boost-for-Android.git
     path = build/Android/Boost-for-Android
 [submodule "wallet-core"]
-	path = wallet-core
-	url = ../wallet-core.git
+    path = wallet-core
+    url = ../wallet-core.git
+    ignore = dirty
 [submodule "MNN"]
-	path = MNN
-	url = https://github.com/GeniusVentures/MNN.git
+    path = MNN
+    url = ../MNN.git
 [submodule "zlib"]
-	path = zlib
-	url = https://github.com/madler/zlib.git
+    path = zlib
+    url = https://github.com/madler/zlib.git
+    ignore = dirty
 [submodule "libssh2"]
-	path = libssh2
-	url = https://github.com/libssh2/libssh2.git
+    path = libssh2
+    url = https://github.com/libssh2/libssh2.git
 [submodule "AsyncIOManager"]
-	path = AsyncIOManager
-	url = https://github.com/GeniusVentures/AsyncIOManager.git
-	branch = refactor_async_mnnloader
+    path = AsyncIOManager
+    url = ../AsyncIOManager.git
 [submodule "cryptopp-cmake"]
-	path = cryptopp-cmake
-	url = https://github.com/abdes/cryptopp-cmake.git
-[submodule "zkLLVM"]
-	path = zkLLVM
-	url = ../zkLLVM.git
+    path = cryptopp-cmake
+    url = https://github.com/abdes/cryptopp-cmake.git
 [submodule "stb"]
-	path = stb
-	url = https://github.com/nothings/stb.git
+    path = stb
+    url = https://github.com/nothings/stb.git
+[submodule "gnus_upnp"]
+    path = gnus_upnp
+    url = ../gnus_upnp.git
+[submodule "sqlite3"]
+    path = sqlite3
+	url = ../sqlite-amalgamation
+[submodule "SQLiteModernCpp"]
+    path = SQLiteModernCpp
+    url = ../sqlite_modern_cpp.git

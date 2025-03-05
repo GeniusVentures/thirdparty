@@ -1,209 +1,301 @@
-cmake_minimum_required(VERSION 3.15)
-
-# --------------------------------------------------------
-# if on OSX Darwin system, build the OSX executables
-if (NOT ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
-    message(FATAL_ERROR "${CMAKE_HOST_SYSTEM_NAME} host system name does not match OSX Darwin - Please select the correct folder for configuring project")
-endif()
+cmake_minimum_required(VERSION 3.22)
 
 if(POLICY CMP0025)
-	#NEW: report OS X version of Clang as "AppleClang"
-  cmake_policy(SET CMP0025 NEW)
+    cmake_policy(SET CMP0025 NEW)
 endif()
+
 if(POLICY CMP0042)
-  #NEW: set TARGET PROPERTY MACOSX_RPATH to on by default
-  cmake_policy(SET CMP0042 NEW)
+    cmake_policy(SET CMP0042 NEW)
 endif()
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET "12.1" CACHE STRING "Minimum OS X deployment version" FORCE)
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    set(_PLATFORM "MAC_UNIVERSAL" CACHE STRING "Setting the build for both x86_64 and arm64")
+    #set(_PLATFORM "MAC" CACHE STRING "Setting the default build for x86_64")
 
-project(OSX_SHARED_THIRD_PARTY)
+    set(NAMED_LANGUAGE_SUPPORT OFF CACHE BOOL "Toolchain named language support parameter")
+    set(ENABLE_BITCODE OFF CACHE BOOL "Toolchain bitcode enable parameter")
+    set(ENABLE_ARC OFF CACHE BOOL "Toolchain enable arc parameter")
+    set(ENABLE_VISIBILITY ON CACHE BOOL "Toolchain visibility parameter")
+    set(ENABLE_STRICT_TRY_COMPILE OFF CACHE BOOL "Toolchain try_compile enable parameter")
+    set(PLATFORM ${_PLATFORM} CACHE STRING "Toolchain platform parameter")
+    set(DEPLOYMENT_TARGET "12.1" CACHE STRING "Minimum OSX version")
+    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../apple.toolchain.cmake" CACHE STRING "Toolchain file")
+endif()
 
-# --------------------------------------------------------
-# build common libraries by platforms
+set(ARCHS "x86_64;arm64" CACHE STRING "Default build for OSX is only x86_64 until boost can build universal image")
+# Set OSX specific runtime options
+#set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "OSX Architectures")
+set(OSX_ARCHITECTURES_PIPE_SEPARATED "x86_64|arm64" CACHE STRING "OSX Architectures pipe separator")
+
+project(OSX_SHARED_THIRD_PARTY LANGUAGES C CXX)
+
 include(../CommonCompilerOptions.CMake)
 
-# ------------------------------------------
-# Set OSX specific runtime options
+# OSX specific runtime options
+set(_CMAKE_COMMON_CACHE_ARGS_MINUS_ARCH ${_CMAKE_COMMON_CACHE_ARGS})
 
-# TODO: use single architecture to avoid Crypto3 error - removed ";arm64"  
-set(CMAKE_OSX_ARCHITECTURES "x86_64")
-set(CMAKE_MACOSX_RPATH 1)
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "BOTH")
-
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-	set(BUILD_VARIANT "--debug")
-else()
-	set(BUILD_VARIANT "")
-endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-
-# Assuming that xcode 12.0 is installed you most probably have ios sdk 14.0 or later installed (tested on Big Sur)
-# if you don't set a deployment target it will be set the way you only get 64-bit builds
-if(NOT DEFINED DEPLOYMENT_TARGET AND XCODE_VERSION_INT VERSION_GREATER 12.0)
-  # Temporarily fix the arm64 issues in CMake install-combined by excluding arm64 for simulator builds (needed for Apple Silicon...)
-  set(CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*] "arm64")
-endif()
-
-set(_CMAKE_COMMON_BUILD_PARAMS ${_CMAKE_COMMON_BUILD_PARAMS}
-   	-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
-    -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
-    -DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH:BOOL=YES
-    -DCMAKE_IOS_INSTALL_COMBINED:BOOL=TRUE
-    -DCMAKE_XCODE_ATTRIBUTE_VALID_ARCHS:STRING=${CMAKE_OSX_ARCHITECTURES}
-    -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
-    -D"CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*]":STRING=arm64
-)
-#print("CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS: ${'CMAKE_XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*]'}")
-
-# ------------------------------------------
-# build boost
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-	set(address_model 32)
-else()
-	set(address_model 64)
-endif()
-
-set(_BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
-ExternalProject_Add( Boost
-	PREFIX  boost
-    SOURCE_DIR    "${THIRDPARTY_DIR}/boost"
-	CONFIGURE_COMMAND  ""
-	PATCH_COMMAND ""
- 	BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-build/build.sh ${BUILD_VARIANT} --build-dir=${_BOOST_ROOT} --src-dir=${THIRDPARTY_DIR}/boost --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
-	INSTALL_COMMAND ""
-	UPDATE_COMMAND ""
+set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS_MINUS_ARCH}
+    -DPLATFORM:STRING=${PLATFORM}
+    -DDEPLOYMENT_TARGET:STRING=${DEPLOYMENT_TARGET}
+    -DNAMED_LANGUAGE_SUPPORT:BOOL=${NAMED_LANGUAGE_SUPPORT}
+    -DENABLE_BITCODE:BOOL=${ENABLE_BITCODE}
+    -DENABLE_ARC:BOOL=${ENABLE_ARC}
+    -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
+    -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
 )
 
+# for now until we get fat libraries working with Boost
+set(BOOST_ARCH "arm+x86")
+#if(PLATFORM STREQUAL "MAC_ARM64")
+#    set(BOOST_ARCH "arm")
+#endif()
+# Boost
+set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
+ExternalProject_Add(Boost
+    PREFIX boost
+    SOURCE_DIR "${THIRDPARTY_DIR}/boost"
+    INSTALL_DIR ${BOOST_ROOT}
 
-print("BOOST_VERSION: ${BOOST_VERSION}")
-set(boost_headers_DIR "${_BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}")
-set(boost_random_DIR "${_BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
-set(boost_system_DIR "${_BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
-set(boost_filesystem_DIR "${_BOOST_ROOT}/lib/cmake/boost_filesystem-${BOOST_VERSION}")
-set(boost_program_options_DIR "${_BOOST_ROOT}/lib/cmake/boost_program_options-${BOOST_VERSION}")
-set(boost_regex_DIR "${_BOOST_ROOT}/lib/cmake/boost_regex-${BOOST_VERSION}")
-set(boost_date_time_DIR "${_BOOST_ROOT}/lib/cmake/boost_date_time-${BOOST_VERSION}")
-set(boost_DIR "${_BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
-set(Boost_USE_STATIC_RUNTIME ON)
-print("boost_DIR: ${boost_DIR}")
-set(_Boost_INCLUDE_DIR "${_BOOST_ROOT}/include")
-set(_FINDPACKAGE_BOOST_CONFIG_DIR ${boost_DIR})
+    CONFIGURE_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
+
+    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} toolset=clang cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=${BOOST_ARCH} variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} install
+    BUILD_IN_SOURCE TRUE
+
+    INSTALL_COMMAND ""
+    BUILD_BYPRODUCTS
+        "${BOOST_ROOT}/lib/libboost_container.a"
+        "${BOOST_ROOT}/lib/libboost_program_options.a"
+        "${BOOST_ROOT}/lib/libboost_random.a"
+        "${BOOST_ROOT}/lib/libboost_regex.a"
+        "${BOOST_ROOT}/lib/libboost_system.a"
+        "${BOOST_ROOT}/lib/libboost_prg_exec_monitor.a"
+        "${BOOST_ROOT}/lib/libboost_test_exec_monitor.a"
+        "${BOOST_ROOT}/lib/libboost_unit_test_framework.a"
+        "${BOOST_ROOT}/lib/libboost_timer.a"
+        "${BOOST_ROOT}/lib/libboost_date_time.a"
+        "${BOOST_ROOT}/lib/libboost_atomic.a"
+        "${BOOST_ROOT}/lib/libboost_filesystem.a"
+        "${BOOST_ROOT}/lib/libboost_json.a"
+        "${BOOST_ROOT}/lib/libboost_thread.a"
+        "${BOOST_ROOT}/lib/libboost_chrono.a"
+        "${BOOST_ROOT}/lib/libboost_log.a"
+        "${BOOST_ROOT}/lib/libboost_log_setup.a"
+
+)
+
+set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
+set(Boost_INCLUDE_DIR "${BOOST_ROOT}/include")
+set(boost_headers_DIR "${BOOST_ROOT}/lib/cmake/boost_headers-${BOOST_VERSION}")
+set(boost_date_time_DIR "${BOOST_ROOT}/lib/cmake/boost_date_time-${BOOST_VERSION}")
+set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-${BOOST_VERSION}")
+set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-${BOOST_VERSION}")
+set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
+set(boost_regex_DIR "${BOOST_ROOT}/lib/cmake/boost_regex-${BOOST_VERSION}")
+set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
 
 set(_BOOST_CACHE_ARGS
-	-Dboost_headers_DIR:PATH=${boost_headers_DIR}
-	-Dboost_random_DIR:PATH=${boost_random_DIR}
-	-Dboost_system_DIR:PATH=${boost_system_DIR}
-	-Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
-	-Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
-	-Dboost_regex_DIR:PATH=${boost_regex_DIR}
-	-Dboost_date_time_DIR:PATH=${boost_date-time_DIR}
-	-DBoost_DIR:PATH=${boost_DIR}
-	-DBOOST_ROOT:PATH=${_BOOST_ROOT}
-	-DBoost_USE_MULTITHREADED:BOOL=ON
-	-DBoost_USE_STATIC_RUNTIME:BOOL=ON
-	-DBoost_USE_STATIC_LIBS:BOOL=ON
-	-DBoost_NO_SYSTEM_PATHS:BOOL=ON
-	-DBoost_INCLUDE_DIR:PATH=${_BOOST_ROOT}/include
+    -DBOOST_ROOT:PATH=${BOOST_ROOT}
+    -DBoost_DIR:PATH=${Boost_DIR}
+    -DBoost_INCLUDE_DIR:PATH=${Boost_INCLUDE_DIR}
+    -Dboost_date_time_DIR:PATH=${boost_date-time_DIR}
+    -Dboost_filesystem_DIR:PATH=${boost_filesystem_DIR}
+    -Dboost_headers_DIR:PATH=${boost_headers_DIR}
+    -Dboost_program_options_DIR:PATH=${boost_program_options_DIR}
+    -Dboost_random_DIR:PATH=${boost_random_DIR}
+    -Dboost_regex_DIR:PATH=${boost_regex_DIR}
+    -Dboost_system_DIR:PATH=${boost_system_DIR}
+    -DBoost_NO_SYSTEM_PATHS:BOOL=ON
+    -DBoost_USE_MULTITHREADED:BOOL=ON
+    -DBoost_USE_STATIC_LIBS:BOOL=ON
+    -DBoost_USE_STATIC_RUNTIME:BOOL=ON
 )
 
-# ------------------------------------------
-# build OpenSSL
-set(_openssl_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
+# OpenSSL
+set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
+set(OPENSSL_VARIANT "$<IF:$<CONFIG:Debug>,--debug,--release>")
+set(OPENSSL_ARCH "darwin64-x86_64-cc")
+if(PLATFORM STREQUAL "MAC_ARM64")
+    set(OPENSSL_ARCH "darwin64-arm64-cc")
+endif()
+
 ExternalProject_Add(openssl
     PREFIX openssl
-	  SOURCE_DIR    "${THIRDPARTY_DIR}/openssl"
-	  CONFIGURE_COMMAND  ""
+    SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
+    CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build.sh ${BUILD_VARIANT} --build-dir=${_openssl_BUILD_ROOT} --src-dir=${THIRDPARTY_DIR}/openssl --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
-    INSTALL_COMMAND ""
+    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/Openssl-build/build.sh ${OPENSSL_VARIANT} --deployment-target="12.1" --src-dir=<SOURCE_DIR> --build-dir=${OPENSSL_ROOT_DIR} --arch=${OSX_ARCHITECTURES_PIPE_SEPARATED}
+    BUILD_IN_SOURCE FALSE
+    INSTALL_COMMAND touch ${OPENSSL_ROOT_DIR}/openssl.stamp
     UPDATE_COMMAND ""
+    BUILD_BYPRODUCTS
+        ${OPENSSL_ROOT_DIR}/openssl.stamp
+        ${OPENSSL_ROOT_DIR}/lib/libssl.a
+        ${OPENSSL_ROOT_DIR}/lib/libcrypto.a
+        ${OPENSSL_ROOT_DIR}/include/openssl/ssl.h
+        ${OPENSSL_ROOT_DIR}/include/openssl/crypto.h
 )
-set(OPENSSL_USE_STATIC_LIBS  ON)
-set(_OPENSSL_INCLUDE_DIR ${_openssl_BUILD_ROOT}/include)
 
+set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
 set(_OPENSSL_CACHE_ARGS
-	-DOPENSSL_USE_STATIC_LIBS:BOOL=ON
-	-DOPENSSL_ROOT_DIR:STRING=${_openssl_BUILD_ROOT}
-  -DOPENSSL_INCLUDE_DIR:PATH=${_OPENSSL_INCLUDE_DIR}
-  -DOPENSSL_CRYPTO_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}
-  -DOPENSSL_SSL_LIBRARY:PATH=${_openssl_BUILD_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
+    -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+    -DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}
+    -DOpenSSL_DIR:PATH=${OPENSSL_ROOT_DIR}/lib/cmake/OpenSSL
 )
 
-
-# ------------------------------------------
-# build MoltenVK
+# MoltenVK
 set(_MVK_ROOT "${CMAKE_CURRENT_BINARY_DIR}/MoltenVK/build/")
 ExternalProject_Add(MoltenVK
-	PREFIX  moltenvk
-    SOURCE_DIR    "${THIRDPARTY_DIR}/MoltenVK"
-	CONFIGURE_COMMAND  ""
-	PATCH_COMMAND ""
- 	BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/MoltenVK-build/build.sh ${BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
-	INSTALL_COMMAND ""
-	UPDATE_COMMAND ""
+    PREFIX moltenvk
+    SOURCE_DIR "${THIRDPARTY_DIR}/MoltenVK"
+    CONFIGURE_COMMAND ""
+    PATCH_COMMAND ""
+    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/MoltenVK-build/build.sh ${BOOST_BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
+    INSTALL_COMMAND ""
+    UPDATE_COMMAND ""
+    BUILD_BYPRODUCTS
+        "${_MVK_ROOT}/lib/MoltenVK.xcframework"
 )
 
-# --------------------------------------------------------
-# set config for grpc
-set(_grpc_EXTRA_PARAM
-    -D_gRPC_PROTOBUF_PROTOC_EXECUTABLE:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/third_party/protobuf/protoc
-    -D_gRPC_CPP_PLUGIN:STRING=${CMAKE_CURRENT_BINARY_DIR}/grpc/bin/grpc_cpp_plugin
-		-DgRPC_SSL_PROVIDER:STRING=package
-	  -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_PHP_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=ON
-    -DgRPC_BUILD_GRPC_NODE_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
-)
-
-# --------------------------------------------------------
-# Build protobuf project from the git submodule
-set(PROTOBUF_SRC_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf/cmake")
-
-# Build protobuf project from the git submodule.
-ExternalProject_Add(protobuf
-		PREFIX protobuf
-		SOURCE_DIR "${PROTOBUF_SRC_DIR}"
-		CMAKE_CACHE_ARGS
-		-Dprotobuf_BUILD_TESTS:BOOL=OFF
-		-Dprotobuf_WITH_ZLIB:BOOL=OFF
-		-Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
-		-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/protobuf
-		-Dprotobuf_BUILD_PROTOC_BINARIES:BOOL=ON
-)
-
-set(PROTOC_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/protobuf/bin/protoc")
-set(_PROTOBUF_TARGET protobuf)
-set(_PROTOBUF_HOST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib/cmake/protobuf")
-set(_PROTOBUF_HOST_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/include")
-set(_PROTOBUF_HOST_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib")
-
-# --------------------------------------------------------
-# set config for rocksdb
-set(_rocksdb_EXTRA_PARAM
-  -DHAS_ARMV8_CRC:BOOL=ON)
-
-# ------------------------------------------
-# set config for ed25519 crypto
-set(_ED25519_EDIIMPL ref10)
-set(_ED25519_HASH sha3_brainhub)
+# ed25519 crypto
 set(_ED25519_RANDOM dev_urandom)
 
-# --------------------------------------------------------
-# Set config for libp2p
-set(_libp2p_BUILD_EXAMPLES ON)
+# MNN
+set(_MNN_EXTRA_PARAM
+    -DMNN_USE_SYSTEM_LIB:BOOL=ON
+    -DVulkan_INCLUDE_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/include
+    -DVulkan_LIBRARY:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/lib/MoltenVK.xcframework
+)
+set(_MNN_DEPENDS MoltenVK)
 
-# ---------------------------------------------------------
-# Set config for MNN modules
-set(_MNN_WIN_RUNTIME_MT OFF)
+set(_ZKLLVM_EXTRA_PARAM
+    -DZKLLVM_BUILD_TRANSPILER_LIB:BOOL=OFF
+    -DZKLLVM_BUILD_EXAMPLES:BOOL=OFF
+    -DZKLLVM_BUILD_STD_LIB:BOOL=ON
+    -DZKLLVM_BUILD_EXECUTABLES:BOOL=OFF
+    -DZKLLVM_BUILD_OSX_FAT_BINARY:BOOL=ON
+    -DLLVM_INCLUDE_UTILS:BOOL=OFF
+    -DLLVM_INCLUDE_TESTS:BOOL=OFF
+)
+# MNN Has separate source files for x86 and ARM, so I think we need to build twice and lipo combine
+ExternalProject_Add(MNN_X86
+    PREFIX MNN
+    SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN/x86_64
+    -DCMAKE_OSX_ARCHITECTURES:STRING=x86_64
+    -DPLATFORM:STRING=MAC
+    -DDEPLOYMENT_TARGET:STRING=${DEPLOYMENT_TARGET}
+    -DNAMED_LANGUAGE_SUPPORT:BOOL=${NAMED_LANGUAGE_SUPPORT}
+    -DENABLE_BITCODE:BOOL=${ENABLE_BITCODE}
+    -DENABLE_ARC:BOOL=${ENABLE_ARC}
+    -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
+    -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
+    -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_CURRENT_SOURCE_DIR}/mnn.toolchain.cmake
+    -DMNN_BUILD_SHARED_LIBS:BOOL=OFF
+    -DMNN_BUILD_TESTS:BOOL=OFF
+    -DMNN_BUILD_TOOLS:BOOL=OFF
+    -DMNN_BUILD_PROTOBUFFER:BOOL=OFF
+    -DMNN_VULKAN:BOOL=ON
+    -DMNN_WIN_RUNTIME_MT:BOOL=ON
+    ${_CMAKE_COMMON_CACHE_ARGS_MINUS_ARCH}
+    ${_MNN_EXTRA_PARAM}
+    DEPENDS ${_MNN_DEPENDS}
+    BUILD_BYPRODUCTS
+        "${CMAKE_CURRENT_BINARY_DIR}/MNN/x86_64/lib/libMNN.a"
+)
 
-# --------------------------------------------------------
-# Allow multiple definitions
-set(FORCE_MULTILE ON)
-set(MULTIPLE_OPTION "-Xlink=-force:multiple")
+ExternalProject_Add(MNN_ARM
+    PREFIX MNN
+    SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64
+    -DCMAKE_OSX_ARCHITECTURES:STRING=arm64
+    -DPLATFORM:STRING=MAC_ARM64
+    -DDEPLOYMENT_TARGET:STRING=${DEPLOYMENT_TARGET}
+    -DNAMED_LANGUAGE_SUPPORT:BOOL=${NAMED_LANGUAGE_SUPPORT}
+    -DENABLE_BITCODE:BOOL=${ENABLE_BITCODE}
+    -DENABLE_ARC:BOOL=${ENABLE_ARC}
+    -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
+    -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
+    -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_CURRENT_SOURCE_DIR}/mnn.toolchain.cmake
+    -DMNN_BUILD_SHARED_LIBS:BOOL=OFF
+    -DMNN_BUILD_TESTS:BOOL=OFF
+    -DMNN_BUILD_TOOLS:BOOL=OFF
+    -DMNN_BUILD_PROTOBUFFER:BOOL=OFF
+    -DMNN_VULKAN:BOOL=ON
+    -DMNN_WIN_RUNTIME_MT:BOOL=ON
+    ${_CMAKE_COMMON_CACHE_ARGS_MINUS_ARCH}
+    ${_MNN_EXTRA_PARAM}
+    DEPENDS ${_MNN_DEPENDS}
+    BUILD_BYPRODUCTS
+        "${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64/lib/libMNN.a"
+)
 
-# --------------------------------------------------------
-# build common targets
+set(MNN_X86_LIB "${CMAKE_CURRENT_BINARY_DIR}/MNN/x86_64/lib/libMNN.a")
+set(MNN_ARM_LIB "${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64/lib/libMNN.a")
+set(MNN_FAT_LIB "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/libMNN.a")
+
+# Ensure the destination directory exists
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN)
+set(MNN_X86_CMAKE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/x86_64/lib/cmake/MNN")
+set(MNN_ARM_CMAKE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64/lib/cmake/MNN")
+set(MNN_FAT_CMAKE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN")
+
+
+# Add custom command to create fat library
+add_custom_command(
+    OUTPUT ${MNN_FAT_LIB}
+    COMMAND lipo -create -output ${MNN_FAT_LIB} ${MNN_X86_LIB} ${MNN_ARM_LIB}
+    DEPENDS MNN_ARM MNN_X86
+    COMMENT "Creating fat library for MNN..."
+)
+
+# Add target for fat library
+add_custom_target(MNN_Fat ALL
+    DEPENDS ${MNN_FAT_LIB})
+
+# Ensure the destination directory exists
+file(MAKE_DIRECTORY ${MNN_FAT_CMAKE_DIR})
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/MNN/include)
+
+# Copy CMake configuration files
+add_custom_command(
+    OUTPUT ${MNN_FAT_CMAKE_DIR}/MNNConfig.cmake
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${MNN_X86_CMAKE_DIR}
+            ${MNN_FAT_CMAKE_DIR}
+    DEPENDS MNN_Fat
+    COMMENT "Copying CMake configuration files for MNN..."
+)
+
+# Add target for copying CMake files
+add_custom_target(MNN_CMakeFiles ALL
+    DEPENDS ${MNN_FAT_CMAKE_DIR}/MNNConfig.cmake)
+
+    # Copy include files from arm64 directory to base include directory
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/MNN/include/MNN/MNNDefine.h
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_BINARY_DIR}/MNN/arm64/include
+            ${CMAKE_CURRENT_BINARY_DIR}/MNN/include
+    DEPENDS MNN_Fat
+    COMMENT "Copying include files for MNN..."
+)
+
+# Add a target for copying include files
+add_custom_target(MNN_IncludeFiles ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/MNN/include/MNN/MNNDefine.h)
+
+set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN")
+set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
+set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
+
+
+# Define the expected `MNN` target
+add_custom_target(MNN ALL DEPENDS MNN_Fat MNN_CMakeFiles MNN_IncludeFiles)
+
+unset(TOOLCHAIN_FILE_PROCESSED)
+
+set(_EXT_ZKSTDLIB OFF)
+
 include(../CommonTargets.CMake)

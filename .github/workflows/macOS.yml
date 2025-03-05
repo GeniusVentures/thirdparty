@@ -1,0 +1,11 @@
+name: macOS
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  macos-build:
+    uses: ./.github/workflows/build.yml
+    with:
+      target: OSX
+      build-type: Release
