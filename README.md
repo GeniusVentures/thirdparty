@@ -19,7 +19,7 @@ Where:
 - `PLATFORM` is Android, iOS, Linux, OSX or Windows
 - `BUILD_TYPE` is either Debug or Release
 
-The `master` branch receives few merges, download from the `develop` branch to get the newest builds.
+The `master` branch has the release versions, for development download from the `develop` branch to get the newest builds.
 
 # Building
 
@@ -44,9 +44,12 @@ If you want to build `thirdparty` for yourself, you'll need to recursively check
 ### Android
 
 - NDK, preferably version 27b
-  - Remember to set the environment variable `ANDROID_NDK_HOME` to point to the install path 
+  - Remember to set the environment variable `ANDROID_NDK_HOME` to point to the install path (.bash_profile/.bashrc/.zprofile etc.) 
+    ```
+    export ANDROID_NDK_HOME=/path/to/android-ndk-27b
+    ```
 - Rust Android target
-  - Installable with `rustup target add aarch64-linux-android`
+  - Installable with `rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android`
 
 Note: we do not test cross-compiling for Android using Windows.
 
