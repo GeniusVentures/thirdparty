@@ -183,6 +183,14 @@ jobs:
               build_directory=$(echo $file | sed 's|^\(\./[^/]*\).*|\1|')
               target_build_directories[$target]=$build_directory
           done < <(rg 'source_dir=(.*)' -u -r '$1' -g '*-source_dirinfo.txt' .)
+          
+          if [[ "${{matrix.target}}" == "OSX" ]]; then
+              if [[ -v target_shas["MNN_X86"] && -v target_shas["MNN_ARM"] ]]; then
+                  target_shas["MNN"]=${target_shas["MNN_X86"]}
+                  target_build_directories["MNN"]="./MNN"
+                  echo "MNN (${target_shas["MNN"]}): Custom target added for fat binary"
+              fi
+          fi
 
           echo "Downloading release.json file"
           set +e
@@ -216,6 +224,16 @@ jobs:
                   build_directories_of_targets_to_update+=("${target_build_directories[$target]}")
               fi
           done
+
+          # Check if MNN should be built because its components are being updated
+          if [[ "${{matrix.target}}" == "OSX" && " ${targets_to_update[*]} " =~ " MNN_X86 " || " ${targets_to_update[*]} " =~ " MNN_ARM " ]]; then
+              if [[ ! " ${targets_to_update[*]} " =~ " MNN " ]]; then
+                  echo "Adding MNN to targets_to_update because MNN_X86 or MNN_ARM is being updated"
+                  targets_to_update+=("MNN")
+                  sha_of_targets_to_update+=("${target_shas["MNN"]}")
+                  build_directories_of_targets_to_update+=("${target_build_directories["MNN"]}")
+              fi
+          fi
 
           echo "TARGETS_TO_UPDATE=${targets_to_update[@]}" >>$GITHUB_OUTPUT
           echo "SHA_OF_TARGETS_TO_UPDATE=${sha_of_targets_to_update[@]}" >>$GITHUB_OUTPUT
