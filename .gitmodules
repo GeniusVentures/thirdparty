@@ -108,7 +108,7 @@
 	url = ../secp256k1
 [submodule "xxhash"]
     path = xxhash
-    url = https://github.com/hunter-packages/xxHash.git
+    url = ../xxHash.git
 [submodule "MoltenVK"]
     path = MoltenVK
     url = https://github.com/KhronosGroup/MoltenVK.git
