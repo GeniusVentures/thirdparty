@@ -47,9 +47,6 @@
 [submodule "cpp-ipfs-http-client"]
     path = cpp-ipfs-http-client
     url = https://github.com/vasild/cpp-ipfs-http-client
-[submodule "json"]
-    path = json
-    url = https://github.com/nlohmann/json
 [submodule "ipfs-pubsub"]
     path = ipfs-pubsub
     url = ../ipfs-pubsub.git
@@ -72,9 +69,6 @@
     path = Parabeac-Core
     url = https://github.com/Parabeac/Parabeac-Core.git
     branch = stable
-[submodule "delta-enabled-crdts"]
-    path = delta-enabled-crdts
-    url = ../delta-enabled-crdts.git
 [submodule "rocksdb"]
     path = rocksdb
     url = ../rocksdb.git
