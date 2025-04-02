@@ -95,8 +95,7 @@
     branch = cares-1_17_2
 [submodule "soralog"]
     path = soralog
-    url = ../soralog
-    branch = c17
+	url = ../soralog
 [submodule "ipfs-bitswap-cpp"]
     path = ipfs-bitswap-cpp
     url = ../ipfs-bitswap-cpp.git
