@@ -16,7 +16,7 @@ jobs:
   build:
     env:
       GRPC_BUILD_ENABLE_CCACHE: "ON"
-    runs-on: ${{ contains(fromJson('["Android", "Linux"]'), inputs.target) && 'ubuntu-latest' || contains(fromJson('["iOS", "OSX"]'), inputs.target) && 'macos-latest' || 'windows-latest' }}
+    runs-on: ${{ contains(fromJson('["Android", "Linux"]'), inputs.target) && 'ubuntu-22.04' || contains(fromJson('["iOS", "OSX"]'), inputs.target) && 'macos-latest' || 'windows-latest' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
