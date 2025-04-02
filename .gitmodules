@@ -58,7 +58,7 @@
     url = https://github.com/hyperledger/iroha-ed25519.git
 [submodule "rapidjson"]
     path = rapidjson
-	url = ../rapidjson
+    url = ../rapidjson.git
 [submodule "jsonrpc-lean"]
     path = jsonrpc-lean
     url = https://github.com/uskr/jsonrpc-lean
