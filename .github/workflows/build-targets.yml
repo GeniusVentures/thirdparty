@@ -42,6 +42,17 @@ jobs:
         with:
           submodules: "recursive"
 
+      - name: Set mtimes based on Git history
+        shell: bash
+        run: |
+          curl -O https://raw.githubusercontent.com/MestreLion/git-tools/master/git-restore-mtime
+          chmod +x git-restore-mtime
+          ./git-restore-mtime
+
+          git submodule foreach --recursive '
+            "${{github.workspace}}/git-restore-mtime"
+          '
+
       - name: Configure Linux host
         if: ${{ runner.os == 'Linux'}}
         run: |
