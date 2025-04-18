@@ -17,9 +17,9 @@ elseif(CMAKE_SYSTEM_PROCESSOR_LOWER STREQUAL "x86_64" OR CMAKE_SYSTEM_PROCESSOR_
 endif()
 
 if(IS_X86_64)
-    set(BOOST_ARCH_FLAGS "address-model=64 architecture=x86")
+    set(BOOST_ARCH_FLAGS address-model=64 architecture=x86)
 else()
-    set(BOOST_ARCH_FLAGS "")
+    set(BOOST_ARCH_FLAGS)
 endif()
 
 # Boost
