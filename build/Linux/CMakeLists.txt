@@ -4,22 +4,15 @@ project(LINUX_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
 include(../CommonCompilerOptions.CMake)
 
-#Check for Arm64
+# Check for Arm64
 string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" CMAKE_SYSTEM_PROCESSOR_LOWER)
 
-set(IS_ARM64 FALSE)
-set(IS_X86_64 FALSE)
-
 if(CMAKE_SYSTEM_PROCESSOR_LOWER STREQUAL "aarch64" OR CMAKE_SYSTEM_PROCESSOR_LOWER STREQUAL "arm64")
-    set(IS_ARM64 TRUE)
+    set(BOOST_ARCH_FLAGS "architecture=arm")
+    set(OPENSSL_TARGET "linux-${CMAKE_SYSTEM_PROCESSOR}")
 elseif(CMAKE_SYSTEM_PROCESSOR_LOWER STREQUAL "x86_64" OR CMAKE_SYSTEM_PROCESSOR_LOWER STREQUAL "amd64")
-    set(IS_X86_64 TRUE)
-endif()
-
-if(IS_X86_64)
-    set(BOOST_ARCH_FLAGS address-model=64 architecture=x86)
-else()
-    set(BOOST_ARCH_FLAGS)
+    set(BOOST_ARCH_FLAGS "architecture=x86")
+    set(OPENSSL_TARGET "linux-${CMAKE_SYSTEM_PROCESSOR}-clang")
 endif()
 
 # Boost
@@ -31,7 +24,7 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
 
-    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal ${BOOST_ARCH_FLAGS} variant=${BOOST_VARIANT} --prefix=<INSTALL_DIR> -d0 install
+    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 ${BOOST_ARCH_FLAGS} variant=${BOOST_VARIANT} --prefix=<INSTALL_DIR> -d0 install
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
@@ -51,11 +44,6 @@ set(_BOOST_CACHE_ARGS
 )
 
 # OpenSSL
-if(IS_X86_64)
-    set(OPENSSL_TARGET "linux-${CMAKE_SYSTEM_PROCESSOR}-clang")
-else()
-    set(OPENSSL_TARGET "linux-${CMAKE_SYSTEM_PROCESSOR}")
-endif()
 set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
 
 ExternalProject_Add(openssl
@@ -78,7 +66,7 @@ set(_OPENSSL_CACHE_ARGS
 set(_ED25519_RANDOM dev_urandom)
 
 set(_MNN_EXTRA_PARAM
-    -DMNN_USE_SYSTEM_LIB:BOOL=ON 
+    -DMNN_USE_SYSTEM_LIB:BOOL=ON
     -DMNN_SEP_BUILD:BOOL=OFF
     -DVulkan_INCLUDE_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader/include
     -DVulkan_LIBRARY:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader/lib/libvulkan.so
