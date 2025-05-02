@@ -44,7 +44,7 @@ set(_BOOST_CACHE_ARGS
 )
 
 # OpenSSL
-set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
+set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build")
 
 ExternalProject_Add(openssl
     PREFIX openssl

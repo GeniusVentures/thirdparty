@@ -111,7 +111,7 @@ set(_BOOST_CACHE_ARGS
 )
 
 # OpenSSL
-set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build/${CMAKE_SYSTEM_NAME}")
+set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build")
 set(OPENSSL_VARIANT "$<IF:$<CONFIG:Debug>,--debug,--release>")
 set(OPENSSL_ARCH "darwin64-x86_64-cc")
 if(PLATFORM STREQUAL "MAC_ARM64")
