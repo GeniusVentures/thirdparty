@@ -47,9 +47,6 @@
 [submodule "cpp-ipfs-http-client"]
     path = cpp-ipfs-http-client
     url = https://github.com/vasild/cpp-ipfs-http-client
-[submodule "json"]
-    path = json
-    url = https://github.com/nlohmann/json
 [submodule "ipfs-pubsub"]
     path = ipfs-pubsub
     url = ../ipfs-pubsub.git
@@ -61,7 +58,7 @@
     url = https://github.com/hyperledger/iroha-ed25519.git
 [submodule "rapidjson"]
     path = rapidjson
-    url = ../rapidjson.git
+	url = ../rapidjson
 [submodule "jsonrpc-lean"]
     path = jsonrpc-lean
     url = https://github.com/uskr/jsonrpc-lean
@@ -72,9 +69,6 @@
     path = Parabeac-Core
     url = https://github.com/Parabeac/Parabeac-Core.git
     branch = stable
-[submodule "delta-enabled-crdts"]
-    path = delta-enabled-crdts
-    url = ../delta-enabled-crdts.git
 [submodule "rocksdb"]
     path = rocksdb
     url = ../rocksdb.git
@@ -95,8 +89,7 @@
     branch = cares-1_17_2
 [submodule "soralog"]
     path = soralog
-    url = ../soralog
-    branch = c17
+	url = ../soralog
 [submodule "ipfs-bitswap-cpp"]
     path = ipfs-bitswap-cpp
     url = ../ipfs-bitswap-cpp.git
@@ -108,7 +101,7 @@
 	url = ../secp256k1
 [submodule "xxhash"]
     path = xxhash
-    url = ../xxHash.git
+	url = https://github.com/Cyan4973/xxHash.git
 [submodule "MoltenVK"]
     path = MoltenVK
     url = https://github.com/KhronosGroup/MoltenVK.git

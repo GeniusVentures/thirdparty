@@ -566,9 +566,10 @@ ExternalProject_Add(libsecp256k1
 # xxhash
 ExternalProject_Add(xxhash
     PREFIX xxhash
-    SOURCE_DIR "${THIRDPARTY_DIR}/xxhash"
+    SOURCE_DIR "${THIRDPARTY_DIR}/xxhash/cmake_unofficial"
     CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    -DXXHASH_BUILD_XXHSUM:BOOL=OFF
     ${_CMAKE_COMMON_CACHE_ARGS}
 )
 
