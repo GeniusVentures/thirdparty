@@ -9,3 +9,4 @@ jobs:
     with:
       target: Linux
       build-type: Release
+      abi: x86_64
