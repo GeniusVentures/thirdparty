@@ -188,6 +188,5 @@ jobs:
 
       - name: Upload file
         if: github.ref_name == 'main' || github.ref_name == 'develop'
-        working-directory: ${{env.BUILD_DIRECTORY}}
         shell: bash
         run: gh release upload ${{env.RELEASE_TAG}} ${{env.FILE_NAME}} --clobber
