@@ -174,7 +174,6 @@ jobs:
 
       - name: Compress directories
         if: github.ref_name == 'main' || github.ref_name == 'develop'
-        working-directory: ${{env.BUILD_DIRECTORY}}
         shell: bash
         run: |
           if [ '${{matrix.abi}}' ]; then
@@ -185,7 +184,7 @@ jobs:
 
           echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
 
-          tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^|${{env.BUILD_DIRECTORY}}|g' -czf $FILE_NAME ./*/
+          tar --exclude='*/src' --exclude='*/tmp' -czf $FILE_NAME $BUILD_DIRECTORY
 
       - name: Upload file
         if: github.ref_name == 'main' || github.ref_name == 'develop'
