@@ -137,6 +137,7 @@ jobs:
         run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
 
       - name: Create release tag
+        if: github.ref_name == 'main' || github.ref_name == 'develop'
         id: create-release-tag
         run: |
           RELEASE_TAG='${{matrix.target}}-${{github.ref_name}}-${{matrix.build-type}}'
@@ -172,6 +173,7 @@ jobs:
         run: cmake --build . --config ${{matrix.build-type}} -j
 
       - name: Compress directories
+        if: github.ref_name == 'main' || github.ref_name == 'develop'
         working-directory: ${{env.BUILD_DIRECTORY}}
         shell: bash
         run: |
@@ -186,6 +188,7 @@ jobs:
           tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^|${{env.BUILD_DIRECTORY}}|g' -czf $FILE_NAME ./*/
 
       - name: Upload file
+        if: github.ref_name == 'main' || github.ref_name == 'develop'
         working-directory: ${{env.BUILD_DIRECTORY}}
         shell: bash
         run: gh release upload ${{env.RELEASE_TAG}} ${{env.FILE_NAME}} --clobber
