@@ -46,11 +46,11 @@ jobs:
             build-type: Release
             abi: armeabi-v7a
           - target: Android
-            host: ubuntu-22.04-8-cores
+            host: gv-Linux-large
             build-type: Debug
             abi: arm64-v8a
           - target: Android
-            host: ubuntu-22.04-8-cores
+            host: gv-Linux-large
             build-type: Debug
             abi: armeabi-v7a
         exclude:
