@@ -1,0 +1,209 @@
+name: Build and release for tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to create releases for'
+        required: true
+        type: string
+
+env:
+  GH_TOKEN: ${{ secrets.GNUS_TOKEN_1 }}
+
+jobs:
+  build:
+    runs-on: ${{matrix.host}}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [Android, iOS, OSX, Linux, Windows]
+        build-type: [Debug, Release]
+        abi: [""]
+        include:
+          - target: Linux
+            host: ubuntu-22.04
+            abi: x86_64
+            build-type: Debug
+          - target: Linux
+            host: ubuntu-22.04
+            abi: x86_64
+            build-type: Release
+          - target: Linux
+            host: ubuntu-24.04-arm
+            abi: aarch64
+            build-type: Debug
+          - target: Linux
+            host: ubuntu-24.04-arm
+            abi: aarch64
+            build-type: Release
+          - target: Windows
+            host: windows-latest
+          - target: OSX
+            host: macos-latest
+          - target: iOS
+            host: macos-latest
+          - target: Android
+            host: ubuntu-22.04
+            build-type: Release
+            abi: arm64-v8a
+          - target: Android
+            host: ubuntu-22.04
+            build-type: Release
+            abi: armeabi-v7a
+          - target: Android
+            host: gv-Linux-large
+            build-type: Debug
+            abi: arm64-v8a
+          - target: Android
+            host: gv-Linux-large
+            build-type: Debug
+            abi: armeabi-v7a
+        exclude:
+          - target: Android
+            abi: ""
+          - target: Linux
+            abi: ""
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+          ref: ${{ github.event.inputs.tag }}
+
+      - name: Configure Linux host
+        if: ${{ runner.os == 'Linux'}}
+        run: |
+          sudo update-alternatives --install /usr/bin/cc cc $(which clang) 100
+          sudo update-alternatives --install /usr/bin/c++ c++ $(which clang++) 100
+          sudo update-alternatives --set cc $(which clang)
+          sudo update-alternatives --set c++ $(which clang++)
+
+          sudo apt install libvulkan-dev ninja-build -y
+          echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
+
+      - name: Configure macOS host
+        if: ${{ runner.os == 'macOS'}}
+        run: |
+          brew install ninja bash
+
+          PATH="$HOMEBREW_PREFIX/opt/gnu-tar/libexec/gnubin:$PATH"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
+          echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
+
+      - name: Add Darwin toolchain
+        if: ${{ matrix.target == 'OSX'}}
+        run: rustup target add x86_64-apple-darwin
+
+      - name: Add iOS toolchain
+        if: ${{ matrix.target == 'iOS' }}
+        run: |
+          rustup toolchain install nightly-aarch64-apple-darwin
+          rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
+          rustup target add aarch64-apple-ios
+
+      - name: Add Android toolchain
+        if: ${{ matrix.target == 'Android' }}
+        run: |
+          NDK_VERSION="r27b"
+          wget https://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux.zip -O ndk.zip
+          unzip ndk.zip -d $HOME
+
+          echo "ANDROID_NDK_HOME=$HOME/android-ndk-$NDK_VERSION" >> $GITHUB_ENV
+
+          rustup target add aarch64-linux-android
+          rustup target add armv7-linux-androideabi
+
+      - name: Install bindgen
+        run: cargo install cbindgen
+
+      - name: Add wasm Rust target
+        run: rustup target add wasm32-unknown-emscripten
+
+      - name: Set build directory
+        run: |
+          if [ '${{matrix.abi}}' ]; then
+            BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build-type}}/${{matrix.abi}}
+          else
+            BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build-type}}
+          fi
+          echo "BUILD_DIRECTORY=$BUILD_DIRECTORY" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Configure CMake for Mac
+        if: ${{ matrix.target == 'OSX'}}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=MAC_UNIVERSAL
+
+      - name: Configure CMake for iOS
+        if: ${{ matrix.target == 'iOS'}}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=OS64
+
+      - name: Configure CMake for Android
+        if: ${{ matrix.target == 'Android'}}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DANDROID_ABI=${{matrix.abi}}
+
+      - name: Configure CMake for Windows
+        if: ${{ matrix.target == 'Windows' }}
+        run: cmake -S build/${{matrix.target}} -B $env:BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
+
+      - name: Configure CMake for Linux
+        if: ${{ matrix.target == 'Linux' }}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
+
+      - name: Create release for tag
+        id: create-release-tag
+        run: |
+          TAG_NAME='${{ github.event.inputs.tag }}'
+          RELEASE_TAG="${{matrix.target}}-${TAG_NAME}-${{matrix.build-type}}"
+          
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+
+          echo "Checking if GitHub release exists for: $RELEASE_TAG"
+
+          set +e
+          gh release view $RELEASE_TAG
+          releaseFound=$?
+          set -e
+
+          if [[ $releaseFound -ne 0 ]]; then
+              echo "Release not found, creating with tag: $RELEASE_TAG"
+
+              RELEASE_TYPE="--latest=false"
+              if [ '${{ matrix.build-type }}' != 'Release' ]; then
+                  RELEASE_TYPE="--prerelease"
+              fi
+
+              # Create release on GitHub for the tag
+              gh release create $RELEASE_TAG \
+                  -n "Build artifacts for tag ${TAG_NAME}" \
+                  --target "${TAG_NAME}" \
+                  ${RELEASE_TYPE} \
+                  -t "${{ matrix.target }} ${TAG_NAME} ${{ matrix.build-type }} build"
+          else
+              echo "Release already exists for: $RELEASE_TAG"
+          fi
+        shell: bash
+
+      - name: Build thirdparty
+        working-directory: ${{env.BUILD_DIRECTORY}}
+        run: cmake --build . --config ${{matrix.build-type}} -j
+
+      - name: Compress directories
+        working-directory: ${{env.BUILD_DIRECTORY}}
+        shell: bash
+        run: |
+          if [ '${{matrix.abi}}' ]; then
+            FILE_NAME="${{matrix.target}}-${{matrix.abi}}-${{matrix.build-type}}.tar.gz"
+          else
+            FILE_NAME="${{matrix.target}}-${{matrix.build-type}}.tar.gz"
+          fi
+
+          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
+
+          tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^\.|${{env.BUILD_DIRECTORY}}|g' -czf $FILE_NAME ./*/
+
+      - name: Upload file
+        working-directory: ${{env.BUILD_DIRECTORY}}
+        run: gh release upload ${{env.RELEASE_TAG}} ${{env.FILE_NAME}} --clobber

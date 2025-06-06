@@ -1,13 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
 
-if(POLICY CMP0025)
-    cmake_policy(SET CMP0025 NEW)
-endif()
-
-if(POLICY CMP0042)
-    cmake_policy(SET CMP0042 NEW)
-endif()
-
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(_PLATFORM "MAC_UNIVERSAL" CACHE STRING "Setting the build for both x86_64 and arm64")
     #set(_PLATFORM "MAC" CACHE STRING "Setting the default build for x86_64")
@@ -50,7 +42,7 @@ set(BOOST_ARCH "arm+x86")
 #    set(BOOST_ARCH "arm")
 #endif()
 # Boost
-set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
+set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build")
 ExternalProject_Add(Boost
     PREFIX boost
     SOURCE_DIR "${THIRDPARTY_DIR}/boost"
