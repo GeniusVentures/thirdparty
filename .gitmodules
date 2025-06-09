@@ -146,3 +146,6 @@
 [submodule "SQLiteModernCpp"]
     path = SQLiteModernCpp
     url = ../sqlite_modern_cpp.git
+[submodule "valijson"]
+	path = valijson
+	url = git@github.com:tristanpenman/valijson.git
