@@ -155,34 +155,25 @@ jobs:
         id: create-release-tag
         run: |
           TAG_NAME='${{ github.event.inputs.tag }}'
-          RELEASE_TAG="${{matrix.target}}-${TAG_NAME}-${{matrix.build-type}}"
           
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
 
-          echo "Checking if GitHub release exists for: $RELEASE_TAG"
+          echo "Checking if GitHub release exists for tag: $TAG_NAME"
 
           set +e
-          gh release view $RELEASE_TAG
+          gh release view $TAG_NAME
           releaseFound=$?
           set -e
 
           if [[ $releaseFound -ne 0 ]]; then
-              echo "Release not found, creating with tag: $RELEASE_TAG"
+              echo "Release not found, creating for tag: $TAG_NAME"
 
-              RELEASE_TYPE="--latest=false"
-              if [ '${{ matrix.build-type }}' != 'Release' ]; then
-                  RELEASE_TYPE="--prerelease"
-              fi
-
-              # Create release on GitHub for the tag
-              gh release create $RELEASE_TAG \
+              # Create a single release for the tag
+              gh release create $TAG_NAME \
                   -n "Build artifacts for tag ${TAG_NAME}" \
-                  --target "${TAG_NAME}" \
-                  ${RELEASE_TYPE} \
-                  -t "${{ matrix.target }} ${TAG_NAME} ${{ matrix.build-type }} build"
+                  -t "${TAG_NAME} build artifacts"
           else
-              echo "Release already exists for: $RELEASE_TAG"
+              echo "Release already exists for tag: $TAG_NAME"
           fi
         shell: bash
 
@@ -206,4 +197,6 @@ jobs:
 
       - name: Upload file
         working-directory: ${{env.BUILD_DIRECTORY}}
-        run: gh release upload ${{env.RELEASE_TAG}} ${{env.FILE_NAME}} --clobber
+        run: |
+          # Upload to the main tag release with platform-specific filename
+          gh release upload ${{env.TAG_NAME}} ${{env.FILE_NAME}} --clobber
