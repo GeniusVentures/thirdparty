@@ -149,3 +149,6 @@
 [submodule "valijson"]
 	path = valijson
 	url = git@github.com:tristanpenman/valijson.git
+[submodule "json"]
+	path = json
+	url = git@github.com:nlohmann/json.git
