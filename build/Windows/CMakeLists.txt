@@ -21,7 +21,7 @@ set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/win-genera
 set(_PROTOBUF_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/grpc/cmake")
 
 # Boost
-set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build/${CMAKE_SYSTEM_NAME}")
+set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build")
 
 list(TRANSFORM BOOST_INCLUDE_LIBRARIES PREPEND --with- OUTPUT_VARIABLE BOOST_INCLUDE_LIBRARIES_EXPANDED)
 ExternalProject_Add(Boost
@@ -31,15 +31,12 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND ./bootstrap.bat vc143
 
-    #BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal ${BOOST_INCLUDE_LIBRARIES_EXPANDED} address-model=64 architecture=x86 variant=${BOOST_VARIANT} cxxflags="/fsanitize=address" linkflags="/fsanitize=address" --prefix=${BOOST_ROOT} -d0 install
     BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal ${BOOST_INCLUDE_LIBRARIES_EXPANDED} address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} -d0 install
     BUILD_IN_SOURCE TRUE
 
     PATCH_COMMAND 
     ${CMAKE_COMMAND} -E echo "Checking if patch has already been applied... ${THIRDPARTY_DIR}/boost/tools/build/src/tools/msvc.jam" &&
     powershell -Command "if (!(Select-String -Path '${THIRDPARTY_DIR}\\boost\\tools\\build\\src\\tools\\msvc.jam' -Pattern '14\\.4')) { git apply '${CMAKE_CURRENT_LIST_DIR}/boost_patch_185.diff' }"
-
-
 
     INSTALL_COMMAND ""
 )
