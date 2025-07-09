@@ -2,6 +2,11 @@ name: Multiplatform build and upload
 
 on:
   workflow_dispatch:
+    inputs:
+    tag:
+      description: "Release tag"
+      required: false
+      type: string
 
 env:
   GH_TOKEN: ${{ secrets.GNUS_TOKEN_1 }}
@@ -155,7 +160,13 @@ jobs:
         if: github.ref_name == 'main' || github.ref_name == 'develop'
         id: create-release-tag
         run: |
-          RELEASE_TAG='${{matrix.target}}-${{github.ref_name}}-${{matrix.build-type}}'
+          if ${{github.event_name == 'workflow_dispatch'}} && [ '${{ github.event.inputs.tag }}' ]; then
+              RELEASE_TAG="${{ github.event.inputs.tag }}"
+              IS_TAG_RELEASE="true"
+          else
+              RELEASE_TAG='${{matrix.target}}-${{github.ref_name}}-${{matrix.build-type}}'
+              IS_TAG_RELEASE="false"
+          fi
 
           echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
 
@@ -169,8 +180,10 @@ jobs:
           if [[ $releaseFound -ne 0 ]]; then
               echo "Release not found, creating with tag: $RELEASE_TAG"
 
-              RELEASE_TYPE="--latest"
-              if [ '${{ matrix.build-type }}' != 'Release' ]; then
+              if [ "${{github.ref_name}}" = "main" ] || [ "$IS_TAG_RELEASE" = "true" ]; then
+                  RELEASE_TYPE="--latest"
+              else
+                  # Everything else (develop) is prerelease
                   RELEASE_TYPE="--prerelease"
               fi
 
@@ -180,6 +193,25 @@ jobs:
                   --target '${{ github.ref_name }}' \
                   ${RELEASE_TYPE} \
                   -t '${{ matrix.target }} ${{ github.ref_name }} branch ${{ matrix.build-type }} build'
+          else
+              echo "Release found for tag: $RELEASE_TAG"
+              
+              # Only update the target commit for branch releases, not tag releases
+              if [ "$IS_TAG_RELEASE" = "false" ]; then
+                  echo "Updating release target to latest commit on ${{ github.ref_name }}"
+                  
+                  # Get the current commit SHA
+                  CURRENT_SHA="${{ github.sha }}"
+                  
+                  # Update the release to point to the current commit
+                  gh release edit $RELEASE_TAG \
+                      --target "$CURRENT_SHA" \
+                      -n "Updated to commit $CURRENT_SHA on ${{ github.ref_name }} branch"
+                  
+                  echo "Release updated to target commit: $CURRENT_SHA"
+              else
+                  echo "Tag release detected, not updating target commit"
+              fi
           fi
         shell: bash
 
