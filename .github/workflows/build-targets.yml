@@ -156,64 +156,80 @@ jobs:
         if: ${{ matrix.target == 'Linux' }}
         run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
 
-      - name: Create release tag
-        if: github.ref_name == 'main' || github.ref_name == 'develop'
-        id: create-release-tag
+      - name: Wait for primary release creation
+        if: (github.ref_name == 'main' || github.ref_name == 'develop') && ((matrix.target == 'Linux' && matrix.abi == 'aarch64') || (matrix.target == 'Android' && matrix.abi == 'armeabi-v7a'))
         run: |
           if ${{github.event_name == 'workflow_dispatch'}} && [ '${{ github.event.inputs.tag }}' ]; then
               RELEASE_TAG="${{ github.event.inputs.tag }}"
-              IS_TAG_RELEASE="true"
           else
               RELEASE_TAG='${{matrix.target}}-${{github.ref_name}}-${{matrix.build-type}}'
+          fi
+          
+          echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+          echo "Waiting for primary job to create/update release: $RELEASE_TAG"
+          
+          # Wait up to 5 minutes for the release to be created/updated
+          ATTEMPT=1
+          MAX_ATTEMPTS=30
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+              if gh release view $RELEASE_TAG >/dev/null 2>&1; then
+                  echo "Release found!"
+                  # Check if it's at the correct commit
+                  if gh release view $RELEASE_TAG | grep -q "${{ github.sha }}"; then
+                      echo "Release is at correct commit"
+                      break
+                  fi
+              fi
+              echo "Waiting for release... (attempt $ATTEMPT/$MAX_ATTEMPTS)"
+              sleep 10
+              ATTEMPT=$((ATTEMPT + 1))
+          done
+
+      - name: Create release tag
+        if: (github.ref_name == 'main' || github.ref_name == 'develop') && !((matrix.target == 'Linux' && matrix.abi == 'aarch64') || (matrix.target == 'Android' && matrix.abi == 'armeabi-v7a'))
+        id: create-release-tag
+        run: |
+          if ${{ github.event_name == 'workflow_dispatch' }} && [ '${{ github.event.inputs.tag }}' ]; then
+              RELEASE_TAG="${{ github.event.inputs.tag }}"
+              IS_TAG_RELEASE="true"
+          else
+              RELEASE_TAG="${{ matrix.target }}-${{ github.ref_name }}-${{ matrix.build-type }}"
               IS_TAG_RELEASE="false"
           fi
 
-          echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
 
-          echo "Check if GitHub release tag $RELEASE_TAG available."
-
+          echo "Checking if release $RELEASE_TAG exists..."
           set +e
-          gh release view $RELEASE_TAG
+          gh release view "$RELEASE_TAG"
           releaseFound=$?
           set -e
 
-          if [[ $releaseFound -ne 0 ]]; then
-              echo "Release not found, creating with tag: $RELEASE_TAG"
-
-              if [ "${{github.ref_name}}" = "main" ] || [ "$IS_TAG_RELEASE" = "true" ]; then
-                  RELEASE_TYPE="--latest"
-              else
-                  # Everything else (develop) is prerelease
-                  RELEASE_TYPE="--prerelease"
-              fi
-
-              # Create release on GitHub
-              gh release create $RELEASE_TAG \
-                  -n '${{ github.ref_name }} branch' \
-                  --target '${{ github.ref_name }}' \
-                  ${RELEASE_TYPE} \
-                  -t '${{ matrix.target }} ${{ github.ref_name }} branch ${{ matrix.build-type }} build'
-          else
-              echo "Release found for tag: $RELEASE_TAG"
-              
-              # Only update the target commit for branch releases, not tag releases
-              if [ "$IS_TAG_RELEASE" = "false" ]; then
-                  echo "Updating release target to latest commit on ${{ github.ref_name }}"
-                  
-                  # Get the current commit SHA
-                  CURRENT_SHA="${{ github.sha }}"
-                  
-                  # Update the release to point to the current commit
-                  gh release edit $RELEASE_TAG \
-                      --target "$CURRENT_SHA" \
-                      -n "Updated to commit $CURRENT_SHA on ${{ github.ref_name }} branch"
-                  
-                  echo "Release updated to target commit: $CURRENT_SHA"
-              else
-                  echo "Tag release detected, not updating target commit"
-              fi
+          if [[ $releaseFound -eq 0 && "$IS_TAG_RELEASE" == "false" ]]; then
+              echo "Deleting existing branch-based release + tag..."
+              gh release delete "$RELEASE_TAG" --yes
+              git push origin ":refs/tags/$RELEASE_TAG" || true
           fi
+
+          # Force-create tag locally and push it
+          echo "Tagging commit ${{ github.sha }} as $RELEASE_TAG"
+          git tag -f "$RELEASE_TAG" "${{ github.sha }}"
+          git push --force origin "$RELEASE_TAG"
+
+          if [ "$IS_TAG_RELEASE" = "true" ]; then
+              RELEASE_TYPE="--latest"
+          else
+              RELEASE_TYPE="--draft"
+          fi
+
+          echo "Creating GitHub release $RELEASE_TAG..."
+          gh release create "$RELEASE_TAG" \
+            --target "${{ github.sha }}" \
+            -t "${{ matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
+            -n "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
+            ${RELEASE_TYPE}
         shell: bash
+
 
       - name: Build thirdparty
         working-directory: ${{env.BUILD_DIRECTORY}}
