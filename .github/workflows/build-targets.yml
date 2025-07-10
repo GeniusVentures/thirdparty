@@ -156,6 +156,26 @@ jobs:
         if: ${{ matrix.target == 'Linux' }}
         run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
 
+
+      - name: Build thirdparty
+        working-directory: ${{env.BUILD_DIRECTORY}}
+        run: cmake --build . --config ${{matrix.build-type}} -j
+
+      - name: Compress directories
+        if: github.ref_name == 'main' || github.ref_name == 'develop'
+        working-directory: ${{env.BUILD_DIRECTORY}}
+        shell: bash
+        run: |
+          if [ '${{matrix.abi}}' ]; then
+            FILE_NAME="${{matrix.target}}-${{matrix.abi}}-${{matrix.build-type}}.tar.gz"
+          else
+            FILE_NAME="${{matrix.target}}-${{matrix.build-type}}.tar.gz"
+          fi
+
+          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
+
+          tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^\.|${{env.BUILD_DIRECTORY}}|g' -czf $FILE_NAME ./*/
+
       - name: Wait for primary release creation
         if: (github.ref_name == 'main' || github.ref_name == 'develop') && ((matrix.target == 'Linux' && matrix.abi == 'aarch64') || (matrix.target == 'Android' && matrix.abi == 'armeabi-v7a'))
         run: |
@@ -168,9 +188,9 @@ jobs:
           echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
           echo "Waiting for primary job to create/update release: $RELEASE_TAG"
           
-          # Wait up to 5 minutes for the release to be created/updated
+          # Wait up to 15 minutes for the release to be created/updated
           ATTEMPT=1
-          MAX_ATTEMPTS=30
+          MAX_ATTEMPTS=90
           while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
               if gh release view $RELEASE_TAG >/dev/null 2>&1; then
                   echo "Release found!"
@@ -229,26 +249,6 @@ jobs:
             -n "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
             ${RELEASE_TYPE}
         shell: bash
-
-
-      - name: Build thirdparty
-        working-directory: ${{env.BUILD_DIRECTORY}}
-        run: cmake --build . --config ${{matrix.build-type}} -j
-
-      - name: Compress directories
-        if: github.ref_name == 'main' || github.ref_name == 'develop'
-        working-directory: ${{env.BUILD_DIRECTORY}}
-        shell: bash
-        run: |
-          if [ '${{matrix.abi}}' ]; then
-            FILE_NAME="${{matrix.target}}-${{matrix.abi}}-${{matrix.build-type}}.tar.gz"
-          else
-            FILE_NAME="${{matrix.target}}-${{matrix.build-type}}.tar.gz"
-          fi
-
-          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
-
-          tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^\.|${{env.BUILD_DIRECTORY}}|g' -czf $FILE_NAME ./*/
 
       - name: Upload file
         if: github.ref_name == 'main' || github.ref_name == 'develop'
