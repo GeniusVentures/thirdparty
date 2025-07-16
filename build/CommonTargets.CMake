@@ -433,7 +433,6 @@ ExternalProject_Add(ipfs-lite-cpp
     -DTESTING:BOOL=${TESTING}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
-    ${ipfs-lite-cpp_EXTRA_PARAM}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
     DEPENDS Microsoft.GSL spdlog tsl_hat_trie libp2p grpc ${PROTOBUF_TARGET} rocksdb Boost.DI
 )
@@ -467,7 +466,6 @@ ExternalProject_Add(ipfs-pubsub
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
-    ${ipfs-pubsub_EXTRA_PARAM}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
     DEPENDS Microsoft.GSL spdlog tsl_hat_trie libp2p Boost.DI ipfs-lite-cpp
 )
@@ -500,7 +498,6 @@ ExternalProject_Add(ipfs-bitswap-cpp
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
-    ${ipfs-bitswap-cpp_EXTRA_PARAM}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
     DEPENDS Microsoft.GSL spdlog libp2p Boost
 )
