@@ -94,31 +94,6 @@ set(_OPENSSL_CACHE_ARGS
 # ed25519 crypto
 set(_ED25519_RANDOM bcryptgen)
 
-# eliminates some warnings on windows
-set(libp2_EXTRA_PARAM
-    -D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN7
-)
-
-set(ipfs-lite-cpp_EXTRA_PARAM
-    -D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN7
-)
-
-set(ipfs-pubsub_EXTRA_PARAM
-    -D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN7
-)
-
-set(ipfs-bitswap-cpp_EXTRA_PARAM
-    -D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN7
-)
-
-# Allow multiple definitions
-set(MULTIPLE_OPTION /FORCE:MULTIPLE)
-
-# for rocksdb windows needs > windows 8
-set(rocksdb_EXTRA_PARAM
-    -D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN8
-)
-
 set(_ZKLLVM_EXTRA_PARAM
     -DZKLLVM_BUILD_TRANSPILER_LIB:BOOL=OFF
     -DZKLLVM_BUILD_EXAMPLES:BOOL=OFF

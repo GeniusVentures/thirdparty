@@ -9,16 +9,9 @@
 [submodule "ipfs-lite-cpp"]
     path = ipfs-lite-cpp
     url = ../ipfs-lite-cpp.git
-[submodule "restclient-cpp"]
-    path = restclient-cpp
-    url = https://github.com/mrtazz/restclient-cpp.git
-    ignore = untracked
 [submodule "celer-network/pb3-gen-sol"]
     path = celer-network/pb3-gen-sol
     url = https://github.com/celer-network/pb3-gen-sol.git
-[submodule "boost-for-mobile"]
-    path = boost-for-mobile
-    url = ../boost-for-mobile.git
 [submodule "lmdb"]
     path = lmdb
     url = ../lmdb.git
@@ -59,16 +52,9 @@
 [submodule "rapidjson"]
     path = rapidjson
     url = ../rapidjson.git
-[submodule "jsonrpc-lean"]
-    path = jsonrpc-lean
-    url = https://github.com/uskr/jsonrpc-lean
 [submodule "gnostic"]
     path = gnostic
     url = https://github.com/googleapis/gnostic
-[submodule "Parabeac-Core"]
-    path = Parabeac-Core
-    url = https://github.com/Parabeac/Parabeac-Core.git
-    branch = stable
 [submodule "rocksdb"]
     path = rocksdb
     url = ../rocksdb.git
@@ -98,7 +84,7 @@
     url = https://github.com/openssl/openssl.git
 [submodule "libsecp256k1"]
     path = libsecp256k1
-	url = ../secp256k1
+	url = https://github.com/bitcoin-core/secp256k1.git
 [submodule "xxhash"]
     path = xxhash
 	url = https://github.com/Cyan4973/xxHash.git
