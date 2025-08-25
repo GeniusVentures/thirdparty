@@ -14,11 +14,11 @@ The following libraries are supported across SuperGenius submodules, as listed i
    - **Purpose**: Supports asynchronous I/O for event loops and networking.
    - **Integration**: Configure include paths in CMake to `${_THIRDPARTY_BUILD_DIR}/AsyncIOManager/include`. Link the library if prebuilt or build as a submodule in `${_THIRDPARTY_BUILD_DIR}`.
 
-3. **boost** (~1.89)
+3. **boost** (~1.85)
    - **Purpose**: Offers utilities for error handling (`Boost.Outcome`), networking (`Boost.Asio`), endianness (`Boost.Endian`), and program options.
-   - **Integration**: Set `BOOST_VERSION` in `CommonBuildParameters.cmake` (e.g., 1.89.0). Use `find_package(Boost COMPONENTS program_options json filesystem REQUIRED)` and link against `Boost::program_options`, etc. Include directories from `${_THIRDPARTY_BUILD_DIR}/boost/build/include`.
+   - **Integration**: Set `BOOST_VERSION` in `CommonBuildParameters.cmake` (e.g., 1.85.0). Use `find_package(Boost COMPONENTS program_options json filesystem REQUIRED)` and link against `Boost::program_options`, etc. Include directories from `${_THIRDPARTY_BUILD_DIR}/boost/build/include`.
 
-4. **boost-for-mobile** (~1.89)
+4. **boost-for-mobile** (~1.85)
    - **Purpose**: Mobile-optimized Boost libraries for iOS/Android compatibility.
    - **Integration**: Similar to Boost, but use platform-specific paths in `apple.toolchain.cmake` for iOS builds. Include `${_THIRDPARTY_BUILD_DIR}/boost-for-mobile/include` and link as needed.
 
