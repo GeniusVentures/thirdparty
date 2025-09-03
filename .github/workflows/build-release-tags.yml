@@ -47,9 +47,9 @@ jobs:
           - target: Windows
             host: windows-latest
           - target: OSX
-            host: macos-latest
+            host: macos-14
           - target: iOS
-            host: macos-latest
+            host: macos-14
           - target: Android
             host: ubuntu-22.04
             build-type: Release
