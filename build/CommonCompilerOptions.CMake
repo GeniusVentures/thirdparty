@@ -21,6 +21,11 @@ if (DEFINED SANITIZE_CODE AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     add_link_options("-fsanitize=${SANITIZE_CODE}")
 endif()
 
+# Remove this once we update gRPC, its dependencies, fix libp2p and change some of our internal projects
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-template-arg-list-after-template-kw")
+endif()
+
 # Set PROJECT_BUILD folder
 get_filename_component(PROJECT_BUILD_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}" DIRECTORY ABSOLUTE)
 get_filename_component(PROJECT_SRC_FOLDER "${PROJECT_BUILD_FOLDER}" DIRECTORY ABSOLUTE)
@@ -91,7 +96,6 @@ set(BOOST_INCLUDE_LIBRARIES container date_time filesystem json log program_opti
 list(JOIN BOOST_INCLUDE_LIBRARIES "," BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED)
 separate_arguments(BOOST_B2_FLAGS NATIVE_COMMAND "${CMAKE_CXX_FLAGS}")
 list(APPEND BOOST_B2_FLAGS "-fPIC")
-#list(APPEND BOOST_B2_FLAGS "--with-test")
 list(TRANSFORM BOOST_B2_FLAGS PREPEND "cxxflags=")
 
 # OpenSSL

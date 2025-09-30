@@ -31,7 +31,7 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND ./bootstrap.bat vc143
 
-    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal ${BOOST_INCLUDE_LIBRARIES_EXPANDED} address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} -d0 install
+    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal ${BOOST_INCLUDE_LIBRARIES_EXPANDED} address-model=64 architecture=x86 variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} -d0 -j4 install
     BUILD_IN_SOURCE TRUE
 
     PATCH_COMMAND 
