@@ -74,29 +74,37 @@ jobs:
     steps:
       - name: Clean workspace (self-hosted runners)
         if: ${{ runner.environment == 'self-hosted' }}
-        working-directory: ${{github.workspace}}
         run: |
           echo "=== PRE-CLEANUP DEBUG ==="
           echo "Current working directory: $(pwd)"
-          echo "Contents of workspace:"
-          ls -la
+          echo "Workspace: ${{github.workspace}}"
           
-          echo "Checking for thirdparty directory..."
-          if [ -d "thirdparty" ]; then
-            echo "thirdparty directory exists, contents:"
-            ls -la thirdparty/
-            if [ -d "thirdparty/build" ]; then
-              echo "Build directory exists, checking size..."
-              du -sh thirdparty/build || true
-              echo "Removing thirdparty/build..."
-              rm -rf thirdparty/build
-              echo "Removed thirdparty/build"
+          if [ -d "${{github.workspace}}" ]; then
+            cd "${{github.workspace}}"
+            echo "Changed to workspace directory: $(pwd)"
+            echo "Contents:"
+            ls -la
+            
+            if [ -d ".git" ]; then
+              echo "Git repository detected, performing deep clean..."
+              git clean -xfd
+              git submodule foreach --recursive git clean -xfd
+              git reset --hard
+              git submodule foreach --recursive git reset --hard
+              echo "Git clean completed"
+            else
+              echo "Not a git repository, skipping git clean"
             fi
+          else
+            echo "Workspace directory does not exist yet, skipping cleanup"
           fi
           
           echo "=== POST-CLEANUP DEBUG ==="
-          echo "Final workspace contents:"
-          ls -la
+          if [ -d "${{github.workspace}}" ]; then
+            cd "${{github.workspace}}"
+            echo "Final workspace contents:"
+            ls -la
+          fi
         shell: bash
 
       - name: Checkout tag
