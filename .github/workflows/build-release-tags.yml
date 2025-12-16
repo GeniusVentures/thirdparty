@@ -119,10 +119,19 @@ jobs:
       - name: Configure macOS host
         if: ${{ runner.os == 'macOS'}}
         run: |
-          brew install ninja bash
+          brew install ninja bash gnu-tar
 
-          PATH="$HOMEBREW_PREFIX/opt/gnu-tar/libexec/gnubin:$PATH"
-          echo "PATH=$PATH" >> $GITHUB_ENV
+          # Ensure GNU tar is first in PATH - check both possible Homebrew locations
+          if [ -d "/opt/homebrew/opt/gnu-tar/libexec/gnubin" ]; then
+            echo "PATH=/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH" >> $GITHUB_ENV
+            echo "Using GNU tar from /opt/homebrew"
+          elif [ -d "/usr/local/opt/gnu-tar/libexec/gnubin" ]; then
+            echo "PATH=/usr/local/opt/gnu-tar/libexec/gnubin:$PATH" >> $GITHUB_ENV
+            echo "Using GNU tar from /usr/local"
+          else
+            echo "WARNING: GNU tar installation not found in expected locations"
+            echo "Available tar: $(which tar)"
+          fi
 
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
