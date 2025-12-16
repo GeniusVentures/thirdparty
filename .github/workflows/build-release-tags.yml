@@ -72,12 +72,6 @@ jobs:
           - target: Linux
             abi: ""
     steps:
-      - name: Checkout tag
-        uses: actions/checkout@v4
-        with:
-          submodules: "recursive"
-          ref: ${{ github.event.inputs.tag }}
-
       - name: Clean workspace (self-hosted runners)
         if: ${{ runner.environment == 'self-hosted' }}
         working-directory: ${{github.workspace}}
@@ -104,6 +98,12 @@ jobs:
           echo "Final workspace contents:"
           ls -la
         shell: bash
+
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+          ref: ${{ github.event.inputs.tag }}
 
       - name: Configure Linux host
         if: ${{ runner.os == 'Linux'}}
