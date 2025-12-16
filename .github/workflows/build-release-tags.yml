@@ -47,7 +47,7 @@ jobs:
           - target: Windows
             host: windows-latest
           - target: OSX
-            host: macos-latest
+            host: gv-OSX-Large
           - target: iOS
             host: macos-latest
           - target: Android
@@ -77,6 +77,33 @@ jobs:
         with:
           submodules: "recursive"
           ref: ${{ github.event.inputs.tag }}
+
+      - name: Clean workspace (self-hosted runners)
+        if: ${{ runner.environment == 'self-hosted' }}
+        working-directory: ${{github.workspace}}
+        run: |
+          echo "=== PRE-CLEANUP DEBUG ==="
+          echo "Current working directory: $(pwd)"
+          echo "Contents of workspace:"
+          ls -la
+          
+          echo "Checking for thirdparty directory..."
+          if [ -d "thirdparty" ]; then
+            echo "thirdparty directory exists, contents:"
+            ls -la thirdparty/
+            if [ -d "thirdparty/build" ]; then
+              echo "Build directory exists, checking size..."
+              du -sh thirdparty/build || true
+              echo "Removing thirdparty/build..."
+              rm -rf thirdparty/build
+              echo "Removed thirdparty/build"
+            fi
+          fi
+          
+          echo "=== POST-CLEANUP DEBUG ==="
+          echo "Final workspace contents:"
+          ls -la
+        shell: bash
 
       - name: Configure Linux host
         if: ${{ runner.os == 'Linux'}}
