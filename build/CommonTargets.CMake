@@ -482,6 +482,7 @@ ExternalProject_Add(ipfs-bitswap-cpp
     -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
     -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
     -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
+    -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
     -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
     -DProtobuf_INCLUDE_DIR:PATH=${Protobuf_INCLUDE_DIR}
@@ -490,6 +491,8 @@ ExternalProject_Add(ipfs-bitswap-cpp
     -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
     -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
     -DSQLiteModernCpp_DIR:PATH=${_FINDPACKAGE_SQLITECPP_CONFIG_DIR}
+    -Dipfs-lite-cpp_DIR:PATH=${_FINDPACKAGE_IPFS_LITE_CONFIG_DIR}
+    -Dipfs-lite-cpp_INCLUDE_DIR:PATH=${_FINDPACKAGE_IPFS_LITE_INCLUDE_DIR}
     -DTESTING:BOOL=${TESTING}
     -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
     -Dutf8_range_DIR:PATH=${utf8_range_DIR}
@@ -498,7 +501,7 @@ ExternalProject_Add(ipfs-bitswap-cpp
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
-    DEPENDS Microsoft.GSL spdlog libp2p Boost
+    DEPENDS Microsoft.GSL spdlog libp2p Boost GTest ipfs-lite-cpp
 )
 set(_FINDPACKAGE_IPFS_BITSWAP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp/lib/cmake/ipfs-bitswap-cpp")
 set(_FINDPACKAGE_IPFS_BITSWAP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp/lib")
