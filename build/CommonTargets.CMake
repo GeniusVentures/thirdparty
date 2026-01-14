@@ -87,7 +87,6 @@ ExternalProject_Add(grpc
     -DBUILD_SHARED_LIBS:BOOL=OFF
     -DBUILD_TESTING:BOOL=OFF
     -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
-    -DCMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}
     -DgRPC_BUILD_CODEGEN:BOOL=OFF
     -DgRPC_BUILD_CSHARP_EXT:BOOL=OFF
     -DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=OFF
@@ -433,7 +432,6 @@ ExternalProject_Add(ipfs-lite-cpp
     -DTESTING:BOOL=${TESTING}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
-    ${ipfs-lite-cpp_EXTRA_PARAM}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
     DEPENDS Microsoft.GSL spdlog tsl_hat_trie libp2p grpc ${PROTOBUF_TARGET} rocksdb Boost.DI
 )
@@ -467,7 +465,6 @@ ExternalProject_Add(ipfs-pubsub
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
-    ${ipfs-pubsub_EXTRA_PARAM}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
     DEPENDS Microsoft.GSL spdlog tsl_hat_trie libp2p Boost.DI ipfs-lite-cpp
 )
@@ -485,6 +482,7 @@ ExternalProject_Add(ipfs-bitswap-cpp
     -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
     -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
     -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
+    -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
     -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
     -DProtobuf_INCLUDE_DIR:PATH=${Protobuf_INCLUDE_DIR}
@@ -493,6 +491,8 @@ ExternalProject_Add(ipfs-bitswap-cpp
     -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
     -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
     -DSQLiteModernCpp_DIR:PATH=${_FINDPACKAGE_SQLITECPP_CONFIG_DIR}
+    -Dipfs-lite-cpp_DIR:PATH=${_FINDPACKAGE_IPFS_LITE_CONFIG_DIR}
+    -Dipfs-lite-cpp_INCLUDE_DIR:PATH=${_FINDPACKAGE_IPFS_LITE_INCLUDE_DIR}
     -DTESTING:BOOL=${TESTING}
     -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
     -Dutf8_range_DIR:PATH=${utf8_range_DIR}
@@ -500,9 +500,8 @@ ExternalProject_Add(ipfs-bitswap-cpp
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
-    ${ipfs-bitswap-cpp_EXTRA_PARAM}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
-    DEPENDS Microsoft.GSL spdlog libp2p Boost
+    DEPENDS Microsoft.GSL spdlog libp2p Boost GTest ipfs-lite-cpp
 )
 set(_FINDPACKAGE_IPFS_BITSWAP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp/lib/cmake/ipfs-bitswap-cpp")
 set(_FINDPACKAGE_IPFS_BITSWAP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp/lib")
@@ -707,6 +706,22 @@ ExternalProject_Add(gnus_upnp
 set(_FINDPACKAGE_GNUS_UPNP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/gnus_upnp/lib/cmake/gnus_upnp")
 set(_FINDPACKAGE_GNUS_UPNP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/gnus_upnp/lib")
 set(_FINDPACKAGE_GNUS_UPNP_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/gnus_upnp/include")
+
+#json.hpp
+ExternalProject_Add(json
+    PREFIX json
+    SOURCE_DIR "${THIRDPARTY_DIR}/json"
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+	-DJSON_BuildTests:BOOL=OFF
+    ${_CMAKE_COMMON_CACHE_ARGS}
+    ${_BOOST_CACHE_ARGS}
+    ${_OPENSSL_CACHE_ARGS}
+    DEPENDS Boost
+)
+set(_FINDPACKAGE_JSON_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/json/lib/cmake/valijson")
+set(_FINDPACKAGE_JSON_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/json/lib")
+set(_FINDPACKAGE_JSON_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/json/include")
 
 # jsonrpc-lean
 install(
