@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [Android, iOS, OSX, Linux, Windows]
+        target: [iOS, OSX, Linux, Windows]
         build-type: [Debug, Release]
         abi: [""]
         include:
@@ -51,24 +51,22 @@ jobs:
           - target: iOS
             host: macos-latest
           - target: Android
-            host: ubuntu-22.04
+            host: sg-ubuntu-linux
             build-type: Release
             abi: arm64-v8a
           - target: Android
-            host: ubuntu-22.04
+            host: sg-ubuntu-linux
             build-type: Release
             abi: armeabi-v7a
           - target: Android
-            host: gv-Linux-large
+            host: sg-ubuntu-linux
             build-type: Debug
             abi: arm64-v8a
           - target: Android
-            host: gv-Linux-large
+            host: sg-ubuntu-linux
             build-type: Debug
             abi: armeabi-v7a
         exclude:
-          - target: Android
-            abi: ""
           - target: Linux
             abi: ""
     steps:
