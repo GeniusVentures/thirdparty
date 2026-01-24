@@ -44,7 +44,7 @@ jobs:
             build-type: Release
             container: ghcr.io/geniusventures/debian-bullseye:latest
           - target: Windows
-            host: windows-latest
+            host: SG-WIN11
           - target: OSX
             host: gv-OSX-Large
           - target: iOS
