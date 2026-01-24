@@ -70,8 +70,43 @@ jobs:
           - target: Linux
             abi: ""
     steps:
+      - name: Clean workspace (self-hosted Windows runners)
+        if: ${{ runner.environment == 'self-hosted' && runner.os == 'Windows' }}
+        run: |
+          Write-Host "=== PRE-CLEANUP DEBUG ==="
+          Write-Host "Current working directory: $(Get-Location)"
+          Write-Host "Workspace: ${{github.workspace}}"
+          
+          if (Test-Path "${{github.workspace}}") {
+            Set-Location "${{github.workspace}}"
+            Write-Host "Changed to workspace directory: $(Get-Location)"
+            Write-Host "Contents:"
+            Get-ChildItem -Force
+            
+            if (Test-Path ".git") {
+              Write-Host "Git repository detected, performing deep clean..."
+              git clean -xfd
+              git submodule foreach --recursive git clean -xfd
+              git reset --hard
+              git submodule foreach --recursive git reset --hard
+              Write-Host "Git clean completed"
+            } else {
+              Write-Host "Not a git repository, skipping git clean"
+            }
+          } else {
+            Write-Host "Workspace directory does not exist yet, skipping cleanup"
+          }
+          
+          Write-Host "=== POST-CLEANUP DEBUG ==="
+          if (Test-Path "${{github.workspace}}") {
+            Set-Location "${{github.workspace}}"
+            Write-Host "Final workspace contents:"
+            Get-ChildItem -Force
+          }
+        shell: powershell
+
       - name: Clean workspace (self-hosted runners)
-        if: ${{ runner.environment == 'self-hosted' }}
+        if: ${{ runner.environment == 'self-hosted' && runner.os != 'Windows' }}
         run: |
           echo "=== PRE-CLEANUP DEBUG ==="
           echo "Current working directory: $(pwd)"
