@@ -103,7 +103,7 @@ jobs:
             Write-Host "Final workspace contents:"
             Get-ChildItem -Force
           }
-        shell: powershell
+        shell: pwsh
 
       - name: Clean workspace (self-hosted runners)
         if: ${{ runner.environment == 'self-hosted' && runner.os != 'Windows' }}
