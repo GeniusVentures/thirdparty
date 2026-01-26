@@ -1,0 +1,12 @@
+name: Setup Windows Self-Hosted Runner
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: SG-WIN11
+    steps:
+      - name: Install wasm Rust target
+        run: rustup target add wasm32-unknown-emscripten
+        shell: powershell
