@@ -70,6 +70,9 @@ jobs:
             abi: ""
           - target: Linux
             abi: ""
+    concurrency:
+      group: ${{ matrix.target == 'Android' && format('android-{0}', matrix.build-type) || github.run_id }}
+      cancel-in-progress: false
     steps:
       - name: Clean workspace (self-hosted runners)
         if: ${{ runner.environment == 'self-hosted' }}

@@ -35,7 +35,15 @@ jobs:
         shell: powershell
 
       - name: Install cbindgen
-        run: cargo install cbindgen
+        run: |
+          Write-Host "=== Installing cbindgen ==="
+          cargo install cbindgen
+          Write-Host ""
+          Write-Host "=== Checking cbindgen.exe permissions ==="
+          icacls "C:\Rust\cargo\bin\cbindgen.exe"
+          Write-Host ""
+          Write-Host "=== Checking cargo.exe permissions for comparison ==="
+          icacls "C:\Rust\cargo\bin\cargo.exe"
         shell: powershell
 
       - name: Check cbindgen after install
