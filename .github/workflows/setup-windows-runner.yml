@@ -7,6 +7,44 @@ jobs:
   setup:
     runs-on: SG-WIN11
     steps:
+      - name: Check Rust environment
+        run: |
+          Write-Host "=== Rust Environment Check ==="
+          Write-Host "RUSTUP_HOME: $env:RUSTUP_HOME"
+          Write-Host "CARGO_HOME: $env:CARGO_HOME"
+          Write-Host ""
+          Write-Host "=== PATH ==="
+          $env:PATH -split ';' | ForEach-Object { Write-Host $_ }
+          Write-Host ""
+          Write-Host "=== Cargo bin directory contents ==="
+          if (Test-Path "$env:CARGO_HOME\bin") {
+            Get-ChildItem "$env:CARGO_HOME\bin" | Select-Object Name
+          } else {
+            Write-Host "CARGO_HOME\bin does not exist"
+          }
+          if (Test-Path "$env:USERPROFILE\.cargo\bin") {
+            Write-Host ""
+            Write-Host "=== USERPROFILE\.cargo\bin contents ==="
+            Get-ChildItem "$env:USERPROFILE\.cargo\bin" | Select-Object Name
+          }
+          Write-Host ""
+          Write-Host "=== Command availability ==="
+          Write-Host "cargo: $(Get-Command cargo -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)"
+          Write-Host "rustup: $(Get-Command rustup -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)"
+          Write-Host "cbindgen: $(Get-Command cbindgen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)"
+        shell: powershell
+
+      - name: Install cbindgen
+        run: cargo install cbindgen
+        shell: powershell
+
+      - name: Check cbindgen after install
+        run: |
+          Write-Host "=== After cbindgen install ==="
+          Write-Host "cbindgen location: $(Get-Command cbindgen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)"
+          cbindgen --version
+        shell: powershell
+
       - name: Install wasm Rust target
         run: rustup target add wasm32-unknown-emscripten
         shell: powershell
