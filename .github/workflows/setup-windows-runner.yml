@@ -44,6 +44,16 @@ jobs:
           Write-Host ""
           Write-Host "=== Checking cargo.exe permissions for comparison ==="
           icacls "C:\Rust\cargo\bin\cargo.exe"
+          Write-Host ""
+          Write-Host "=== Checking for deny rules ==="
+          $acl = Get-Acl "C:\Rust\cargo\bin\cbindgen.exe"
+          Write-Host "Owner: $($acl.Owner)"
+          Write-Host "Access Rules:"
+          $acl.Access | Format-Table IdentityReference, FileSystemRights, AccessControlType, IsInherited -AutoSize
+          Write-Host ""
+          Write-Host "=== Trying to run cbindgen as NETWORK SERVICE ==="
+          Write-Host "Current user: $env:USERNAME"
+          Write-Host "User identity: $([System.Security.Principal.WindowsIdentity]::GetCurrent().Name)"
         shell: powershell
 
       - name: Check cbindgen after install
