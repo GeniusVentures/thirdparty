@@ -120,6 +120,14 @@ jobs:
         with:
           submodules: "recursive"
           ref: ${{ github.event.inputs.tag }}
+          fetch-depth: 0
+
+      - name: Fix submodules (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive --force
+        shell: bash
 
       - name: Configure Linux host
         if: ${{ runner.os == 'Linux'}}
