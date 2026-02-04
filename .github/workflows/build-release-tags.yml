@@ -30,10 +30,12 @@ jobs:
             host: ubuntu-22.04
             abi: x86_64
             build-type: Debug
+            container: ghcr.io/geniusventures/debian-bullseye:latest
           - target: Linux
             host: ubuntu-22.04
             abi: x86_64
             build-type: Release
+            container: ghcr.io/geniusventures/debian-bullseye:latest
           - target: Linux
             host: ubuntu-24.04-arm
             abi: aarch64
@@ -67,6 +69,8 @@ jobs:
             build-type: Debug
             abi: armeabi-v7a
         exclude:
+          - target: Android
+            abi: ""
           - target: Linux
             abi: ""
     steps:
@@ -221,23 +225,25 @@ jobs:
           
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
-          echo "Checking if GitHub release exists for tag: $TAG_NAME"
+          echo "Checking if release $TAG_NAME exists..."
 
-          set +e
-          gh release view $TAG_NAME
-          releaseFound=$?
-          set -e
-
-          if [[ $releaseFound -ne 0 ]]; then
-              echo "Release not found, creating for tag: $TAG_NAME"
-
-              # Create a single release for the tag
-              gh release create $TAG_NAME \
-                  -n "Build artifacts for tag ${TAG_NAME}" \
-                  -t "${TAG_NAME} build artifacts"
-          else
-              echo "Release already exists for tag: $TAG_NAME"
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+              echo "Deleting existing release/tag $TAG_NAME..."
+              gh release delete "$TAG_NAME" --yes || true
+              git push origin ":refs/tags/$TAG_NAME" || true
+              git tag -d "$TAG_NAME" || true
           fi
+
+          echo "Creating new tag $TAG_NAME..."
+          git tag -f "$TAG_NAME" "${{ github.sha }}"
+          git push origin "$TAG_NAME" --force
+
+          echo "Creating GitHub release $TAG_NAME..."
+          gh release create "$TAG_NAME" \
+          --target "${{ github.sha }}" \
+          -t "${TAG_NAME} build artifacts" \
+          -n "Build artifacts for tag ${TAG_NAME}" \
+          --latest
         shell: bash
 
       - name: Build thirdparty
