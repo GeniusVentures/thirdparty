@@ -225,25 +225,18 @@ jobs:
           
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
-          echo "Checking if release $TAG_NAME exists..."
+          echo "Checking if GitHub release exists for tag: $TAG_NAME"
 
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then
-              echo "Deleting existing release/tag $TAG_NAME..."
-              gh release delete "$TAG_NAME" --yes || true
-              git push origin ":refs/tags/$TAG_NAME" || true
-              git tag -d "$TAG_NAME" || true
+              echo "Release already exists for tag: $TAG_NAME"
+          else
+              echo "Release not found, creating for tag: $TAG_NAME"
+
+              # Create a single release for the tag
+              gh release create "$TAG_NAME" \
+                  -n "Build artifacts for tag ${TAG_NAME}" \
+                  -t "${TAG_NAME} build artifacts"
           fi
-
-          echo "Creating new tag $TAG_NAME..."
-          git tag -f "$TAG_NAME" "${{ github.sha }}"
-          git push origin "$TAG_NAME" --force
-
-          echo "Creating GitHub release $TAG_NAME..."
-          gh release create "$TAG_NAME" \
-          --target "${{ github.sha }}" \
-          -t "${TAG_NAME} build artifacts" \
-          -n "Build artifacts for tag ${TAG_NAME}" \
-          --latest
         shell: bash
 
       - name: Build thirdparty
