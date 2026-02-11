@@ -7,6 +7,76 @@ on:
         description: "Release tag"
         required: false
         type: string
+      build_android_arm64v8a_release:
+        description: 'Build Android arm64-v8a Release'
+        required: true
+        default: true
+        type: boolean
+      build_android_arm64v8a_debug:
+        description: 'Build Android arm64-v8a Debug'
+        required: true
+        default: true
+        type: boolean
+      build_android_armv7a_release:
+        description: 'Build Android armeabi-v7a Release'
+        required: true
+        default: true
+        type: boolean
+      build_android_armv7a_debug:
+        description: 'Build Android armeabi-v7a Debug'
+        required: true
+        default: true
+        type: boolean
+      build_ios_release:
+        description: 'Build iOS Release'
+        required: true
+        default: true
+        type: boolean
+      build_ios_debug:
+        description: 'Build iOS Debug'
+        required: true
+        default: true
+        type: boolean
+      build_osx_release:
+        description: 'Build OSX Release'
+        required: true
+        default: true
+        type: boolean
+      build_osx_debug:
+        description: 'Build OSX Debug'
+        required: true
+        default: true
+        type: boolean
+      build_linux_x86_64_release:
+        description: 'Build Linux x86_64 Release'
+        required: true
+        default: true
+        type: boolean
+      build_linux_x86_64_debug:
+        description: 'Build Linux x86_64 Debug'
+        required: true
+        default: true
+        type: boolean
+      build_linux_aarch64_release:
+        description: 'Build Linux aarch64 Release'
+        required: true
+        default: true
+        type: boolean
+      build_linux_aarch64_debug:
+        description: 'Build Linux aarch64 Debug'
+        required: true
+        default: true
+        type: boolean
+      build_windows_release:
+        description: 'Build Windows Release'
+        required: true
+        default: true
+        type: boolean
+      build_windows_debug:
+        description: 'Build Windows Debug'
+        required: true
+        default: true
+        type: boolean
 
 env:
   GH_TOKEN: ${{ secrets.GNUS_TOKEN_1 }}
@@ -105,6 +175,63 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: "recursive"
+
+      - name: Check if build should run
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          SHOULD_RUN="true"
+          # Only check inputs on workflow_dispatch events
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            case '${{matrix.target}}-${{matrix.abi}}-${{ matrix.build-type }}' in
+              Android-arm64-v8a-Release)
+                if [ '${{ inputs.build_android_arm64v8a_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              Android-arm64-v8a-Debug)
+                if [ '${{ inputs.build_android_arm64v8a_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              Android-armeabi-v7a-Release)
+                if [ '${{ inputs.build_android_armv7a_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              Android-armeabi-v7a-Debug)
+                if [ '${{ inputs.build_android_armv7a_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              iOS-*-Release)
+                if [ '${{ inputs.build_ios_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              iOS-*-Debug)
+                if [ '${{ inputs.build_ios_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              OSX-*-Release)
+                if [ '${{ inputs.build_osx_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              OSX-*-Debug)
+                if [ '${{ inputs.build_osx_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              Linux-x86_64-Release)
+                if [ '${{ inputs.build_linux_x86_64_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              Linux-x86_64-Debug)
+                if [ '${{ inputs.build_linux_x86_64_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              Linux-aarch64-Release)
+                if [ '${{ inputs.build_linux_aarch64_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              Linux-aarch64-Debug)
+                if [ '${{ inputs.build_linux_aarch64_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              Windows-*-Release)
+                if [ '${{ inputs.build_windows_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+              Windows-*-Debug)
+                if [ '${{ inputs.build_windows_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
+                ;;
+            esac
+          fi
+          if [ "$SHOULD_RUN" == "false" ]; then
+            echo "Skipping build for ${{ matrix.target }} ${{ matrix.abi }} ${{ matrix.build-type }}"
+            exit 78
+          fi
+        shell: bash
 
       - name: Configure Linux host
         if: ${{ runner.os == 'Linux'}}

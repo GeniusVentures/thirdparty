@@ -141,6 +141,7 @@ set(_MNN_EXTRA_PARAM
     -DMNN_USE_SYSTEM_LIB:BOOL=ON
     -DVulkan_INCLUDE_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/include
     -DVulkan_LIBRARY:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/lib/MoltenVK.xcframework
+    -DCMAKE_CXX_FLAGS:STRING=-include\ cstdint
 )
 set(_MNN_DEPENDS MoltenVK)
 
