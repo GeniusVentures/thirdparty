@@ -91,9 +91,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [Android, iOS, OSX, Linux, Windows]
-        build-type: [Debug, Release]
-        abi: [""]
+        target: [ Android, iOS, OSX, Linux, Windows ]
+        build-type: [ Debug, Release ]
+        abi: [ "" ]
         include:
           - target: Linux
             host: ubuntu-22.04
@@ -143,8 +143,30 @@ jobs:
           - target: Linux
             abi: ""
     steps:
+      - name: Configure Git Bash on Windows
+        if: ${{ runner.environment == 'self-hosted' && matrix.target == 'Windows' }}
+        run: |
+          $gitUsrBinPath = "C:\Program Files\Git\usr\bin"
+          $gitBinPath = "C:\Program Files\Git\bin"
+          
+          foreach ($p in @($gitBinPath, $gitUsrBinPath)) {
+            if (Test-Path $p) {
+              Add-Content -Path $env:GITHUB_PATH -Value $p
+              $env:PATH = "$p;$env:PATH"
+            }
+          }
+          
+          Write-Output "Git Bash configured for bash shell commands"
+          $bashLocation = (Get-Command bash.exe -ErrorAction SilentlyContinue).Source
+          if ($bashLocation) {
+            Write-Output "Bash location: $bashLocation"
+          } else {
+            Write-Output "WARNING: bash.exe not found in PATH"
+          }
+
       - name: Check if build should run
         if: ${{ github.event_name == 'workflow_dispatch' }}
+        shell: bash
         run: |
           SHOULD_RUN="true"
           # Only check inputs on workflow_dispatch events
@@ -198,7 +220,6 @@ jobs:
             echo "Skipping build for ${{ matrix.target }} ${{ matrix.abi }} ${{ matrix.build-type }}"
             exit 78
           fi
-        shell: bash
 
       - name: Clean workspace (self-hosted runners)
         if: ${{ runner.environment == 'self-hosted' }}
@@ -209,9 +230,7 @@ jobs:
           echo "Runner workspace: ${{runner.workspace}}"
           echo "GitHub workspace: ${{github.workspace}}"
           
-          echo "=== CLEANUP ARTIFACTS ==="
-          # Clean up artifacts from previous runs (self-hosted runners only)
-          
+          echo "=== CLEANUP ARTIFACTS ==="          
           # Clean contents of thirdparty directory but keep the directory itself
           if [ -d "thirdparty" ]; then
             echo "Cleaning thirdparty directory contents..."
@@ -249,7 +268,7 @@ jobs:
         run: |
           brew install ninja bash gnu-tar
 
-          # Ensure GNU tar is first in PATH - check both possible Homebrew locations
+          # Ensure GNU tar is first in PATH
           if [ -d "/opt/homebrew/opt/gnu-tar/libexec/gnubin" ]; then
             echo "PATH=/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH" >> $GITHUB_ENV
             echo "Using GNU tar from /opt/homebrew"
@@ -369,6 +388,7 @@ jobs:
 
       - name: Create release tag
         if: github.ref_name == 'main' || github.ref_name == 'develop'
+        shell: bash
         id: create-release-tag
         run: |
           echo "Checking if release $RELEASE_TAG exists..."
@@ -392,7 +412,6 @@ jobs:
           -t "${{ matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
           -n "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
           $( [ "$IS_TAG_RELEASE" = "true" ] && echo "" || echo "--prerelease" )
-        shell: bash
 
       - name: Upload file
         if: github.ref_name == 'main' || github.ref_name == 'develop'
