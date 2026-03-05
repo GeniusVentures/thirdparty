@@ -146,14 +146,11 @@ jobs:
       - name: Configure Git Bash on Windows
         if: ${{ runner.environment == 'self-hosted' && matrix.target == 'Windows' }}
         run: |
-          $gitUsrBinPath = "C:\Program Files\Git\usr\bin"
           $gitBinPath = "C:\Program Files\Git\bin"
-          
-          foreach ($p in @($gitBinPath, $gitUsrBinPath)) {
-            if (Test-Path $p) {
-              Add-Content -Path $env:GITHUB_PATH -Value $p
-              $env:PATH = "$p;$env:PATH"
-            }
+
+          if (Test-Path $gitBinPath) {
+            Add-Content -Path $env:GITHUB_PATH -Value $gitBinPath
+            $env:PATH = "$gitBinPath;$env:PATH"
           }
           
           Write-Output "Git Bash configured for bash shell commands"
