@@ -5,10 +5,6 @@ ExternalProject_Add(GTest
     CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     ${_CMAKE_COMMON_CACHE_ARGS}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/GTest/lib/libgtest.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/GTest/lib/libgtest_main.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/GTest/lib/cmake/GTest/GTestConfig.cmake"
 )
 set(_FINDPACKAGE_GTEST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/GTest/lib/cmake/GTest")
 
@@ -30,8 +26,6 @@ if(CMAKE_CROSSCOMPILING)
         -Dprotobuf_BUILD_TESTS:BOOL=OFF
         -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
         -Dprotobuf_INSTALL:BOOL=ON
-        BUILD_BYPRODUCTS
-        "${CMAKE_CURRENT_BINARY_DIR}/protobuf_host/bin/protoc"
     )
 else()
     set(PROTOBUF_HOST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/grpc")
@@ -62,8 +56,6 @@ ExternalProject_Add(zlib
     -DBUILD_SHARED_LIBS:BOOL=FALSE
     ${_CMAKE_COMMON_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/zlib/lib/libz.a"
 )
 ExternalProject_Get_Property(zlib INSTALL_DIR)
 set(ZLIB_ROOT ${INSTALL_DIR})
@@ -77,8 +69,6 @@ ExternalProject_Add(cares
     -DCARES_STATIC:BOOL=ON
     -DCARES_SHARED:BOOL=OFF
     ${_CMAKE_COMMON_CACHE_ARGS}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/cares/lib/libcares.a"
 )
 ExternalProject_Get_Property(cares INSTALL_DIR)
 set(_FINDPACKAGE_CARES_CONFIG_DIR "${INSTALL_DIR}/lib/cmake/c-ares")
@@ -119,11 +109,6 @@ ExternalProject_Add(grpc
     -DABSL_PROPAGATE_CXX_STD:BOOL=ON
     ${_OPENSSL_CACHE_ARGS}
     DEPENDS openssl zlib cares
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib/libgrpc.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib/libgrpc++.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib/$<IF:$<CONFIG:Debug>,libprotobufd.a,libprotobuf.a>"
-    "${CMAKE_CURRENT_BINARY_DIR}/grpc/lib/cmake/grpc/gRPCConfig.cmake"
 )
 
 ExternalProject_Get_Property(grpc INSTALL_DIR)
@@ -143,26 +128,6 @@ endif()
 
 set(Protobuf_LIBRARIES "${INSTALL_DIR}/lib")
 set(Protobuf_INCLUDE_DIR "${INSTALL_DIR}/include")
-
-# Snappy for RocksDB compression and rlp/rlx
-ExternalProject_Add(snappy
-        PREFIX snappy
-        SOURCE_DIR "${THIRDPARTY_DIR}/snappy"
-        CMAKE_ARGS
-        CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        -DFAIL_ON_WARNINGS:BOOL=OFF
-        -DSNAPPY_BUILD_TESTS:BOOL=OFF
-        -DSNAPPY_BUILD_BENCHMARKS:BOOL=OFF
-        ${_CMAKE_COMMON_CACHE_ARGS}
-        # these need to be at the end to override previous cached args line
-        -DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}\ -DNDEBUG
-        -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}\ -DNDEBUG
-        BUILD_BYPRODUCTS
-        "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/libsnappy.a"
-)
-set(_FINDPACKAGE_SNAPPY_DIR "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/cmake/snappy")
-set(_FINDPACKAGE_SNAPPY_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/snappy/include")
 
 # RocksDB
 ExternalProject_Add(rocksdb
@@ -184,16 +149,11 @@ ExternalProject_Add(rocksdb
     -DWITH_RUNTIME_DEBUG:BOOL=ON
     -DWITH_TESTS:BOOL=OFF
     -DWITH_TOOLS:BOOL=OFF
-    -DWITH_SNAPPY:BOOL=ON
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_rocksdb_EXTRA_PARAM}
     # these need to be at the end to override previous cached args line
     -DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}\ -DNDEBUG
     -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}\ -DNDEBUG
-    DEPENDS snappy
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/librocksdb.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/cmake/rocksdb/RocksDBConfig.cmake"
 )
 set(_FINDPACKAGE_ROCKSDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/cmake/rocksdb")
 set(_FINDPACKAGE_ROCKSDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/include")
@@ -206,8 +166,6 @@ ExternalProject_Add(Microsoft.GSL
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     -DGSL_TEST:BOOL=OFF
     ${_CMAKE_COMMON_CACHE_ARGS}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/Microsoft.GSL/include/gsl/gsl"
 )
 set(_FINDPACKAGE_GSL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Microsoft.GSL/include")
 
@@ -221,9 +179,6 @@ ExternalProject_Add(fmt
     -DBUILD_SHARED_LIBS:BOOL=OFF
     -DFMT_DOC:BOOL=OFF
     -DFMT_TEST:BOOL=OFF
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/fmt/lib/$<IF:$<CONFIG:Debug>,libfmtd.a,libfmt.a>"
-    "${CMAKE_CURRENT_BINARY_DIR}/fmt/lib/cmake/fmt/fmt-config.cmake"
 )
 
 set(_FINDPACKAGE_FMT_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt/lib/cmake/fmt")
@@ -241,9 +196,6 @@ ExternalProject_Add(spdlog
     -DSPDLOG_FMT_EXTERNAL:BOOL=ON
     ${_CMAKE_COMMON_CACHE_ARGS}
     DEPENDS fmt
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/$<IF:$<CONFIG:Debug>,libspdlogd.a,libspdlog.a>"
-    "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog/spdlogConfig.cmake"
 )
 set(_FINDPACKAGE_SPDLOG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/include")
 set(_FINDPACKAGE_SPDLOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog/lib/cmake/spdlog")
@@ -255,8 +207,6 @@ ExternalProject_Add(tsl_hat_trie
     CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     ${_CMAKE_COMMON_CACHE_ARGS}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/tsl_hat_trie/lib/cmake/tsl_hat_trie/tsl_hat_trieConfig.cmake"
 )
 set(_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/tsl_hat_trie/lib/cmake/tsl_hat_trie")
 set(_FINDPACKAGE_TSL_HAT_TRIE_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/tsl_hat_trie/include")
@@ -273,8 +223,6 @@ ExternalProject_Add(Boost.DI
     ${_BOOST_CACHE_ARGS}
     ${_CMAKE_COMMON_CACHE_ARGS}
     DEPENDS Boost
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/lib/cmake/Boost.DI/Boost.DIConfig.cmake"
 )
 set(_FINDPACKAGE_BOOST_DI_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/lib/cmake/Boost.DI")
 set(_FINDPACKAGE_BOOST_DI_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Boost.DI/include")
@@ -290,9 +238,6 @@ ExternalProject_Add(yaml-cpp
     -DYAML_CPP_BUILD_TOOLS:BOOL=OFF
     -DYAML_MSVC_SHARED_RT:BOOL=OFF
     ${_CMAKE_COMMON_CACHE_ARGS}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/lib/$<IF:$<CONFIG:Debug>,libyaml-cppd.a,libyaml-cpp.a>"
-    "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/lib/cmake/yaml-cpp/yaml-cpp-config.cmake"
 )
 
 set(_FINDPACKAGE_YAMLCPP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp/lib/cmake/yaml-cpp")
@@ -309,8 +254,6 @@ ExternalProject_Add(STB
     BUILD_COMMAND ""
     INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/stb/include
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${STB_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/stb/include/
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/stb/include/stb_image.h"
 )
 
 # soralog
@@ -326,9 +269,6 @@ ExternalProject_Add(soralog
     -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
     ${_CMAKE_COMMON_CACHE_ARGS}
     DEPENDS fmt yaml-cpp
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/soralog/lib/soralog/liblogging_system.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/soralog/lib/cmake/soralog/soralogConfig.cmake"
 )
 
 set(_FINDPACKAGE_SORALOG_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/soralog/lib/cmake/soralog")
@@ -347,9 +287,6 @@ ExternalProject_Add(sqlite3
     -DENABLE_STATIC:BOOL=ON
     -DBUILD_SHELL:BOOL=OFF
     ${_CMAKE_COMMON_CACHE_ARGS}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/lib/libsqlite3.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/cmake/sqlite3Config.cmake"
 )
 
 set(_FINDPACKAGE_SQLITE3_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/cmake")
@@ -367,8 +304,6 @@ ExternalProject_Add(SQLiteModernCpp
     -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
     -DENABLE_INSTALL:BOOL=ON
     DEPENDS sqlite3
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/SQLiteModernCpp/lib/cmake/SQLiteModernCpp/SQLiteModernCppConfig.cmake"
 )
 
 set(_FINDPACKAGE_SQLITECPP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/SQLiteModernCpp/lib/cmake/SQLiteModernCpp")
@@ -406,8 +341,6 @@ ExternalProject_Add(libp2p
     ${_CMAKE_COMMON_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SQLITE3_INCLUDE_DIR}
     DEPENDS Boost Microsoft.GSL openssl cares ${PROTOBUF_TARGET} fmt yaml-cpp soralog tsl_hat_trie Boost.DI SQLiteModernCpp grpc
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p/libp2pConfig.cmake"
 )
 set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p")
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
@@ -427,8 +360,6 @@ if(NOT ANDROID)
         CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader
         ${_CMAKE_COMMON_CACHE_ARGS}
-        BUILD_BYPRODUCTS
-        "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers/share/cmake/VulkanHeaders/VulkanHeadersConfig.cmake"
     )
 
     # Vulkan-Loader
@@ -446,8 +377,6 @@ if(NOT ANDROID)
         -DBUILD_WSI_SCREEN_QNX_SUPPORT:BOOL=OFF
         ${_CMAKE_COMMON_CACHE_ARGS}
         DEPENDS Vulkan-Headers
-        BUILD_BYPRODUCTS
-        "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader/lib/cmake/VulkanLoader/VulkanLoaderConfig.cmake"
     )
 
     set(ENV{VULKAN_SDK} "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader")
@@ -469,9 +398,6 @@ ExternalProject_Add(MNN
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_MNN_EXTRA_PARAM}
     DEPENDS ${_MNN_DEPENDS} ${vulkanTarget}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/libMNN.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN/MNNConfig.cmake"
 )
 
 set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN")
@@ -508,8 +434,6 @@ ExternalProject_Add(ipfs-lite-cpp
     ${_OPENSSL_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
     DEPENDS Microsoft.GSL spdlog tsl_hat_trie libp2p grpc ${PROTOBUF_TARGET} rocksdb Boost.DI
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp/lib/cmake/ipfs-lite-cpp/ipfs-lite-cppConfig.cmake"
 )
 set(_FINDPACKAGE_IPFS_LITE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp/lib/cmake/ipfs-lite-cpp")
 set(_FINDPACKAGE_IPFS_LITE_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp/lib")
@@ -542,10 +466,7 @@ ExternalProject_Add(ipfs-pubsub
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
-    DEPENDS Microsoft.GSL spdlog tsl_hat_trie libp2p Boost.DI ipfs-lite-cpp yaml-cpp
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/ipfs-pubsub/lib/libipfs-pubsub.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/ipfs-pubsub/lib/cmake/ipfs-pubsub/ipfs-pubsubConfig.cmake"
+    DEPENDS Microsoft.GSL spdlog tsl_hat_trie libp2p Boost.DI ipfs-lite-cpp
 )
 set(_FINDPACKAGE_IPFS_PUBSUB_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-pubsub/lib/cmake/ipfs-pubsub")
 set(_FINDPACKAGE_IPFS_PUBSUB_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-pubsub/lib")
@@ -580,10 +501,7 @@ ExternalProject_Add(ipfs-bitswap-cpp
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
-    DEPENDS Microsoft.GSL spdlog libp2p Boost GTest ipfs-lite-cpp Boost.DI yaml-cpp
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp/lib/libipfs-bitswap-cpp.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp/lib/cmake/ipfs-bitswap-cpp/ipfs-bitswap-cppConfig.cmake"
+    DEPENDS Microsoft.GSL spdlog libp2p Boost GTest ipfs-lite-cpp
 )
 set(_FINDPACKAGE_IPFS_BITSWAP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp/lib/cmake/ipfs-bitswap-cpp")
 set(_FINDPACKAGE_IPFS_BITSWAP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-bitswap-cpp/lib")
@@ -602,9 +520,6 @@ ExternalProject_Add(ed25519
     -DBUILD:STRING=STATIC
     -DTESTING:BOOL=OFF
     ${_CMAKE_COMMON_CACHE_ARGS}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/ed25519/lib/libed25519.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/ed25519/lib/cmake/ed25519/ed25519Config.cmake"
 )
 set(_FINDPACKAGE_ed25519_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ed25519/lib/cmake/ed25519")
 
@@ -618,9 +533,6 @@ ExternalProject_Add(sr25519-donna
     -DBUILD_SHARED_LIBS:BOOL=OFF
     -DHASH_USE_SHA3_BRAINHUB:BOOL=ON
     ${_CMAKE_COMMON_CACHE_ARGS}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/sr25519-donna/lib/libsr25519-donna.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/sr25519-donna/lib/cmake/sr25519-donna/sr25519-donnaConfig.cmake"
 )
 
 # RapidJSON
@@ -634,8 +546,6 @@ ExternalProject_Add(rapidjson
     -DHUNTER_ENABLED:BOOL=OFF
     -DBUILD_SHARED_LIBS:BOOL=FALSE
     ${_CMAKE_COMMON_CACHE_ARGS}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/rapidjson/lib/cmake/RapidJSON/RapidJSONConfig.cmake"
 )
 
 # libsecp256k1
@@ -657,8 +567,6 @@ ExternalProject_Add(libsecp256k1
     -DSECP256K1_INSTALL:BOOL=ON
     -DSECP256K1_VALGRIND:BOOL=OFF
     ${_CMAKE_COMMON_CACHE_ARGS}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/libsecp256k1/lib/libsecp256k1.a"
 )
 
 # xxhash
@@ -669,9 +577,6 @@ ExternalProject_Add(xxhash
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     -DXXHASH_BUILD_XXHSUM:BOOL=OFF
     ${_CMAKE_COMMON_CACHE_ARGS}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/xxhash/lib/libxxhash.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/xxhash/lib/cmake/xxHash/xxHashConfig.cmake"
 )
 
 # protobuf-plugin
@@ -689,8 +594,6 @@ ExternalProject_Add(protobuf-plugin
     -Dutf8_range_DIR:PATH=${utf8_range_HOST_DIR}
     ${_MSVC_RUNTIME_LIBRARY}
     DEPENDS ${PROTOBUF_TARGET}
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/protobuf-plugin/lib/cmake/protobuf-plugin/protobuf-pluginConfig.cmake"
 )
 ExternalProject_Get_Property(protobuf-plugin INSTALL_DIR)
 set(ProtobufPlugin_DIR ${INSTALL_DIR})
@@ -747,8 +650,6 @@ ExternalProject_Add(libssh2
     -DZLIB_USE_STATIC_LIBS:BOOL=ON
     ${_OPENSSL_CACHE_ARGS}
     DEPENDS openssl zlib
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/libssh2/lib/libssh2.a"
 )
 
 set(_FINDPACKAGE_LIBSSH2_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libssh2/lib/cmake/libssh2")
@@ -762,6 +663,7 @@ ExternalProject_Add(AsyncIOManager
     CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     -Dabsl_DIR:PATH=${absl_DIR}
+    -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
     -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
     -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
     -DCBOR_INCLUDE_DIR:PATH=${_FINDPACKAGE_CBOR_INCLUDE_DIR}
@@ -788,10 +690,7 @@ ExternalProject_Add(AsyncIOManager
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     ${_CMAKE_COMMON_CACHE_ARGS}
-    DEPENDS libssh2 openssl ipfs-lite-cpp ipfs-bitswap-cpp ipfs-pubsub grpc ${PROTOBUF_TARGET} Boost MNN Boost.DI rocksdb yaml-cpp
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/lib/libAsyncIOManager.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/lib/cmake/AsyncIOManager/AsyncIOManagerConfig.cmake"
+    DEPENDS libssh2 openssl ipfs-lite-cpp ipfs-bitswap-cpp grpc ${PROTOBUF_TARGET} Boost MNN
 )
 set(_FINDPACKAGE_ASIOMGR_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/lib/cmake/AsyncIOManager")
 set(_FINDPACKAGE_ASIOMGR_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/lib")
@@ -812,10 +711,7 @@ ExternalProject_Add(gnus_upnp
     -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
-    DEPENDS Boost fmt spdlog tsl_hat_trie yaml-cpp Boost.DI
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/gnus_upnp/lib/libgnus_upnp.a"
-    "${CMAKE_CURRENT_BINARY_DIR}/gnus_upnp/lib/cmake/gnus_upnp/gnus_upnpConfig.cmake"
+    DEPENDS Boost fmt spdlog tsl_hat_trie yaml-cpp
 )
 set(_FINDPACKAGE_GNUS_UPNP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/gnus_upnp/lib/cmake/gnus_upnp")
 set(_FINDPACKAGE_GNUS_UPNP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/gnus_upnp/lib")
@@ -832,8 +728,6 @@ ExternalProject_Add(json
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     DEPENDS Boost
-    BUILD_BYPRODUCTS
-    "${CMAKE_CURRENT_BINARY_DIR}/json/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake"
 )
 set(_FINDPACKAGE_JSON_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/json/lib/cmake/valijson")
 set(_FINDPACKAGE_JSON_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/json/lib")
