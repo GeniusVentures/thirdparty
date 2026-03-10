@@ -599,37 +599,11 @@ ExternalProject_Get_Property(protobuf-plugin INSTALL_DIR)
 set(ProtobufPlugin_DIR ${INSTALL_DIR})
 
 # wallet-core
+if(NOT DEFINED _WALLET_CORE_GENERATE_SCRIPT)
+    set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/generate-files")
+endif()
+
 STRING(TOLOWER ${CMAKE_SYSTEM_NAME} _WALLET_CORE_ARCH)
-
-# Patched scripts are created in the binary dir (build-type-specific) to avoid
-# modifying the wallet-core source tree. rust-bindgen has wasm32 stripped since
-# TW_COMPILE_WASM is not set, and a second build (e.g. Release after Debug)
-# would otherwise skip the cargo build due to a stale stamp but still try to
-# copy a wasm32 release artifact that was never built.
-set(_WALLET_CORE_SCRIPTS_DIR "${CMAKE_CURRENT_BINARY_DIR}/wallet-core-scripts")
-set(_WALLET_CORE_PATCHED_RUST_BINDGEN "${_WALLET_CORE_SCRIPTS_DIR}/rust-bindgen")
-set(_WALLET_CORE_PATCHED_GENERATE_FILES "${_WALLET_CORE_SCRIPTS_DIR}/generate-files")
-set(_WALLET_CORE_PATCH_SCRIPT "${_WALLET_CORE_SCRIPTS_DIR}/patch-cmake.py")
-
-# Write a Python patch script at configure time so PATCH_COMMAND can call it
-# cleanly without quoting nightmares. The script fixes wallet-core's CMakeLists.txt
-# which incorrectly uses a generator expression in a plain set() call — genexes are
-# not evaluated at configure time so RUST_BUILD_DIR ends up as a literal string.
-# The script is idempotent: it only modifies the file if the old text is present.
-file(MAKE_DIRECTORY "${_WALLET_CORE_SCRIPTS_DIR}")
-file(WRITE "${_WALLET_CORE_PATCH_SCRIPT}"
-"import sys\n\
-src = sys.argv[1]\n\
-content = open(src).read()\n\
-old = 'set(RUST_BUILD_DIR $<IF:$<CONFIG:Release>,release,debug>)'\n\
-new = ('if(CMAKE_BUILD_TYPE STREQUAL \"Release\")\\n'\n\
-       '  set(RUST_BUILD_DIR release)\\n'\n\
-       'else()\\n'\n\
-       '  set(RUST_BUILD_DIR debug)\\n'\n\
-       'endif()')\n\
-if old in content:\n\
-    open(src, 'w').write(content.replace(old, new))\n\
-")
 
 ExternalProject_Add(wallet-core
     PREFIX wallet-core
@@ -648,11 +622,11 @@ ExternalProject_Add(wallet-core
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
-    PATCH_COMMAND ${CMAKE_COMMAND} -E make_directory ${_WALLET_CORE_SCRIPTS_DIR}
-        COMMAND bash -c "grep -v 'wasm32-unknown-emscripten' <SOURCE_DIR>/tools/rust-bindgen > ${_WALLET_CORE_PATCHED_RUST_BINDGEN} && chmod +x ${_WALLET_CORE_PATCHED_RUST_BINDGEN}"
-        COMMAND bash -c "sed 's|tools/rust-bindgen|${_WALLET_CORE_PATCHED_RUST_BINDGEN}|g' <SOURCE_DIR>/tools/generate-files > ${_WALLET_CORE_PATCHED_GENERATE_FILES} && chmod +x ${_WALLET_CORE_PATCHED_GENERATE_FILES}"
-        COMMAND python3 ${_WALLET_CORE_PATCH_SCRIPT} <SOURCE_DIR>/CMakeLists.txt
-        COMMAND ${_WALLET_CORE_PATCHED_GENERATE_FILES} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${WALLET_CORE_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin --build-type=$<CONFIG>
+    # Remove the rust fat lib before generate-files so rust-bindgen's stamp check
+    # doesn't short-circuit a second config (e.g. Release after Debug) and skip
+    # building the correct config's artifact.
+    PATCH_COMMAND ${CMAKE_COMMAND} -E rm -f "${THIRDPARTY_DIR}/wallet-core/rust/target/libwallet_core_rs.a"
+        COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${WALLET_CORE_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin --build-type=$<CONFIG>
     DEPENDS Boost grpc openssl protobuf-plugin
     BUILD_BYPRODUCTS
     "${CMAKE_CURRENT_BINARY_DIR}/wallet-core/lib/libTrustWalletCore.a"
