@@ -129,6 +129,26 @@ endif()
 set(Protobuf_LIBRARIES "${INSTALL_DIR}/lib")
 set(Protobuf_INCLUDE_DIR "${INSTALL_DIR}/include")
 
+# Snappy for RocksDB compression
+ExternalProject_Add(snappy
+        PREFIX snappy
+        SOURCE_DIR "${THIRDPARTY_DIR}/snappy"
+        CMAKE_ARGS
+        CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        -DFAIL_ON_WARNINGS:BOOL=OFF
+        -DSNAPPY_BUILD_TESTS:BOOL=OFF
+        -DSNAPPY_BUILD_BENCHMARKS:BOOL=OFF
+        ${_CMAKE_COMMON_CACHE_ARGS}
+        # these need to be at the end to override previous cached args line
+        -DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}\ -DNDEBUG
+        -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}\ -DNDEBUG
+        BUILD_BYPRODUCTS
+        "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/libsnappy.a"
+)
+set(_FINDPACKAGE_SNAPPY_DIR "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/cmake/snappy")
+set(_FINDPACKAGE_SNAPPY_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/snappy/include")
+
 # RocksDB
 ExternalProject_Add(rocksdb
     PREFIX rocksdb
@@ -149,11 +169,16 @@ ExternalProject_Add(rocksdb
     -DWITH_RUNTIME_DEBUG:BOOL=ON
     -DWITH_TESTS:BOOL=OFF
     -DWITH_TOOLS:BOOL=OFF
+    -DWITH_SNAPPY:BOOL=ON
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_rocksdb_EXTRA_PARAM}
     # these need to be at the end to override previous cached args line
     -DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}\ -DNDEBUG
     -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}\ -DNDEBUG
+    DEPENDS snappy
+    BUILD_BYPRODUCTS
+    "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/librocksdb.a"
+    "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/cmake/rocksdb/RocksDBConfig.cmake"
 )
 set(_FINDPACKAGE_ROCKSDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/cmake/rocksdb")
 set(_FINDPACKAGE_ROCKSDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/include")
@@ -421,6 +446,7 @@ ExternalProject_Add(ipfs-lite-cpp
     -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
     -DProtobuf_PROTOC_EXECUTABLE:FILEPATH=${PROTOC_EXECUTABLE}
     -DRocksDB_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}
+    -Dsnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
     -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
     -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
     -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
@@ -676,6 +702,7 @@ ExternalProject_Add(AsyncIOManager
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
     -DProtobuf_PROTOC_EXECUTABLE:FILEPATH=${PROTOC_EXECUTABLE}
     -DRocksDB_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}
+    -Dsnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
     -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
     -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
     -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
