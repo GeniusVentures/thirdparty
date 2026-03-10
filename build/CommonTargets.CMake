@@ -696,11 +696,16 @@ ExternalProject_Get_Property(protobuf-plugin INSTALL_DIR)
 set(ProtobufPlugin_DIR ${INSTALL_DIR})
 
 # wallet-core
-if(NOT DEFINED _WALLET_CORE_GENERATE_SCRIPT)
-    set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/generate-files")
-endif()
-
 STRING(TOLOWER ${CMAKE_SYSTEM_NAME} _WALLET_CORE_ARCH)
+
+# Patched scripts are created in the binary dir (build-type-specific) to avoid
+# modifying the wallet-core source tree. rust-bindgen has wasm32 stripped since
+# TW_COMPILE_WASM is not set, and a second build (e.g. Release after Debug)
+# would otherwise skip the cargo build due to a stale stamp but still try to
+# copy a wasm32 release artifact that was never built.
+set(_WALLET_CORE_SCRIPTS_DIR "${CMAKE_CURRENT_BINARY_DIR}/wallet-core-scripts")
+set(_WALLET_CORE_PATCHED_RUST_BINDGEN "${_WALLET_CORE_SCRIPTS_DIR}/rust-bindgen")
+set(_WALLET_CORE_PATCHED_GENERATE_FILES "${_WALLET_CORE_SCRIPTS_DIR}/generate-files")
 
 ExternalProject_Add(wallet-core
     PREFIX wallet-core
@@ -719,7 +724,10 @@ ExternalProject_Add(wallet-core
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
-    PATCH_COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${WALLET_CORE_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin --build-type=$<CONFIG>
+    PATCH_COMMAND ${CMAKE_COMMAND} -E make_directory ${_WALLET_CORE_SCRIPTS_DIR}
+        COMMAND bash -c "grep -v 'wasm32-unknown-emscripten' <SOURCE_DIR>/tools/rust-bindgen > ${_WALLET_CORE_PATCHED_RUST_BINDGEN} && chmod +x ${_WALLET_CORE_PATCHED_RUST_BINDGEN}"
+        COMMAND bash -c "sed 's|tools/rust-bindgen|${_WALLET_CORE_PATCHED_RUST_BINDGEN}|g' <SOURCE_DIR>/tools/generate-files > ${_WALLET_CORE_PATCHED_GENERATE_FILES} && chmod +x ${_WALLET_CORE_PATCHED_GENERATE_FILES}"
+        COMMAND ${_WALLET_CORE_PATCHED_GENERATE_FILES} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${WALLET_CORE_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin --build-type=$<CONFIG>
     DEPENDS Boost grpc openssl protobuf-plugin
     BUILD_BYPRODUCTS
     "${CMAKE_CURRENT_BINARY_DIR}/wallet-core/lib/libTrustWalletCore.a"
