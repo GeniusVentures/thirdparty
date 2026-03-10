@@ -609,6 +609,27 @@ STRING(TOLOWER ${CMAKE_SYSTEM_NAME} _WALLET_CORE_ARCH)
 set(_WALLET_CORE_SCRIPTS_DIR "${CMAKE_CURRENT_BINARY_DIR}/wallet-core-scripts")
 set(_WALLET_CORE_PATCHED_RUST_BINDGEN "${_WALLET_CORE_SCRIPTS_DIR}/rust-bindgen")
 set(_WALLET_CORE_PATCHED_GENERATE_FILES "${_WALLET_CORE_SCRIPTS_DIR}/generate-files")
+set(_WALLET_CORE_PATCH_SCRIPT "${_WALLET_CORE_SCRIPTS_DIR}/patch-cmake.py")
+
+# Write a Python patch script at configure time so PATCH_COMMAND can call it
+# cleanly without quoting nightmares. The script fixes wallet-core's CMakeLists.txt
+# which incorrectly uses a generator expression in a plain set() call — genexes are
+# not evaluated at configure time so RUST_BUILD_DIR ends up as a literal string.
+# The script is idempotent: it only modifies the file if the old text is present.
+file(MAKE_DIRECTORY "${_WALLET_CORE_SCRIPTS_DIR}")
+file(WRITE "${_WALLET_CORE_PATCH_SCRIPT}"
+"import sys\n\
+src = sys.argv[1]\n\
+content = open(src).read()\n\
+old = 'set(RUST_BUILD_DIR $<IF:$<CONFIG:Release>,release,debug>)'\n\
+new = ('if(CMAKE_BUILD_TYPE STREQUAL \"Release\")\\n'\n\
+       '  set(RUST_BUILD_DIR release)\\n'\n\
+       'else()\\n'\n\
+       '  set(RUST_BUILD_DIR debug)\\n'\n\
+       'endif()')\n\
+if old in content:\n\
+    open(src, 'w').write(content.replace(old, new))\n\
+")
 
 ExternalProject_Add(wallet-core
     PREFIX wallet-core
@@ -624,13 +645,13 @@ ExternalProject_Add(wallet-core
     -DTW_UNIT_TESTS:BOOL=OFF
     -DTW_USE_EXTERNAL_PROTOC:BOOL=TRUE
     -Dutf8_range_DIR:PATH=${utf8_range_DIR}
-    -DRUST_BUILD_DIR:STRING=$<IF:$<CONFIG:Release>,release,debug>
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     PATCH_COMMAND ${CMAKE_COMMAND} -E make_directory ${_WALLET_CORE_SCRIPTS_DIR}
         COMMAND bash -c "grep -v 'wasm32-unknown-emscripten' <SOURCE_DIR>/tools/rust-bindgen > ${_WALLET_CORE_PATCHED_RUST_BINDGEN} && chmod +x ${_WALLET_CORE_PATCHED_RUST_BINDGEN}"
         COMMAND bash -c "sed 's|tools/rust-bindgen|${_WALLET_CORE_PATCHED_RUST_BINDGEN}|g' <SOURCE_DIR>/tools/generate-files > ${_WALLET_CORE_PATCHED_GENERATE_FILES} && chmod +x ${_WALLET_CORE_PATCHED_GENERATE_FILES}"
+        COMMAND python3 ${_WALLET_CORE_PATCH_SCRIPT} <SOURCE_DIR>/CMakeLists.txt
         COMMAND ${_WALLET_CORE_PATCHED_GENERATE_FILES} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${WALLET_CORE_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin --build-type=$<CONFIG>
     DEPENDS Boost grpc openssl protobuf-plugin
     BUILD_BYPRODUCTS
