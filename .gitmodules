@@ -135,3 +135,6 @@
 [submodule "json"]
 	path = json
 	url = git@github.com:nlohmann/json.git
+[submodule "snappy"]
+	path = snappy
+	url = https://github.com/google/snappy.git
