@@ -624,6 +624,7 @@ ExternalProject_Add(wallet-core
     -DTW_UNIT_TESTS:BOOL=OFF
     -DTW_USE_EXTERNAL_PROTOC:BOOL=TRUE
     -Dutf8_range_DIR:PATH=${utf8_range_DIR}
+    -DRUST_BUILD_DIR:STRING=$<IF:$<CONFIG:Release>,release,debug>
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
