@@ -128,10 +128,13 @@
     url = ../gnus_upnp.git
 [submodule "sqlite3"]
     path = sqlite3
-	url = ../sqlite-amalgamation
+    url = ../sqlite-amalgamation
 [submodule "SQLiteModernCpp"]
     path = SQLiteModernCpp
     url = ../sqlite_modern_cpp.git
 [submodule "json"]
-	path = json
-	url = git@github.com:nlohmann/json.git
+    path = json
+    url = git@github.com:nlohmann/json.git
+[submodule "snappy"]
+    path = snappy
+    url = https://github.com/google/snappy.git
