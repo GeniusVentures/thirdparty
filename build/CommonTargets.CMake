@@ -148,7 +148,7 @@ ExternalProject_Add(snappy
         "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/libsnappy.a"
 )
 
-set(_FINDPACKAGE_SNAPPY_DIR "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/cmake/snappy")
+set(_FINDPACKAGE_SNAPPY_DIR "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/cmake/Snappy")
 set(_FINDPACKAGE_SNAPPY_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/snappy/include")
 
 # RocksDB
