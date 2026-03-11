@@ -26,6 +26,7 @@ if(CMAKE_CROSSCOMPILING)
         -Dprotobuf_BUILD_TESTS:BOOL=OFF
         -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
         -Dprotobuf_INSTALL:BOOL=ON
+        ${_PROTOBUF_HOST_EXTRA_CACHE_ARGS}
     )
 else()
     set(PROTOBUF_HOST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/grpc")
@@ -146,6 +147,7 @@ ExternalProject_Add(snappy
         BUILD_BYPRODUCTS
         "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/libsnappy.a"
 )
+
 set(_FINDPACKAGE_SNAPPY_DIR "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/cmake/snappy")
 set(_FINDPACKAGE_SNAPPY_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/snappy/include")
 
@@ -170,6 +172,7 @@ ExternalProject_Add(rocksdb
     -DWITH_TESTS:BOOL=OFF
     -DWITH_TOOLS:BOOL=OFF
     -DWITH_SNAPPY:BOOL=ON
+    -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_rocksdb_EXTRA_PARAM}
     # these need to be at the end to override previous cached args line
@@ -445,8 +448,9 @@ ExternalProject_Add(ipfs-lite-cpp
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
     -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
     -DProtobuf_PROTOC_EXECUTABLE:FILEPATH=${PROTOC_EXECUTABLE}
+    -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
     -DRocksDB_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}
-    -Dsnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
+    -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
     -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
     -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
     -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
@@ -619,6 +623,7 @@ ExternalProject_Add(protobuf-plugin
     -DTW_USE_EXTERNAL_PROTOC:BOOL=TRUE
     -Dutf8_range_DIR:PATH=${utf8_range_HOST_DIR}
     ${_MSVC_RUNTIME_LIBRARY}
+    ${_PROTOBUF_PLUGIN_EXTRA_CACHE_ARGS}
     DEPENDS ${PROTOBUF_TARGET}
 )
 ExternalProject_Get_Property(protobuf-plugin INSTALL_DIR)
@@ -701,8 +706,8 @@ ExternalProject_Add(AsyncIOManager
     -DMNN_DIR:PATH=${_FINDPACKAGE_MNN_CONFIG_DIR}
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
     -DProtobuf_PROTOC_EXECUTABLE:FILEPATH=${PROTOC_EXECUTABLE}
+    -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
     -DRocksDB_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}
-    -Dsnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
     -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
     -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
     -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
