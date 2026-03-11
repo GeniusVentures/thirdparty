@@ -96,22 +96,22 @@ jobs:
         abi: [ "" ]
         include:
           - target: Linux
-            host: ubuntu-22.04
+            host: sg-ubuntu-linux
             abi: x86_64
             build-type: Debug
             container: ghcr.io/geniusventures/debian-bullseye:latest
           - target: Linux
-            host: ubuntu-22.04
+            host: sg-ubuntu-linux
             abi: x86_64
             build-type: Release
             container: ghcr.io/geniusventures/debian-bullseye:latest
           - target: Linux
-            host: ubuntu-24.04-arm
+            host: sg-arm-linux
             abi: aarch64
             build-type: Debug
             container: ghcr.io/geniusventures/debian-bullseye:latest
           - target: Linux
-            host: ubuntu-24.04-arm
+            host: sg-arm-linux
             abi: aarch64
             build-type: Release
             container: ghcr.io/geniusventures/debian-bullseye:latest
@@ -120,7 +120,7 @@ jobs:
           - target: OSX
             host: gv-OSX-Large
           - target: iOS
-            host: macos-latest
+            host: gv-OSX-Large
           - target: Android
             host: sg-ubuntu-linux
             build-type: Release
