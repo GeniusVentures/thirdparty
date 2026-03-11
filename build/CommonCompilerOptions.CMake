@@ -23,7 +23,7 @@ endif()
 
 # Remove this once we update gRPC, its dependencies, fix libp2p and change some of our internal projects
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-template-arg-list-after-template-kw")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-warning-option -Wno-missing-template-arg-list-after-template-kw")
 endif()
 
 # Set PROJECT_BUILD folder
