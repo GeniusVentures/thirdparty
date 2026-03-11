@@ -227,11 +227,17 @@ jobs:
           echo "Runner workspace: ${{runner.workspace}}"
           echo "GitHub workspace: ${{github.workspace}}"
           
+          # Use sudo on Linux to handle root-owned files left by container jobs
+          SUDO=""
+          if [ "$(uname)" = "Linux" ]; then
+            SUDO="sudo"
+          fi
+
           echo "=== CLEANUP ARTIFACTS ==="          
           # Clean contents of thirdparty directory but keep the directory itself
           if [ -d "thirdparty" ]; then
             echo "Cleaning thirdparty directory contents..."
-            rm -rf thirdparty/* thirdparty/.* 2>/dev/null || true
+            $SUDO rm -rf thirdparty/* thirdparty/.* 2>/dev/null || true
             echo "thirdparty directory cleaned (kept the directory)"
           fi
           
