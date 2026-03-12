@@ -20,8 +20,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: "recursive"
+
+      - name: Parallel checkout submodules
+        run: git submodule update --init --recursive --jobs 4
 
       - name: Configure Linux host
         if: ${{ runner.os == 'Linux'}}
