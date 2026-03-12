@@ -254,7 +254,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Parallel checkout submodules
-        run: git submodule update --init --recursive --jobs 8 --depth 1
+        run: git submodule update --init --recursive --jobs 6 --depth 1
 
       - name: Configure Linux host
         if: ${{ runner.os == 'Linux'}}
