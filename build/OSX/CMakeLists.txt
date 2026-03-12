@@ -39,7 +39,7 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env MACOSX_DEPLOYMENT_TARGET=${DEPLOYMENT_TARGET} <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
 
-    BUILD_COMMAND ${CMAKE_COMMAND} -E env MACOSX_DEPLOYMENT_TARGET=${DEPLOYMENT_TARGET} <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} toolset=clang cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=${BOOST_ARCH} variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} -j4 install
+    BUILD_COMMAND ${CMAKE_COMMAND} -E env MACOSX_DEPLOYMENT_TARGET=${DEPLOYMENT_TARGET} <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} ${BOOST_B2_EXTRA_FLAGS} toolset=clang cxxstd=${CMAKE_CXX_STANDARD} abi=sysv visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=${BOOST_ARCH} variant=${BOOST_VARIANT} --prefix=${BOOST_ROOT} install
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
@@ -62,6 +62,7 @@ ExternalProject_Add(Boost
     "${BOOST_ROOT}/lib/libboost_log.a"
     "${BOOST_ROOT}/lib/libboost_log_setup.a"
     "${BOOST_ROOT}/lib/libboost_context.a"
+    "${BOOST_ROOT}/lib/libboost_coroutine.a"
 
 )
 
@@ -75,6 +76,7 @@ set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
 set(boost_regex_DIR "${BOOST_ROOT}/lib/cmake/boost_regex-${BOOST_VERSION}")
 set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
 set(boost_context_DIR "${BOOST_ROOT}/lib/cmake/boost_context-${BOOST_VERSION}")
+set(boost_coroutine_DIR "${BOOST_ROOT}/lib/cmake/boost_coroutine-${BOOST_VERSION}")
 
 set(_BOOST_CACHE_ARGS
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
@@ -88,6 +90,7 @@ set(_BOOST_CACHE_ARGS
     -Dboost_regex_DIR:PATH=${boost_regex_DIR}
     -Dboost_system_DIR:PATH=${boost_system_DIR}
     -Dboost_context_DIR:PATH=${boost_context_DIR}
+    -Dboost_coroutine_DIR:PATH=${boost_coroutine_DIR}
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_USE_MULTITHREADED:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON

@@ -91,11 +91,12 @@ if(NOT EXISTS "${THIRDPARTY_DIR}/build")
 endif()
 
 # Boost settings
-set(BOOST_INCLUDE_LIBRARIES container date_time filesystem json log program_options random regex system test timer context)
+set(BOOST_INCLUDE_LIBRARIES container date_time filesystem json log program_options random regex system test timer context coroutine)
 
 list(JOIN BOOST_INCLUDE_LIBRARIES "," BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED)
 separate_arguments(BOOST_B2_FLAGS NATIVE_COMMAND "${CMAKE_CXX_FLAGS}")
 list(APPEND BOOST_B2_FLAGS "-fPIC")
+set(BOOST_B2_EXTRA_FLAGS "context-impl=fcontext")
 list(TRANSFORM BOOST_B2_FLAGS PREPEND "cxxflags=")
 
 # OpenSSL

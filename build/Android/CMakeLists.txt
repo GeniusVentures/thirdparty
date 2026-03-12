@@ -52,28 +52,29 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${BOOST_ROOT}" --with-libraries="${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}" --extra="--build-type=minimal,visibility=global,cxxstd=${CMAKE_CXX_STANDARD},-d0"
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${BOOST_ROOT}" --with-libraries="${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}" --extra="--build-type=minimal,visibility=global,cxxstd=${CMAKE_CXX_STANDARD},-d0,${BOOST_B2_EXTRA_FLAGS}"
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
-#   TODO: fix this so that ninja parallel build will work
-#     BUILD_BYPRODUCTS
-#        "${BOOST_ROOT}/lib/libboost_container.a"
-#        "${BOOST_ROOT}/lib/libboost_program_options.a"
-#        "${BOOST_ROOT}/lib/libboost_random.a"
-#        "${BOOST_ROOT}/lib/libboost_regex.a"
-#        "${BOOST_ROOT}/lib/libboost_system.a"
-#        "${BOOST_ROOT}/lib/libboost_prg_exec_monitor.a"
-#        "${BOOST_ROOT}/lib/libboost_test_exec_monitor.a"
-#        "${BOOST_ROOT}/lib/libboost_unit_test_framework.a"
-#        "${BOOST_ROOT}/lib/libboost_timer.a"
-#        "${BOOST_ROOT}/lib/libboost_date_time.a"
-#        "${BOOST_ROOT}/lib/libboost_atomic.a"
-#        "${BOOST_ROOT}/lib/libboost_filesystem.a"
-#        "${BOOST_ROOT}/lib/libboost_json.a"
-#        "${BOOST_ROOT}/lib/libboost_thread.a"
-#        "${BOOST_ROOT}/lib/libboost_chrono.a"
-#        "${BOOST_ROOT}/lib/libboost_log.a"
-#        "${BOOST_ROOT}/lib/libboost_log_setup.a"
+    BUILD_BYPRODUCTS
+        "${BOOST_ROOT}/lib/libboost_container.a"
+        "${BOOST_ROOT}/lib/libboost_program_options.a"
+        "${BOOST_ROOT}/lib/libboost_random.a"
+        "${BOOST_ROOT}/lib/libboost_regex.a"
+        "${BOOST_ROOT}/lib/libboost_system.a"
+        "${BOOST_ROOT}/lib/libboost_prg_exec_monitor.a"
+        "${BOOST_ROOT}/lib/libboost_test_exec_monitor.a"
+        "${BOOST_ROOT}/lib/libboost_unit_test_framework.a"
+        "${BOOST_ROOT}/lib/libboost_timer.a"
+        "${BOOST_ROOT}/lib/libboost_date_time.a"
+        "${BOOST_ROOT}/lib/libboost_atomic.a"
+        "${BOOST_ROOT}/lib/libboost_filesystem.a"
+        "${BOOST_ROOT}/lib/libboost_json.a"
+        "${BOOST_ROOT}/lib/libboost_thread.a"
+        "${BOOST_ROOT}/lib/libboost_chrono.a"
+        "${BOOST_ROOT}/lib/libboost_log.a"
+        "${BOOST_ROOT}/lib/libboost_log_setup.a"
+        "${BOOST_ROOT}/lib/libboost_context.a"
+        "${BOOST_ROOT}/lib/libboost_coroutine.a"
 )
 
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
@@ -93,6 +94,7 @@ set(boost_log_setup_DIR "${BOOST_ROOT}/lib/cmake/boost_log_setup-${BOOST_VERSION
 set(boost_container_DIR "${BOOST_ROOT}/lib/cmake/boost_container-${BOOST_VERSION}")
 set(boost_unit_test_framework_DIR "${BOOST_ROOT}/lib/cmake/boost_unit_test_framework-${BOOST_VERSION}")
 set(boost_context_DIR "${BOOST_ROOT}/lib/cmake/boost_context-${BOOST_VERSION}")
+set(boost_coroutine_DIR "${BOOST_ROOT}/lib/cmake/boost_coroutine-${BOOST_VERSION}")
 
 set(_BOOST_CACHE_ARGS
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
@@ -117,6 +119,7 @@ set(_BOOST_CACHE_ARGS
     -Dboost_thread_DIR:PATH=${boost_thread_DIR}
     -Dboost_unit_test_framework_DIR:PATH=${boost_unit_test_framework_DIR}
     -Dboost_context_DIR:PATH=${boost_context_DIR}
+    -Dboost_coroutine_DIR:PATH=${boost_coroutine_DIR}
     -DBoost_COMPILER:STRING=clang
 )
 
