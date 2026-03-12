@@ -26,6 +26,7 @@ if(CMAKE_CROSSCOMPILING)
         -Dprotobuf_BUILD_TESTS:BOOL=OFF
         -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
         -Dprotobuf_INSTALL:BOOL=ON
+        ${_PROTOBUF_HOST_EXTRA_CACHE_ARGS}
     )
 else()
     set(PROTOBUF_HOST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/grpc")
@@ -129,6 +130,27 @@ endif()
 set(Protobuf_LIBRARIES "${INSTALL_DIR}/lib")
 set(Protobuf_INCLUDE_DIR "${INSTALL_DIR}/include")
 
+# Snappy for RocksDB compression
+ExternalProject_Add(snappy
+        PREFIX snappy
+        SOURCE_DIR "${THIRDPARTY_DIR}/snappy"
+        CMAKE_ARGS
+        CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        -DFAIL_ON_WARNINGS:BOOL=OFF
+        -DSNAPPY_BUILD_TESTS:BOOL=OFF
+        -DSNAPPY_BUILD_BENCHMARKS:BOOL=OFF
+        ${_CMAKE_COMMON_CACHE_ARGS}
+        # these need to be at the end to override previous cached args line
+        -DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}\ -DNDEBUG
+        -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}\ -DNDEBUG
+        BUILD_BYPRODUCTS
+        "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/libsnappy.a"
+)
+
+set(_FINDPACKAGE_SNAPPY_DIR "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/cmake/Snappy")
+set(_FINDPACKAGE_SNAPPY_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/snappy/include")
+
 # RocksDB
 ExternalProject_Add(rocksdb
     PREFIX rocksdb
@@ -149,11 +171,17 @@ ExternalProject_Add(rocksdb
     -DWITH_RUNTIME_DEBUG:BOOL=ON
     -DWITH_TESTS:BOOL=OFF
     -DWITH_TOOLS:BOOL=OFF
+    -DWITH_SNAPPY:BOOL=ON
+    -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_rocksdb_EXTRA_PARAM}
     # these need to be at the end to override previous cached args line
     -DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}\ -DNDEBUG
     -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}\ -DNDEBUG
+    DEPENDS snappy
+    BUILD_BYPRODUCTS
+    "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/librocksdb.a"
+    "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/cmake/rocksdb/RocksDBConfig.cmake"
 )
 set(_FINDPACKAGE_ROCKSDB_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/lib/cmake/rocksdb")
 set(_FINDPACKAGE_ROCKSDB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/include")
@@ -420,7 +448,9 @@ ExternalProject_Add(ipfs-lite-cpp
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
     -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
     -DProtobuf_PROTOC_EXECUTABLE:FILEPATH=${PROTOC_EXECUTABLE}
+    -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
     -DRocksDB_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}
+    -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
     -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
     -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
     -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
@@ -593,6 +623,7 @@ ExternalProject_Add(protobuf-plugin
     -DTW_USE_EXTERNAL_PROTOC:BOOL=TRUE
     -Dutf8_range_DIR:PATH=${utf8_range_HOST_DIR}
     ${_MSVC_RUNTIME_LIBRARY}
+    ${_PROTOBUF_PLUGIN_EXTRA_CACHE_ARGS}
     DEPENDS ${PROTOBUF_TARGET}
 )
 ExternalProject_Get_Property(protobuf-plugin INSTALL_DIR)
@@ -622,8 +653,14 @@ ExternalProject_Add(wallet-core
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
-    PATCH_COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${WALLET_CORE_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin --build-type=$<CONFIG>
+    # Remove the rust fat lib before generate-files so rust-bindgen's stamp check
+    # doesn't short-circuit a second config (e.g. Release after Debug) and skip
+    # building the correct config's artifact.
+    PATCH_COMMAND ${CMAKE_COMMAND} -E rm -f "${THIRDPARTY_DIR}/wallet-core/rust/target/libwallet_core_rs.a"
+        COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${WALLET_CORE_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin --build-type=$<CONFIG>
     DEPENDS Boost grpc openssl protobuf-plugin
+    BUILD_BYPRODUCTS
+    "${CMAKE_CURRENT_BINARY_DIR}/wallet-core/lib/libTrustWalletCore.a"
 )
 
 # libssh2
@@ -669,6 +706,7 @@ ExternalProject_Add(AsyncIOManager
     -DMNN_DIR:PATH=${_FINDPACKAGE_MNN_CONFIG_DIR}
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
     -DProtobuf_PROTOC_EXECUTABLE:FILEPATH=${PROTOC_EXECUTABLE}
+    -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
     -DRocksDB_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}
     -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
     -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}

@@ -1,23 +1,104 @@
 name: Build
 
 on:
-  workflow_call:
-    inputs:
-      target:
-        required: true
-        type: string
-      abi:
-        required: false
-        type: string
-      build-type:
-        required: true
-        type: string
+  pull_request:
+  workflow_dispatch:
 jobs:
   build:
-    env:
-      GRPC_BUILD_ENABLE_CCACHE: "ON"
-    runs-on: ${{ (inputs.target == 'Linux' && inputs.abi == 'aarch64' && 'ubuntu-24.04-arm') || contains(fromJson('["Android", "Linux"]'), inputs.target) && 'ubuntu-22.04' || contains(fromJson('["iOS", "OSX"]'), inputs.target) && 'macos-latest' || 'windows-latest' }}
+    runs-on: ${{matrix.host}}
+    container:
+      image: ${{matrix.container}}
+      credentials:
+        username: ${{github.actor}}
+        password: ${{secrets.GNUS_TOKEN_1}}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [ Android, iOS, OSX, Linux, Windows ]
+        build-type: [ Release ]
+        abi: [ "" ]
+        include:
+          - target: Linux
+            host: sg-ubuntu-linux
+            abi: x86_64
+            build-type: Release
+            container: ghcr.io/geniusventures/debian-bullseye:latest
+          - target: Linux
+            host: sg-arm-linux
+            abi: aarch64
+            build-type: Release
+            container: ghcr.io/geniusventures/debian-bullseye:latest
+          - target: Windows
+            host: SG-WIN11
+          - target: OSX
+            host: gv-OSX-Large
+          - target: iOS
+            host: gv-OSX-Large
+          - target: Android
+            host: sg-ubuntu-linux
+            build-type: Release
+            abi: arm64-v8a
+          - target: Android
+            host: sg-ubuntu-linux
+            build-type: Release
+            abi: armeabi-v7a
+        exclude:
+          - target: Android
+            abi: ""
+          - target: Linux
+            abi: ""
     steps:
+      - name: Configure Git Bash on Windows
+        if: ${{ runner.environment == 'self-hosted' && matrix.target == 'Windows' }}
+        run: |
+          $gitBinPath = "C:\Program Files\Git\bin"
+
+          if (Test-Path $gitBinPath) {
+            Add-Content -Path $env:GITHUB_PATH -Value $gitBinPath
+            $env:PATH = "$gitBinPath;$env:PATH"
+          }
+          
+          Write-Output "Git Bash configured for bash shell commands"
+          $bashLocation = (Get-Command bash.exe -ErrorAction SilentlyContinue).Source
+          if ($bashLocation) {
+            Write-Output "Bash location: $bashLocation"
+          } else {
+            Write-Output "WARNING: bash.exe not found in PATH"
+          }
+
+
+      - name: Clean workspace (self-hosted runners)
+        if: ${{ runner.environment == 'self-hosted' }}
+        working-directory: ${{runner.workspace}}
+        run: |
+          echo "=== PRE-CLEANUP DEBUG ==="
+          echo "Current working directory: $(pwd)"
+          echo "Runner workspace: ${{runner.workspace}}"
+          echo "GitHub workspace: ${{github.workspace}}"
+          
+          # Use sudo on Linux to handle root-owned files left by container jobs
+          SUDO=""
+          if [ "$(uname)" = "Linux" ]; then
+            SUDO="sudo"
+          fi
+
+          echo "=== CLEANUP ARTIFACTS ==="          
+          # Clean contents of thirdparty directory but keep the directory itself
+          if [ -d "thirdparty" ]; then
+            echo "Cleaning thirdparty directory contents..."
+            $SUDO rm -rf thirdparty/* thirdparty/.* 2>/dev/null || true
+            echo "thirdparty directory cleaned (kept the directory)"
+          fi
+          
+          echo "=== POST-CLEANUP DEBUG ==="
+          echo "Runner workspace contents:"
+          ls -la
+          if [ -d "thirdparty" ]; then
+            echo "thirdparty directory exists and contains:"
+            ls -la thirdparty/ 2>/dev/null || echo "  (empty)"
+          fi
+        shell: bash
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -31,41 +112,58 @@ jobs:
           sudo update-alternatives --set cc $(which clang)
           sudo update-alternatives --set c++ $(which clang++)
 
-          sudo apt install ccache ninja-build libvulkan-dev -y
+          sudo apt install libvulkan-dev ninja-build -y
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
-
-      - name: Configure Windows host
-        if: ${{ runner.os == 'Windows'}}
-        run: |
-          choco install ccache -A
 
       - name: Configure macOS host
         if: ${{ runner.os == 'macOS'}}
         run: |
-          brew install ccache ninja
+          brew install ninja bash gnu-tar
+
+          # Ensure GNU tar is first in PATH
+          if [ -d "/opt/homebrew/opt/gnu-tar/libexec/gnubin" ]; then
+            echo "PATH=/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH" >> $GITHUB_ENV
+            echo "Using GNU tar from /opt/homebrew"
+          elif [ -d "/usr/local/opt/gnu-tar/libexec/gnubin" ]; then
+            echo "PATH=/usr/local/opt/gnu-tar/libexec/gnubin:$PATH" >> $GITHUB_ENV
+            echo "Using GNU tar from /usr/local"
+          else
+            echo "WARNING: GNU tar installation not found in expected locations"
+            echo "Available tar: $(which tar)"
+          fi
+
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
       - name: Add Darwin toolchain
-        if: ${{ inputs.target == 'OSX'}}
+        if: ${{ matrix.target == 'OSX'}}
         run: rustup target add x86_64-apple-darwin
 
       - name: Add iOS toolchain
-        if: ${{ inputs.target == 'iOS' }}
+        if: ${{ matrix.target == 'iOS' }}
         run: |
           rustup toolchain install nightly-aarch64-apple-darwin
           rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
           rustup target add aarch64-apple-ios
 
       - name: Add Android toolchain
-        if: ${{ inputs.target == 'Android' }}
+        if: ${{ matrix.target == 'Android' }}
         run: |
           NDK_VERSION="r27b"
-          wget https://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux.zip -O ndk.zip
-          unzip ndk.zip -d $HOME
+          NDK_DIR="$HOME/android-ndk-$NDK_VERSION"
+          
+          if [ ! -d "$NDK_DIR" ]; then
+            echo "Downloading Android NDK..."
+            wget https://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux.zip -O ndk.zip
+            unzip -o ndk.zip -d $HOME
+            rm ndk.zip
+          else
+            echo "Android NDK already exists at $NDK_DIR, skipping download"
+          fi
 
-          echo "ANDROID_NDK_HOME=$HOME/android-ndk-$NDK_VERSION" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
 
           rustup target add aarch64-linux-android
+          rustup target add armv7-linux-androideabi
 
       - name: Install bindgen
         run: cargo install cbindgen
@@ -74,31 +172,35 @@ jobs:
         run: rustup target add wasm32-unknown-emscripten
 
       - name: Set build directory
-        id: build-dir
         run: |
-          if [ '${{inputs.target}}' == 'Android' ] ; then
-            BUILD_DIRECTORY=build/${{inputs.target}}/${{inputs.build-type}}/${{inputs.abi}}
+          if [ '${{matrix.abi}}' ]; then
+            BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build-type}}/${{matrix.abi}}
           else
-            BUILD_DIRECTORY=build/${{inputs.target}}/${{inputs.build-type}}
+            BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build-type}}
           fi
-          echo "BUILD_DIRECTORY=$BUILD_DIRECTORY" >>$GITHUB_OUTPUT
+          echo "BUILD_DIRECTORY=$BUILD_DIRECTORY" >> $GITHUB_ENV
         shell: bash
 
-      - name: Configure CMake for Mac x86
-        if: ${{ inputs.target == 'OSX'}}
-        run: cmake -S build/${{inputs.target}} -B ${{steps.build-dir.outputs.BUILD_DIRECTORY}} -DCMAKE_BUILD_TYPE=${{inputs.build-type}} -DPLATFORM=MAC
+      - name: Configure CMake for Mac
+        if: ${{ matrix.target == 'OSX'}}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=MAC_UNIVERSAL
 
       - name: Configure CMake for iOS
-        if: ${{ inputs.target == 'iOS'}}
-        run: cmake -S build/${{inputs.target}} -B ${{steps.build-dir.outputs.BUILD_DIRECTORY}} -DCMAKE_BUILD_TYPE=${{inputs.build-type}} -DPLATFORM=OS64
+        if: ${{ matrix.target == 'iOS'}}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=OS64
 
-      - name: Configure SuperGenius CMake for Android
-        if: ${{ inputs.target == 'Android'}}
-        run: cmake -S build/${{inputs.target}} -B ${{steps.build-dir.outputs.BUILD_DIRECTORY}} -DCMAKE_BUILD_TYPE=${{inputs.build-type}} -DANDROID_ABI=${{inputs.abi}}
+      - name: Configure CMake for Android
+        if: ${{ matrix.target == 'Android'}}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DANDROID_ABI=${{matrix.abi}}
 
-      - name: Configure CMake
-        if: ${{ inputs.target != 'OSX' && inputs.target != 'iOS' && inputs.target != 'Android' }}
-        run: cmake -S build/${{inputs.target}} -B ${{steps.build-dir.outputs.BUILD_DIRECTORY}} -DCMAKE_BUILD_TYPE=${{inputs.build-type}}
+      - name: Configure CMake for Windows
+        if: ${{ matrix.target == 'Windows' }}
+        run: cmake -S build/${{matrix.target}} -B $env:BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
 
-      - name: Build project
-        run: cmake --build ${{steps.build-dir.outputs.BUILD_DIRECTORY}} --config ${{inputs.build-type}} -j
+      - name: Configure CMake for Linux
+        if: ${{ matrix.target == 'Linux' }}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
+
+      - name: Build thirdparty
+        working-directory: ${{env.BUILD_DIRECTORY}}
+        run: cmake --build . --config ${{matrix.build-type}} -j
