@@ -61,6 +61,7 @@ ExternalProject_Add(Boost
     "${BOOST_ROOT}/lib/libboost_chrono.a"
     "${BOOST_ROOT}/lib/libboost_log.a"
     "${BOOST_ROOT}/lib/libboost_log_setup.a"
+    "${BOOST_ROOT}/lib/libboost_context.a"
 
 )
 
@@ -73,6 +74,7 @@ set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-${B
 set(boost_random_DIR "${BOOST_ROOT}/lib/cmake/boost_random-${BOOST_VERSION}")
 set(boost_regex_DIR "${BOOST_ROOT}/lib/cmake/boost_regex-${BOOST_VERSION}")
 set(boost_system_DIR "${BOOST_ROOT}/lib/cmake/boost_system-${BOOST_VERSION}")
+set(boost_context_DIR "${BOOST_ROOT}/lib/cmake/boost_context-${BOOST_VERSION}")
 
 set(_BOOST_CACHE_ARGS
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
@@ -85,6 +87,7 @@ set(_BOOST_CACHE_ARGS
     -Dboost_random_DIR:PATH=${boost_random_DIR}
     -Dboost_regex_DIR:PATH=${boost_regex_DIR}
     -Dboost_system_DIR:PATH=${boost_system_DIR}
+    -Dboost_context_DIR:PATH=${boost_context_DIR}
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_USE_MULTITHREADED:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON

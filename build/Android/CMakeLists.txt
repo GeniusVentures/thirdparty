@@ -92,6 +92,7 @@ set(boost_log_DIR "${BOOST_ROOT}/lib/cmake/boost_log-${BOOST_VERSION}")
 set(boost_log_setup_DIR "${BOOST_ROOT}/lib/cmake/boost_log_setup-${BOOST_VERSION}")
 set(boost_container_DIR "${BOOST_ROOT}/lib/cmake/boost_container-${BOOST_VERSION}")
 set(boost_unit_test_framework_DIR "${BOOST_ROOT}/lib/cmake/boost_unit_test_framework-${BOOST_VERSION}")
+set(boost_context_DIR "${BOOST_ROOT}/lib/cmake/boost_context-${BOOST_VERSION}")
 
 set(_BOOST_CACHE_ARGS
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
@@ -115,6 +116,7 @@ set(_BOOST_CACHE_ARGS
     -Dboost_system_DIR:PATH=${boost_system_DIR}
     -Dboost_thread_DIR:PATH=${boost_thread_DIR}
     -Dboost_unit_test_framework_DIR:PATH=${boost_unit_test_framework_DIR}
+    -Dboost_context_DIR:PATH=${boost_context_DIR}
     -DBoost_COMPILER:STRING=clang
 )
 
