@@ -15,7 +15,7 @@ if(CMAKE_CROSSCOMPILING)
 
     ExternalProject_Add(protobuf_host
         PREFIX ${PROTOBUF_HOST_PREFIX}
-        SOURCE_DIR "${THIRDPARTY_DIR}/grpc/third_party/protobuf"
+        SOURCE_DIR "${THIRDPARTY_DIR}/protobuf"
         CMAKE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         CMAKE_CACHE_ARGS
@@ -29,17 +29,12 @@ if(CMAKE_CROSSCOMPILING)
         ${_PROTOBUF_HOST_EXTRA_CACHE_ARGS}
     )
 else()
-    set(PROTOBUF_HOST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/grpc")
-    set(PROTOBUF_TARGET grpc)
-endif()
-
-if(MSVC)
-    set(Protobuf_HOST_DIR "${PROTOBUF_HOST_PREFIX}/cmake")
-else()
-    set(Protobuf_HOST_DIR "${PROTOBUF_HOST_PREFIX}/lib/cmake/protobuf")
+    set(PROTOBUF_HOST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/protobuf")
+    set(PROTOBUF_TARGET protobuf)
 endif()
 
 set(absl_HOST_DIR "${PROTOBUF_HOST_PREFIX}/lib/cmake/absl")
+set(Protobuf_HOST_DIR "${PROTOBUF_HOST_PREFIX}/lib/cmake/protobuf")
 set(utf8_range_HOST_DIR "${PROTOBUF_HOST_PREFIX}/lib/cmake/utf8_range")
 
 set(PROTOBUF_HOST_INCLUDE_DIR "${PROTOBUF_HOST_PREFIX}/include")
@@ -76,10 +71,10 @@ set(_FINDPACKAGE_CARES_CONFIG_DIR "${INSTALL_DIR}/lib/cmake/c-ares")
 set(_FINDPACKAGE_CARES_LIBRARY_DIR "${INSTALL_DIR}/lib")
 set(_FINDPACKAGE_CARES_INCLUDE_DIR "${INSTALL_DIR}/include")
 
-# gRPC
-ExternalProject_Add(grpc
-    PREFIX grpc
-    SOURCE_DIR "${THIRDPARTY_DIR}/grpc"
+# Protobuf
+ExternalProject_Add(protobuf
+    PREFIX protobuf
+    SOURCE_DIR "${THIRDPARTY_DIR}/protobuf"
     CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     CMAKE_CACHE_ARGS
@@ -87,48 +82,13 @@ ExternalProject_Add(grpc
     -DABSL_ENABLE_INSTALL:BOOL=ON
     -DBUILD_SHARED_LIBS:BOOL=OFF
     -DBUILD_TESTING:BOOL=OFF
-    -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
-    -DgRPC_BUILD_CODEGEN:BOOL=OFF
-    -DgRPC_BUILD_CSHARP_EXT:BOOL=OFF
-    -DgRPC_BUILD_GRPC_CPP_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_CSHARP_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_NODE_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_PHP_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_PYTHON_PLUGIN:BOOL=OFF
-    -DgRPC_BUILD_GRPC_RUBY_PLUGIN:BOOL=OFF
-    -DgRPC_CARES_PROVIDER:STRING=package
-    -DgRPC_INSTALL:BOOL=ON
-    -DgRPC_SSL_PROVIDER:STRING=package
-    -DgRPC_ZLIB_PROVIDER:STRING=package
-    -Dprotobuf_ABSL_PROVIDER:STRING=package
     -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
     -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=ON
-    -DRE2_BUILD_TESTING:BOOL=OFF
-    -DZLIB_ROOT:PATH=${ZLIB_ROOT}
-    -DZLIB_USE_STATIC_LIBS:BOOL=ON
-    -DABSL_PROPAGATE_CXX_STD:BOOL=ON
-    ${_OPENSSL_CACHE_ARGS}
-    DEPENDS openssl zlib cares
 )
-
-ExternalProject_Get_Property(grpc INSTALL_DIR)
-
-# absl
+ExternalProject_Get_Property(protobuf INSTALL_DIR)
 set(absl_DIR "${INSTALL_DIR}/lib/cmake/absl")
-
-# utf8_range
 set(utf8_range_DIR "${INSTALL_DIR}/lib/cmake/utf8_range")
-
-# Protobuf
-if(MSVC)
-    set(Protobuf_DIR "${INSTALL_DIR}/cmake")
-else()
-    set(Protobuf_DIR "${INSTALL_DIR}/lib/cmake/protobuf")
-endif()
-
-set(Protobuf_LIBRARIES "${INSTALL_DIR}/lib")
-set(Protobuf_INCLUDE_DIR "${INSTALL_DIR}/include")
+set(Protobuf_DIR "${INSTALL_DIR}/lib/cmake/protobuf")
 
 # Snappy for RocksDB compression
 ExternalProject_Add(snappy
@@ -368,7 +328,7 @@ ExternalProject_Add(libp2p
     ${_OPENSSL_CACHE_ARGS}
     ${_CMAKE_COMMON_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SQLITE3_INCLUDE_DIR}
-    DEPENDS Boost Microsoft.GSL openssl cares ${PROTOBUF_TARGET} fmt yaml-cpp soralog tsl_hat_trie Boost.DI SQLiteModernCpp grpc
+    DEPENDS Boost Microsoft.GSL openssl cares ${PROTOBUF_TARGET} fmt yaml-cpp soralog tsl_hat_trie Boost.DI SQLiteModernCpp protobuf
 )
 set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake/libp2p")
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
@@ -458,7 +418,7 @@ ExternalProject_Add(ipfs-lite-cpp
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
-    DEPENDS Microsoft.GSL spdlog tsl_hat_trie libp2p grpc ${PROTOBUF_TARGET} rocksdb Boost.DI
+    DEPENDS Microsoft.GSL spdlog tsl_hat_trie libp2p protobuf ${PROTOBUF_TARGET} rocksdb Boost.DI
 )
 set(_FINDPACKAGE_IPFS_LITE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp/lib/cmake/ipfs-lite-cpp")
 set(_FINDPACKAGE_IPFS_LITE_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/ipfs-lite-cpp/lib")
@@ -611,8 +571,8 @@ ExternalProject_Add(protobuf-plugin
     INSTALL_DIR protobuf-plugin
     CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    -Dabsl_DIR:PATH=${absl_HOST_DIR}
     -DCMAKE_BUILD_TYPE:STRING=Release
+    -Dabsl_DIR:PATH=${absl_HOST_DIR}
     -DProtobuf_DIR:PATH=${Protobuf_HOST_DIR}
     -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
     -DTW_USE_EXTERNAL_PROTOC:BOOL=TRUE
@@ -653,7 +613,7 @@ ExternalProject_Add(wallet-core
     # building the correct config's artifact.
     PATCH_COMMAND ${CMAKE_COMMAND} -E rm -f "${THIRDPARTY_DIR}/wallet-core/rust/target/libwallet_core_rs.a"
     COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${WALLET_CORE_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin --build-type=$<CONFIG>
-    DEPENDS Boost grpc openssl protobuf-plugin
+    DEPENDS Boost protobuf openssl protobuf-plugin
     BUILD_BYPRODUCTS
     "${CMAKE_CURRENT_BINARY_DIR}/wallet-core/lib/libTrustWalletCore.a"
 )
@@ -713,7 +673,7 @@ ExternalProject_Add(AsyncIOManager
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     ${_CMAKE_COMMON_CACHE_ARGS}
-    DEPENDS libssh2 openssl ipfs-lite-cpp ipfs-bitswap-cpp grpc ${PROTOBUF_TARGET} Boost MNN
+    DEPENDS libssh2 openssl ipfs-lite-cpp ipfs-bitswap-cpp protobuf ${PROTOBUF_TARGET} Boost MNN
 )
 
 # gnus_upnp
