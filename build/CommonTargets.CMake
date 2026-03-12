@@ -132,20 +132,20 @@ set(Protobuf_INCLUDE_DIR "${INSTALL_DIR}/include")
 
 # Snappy for RocksDB compression
 ExternalProject_Add(snappy
-        PREFIX snappy
-        SOURCE_DIR "${THIRDPARTY_DIR}/snappy"
-        CMAKE_ARGS
-        CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        -DFAIL_ON_WARNINGS:BOOL=OFF
-        -DSNAPPY_BUILD_TESTS:BOOL=OFF
-        -DSNAPPY_BUILD_BENCHMARKS:BOOL=OFF
-        ${_CMAKE_COMMON_CACHE_ARGS}
-        # these need to be at the end to override previous cached args line
-        -DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}\ -DNDEBUG
-        -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}\ -DNDEBUG
-        BUILD_BYPRODUCTS
-        "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/libsnappy.a"
+    PREFIX snappy
+    SOURCE_DIR "${THIRDPARTY_DIR}/snappy"
+    CMAKE_ARGS
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    -DFAIL_ON_WARNINGS:BOOL=OFF
+    -DSNAPPY_BUILD_TESTS:BOOL=OFF
+    -DSNAPPY_BUILD_BENCHMARKS:BOOL=OFF
+    ${_CMAKE_COMMON_CACHE_ARGS}
+    # these need to be at the end to override previous cached args line
+    -DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}\ -DNDEBUG
+    -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}\ -DNDEBUG
+    BUILD_BYPRODUCTS
+    "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/libsnappy.a"
 )
 
 set(_FINDPACKAGE_SNAPPY_DIR "${CMAKE_CURRENT_BINARY_DIR}/snappy/lib/cmake/Snappy")
@@ -374,11 +374,6 @@ set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
 set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include")
 
-#if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-#    set(IS_APPLE_PLATFORM ON)
-#elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-#    set(IS_APPLE_PLATFORM ON)
-#endif()
 if(NOT ANDROID)
     # Vulkan-Headers
     ExternalProject_Add(
@@ -412,25 +407,25 @@ if(NOT ANDROID)
 endif()
 
 if(NOT APPLE OR (APPLE AND CMAKE_OSX_SYSROOT MATCHES "iPhoneOS"))
-ExternalProject_Add(MNN
-    PREFIX MNN
-    SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
-    CMAKE_CACHE_ARGS
-    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    -DMNN_BUILD_SHARED_LIBS:BOOL=OFF
-    -DMNN_BUILD_TESTS:BOOL=OFF
-    -DMNN_BUILD_TOOLS:BOOL=OFF
-    -DMNN_BUILD_PROTOBUFFER:BOOL=OFF
-    -DMNN_VULKAN:BOOL=ON
-    -DMNN_WIN_RUNTIME_MT:BOOL=ON
-    ${_CMAKE_COMMON_CACHE_ARGS}
-    ${_MNN_EXTRA_PARAM}
-    DEPENDS ${_MNN_DEPENDS} ${vulkanTarget}
-)
+    ExternalProject_Add(MNN
+        PREFIX MNN
+        SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
+        CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        -DMNN_BUILD_SHARED_LIBS:BOOL=OFF
+        -DMNN_BUILD_TESTS:BOOL=OFF
+        -DMNN_BUILD_TOOLS:BOOL=OFF
+        -DMNN_BUILD_PROTOBUFFER:BOOL=OFF
+        -DMNN_VULKAN:BOOL=ON
+        -DMNN_WIN_RUNTIME_MT:BOOL=ON
+        ${_CMAKE_COMMON_CACHE_ARGS}
+        ${_MNN_EXTRA_PARAM}
+        DEPENDS ${_MNN_DEPENDS} ${vulkanTarget}
+    )
 
-set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN")
-set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
-set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
+    set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN")
+    set(_FINDPACKAGE_MNN_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib")
+    set(_FINDPACKAGE_MNN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/include")
 endif()
 
 # ipfs-lite-cpp
@@ -657,7 +652,7 @@ ExternalProject_Add(wallet-core
     # doesn't short-circuit a second config (e.g. Release after Debug) and skip
     # building the correct config's artifact.
     PATCH_COMMAND ${CMAKE_COMMAND} -E rm -f "${THIRDPARTY_DIR}/wallet-core/rust/target/libwallet_core_rs.a"
-        COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${WALLET_CORE_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin --build-type=$<CONFIG>
+    COMMAND ${_WALLET_CORE_GENERATE_SCRIPT} --target-os=${_WALLET_CORE_ARCH} --arch-abi=${WALLET_CORE_ARCH_ABI} --protobuf-dir=${PROTOBUF_HOST_PREFIX} --out-dir=<INSTALL_DIR> --plugin-dir=${ProtobufPlugin_DIR}/bin --build-type=$<CONFIG>
     DEPENDS Boost grpc openssl protobuf-plugin
     BUILD_BYPRODUCTS
     "${CMAKE_CURRENT_BINARY_DIR}/wallet-core/lib/libTrustWalletCore.a"
@@ -720,9 +715,6 @@ ExternalProject_Add(AsyncIOManager
     ${_CMAKE_COMMON_CACHE_ARGS}
     DEPENDS libssh2 openssl ipfs-lite-cpp ipfs-bitswap-cpp grpc ${PROTOBUF_TARGET} Boost MNN
 )
-set(_FINDPACKAGE_ASIOMGR_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/lib/cmake/AsyncIOManager")
-set(_FINDPACKAGE_ASIOMGR_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/lib")
-set(_FINDPACKAGE_ASIOMGR_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/AsyncIOManager/include")
 
 # gnus_upnp
 ExternalProject_Add(gnus_upnp
@@ -741,25 +733,19 @@ ExternalProject_Add(gnus_upnp
     ${_OPENSSL_CACHE_ARGS}
     DEPENDS Boost fmt spdlog tsl_hat_trie yaml-cpp
 )
-set(_FINDPACKAGE_GNUS_UPNP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/gnus_upnp/lib/cmake/gnus_upnp")
-set(_FINDPACKAGE_GNUS_UPNP_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/gnus_upnp/lib")
-set(_FINDPACKAGE_GNUS_UPNP_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/gnus_upnp/include")
 
-#json.hpp
+# Nlohmann JSON
 ExternalProject_Add(json
     PREFIX json
     SOURCE_DIR "${THIRDPARTY_DIR}/json"
     CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-	-DJSON_BuildTests:BOOL=OFF
+    -DJSON_BuildTests:BOOL=OFF
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     DEPENDS Boost
 )
-set(_FINDPACKAGE_JSON_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/json/lib/cmake/valijson")
-set(_FINDPACKAGE_JSON_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/json/lib")
-set(_FINDPACKAGE_JSON_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/json/include")
 
 # jsonrpc-lean
 install(
