@@ -9,12 +9,6 @@
 [submodule "ipfs-lite-cpp"]
     path = ipfs-lite-cpp
     url = ../ipfs-lite-cpp.git
-[submodule "celer-network/pb3-gen-sol"]
-    path = celer-network/pb3-gen-sol
-    url = https://github.com/celer-network/pb3-gen-sol.git
-[submodule "lmdb"]
-    path = lmdb
-    url = ../lmdb.git
 [submodule "flutter"]
     path = flutter
     url = https://github.com/flutter/flutter.git
@@ -37,9 +31,6 @@
 	path = Boost.DI
 	url = ../Boost.DI
 	branch = cpp14
-[submodule "cpp-ipfs-http-client"]
-    path = cpp-ipfs-http-client
-    url = https://github.com/vasild/cpp-ipfs-http-client
 [submodule "ipfs-pubsub"]
     path = ipfs-pubsub
     url = ../ipfs-pubsub.git
@@ -52,9 +43,6 @@
 [submodule "rapidjson"]
     path = rapidjson
     url = ../rapidjson.git
-[submodule "gnostic"]
-    path = gnostic
-    url = https://github.com/googleapis/gnostic
 [submodule "rocksdb"]
     path = rocksdb
     url = ../rocksdb.git
@@ -117,9 +105,6 @@
 [submodule "AsyncIOManager"]
     path = AsyncIOManager
     url = ../AsyncIOManager.git
-[submodule "cryptopp-cmake"]
-    path = cryptopp-cmake
-    url = https://github.com/abdes/cryptopp-cmake.git
 [submodule "stb"]
     path = stb
     url = https://github.com/nothings/stb.git
