@@ -118,7 +118,7 @@
     path = SQLiteModernCpp
     url = ../sqlite_modern_cpp.git
 [submodule "json"]
-    path = json
+	path = json
 	url = https://github.com/nlohmann/json.git
 [submodule "snappy"]
     path = snappy
