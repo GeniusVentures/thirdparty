@@ -24,10 +24,31 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
 
-    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 ${BOOST_ARCH_FLAGS} variant=${BOOST_VARIANT} --prefix=<INSTALL_DIR> -d0 -j4 install
+    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} ${BOOST_B2_EXTRA_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 ${BOOST_ARCH_FLAGS} variant=${BOOST_VARIANT} --prefix=<INSTALL_DIR> -d0 install
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
+    BUILD_BYPRODUCTS
+        "${BOOST_ROOT}/lib/libboost_container.a"
+        "${BOOST_ROOT}/lib/libboost_program_options.a"
+        "${BOOST_ROOT}/lib/libboost_random.a"
+        "${BOOST_ROOT}/lib/libboost_regex.a"
+        "${BOOST_ROOT}/lib/libboost_system.a"
+        "${BOOST_ROOT}/lib/libboost_prg_exec_monitor.a"
+        "${BOOST_ROOT}/lib/libboost_test_exec_monitor.a"
+        "${BOOST_ROOT}/lib/libboost_unit_test_framework.a"
+        "${BOOST_ROOT}/lib/libboost_timer.a"
+        "${BOOST_ROOT}/lib/libboost_date_time.a"
+        "${BOOST_ROOT}/lib/libboost_atomic.a"
+        "${BOOST_ROOT}/lib/libboost_filesystem.a"
+        "${BOOST_ROOT}/lib/libboost_json.a"
+        "${BOOST_ROOT}/lib/libboost_thread.a"
+        "${BOOST_ROOT}/lib/libboost_chrono.a"
+        "${BOOST_ROOT}/lib/libboost_log.a"
+        "${BOOST_ROOT}/lib/libboost_log_setup.a"
+        "${BOOST_ROOT}/lib/libboost_context.a"
+        "${BOOST_ROOT}/lib/libboost_coroutine.a"
+
 )
 
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")

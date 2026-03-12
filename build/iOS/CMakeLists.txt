@@ -42,10 +42,30 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND <SOURCE_DIR>/bootstrap.sh --with-toolset=clang --with-libraries=${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED} --prefix=${BOOST_ROOT}
 
-    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} toolset=darwin target-os=iphone visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=arm variant=${BOOST_VARIANT} --prefix=<INSTALL_DIR> -d0 -j4 install
+    BUILD_COMMAND <SOURCE_DIR>/b2${CMAKE_EXECUTABLE_SUFFIX} ${BOOST_B2_FLAGS} ${BOOST_B2_EXTRA_FLAGS} cxxstd=${CMAKE_CXX_STANDARD} toolset=darwin target-os=iphone visibility=global runtime-link=static link=static threading=multi --build-type=minimal address-model=64 architecture=arm variant=${BOOST_VARIANT} --prefix=<INSTALL_DIR> -d0 install
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
+    BUILD_BYPRODUCTS
+        "${BOOST_ROOT}/lib/libboost_container.a"
+        "${BOOST_ROOT}/lib/libboost_program_options.a"
+        "${BOOST_ROOT}/lib/libboost_random.a"
+        "${BOOST_ROOT}/lib/libboost_regex.a"
+        "${BOOST_ROOT}/lib/libboost_system.a"
+        "${BOOST_ROOT}/lib/libboost_prg_exec_monitor.a"
+        "${BOOST_ROOT}/lib/libboost_test_exec_monitor.a"
+        "${BOOST_ROOT}/lib/libboost_unit_test_framework.a"
+        "${BOOST_ROOT}/lib/libboost_timer.a"
+        "${BOOST_ROOT}/lib/libboost_date_time.a"
+        "${BOOST_ROOT}/lib/libboost_atomic.a"
+        "${BOOST_ROOT}/lib/libboost_filesystem.a"
+        "${BOOST_ROOT}/lib/libboost_json.a"
+        "${BOOST_ROOT}/lib/libboost_thread.a"
+        "${BOOST_ROOT}/lib/libboost_chrono.a"
+        "${BOOST_ROOT}/lib/libboost_log.a"
+        "${BOOST_ROOT}/lib/libboost_log_setup.a"
+        "${BOOST_ROOT}/lib/libboost_context.a"
+        "${BOOST_ROOT}/lib/libboost_coroutine.a"
 )
 
 set(Boost_DIR "${BOOST_ROOT}/lib/cmake/Boost-${BOOST_VERSION}")
@@ -58,6 +78,7 @@ set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-${B
 set(boost_regex_DIR "${BOOST_ROOT}/lib/cmake/boost_regex-${BOOST_VERSION}")
 set(boost_date_time_DIR "${BOOST_ROOT}/lib/cmake/boost_date_time-${BOOST_VERSION}")
 set(boost_context_DIR "${BOOST_ROOT}/lib/cmake/boost_context-${BOOST_VERSION}")
+set(boost_coroutine_DIR "${BOOST_ROOT}/lib/cmake/boost_coroutine-${BOOST_VERSION}")
 
 set(_BOOST_CACHE_ARGS
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
@@ -75,6 +96,7 @@ set(_BOOST_CACHE_ARGS
     -Dboost_regex_DIR:PATH=${boost_regex_DIR}
     -Dboost_system_DIR:PATH=${boost_system_DIR}
     -Dboost_context_DIR:PATH=${boost_context_DIR}
+    -Dboost_coroutine_DIR:PATH=${boost_coroutine_DIR}
 )
 
 # OpenSSL
