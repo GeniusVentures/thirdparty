@@ -57,6 +57,7 @@ set(boost_filesystem_DIR "${BOOST_ROOT}/lib/cmake/boost_filesystem-${BOOST_VERSI
 set(boost_program_options_DIR "${BOOST_ROOT}/lib/cmake/boost_program_options-${BOOST_VERSION}")
 set(boost_regex_DIR "${BOOST_ROOT}/lib/cmake/boost_regex-${BOOST_VERSION}")
 set(boost_date_time_DIR "${BOOST_ROOT}/lib/cmake/boost_date_time-${BOOST_VERSION}")
+set(boost_context_DIR "${BOOST_ROOT}/lib/cmake/boost_context-${BOOST_VERSION}")
 
 set(_BOOST_CACHE_ARGS
     -DBOOST_ROOT:PATH=${BOOST_ROOT}
@@ -73,6 +74,7 @@ set(_BOOST_CACHE_ARGS
     -Dboost_random_DIR:PATH=${boost_random_DIR}
     -Dboost_regex_DIR:PATH=${boost_regex_DIR}
     -Dboost_system_DIR:PATH=${boost_system_DIR}
+    -Dboost_context_DIR:PATH=${boost_context_DIR}
 )
 
 # OpenSSL

@@ -57,6 +57,7 @@ set(_BOOST_CACHE_ARGS
     -Dboost_random_DIR:PATH=${Boost_DIR}/boost_random-${BOOST_VERSION}
     -Dboost_regex_DIR:PATH=${Boost_DIR}/boost_regex-${BOOST_VERSION}
     -Dboost_system_DIR:PATH=${Boost_DIR}/boost_system-${BOOST_VERSION}
+    -Dboost_context_DIR:PATH=${Boost_DIR}/boost_context-${BOOST_VERSION}
     -DBoost_NO_SYSTEM_PATHS:BOOL=ON
     -DBoost_USE_MULTITHREADED:BOOL=ON
     -DBoost_USE_STATIC_LIBS:BOOL=ON
