@@ -40,9 +40,6 @@
 [submodule "rocksdb"]
     path = rocksdb
     url = ../rocksdb.git
-[submodule "sr25519-donna"]
-    path = sr25519-donna
-    url = ../sr25519-donna.git
 [submodule "fmt"]
     path = fmt
     url = https://github.com/fmtlib/fmt.git
