@@ -508,18 +508,6 @@ ExternalProject_Add(ed25519
 )
 set(_FINDPACKAGE_ed25519_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/ed25519/lib/cmake/ed25519")
 
-# sr25519-donna
-ExternalProject_Add(sr25519-donna
-    PREFIX sr25519-donna
-    SOURCE_DIR "${THIRDPARTY_DIR}/sr25519-donna"
-    CMAKE_CACHE_ARGS
-    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    -DTESTING:BOOL=OFF
-    -DBUILD_SHARED_LIBS:BOOL=OFF
-    -DHASH_USE_SHA3_BRAINHUB:BOOL=ON
-    ${_CMAKE_COMMON_CACHE_ARGS}
-)
-
 # RapidJSON
 ExternalProject_Add(rapidjson
     PREFIX rapidjson
