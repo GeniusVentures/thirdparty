@@ -12,9 +12,6 @@
 [submodule "flutter"]
     path = flutter
     url = https://github.com/flutter/flutter.git
-[submodule "curl-android-ios"]
-    path = curl-android-ios
-    url = https://github.com/gcesarmza/curl-android-ios.git
 [submodule "GSL"]
     path = GSL
     url = ../GSL.git
@@ -23,7 +20,7 @@
     url = https://github.com/gabime/spdlog
 [submodule "hat-trie"]
     path = hat-trie
-    url = https://github.com/masterjedy/hat-trie
+	url = https://github.com/Tessil/hat-trie.git
 [submodule "Boost.DI"]
 	path = Boost.DI
 	url = ../Boost.DI
