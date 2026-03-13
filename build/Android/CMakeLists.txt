@@ -43,6 +43,13 @@ set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DOPENSSL_USE_STATIC_LIBS:BOOL=TRUE
 )
 
+set(BOOST_ANDROID_B2_EXTRA_FLAGS "")
+if(ANDROID_ABI STREQUAL "arm64-v8a")
+    set(BOOST_ANDROID_B2_EXTRA_FLAGS "architecture=arm,address-model=64,abi=aapcs,binary-format=elf")
+elseif(ANDROID_ABI STREQUAL "armeabi-v7a")
+    set(BOOST_ANDROID_B2_EXTRA_FLAGS "architecture=arm,address-model=32,abi=aapcs,binary-format=elf")
+endif()
+
 # Boost
 set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build")
 ExternalProject_Add(Boost
@@ -52,7 +59,7 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${BOOST_ROOT}" --with-libraries="${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}" --extra="--build-type=minimal,visibility=global,cxxstd=${CMAKE_CXX_STANDARD},-d0,${BOOST_B2_EXTRA_FLAGS}"
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${BOOST_ROOT}" --with-libraries="${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}" --extra="--build-type=minimal,visibility=global,cxxstd=${CMAKE_CXX_STANDARD},-d0,${BOOST_B2_EXTRA_FLAGS},${BOOST_ANDROID_B2_EXTRA_FLAGS}"
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
     BUILD_BYPRODUCTS
