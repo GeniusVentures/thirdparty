@@ -20,7 +20,7 @@
     url = https://github.com/gabime/spdlog
 [submodule "hat-trie"]
     path = hat-trie
-	url = https://github.com/Tessil/hat-trie.git
+	url = https://github.com/masterjedy/hat-trie.git
 [submodule "Boost.DI"]
 	path = Boost.DI
 	url = ../Boost.DI
