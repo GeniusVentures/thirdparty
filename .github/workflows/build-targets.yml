@@ -97,6 +97,15 @@ jobs:
           set -euo pipefail
           data="$(gh api "/repos/$REPO/actions/runners" --paginate)"
 
+          # Define JSON arrays using single quotes so real double-quotes are preserved.
+          SH_LINUX_X64='["self-hosted","sg-ubuntu-linux"]'
+          SH_LINUX_ARM='["self-hosted","sg-arm-linux"]'
+          SH_WINDOWS='["self-hosted","SG-WIN11"]'
+          SH_MAC='["self-hosted","gv-OSX-Large"]'
+          FB_LINUX='["ubuntu-latest"]'
+          FB_WINDOWS='["windows-latest"]'
+          FB_MAC='["macos-latest"]'
+
           # Returns the self-hosted label array if at least one matching runner
           # is online and not busy, otherwise returns the GitHub-hosted fallback.
           pick_runner() {
@@ -110,10 +119,10 @@ jobs:
             fi
           }
 
-          echo "linux_x64=$(pick_runner 'sg-ubuntu-linux' '[\"self-hosted\",\"sg-ubuntu-linux\"]' '[\"ubuntu-latest\"]')" >> "$GITHUB_OUTPUT"
-          echo "linux_arm=$(pick_runner 'sg-arm-linux'    '[\"self-hosted\",\"sg-arm-linux\"]'    '[\"ubuntu-latest\"]')" >> "$GITHUB_OUTPUT"
-          echo "windows=$(pick_runner   'SG-WIN11'        '[\"self-hosted\",\"SG-WIN11\"]'        '[\"windows-latest\"]')" >> "$GITHUB_OUTPUT"
-          echo "mac=$(pick_runner       'gv-OSX-Large'    '[\"self-hosted\",\"gv-OSX-Large\"]'    '[\"macos-latest\"]')" >> "$GITHUB_OUTPUT"
+          echo "linux_x64=$(pick_runner 'sg-ubuntu-linux' "$SH_LINUX_X64" "$FB_LINUX")"   >> "$GITHUB_OUTPUT"
+          echo "linux_arm=$(pick_runner 'sg-arm-linux'    "$SH_LINUX_ARM" "$FB_LINUX")"   >> "$GITHUB_OUTPUT"
+          echo "windows=$(pick_runner   'SG-WIN11'        "$SH_WINDOWS"   "$FB_WINDOWS")" >> "$GITHUB_OUTPUT"
+          echo "mac=$(pick_runner       'gv-OSX-Large'    "$SH_MAC"       "$FB_MAC")"     >> "$GITHUB_OUTPUT"
 
   build:
     needs: resolve-runners
