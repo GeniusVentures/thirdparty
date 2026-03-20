@@ -97,6 +97,19 @@ jobs:
           set -euo pipefail
           data="$(gh api "/repos/$REPO/actions/runners" --paginate)"
 
+          echo "Discovered self-hosted runners for $REPO:"
+          echo "$data" | jq -r '.runners[] | "- \(.name) | status=\(.status) | busy=\(.busy) | labels=\([.labels[].name] | join(", "))"'
+
+          {
+            echo "## Runner availability"
+            echo
+            echo "Repository: $REPO"
+            echo
+            echo "Discovered runners:"
+            echo "$data" | jq -r '.runners[] | "- \(.name) | status=\(.status) | busy=\(.busy) | labels=\([.labels[].name] | join(", "))"'
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+
           # Define JSON arrays using single quotes so real double-quotes are preserved.
           SH_LINUX_X64='["self-hosted","sg-ubuntu-linux"]'
           SH_LINUX_ARM='["self-hosted","sg-arm-linux"]'
@@ -108,13 +121,21 @@ jobs:
 
           # Returns the self-hosted label array if at least one matching runner
           # is online and not busy, otherwise returns the GitHub-hosted fallback.
+          # Match either runner name or label/tag text, case-insensitively.
           pick_runner() {
             local label="$1" self_hosted="$2" fallback="$3"
             if echo "$data" | jq -e --arg L "$label" \
-              '.runners[] | select(.status=="online" and (.busy|not)) | select(any(.labels[]; .name==$L))' \
+              '.runners[]
+               | select(.status=="online" and (.busy|not))
+               | select((.name | ascii_downcase) == ($L | ascii_downcase)
+                 or any(.labels[]; (.name | ascii_downcase) == ($L | ascii_downcase)))' \
               >/dev/null 2>&1; then
+              echo "Selector '$label' matched an available self-hosted runner" >&2
+              echo "- $label: self-hosted" >> "$GITHUB_STEP_SUMMARY"
               echo "$self_hosted"
             else
+              echo "Selector '$label' did not match an available self-hosted runner" >&2
+              echo "- $label: fallback" >> "$GITHUB_STEP_SUMMARY"
               echo "$fallback"
             fi
           }
@@ -452,25 +473,47 @@ jobs:
         run: |
           echo "Checking if release $RELEASE_TAG exists..."
 
-          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-              if [ "$IS_TAG_RELEASE" == "false" ]; then
+          if [ "$IS_TAG_RELEASE" = "true" ]; then
+              # For explicit tags, all matrix jobs share the same release tag.
+              # Create once if missing; concurrent creators should not fail the job.
+              if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+                  echo "Release $RELEASE_TAG already exists; skipping create."
+              else
+                  echo "Release does not exist yet; creating tag/release for $RELEASE_TAG..."
+                  git tag "$RELEASE_TAG" "${{ github.sha }}" || true
+                  git push origin "$RELEASE_TAG" || true
+
+                  if ! gh release create "$RELEASE_TAG" \
+                    --target "${{ github.sha }}" \
+                    -t "Release $RELEASE_TAG" \
+                    -n "Tag: $RELEASE_TAG | SHA: ${{ github.sha }}"; then
+                    if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+                      echo "Release was created by another matrix job; continuing."
+                    else
+                      echo "Failed to create release $RELEASE_TAG for an unexpected reason."
+                      exit 1
+                    fi
+                  fi
+              fi
+          else
+              if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
                   echo "Deleting existing release/tag $RELEASE_TAG..."
                   gh release delete "$RELEASE_TAG" --yes || true
                   git push origin ":refs/tags/$RELEASE_TAG" || true
                   git tag -d "$RELEASE_TAG" || true
               fi
+
+              echo "Creating new tag $RELEASE_TAG..."
+              git tag -f "$RELEASE_TAG" "${{ github.sha }}"
+              git push origin "$RELEASE_TAG" --force
+
+              echo "Creating GitHub release $RELEASE_TAG..."
+              gh release create "$RELEASE_TAG" \
+              --target "${{ github.sha }}" \
+              -t "${{ matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
+              -n "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
+              --prerelease
           fi
-
-          echo "Creating new tag $RELEASE_TAG..."
-          git tag -f "$RELEASE_TAG" "${{ github.sha }}"
-          git push origin "$RELEASE_TAG" --force
-
-          echo "Creating GitHub release $RELEASE_TAG..."
-          gh release create "$RELEASE_TAG" \
-          --target "${{ github.sha }}" \
-          -t "${{ matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
-          -n "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
-          $( [ "$IS_TAG_RELEASE" = "true" ] && echo "" || echo "--prerelease" )
 
       - name: Upload file
         if: github.ref_name == 'main' || github.ref_name == 'develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag != '')
