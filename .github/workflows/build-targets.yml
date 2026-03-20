@@ -413,7 +413,7 @@ jobs:
         run: cmake --build . --config ${{matrix.build-type}} -j
 
       - name: Compress directories
-        if: github.ref_name == 'main' || github.ref_name == 'develop'
+        if: github.ref_name == 'main' || github.ref_name == 'develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag != '')
         working-directory: ${{env.BUILD_DIRECTORY}}
         shell: bash
         run: |
@@ -446,7 +446,7 @@ jobs:
           echo "IS_TAG_RELEASE=$IS_TAG_RELEASE" >> $GITHUB_ENV
 
       - name: Create release tag
-        if: github.ref_name == 'main' || github.ref_name == 'develop'
+        if: github.ref_name == 'main' || github.ref_name == 'develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag != '')
         shell: bash
         id: create-release-tag
         run: |
@@ -473,6 +473,6 @@ jobs:
           $( [ "$IS_TAG_RELEASE" = "true" ] && echo "" || echo "--prerelease" )
 
       - name: Upload file
-        if: github.ref_name == 'main' || github.ref_name == 'develop'
+        if: github.ref_name == 'main' || github.ref_name == 'develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag != '')
         working-directory: ${{env.BUILD_DIRECTORY}}
         run: gh release upload ${{env.RELEASE_TAG}} ${{env.FILE_NAME}} --clobber
