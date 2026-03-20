@@ -95,18 +95,50 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          data="$(gh api "/repos/$REPO/actions/runners" --paginate)"
+          ORG="${REPO%%/*}"
+          repo_err="$(mktemp)"
+          org_err="$(mktemp)"
 
-          echo "Discovered self-hosted runners for $REPO:"
-          echo "$data" | jq -r '.runners[] | "- \(.name) | status=\(.status) | busy=\(.busy) | labels=\([.labels[].name] | join(", "))"'
+          # Some org-scoped runners may not show up via the repo endpoint for this token.
+          # Query both scopes and merge the results.
+          if repo_data="$(gh api "/repos/$REPO/actions/runners" --paginate 2>"$repo_err")"; then
+            echo "Repository runner API query succeeded for $REPO"
+          else
+            echo "Repository runner API query failed for $REPO; continuing with empty repo runner set"
+            repo_data='{"runners":[]}'
+          fi
+
+          if org_data="$(gh api "/orgs/$ORG/actions/runners" --paginate 2>"$org_err")"; then
+            echo "Organization runner API query succeeded for $ORG"
+          else
+            echo "Organization runner API query failed for $ORG; continuing with empty org runner set"
+            org_data='{"runners":[]}'
+          fi
+
+          data="$(jq -n --argjson repo "$repo_data" --argjson org "$org_data" '{runners: (($repo.runners // []) + ($org.runners // []) | unique_by(.id))}')"
+
+          repo_count="$(echo "$repo_data" | jq -r '(.runners // []) | length')"
+          org_count="$(echo "$org_data" | jq -r '(.runners // []) | length')"
+          merged_count="$(echo "$data" | jq -r '(.runners // []) | length')"
+
+          echo "Runner counts: repo=$repo_count org=$org_count merged=$merged_count"
+          if [ "$org_count" -eq 0 ] && [ -s "$org_err" ]; then
+            echo "Org endpoint error output:"
+            cat "$org_err"
+          fi
+
+          echo "Discovered self-hosted runners for $REPO (repo+org merged):"
+          echo "$data" | jq -r '.runners[]? | "- \(.name) | status=\(.status) | busy=\(.busy) | labels=\([.labels[].name] | join(", "))"'
 
           {
             echo "## Runner availability"
             echo
             echo "Repository: $REPO"
+            echo "Organization: $ORG"
+            echo "Counts: repo=$repo_count org=$org_count merged=$merged_count"
             echo
-            echo "Discovered runners:"
-            echo "$data" | jq -r '.runners[] | "- \(.name) | status=\(.status) | busy=\(.busy) | labels=\([.labels[].name] | join(", "))"'
+            echo "Discovered runners (repo+org merged):"
+            echo "$data" | jq -r '.runners[]? | "- \(.name) | status=\(.status) | busy=\(.busy) | labels=\([.labels[].name] | join(", "))"'
             echo
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -485,7 +517,7 @@ jobs:
 
                   if ! gh release create "$RELEASE_TAG" \
                     --target "${{ github.sha }}" \
-                    -t "Release $RELEASE_TAG" \
+                    -t "$RELEASE_TAG" \
                     -n "Tag: $RELEASE_TAG | SHA: ${{ github.sha }}"; then
                     if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
                       echo "Release was created by another matrix job; continuing."
