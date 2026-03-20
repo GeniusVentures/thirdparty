@@ -81,8 +81,43 @@ on:
 env:
   GH_TOKEN: ${{ secrets.GNUS_TOKEN_1 }}
 jobs:
+  resolve-runners:
+    runs-on: ubuntu-latest
+    outputs:
+      linux_x64: ${{ steps.pick.outputs.linux_x64 }}
+      linux_arm: ${{ steps.pick.outputs.linux_arm }}
+      windows: ${{ steps.pick.outputs.windows }}
+      mac: ${{ steps.pick.outputs.mac }}
+    steps:
+      - name: Check self-hosted runner availability
+        id: pick
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          data="$(gh api "/repos/$REPO/actions/runners" --paginate)"
+
+          # Returns the self-hosted label array if at least one matching runner
+          # is online and not busy, otherwise returns the GitHub-hosted fallback.
+          pick_runner() {
+            local label="$1" self_hosted="$2" fallback="$3"
+            if echo "$data" | jq -e --arg L "$label" \
+              '.runners[] | select(.status=="online" and (.busy|not)) | select(any(.labels[]; .name==$L))' \
+              >/dev/null 2>&1; then
+              echo "$self_hosted"
+            else
+              echo "$fallback"
+            fi
+          }
+
+          echo "linux_x64=$(pick_runner 'sg-ubuntu-linux' '[\"self-hosted\",\"sg-ubuntu-linux\"]' '[\"ubuntu-latest\"]')" >> "$GITHUB_OUTPUT"
+          echo "linux_arm=$(pick_runner 'sg-arm-linux'    '[\"self-hosted\",\"sg-arm-linux\"]'    '[\"ubuntu-latest\"]')" >> "$GITHUB_OUTPUT"
+          echo "windows=$(pick_runner   'SG-WIN11'        '[\"self-hosted\",\"SG-WIN11\"]'        '[\"windows-latest\"]')" >> "$GITHUB_OUTPUT"
+          echo "mac=$(pick_runner       'gv-OSX-Large'    '[\"self-hosted\",\"gv-OSX-Large\"]'    '[\"macos-latest\"]')" >> "$GITHUB_OUTPUT"
+
   build:
-    runs-on: ${{matrix.host}}
+    needs: resolve-runners
+    runs-on: ${{ fromJson(needs.resolve-runners.outputs[matrix.runner_key]) }}
     container:
       image: ${{matrix.container}}
       credentials:
@@ -96,45 +131,56 @@ jobs:
         abi: [ "" ]
         include:
           - target: Linux
-            host: ubuntu-22.04
+            host: sg-ubuntu-linux
+            runner_key: linux_x64
             abi: x86_64
             build-type: Debug
             container: ghcr.io/geniusventures/debian-bullseye:latest
           - target: Linux
-            host: ubuntu-22.04
+            host: sg-ubuntu-linux
+            runner_key: linux_x64
             abi: x86_64
             build-type: Release
             container: ghcr.io/geniusventures/debian-bullseye:latest
           - target: Linux
-            host: ubuntu-24.04-arm
+            host: sg-arm-linux
+            runner_key: linux_arm
             abi: aarch64
             build-type: Debug
             container: ghcr.io/geniusventures/debian-bullseye:latest
           - target: Linux
-            host: ubuntu-24.04-arm
+            host: sg-arm-linux
+            runner_key: linux_arm
             abi: aarch64
             build-type: Release
             container: ghcr.io/geniusventures/debian-bullseye:latest
           - target: Windows
             host: SG-WIN11
+            runner_key: windows
           - target: OSX
             host: gv-OSX-Large
+            runner_key: mac
           - target: iOS
-            host: macos-latest
+            host: gv-OSX-Large
+            runner_key: mac
           - target: Android
             host: sg-ubuntu-linux
+            runner_key: linux_x64
             build-type: Release
             abi: arm64-v8a
           - target: Android
             host: sg-ubuntu-linux
+            runner_key: linux_x64
             build-type: Release
             abi: armeabi-v7a
           - target: Android
             host: sg-ubuntu-linux
+            runner_key: linux_x64
             build-type: Debug
             abi: arm64-v8a
           - target: Android
             host: sg-ubuntu-linux
+            runner_key: linux_x64
             build-type: Debug
             abi: armeabi-v7a
         exclude:
