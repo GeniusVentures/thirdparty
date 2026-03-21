@@ -148,6 +148,7 @@ jobs:
           SH_WINDOWS='["self-hosted","SG-WIN11"]'
           SH_MAC='["self-hosted","gv-OSX-Large"]'
           FB_LINUX='["ubuntu-latest"]'
+          FB_LINUX_ARM='["ubuntu-24.04-arm"]'
           FB_WINDOWS='["windows-latest"]'
           FB_MAC='["macos-latest"]'
 
@@ -173,7 +174,7 @@ jobs:
           }
 
           echo "linux_x64=$(pick_runner 'sg-ubuntu-linux' "$SH_LINUX_X64" "$FB_LINUX")"   >> "$GITHUB_OUTPUT"
-          echo "linux_arm=$(pick_runner 'sg-arm-linux'    "$SH_LINUX_ARM" "$FB_LINUX")"   >> "$GITHUB_OUTPUT"
+          echo "linux_arm=$(pick_runner 'sg-arm-linux'    "$SH_LINUX_ARM" "$FB_LINUX_ARM")" >> "$GITHUB_OUTPUT"
           echo "windows=$(pick_runner   'SG-WIN11'        "$SH_WINDOWS"   "$FB_WINDOWS")" >> "$GITHUB_OUTPUT"
           echo "mac=$(pick_runner       'gv-OSX-Large'    "$SH_MAC"       "$FB_MAC")"     >> "$GITHUB_OUTPUT"
 
