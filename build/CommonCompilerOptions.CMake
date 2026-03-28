@@ -103,3 +103,6 @@ list(TRANSFORM BOOST_B2_FLAGS PREPEND "cxxflags=")
 
 # OpenSSL
 set(OPENSSL_VARIANT $<IF:$<CONFIG:Debug>,--debug,--release>)
+
+option(MNN_BUILD_TESTS "Build MNN tests" OFF)
+
