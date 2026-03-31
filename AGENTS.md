@@ -45,6 +45,7 @@ ninja
 
 ## Practical editing guidance for agents
 - Make minimal, surgical changes in the relevant platform file and/or `build/CommonTargets.CMake`; avoid broad refactors across vendored sources.
+- Minimal changes do not justify magic numbers; when adding or touching non-obvious literals, use short named constants or helpers so the code remains human-readable.
 - When adding a dependency, update both `DEPENDS` and required `*_DIR`/include cache args for downstream consumers.
 - Validate changes by mirroring one CI configure/build path for the affected platform.
 
