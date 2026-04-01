@@ -12,13 +12,20 @@ if(NOT DEFINED CMAKE_COLOR_DIAGNOSTICS)
     set(CMAKE_COLOR_DIAGNOSTICS ON)
 endif()
 
-if (DEFINED SANITIZE_CODE AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=${SANITIZE_CODE}")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=${SANITIZE_CODE}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=${SANITIZE_CODE}")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=${SANITIZE_CODE}")
-    add_compile_options("-fsanitize=${SANITIZE_CODE}")
-    add_link_options("-fsanitize=${SANITIZE_CODE}")
+if (DEFINED SANITIZE_CODE)
+    message(STATUS "Building with sanitizer: ${SANITIZE_CODE}")
+    if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=${SANITIZE_CODE}")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=${SANITIZE_CODE}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=${SANITIZE_CODE}")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=${SANITIZE_CODE}")
+        add_compile_options("-fsanitize=${SANITIZE_CODE}")
+        add_link_options("-fsanitize=${SANITIZE_CODE}")
+    elseif (MSVC)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=${SANITIZE_CODE}")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=${SANITIZE_CODE}")
+        add_compile_options("/fsanitize=${SANITIZE_CODE}")
+    endif()
 endif()
 
 # Remove this once we update gRPC, its dependencies, fix libp2p and change some of our internal projects
@@ -53,6 +60,11 @@ else()
     set(TP_BUILD_SUBDIR ${CMAKE_SYSTEM_NAME})
 endif()
 
+if(WIN32)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_WIN32_WINNT=0x0A00 -DNOMINMAX")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WIN32_WINNT=0x0A00 -DNOMINMAX")
+endif()
+
 if(MSVC)
     set(_MSVC_RUNTIME_LIBRARY
         -DCMAKE_POLICY_DEFAULT_CMP0091:STRING=NEW
@@ -60,10 +72,10 @@ if(MSVC)
     )
 endif()
 
+string(STRIP "${CMAKE_C_FLAGS}" CMAKE_C_FLAGS)
 string(STRIP "${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS)
 
 set(_CMAKE_COMMON_CACHE_ARGS
-    -D_WIN32_WINNT:STRING=_WIN32_WINNT_WIN10
     -DBUILD_EXAMPLES:BOOL=OFF
     -DBUILD_SHARED_LIBS:BOOL=OFF
     -DBUILD_STATIC_LIBS:BOOL=ON
