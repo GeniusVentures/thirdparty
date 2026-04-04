@@ -59,9 +59,11 @@ ExternalProject_Add(Boost
 
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${BOOST_ROOT}" --with-libraries="${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}" --extra="--build-type=minimal,visibility=global,cxxstd=${CMAKE_CXX_STANDARD},-d0,${BOOST_B2_EXTRA_FLAGS},${BOOST_ANDROID_B2_EXTRA_FLAGS}"
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Boost-for-Android/build-android.sh ${CMAKE_ANDROID_NDK} --src-dir="${THIRDPARTY_DIR}/boost" --boost="${BOOST_VERSION}" --arch="${ANDROID_ABI}" --target-version="${ANDROID_PLATFORM_LEVEL}" --prefix="${BOOST_ROOT}" --without-python --with-libraries="${BOOST_INCLUDE_LIBRARIES_COMMA_SEPARATED}" --extra="--build-type=minimal,visibility=global,cxxstd=${CMAKE_CXX_STANDARD},-d0,${BOOST_B2_EXTRA_FLAGS},${BOOST_ANDROID_B2_EXTRA_FLAGS}"
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
+    DEPENDS
+        zlib
     BUILD_BYPRODUCTS
         "${BOOST_ROOT}/lib/libboost_container.a"
         "${BOOST_ROOT}/lib/libboost_program_options.a"
