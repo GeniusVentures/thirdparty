@@ -15,8 +15,6 @@ endif()
 
 project(OSX_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
-include(../CommonCompilerOptions.CMake)
-
 # OSX specific runtime options
 set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DPLATFORM:STRING=${PLATFORM}
@@ -27,6 +25,8 @@ set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DENABLE_VISIBILITY:BOOL=${ENABLE_VISIBILITY}
     -DENABLE_STRICT_TRY_COMPILE:BOOL=${ENABLE_STRICT_TRY_COMPILE}
 )
+
+include(../CommonCompilerOptions.CMake)
 
 # Boost
 set(BOOST_ARCH "arm+x86")
