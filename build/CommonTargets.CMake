@@ -57,20 +57,8 @@ ExternalProject_Add(zlib
 
 ExternalProject_Get_Property(zlib INSTALL_DIR)
 set(_FINDPACKAGE_ZLIB_INSTALL_DIR "${INSTALL_DIR}")
-set(_FINDPACKAGE_ZLIB_REAL_DIR "${INSTALL_DIR}/lib/cmake/zlib")
-set(_FINDPACKAGE_ZLIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/cmake/zlib")
+set(_FINDPACKAGE_ZLIB_DIR "${INSTALL_DIR}/lib/cmake/zlib")
 set(_FINDPACKAGE_ZLIB_INCLUDE_DIR "${INSTALL_DIR}/include")
-file(MAKE_DIRECTORY "${_FINDPACKAGE_ZLIB_DIR}")
-configure_file(
-    "${CMAKE_CURRENT_LIST_DIR}/cmake.in/ZLIBConfig.cmake.in"
-    "${_FINDPACKAGE_ZLIB_DIR}/ZLIBConfig.cmake"
-    @ONLY
-)
-configure_file(
-    "${CMAKE_CURRENT_LIST_DIR}/cmake.in/ZLIBConfigVersion.cmake.in"
-    "${_FINDPACKAGE_ZLIB_DIR}/ZLIBConfigVersion.cmake"
-    @ONLY
-)
 ExternalProject_Add_StepDependencies(Boost build zlib)
 ExternalProject_Add_StepDependencies(Boost install zlib)
 

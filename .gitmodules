@@ -88,7 +88,7 @@
     url = ../MNN.git
 [submodule "zlib"]
     path = zlib
-    url = https://github.com/madler/zlib.git
+    url = ../zlib.git
     ignore = dirty
 [submodule "libssh2"]
     path = libssh2
