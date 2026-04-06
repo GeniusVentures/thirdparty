@@ -66,6 +66,11 @@ set(_ZLIB_PACKAGE_ARGS
     -DZLIB_ROOT:PATH=${_FINDPACKAGE_ZLIB_INSTALL_DIR}
     -DZLIB_USE_STATIC_LIBS:BOOL=ON
 )
+if(CMAKE_CROSSCOMPILING)
+    set(_PROTOBUF_PLUGIN_ZLIB_PACKAGE_ARGS)
+else()
+    set(_PROTOBUF_PLUGIN_ZLIB_PACKAGE_ARGS ${_ZLIB_PACKAGE_ARGS})
+endif()
 ExternalProject_Add_StepDependencies(Boost build zlib)
 ExternalProject_Add_StepDependencies(Boost install zlib)
 
@@ -586,7 +591,7 @@ ExternalProject_Add(protobuf-plugin
     -DTW_USE_EXTERNAL_PROTOC:BOOL=ON
     -Dutf8_range_DIR:PATH=${utf8_range_HOST_DIR}
     ${_MSVC_RUNTIME_LIBRARY}
-    ${_ZLIB_PACKAGE_ARGS}
+    ${_PROTOBUF_PLUGIN_ZLIB_PACKAGE_ARGS}
     ${_PROTOBUF_PLUGIN_EXTRA_CACHE_ARGS}
     DEPENDS ${PROTOBUF_TARGET}
 )
