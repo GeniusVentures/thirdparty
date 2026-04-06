@@ -59,6 +59,13 @@ ExternalProject_Get_Property(zlib INSTALL_DIR)
 set(_FINDPACKAGE_ZLIB_INSTALL_DIR "${INSTALL_DIR}")
 set(_FINDPACKAGE_ZLIB_DIR "${INSTALL_DIR}/lib/cmake/zlib")
 set(_FINDPACKAGE_ZLIB_INCLUDE_DIR "${INSTALL_DIR}/include")
+set(_ZLIB_PACKAGE_ARGS
+    -DCMAKE_PREFIX_PATH:PATH=${_FINDPACKAGE_ZLIB_INSTALL_DIR}
+    -Dzlib_DIR:PATH=${_FINDPACKAGE_ZLIB_DIR}
+    -DZLIB_DIR:PATH=${_FINDPACKAGE_ZLIB_DIR}
+    -DZLIB_ROOT:PATH=${_FINDPACKAGE_ZLIB_INSTALL_DIR}
+    -DZLIB_USE_STATIC_LIBS:BOOL=ON
+)
 ExternalProject_Add_StepDependencies(Boost build zlib)
 ExternalProject_Add_StepDependencies(Boost install zlib)
 
@@ -88,8 +95,7 @@ ExternalProject_Add(protobuf
     -DABSL_ENABLE_INSTALL:BOOL=ON
     -DBUILD_SHARED_LIBS:BOOL=OFF
     -DBUILD_TESTING:BOOL=OFF
-    -DZLIB_DIR:PATH=${_FINDPACKAGE_ZLIB_DIR}
-    -DZLIB_ROOT:PATH=${_FINDPACKAGE_ZLIB_INSTALL_DIR}
+    ${_ZLIB_PACKAGE_ARGS}
     -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
     -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=ON
     DEPENDS zlib
@@ -333,6 +339,7 @@ ExternalProject_Add(libp2p
     -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
     -Dutf8_range_DIR:PATH=${utf8_range_DIR}
     -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
+    ${_ZLIB_PACKAGE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     ${_CMAKE_COMMON_CACHE_ARGS}
@@ -425,6 +432,7 @@ ExternalProject_Add(ipfs-lite-cpp
     -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
     ${_CMAKE_COMMON_CACHE_ARGS}
     -DTESTING:BOOL=${TESTING}
+    ${_ZLIB_PACKAGE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
@@ -458,6 +466,7 @@ ExternalProject_Add(ipfs-pubsub
     -Dutf8_range_DIR:PATH=${utf8_range_DIR}
     -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
     ${_CMAKE_COMMON_CACHE_ARGS}
+    ${_ZLIB_PACKAGE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
@@ -493,6 +502,7 @@ ExternalProject_Add(ipfs-bitswap-cpp
     -Dutf8_range_DIR:PATH=${utf8_range_DIR}
     -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
     ${_CMAKE_COMMON_CACHE_ARGS}
+    ${_ZLIB_PACKAGE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}
@@ -576,6 +586,7 @@ ExternalProject_Add(protobuf-plugin
     -DTW_USE_EXTERNAL_PROTOC:BOOL=ON
     -Dutf8_range_DIR:PATH=${utf8_range_HOST_DIR}
     ${_MSVC_RUNTIME_LIBRARY}
+    ${_ZLIB_PACKAGE_ARGS}
     ${_PROTOBUF_PLUGIN_EXTRA_CACHE_ARGS}
     DEPENDS ${PROTOBUF_TARGET}
 )
@@ -606,6 +617,7 @@ ExternalProject_Add(wallet-core
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
+    ${_ZLIB_PACKAGE_ARGS}
     # Remove the rust fat lib before generate-files so rust-bindgen's stamp check
     # doesn't short-circuit a second config (e.g. Release after Debug) and skip
     # building the correct config's artifact.
@@ -624,8 +636,7 @@ ExternalProject_Add(libssh2
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     ${_CMAKE_COMMON_CACHE_ARGS}
     -DCRYPTO_BACKEND:STRING=OpenSSL
-    -DZLIB_DIR:PATH=${_FINDPACKAGE_ZLIB_DIR}
-    -DZLIB_ROOT:PATH=${_FINDPACKAGE_ZLIB_INSTALL_DIR}
+    ${_ZLIB_PACKAGE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     DEPENDS openssl zlib
 )
@@ -664,8 +675,7 @@ ExternalProject_Add(AsyncIOManager
     -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
     -Dutf8_range_DIR:PATH=${utf8_range_DIR}
     -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
-    -Dzlib_DIR:PATH=${_FINDPACKAGE_ZLIB_DIR}
-    -DZLIB_DIR:PATH=${_FINDPACKAGE_ZLIB_DIR}
+    ${_ZLIB_PACKAGE_ARGS}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     ${_CMAKE_COMMON_CACHE_ARGS}
