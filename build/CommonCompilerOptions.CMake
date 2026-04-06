@@ -122,23 +122,4 @@ if (MNN_BUILD_TESTS)
     set(MNN_TEST_BYPRODUCT "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/run_test.out")
 endif()
 
-# zlib is here to appear before boost in the dependency graph, as some boost libraries depend on it. We need to build it first to be able to link it statically in boost and avoid issues with shared library loading on some platforms.
-ExternalProject_Add(zlib
-        PREFIX zlib
-        SOURCE_DIR "${THIRDPARTY_DIR}/zlib"
-        CMAKE_CACHE_ARGS
-        ${_CMAKE_COMMON_CACHE_ARGS}
-        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        -DPLATFORM:STRING=${PLATFORM}
-        -DZLIB_BUILD_TESTING:BOOL=OFF
-        -DZLIB_BUILD_EXAMPLES:BOOL=OFF
-        -DZLIB_BUILD_SHARED:BOOL=OFF
-        -DZLIB_BUILD_STATIC:BOOL=ON
-)
-
-ExternalProject_Get_Property(zlib INSTALL_DIR)
-set(ZLIB_ROOT ${INSTALL_DIR})
-set(_FINDPACKAGE_ZLIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/zlib/lib/cmake/zlib")
-set(_FINDPACKAGE_ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/zlib/include")
-
 

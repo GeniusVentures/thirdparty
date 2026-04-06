@@ -49,8 +49,6 @@ ExternalProject_Add(Boost
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
-    DEPENDS
-        zlib
     BUILD_BYPRODUCTS
         "${BOOST_ROOT}/lib/libboost_container.a"
         "${BOOST_ROOT}/lib/libboost_program_options.a"

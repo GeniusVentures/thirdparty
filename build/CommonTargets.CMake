@@ -41,6 +41,39 @@ set(PROTOBUF_HOST_INCLUDE_DIR "${PROTOBUF_HOST_PREFIX}/include")
 set(PROTOBUF_HOST_LIB_DIR "${PROTOBUF_HOST_PREFIX}/lib")
 set(PROTOC_EXECUTABLE "${PROTOBUF_HOST_PREFIX}/bin/protoc${CMAKE_EXECUTABLE_SUFFIX}")
 
+# zlib
+ExternalProject_Add(zlib
+    PREFIX zlib
+    SOURCE_DIR "${THIRDPARTY_DIR}/zlib"
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    -DZLIB_BUILD_SHARED:BOOL=OFF
+    -DZLIB_BUILD_STATIC:BOOL=ON
+    -DZLIB_BUILD_TESTING:BOOL=OFF
+    -DZLIB_INSTALL:BOOL=ON
+    ${_CMAKE_COMMON_CACHE_ARGS}
+    -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
+)
+
+ExternalProject_Get_Property(zlib INSTALL_DIR)
+set(_FINDPACKAGE_ZLIB_INSTALL_DIR "${INSTALL_DIR}")
+set(_FINDPACKAGE_ZLIB_REAL_DIR "${INSTALL_DIR}/lib/cmake/zlib")
+set(_FINDPACKAGE_ZLIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/cmake/zlib")
+set(_FINDPACKAGE_ZLIB_INCLUDE_DIR "${INSTALL_DIR}/include")
+file(MAKE_DIRECTORY "${_FINDPACKAGE_ZLIB_DIR}")
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/cmake.in/ZLIBConfig.cmake.in"
+    "${_FINDPACKAGE_ZLIB_DIR}/ZLIBConfig.cmake"
+    @ONLY
+)
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/cmake.in/ZLIBConfigVersion.cmake.in"
+    "${_FINDPACKAGE_ZLIB_DIR}/ZLIBConfigVersion.cmake"
+    @ONLY
+)
+ExternalProject_Add_StepDependencies(Boost build zlib)
+ExternalProject_Add_StepDependencies(Boost install zlib)
+
 # c-ares
 ExternalProject_Add(cares
     PREFIX cares
@@ -67,8 +100,11 @@ ExternalProject_Add(protobuf
     -DABSL_ENABLE_INSTALL:BOOL=ON
     -DBUILD_SHARED_LIBS:BOOL=OFF
     -DBUILD_TESTING:BOOL=OFF
+    -DZLIB_DIR:PATH=${_FINDPACKAGE_ZLIB_DIR}
+    -DZLIB_ROOT:PATH=${_FINDPACKAGE_ZLIB_INSTALL_DIR}
     -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
     -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=ON
+    DEPENDS zlib
 )
 ExternalProject_Get_Property(protobuf INSTALL_DIR)
 set(absl_DIR "${INSTALL_DIR}/lib/cmake/absl")
@@ -600,9 +636,8 @@ ExternalProject_Add(libssh2
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     ${_CMAKE_COMMON_CACHE_ARGS}
     -DCRYPTO_BACKEND:STRING=OpenSSL
-    -DZLIB_ROOT:PATH=${ZLIB_ROOT}
-    -DZLIB_USE_STATIC_LIBS:BOOL=ON
-    -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=OFF
+    -DZLIB_DIR:PATH=${_FINDPACKAGE_ZLIB_DIR}
+    -DZLIB_ROOT:PATH=${_FINDPACKAGE_ZLIB_INSTALL_DIR}
     ${_OPENSSL_CACHE_ARGS}
     DEPENDS openssl zlib
 )
@@ -641,6 +676,8 @@ ExternalProject_Add(AsyncIOManager
     -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
     -Dutf8_range_DIR:PATH=${utf8_range_DIR}
     -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
+    -Dzlib_DIR:PATH=${_FINDPACKAGE_ZLIB_DIR}
+    -DZLIB_DIR:PATH=${_FINDPACKAGE_ZLIB_DIR}
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     ${_CMAKE_COMMON_CACHE_ARGS}

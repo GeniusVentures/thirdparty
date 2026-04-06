@@ -43,8 +43,6 @@ ExternalProject_Add(Boost
     BUILD_IN_SOURCE TRUE
 
     INSTALL_COMMAND ""
-    DEPENDS
-        zlib
     BUILD_BYPRODUCTS
     "${BOOST_ROOT}/lib/libboost_container.a"
     "${BOOST_ROOT}/lib/libboost_program_options.a"
@@ -98,8 +96,6 @@ set(_BOOST_CACHE_ARGS
     -DBoost_USE_STATIC_LIBS:BOOL=ON
     -DBoost_USE_STATIC_RUNTIME:BOOL=ON
     -DBOOST_LOG_WITHOUT_LIBXML2:BOOL=ON
-    -DZLIB_INCLUDE_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/zlib/build/include
-    -DZLIB_LIBRARY:PATH=${CMAKE_CURRENT_BINARY_DIR}/zlib/build/lib/lib
 )
 
 # OpenSSL
