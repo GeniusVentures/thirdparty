@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 
 project(LINUX_SHARED_THIRD_PARTY LANGUAGES C CXX)
+
+include(../CommonCompilerOptions.CMake)
+
 # Check for Arm64
 string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" CMAKE_SYSTEM_PROCESSOR_LOWER)
 
@@ -11,8 +14,6 @@ elseif(CMAKE_SYSTEM_PROCESSOR_LOWER STREQUAL "x86_64" OR CMAKE_SYSTEM_PROCESSOR_
     set(BOOST_ARCH_FLAGS "architecture=x86")
     set(OPENSSL_TARGET "linux-${CMAKE_SYSTEM_PROCESSOR}-clang")
 endif()
-
-include(../CommonCompilerOptions.CMake)
 
 # Boost
 set(BOOST_ROOT "${CMAKE_CURRENT_BINARY_DIR}/boost/build")
