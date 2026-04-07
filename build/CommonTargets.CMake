@@ -69,7 +69,7 @@ set(_ZLIB_PACKAGE_ARGS
 if(CMAKE_CROSSCOMPILING)
     set(_PROTOBUF_PLUGIN_ZLIB_PACKAGE_ARGS)
 else()
-    set(_PROTOBUF_PLUGIN_ZLIB_PACKAGE_ARGS ${_ZLIB_PACKAGE_ARGS})
+    set(_PROTOBUF_PLUGIN_ZLIB_PACKAGE_ARGS ${_ZLIB_PACKAGE_ARGS} "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON")
 endif()
 ExternalProject_Add_StepDependencies(Boost build zlib)
 ExternalProject_Add_StepDependencies(Boost install zlib)
