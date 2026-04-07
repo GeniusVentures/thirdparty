@@ -66,9 +66,13 @@ set(_ZLIB_PACKAGE_ARGS
     -DZLIB_ROOT:PATH=${_FINDPACKAGE_ZLIB_INSTALL_DIR}
     -DZLIB_USE_STATIC_LIBS:BOOL=ON
 )
-if(CMAKE_CROSSCOMPILING)
+if(CMAKE_CROSSCOMPILING AND NOT CMAKE_SYSTEM_NAME STREQUAL CMAKE_HOST_SYSTEM_NAME)
+    # Truly cross-compiling to a different OS (iOS, Android, etc.): the project zlib
+    # is built for the target OS and cannot be used by the host-side protobuf-plugin.
     set(_PROTOBUF_PLUGIN_ZLIB_PACKAGE_ARGS)
 else()
+    # Native builds or same-OS fat-binary builds (e.g. MAC_UNIVERSAL): the project
+    # zlib runs on the host, so pass the hints through to protobuf-plugin.
     set(_PROTOBUF_PLUGIN_ZLIB_PACKAGE_ARGS ${_ZLIB_PACKAGE_ARGS})
 endif()
 ExternalProject_Add_StepDependencies(Boost build zlib)
