@@ -66,13 +66,9 @@ set(_ZLIB_PACKAGE_ARGS
     -DZLIB_ROOT:PATH=${_FINDPACKAGE_ZLIB_INSTALL_DIR}
     -DZLIB_USE_STATIC_LIBS:BOOL=ON
 )
-if(CMAKE_CROSSCOMPILING AND NOT CMAKE_SYSTEM_NAME STREQUAL CMAKE_HOST_SYSTEM_NAME)
-    # Truly cross-compiling to a different OS (iOS, Android, etc.): the project zlib
-    # is built for the target OS and cannot be used by the host-side protobuf-plugin.
+if(CMAKE_CROSSCOMPILING)
     set(_PROTOBUF_PLUGIN_ZLIB_PACKAGE_ARGS)
 else()
-    # Native builds or same-OS fat-binary builds (e.g. MAC_UNIVERSAL): the project
-    # zlib runs on the host, so pass the hints through to protobuf-plugin.
     set(_PROTOBUF_PLUGIN_ZLIB_PACKAGE_ARGS ${_ZLIB_PACKAGE_ARGS})
 endif()
 ExternalProject_Add_StepDependencies(Boost build zlib)
@@ -298,7 +294,9 @@ ExternalProject_Add(sqlite3
     -DENABLE_SHARED:BOOL=OFF
     -DENABLE_STATIC:BOOL=ON
     -DBUILD_SHELL:BOOL=OFF
+    ${_ZLIB_PACKAGE_ARGS}
     ${_CMAKE_COMMON_CACHE_ARGS}
+    DEPENDS zlib
 )
 
 set(_FINDPACKAGE_SQLITE3_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/sqlite3/cmake")
@@ -315,7 +313,8 @@ ExternalProject_Add(SQLiteModernCpp
     -DHUNTER_ENABLED:BOOL=OFF
     -Dsqlite3_DIR:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
     -DENABLE_INSTALL:BOOL=ON
-    DEPENDS sqlite3
+    ${_ZLIB_PACKAGE_ARGS}
+    DEPENDS sqlite3 zlib
 )
 
 set(_FINDPACKAGE_SQLITECPP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/SQLiteModernCpp/lib/cmake/SQLiteModernCpp")
