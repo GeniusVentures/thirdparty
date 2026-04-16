@@ -339,6 +339,7 @@ ExternalProject_Add(libp2p
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     ${_CMAKE_COMMON_CACHE_ARGS}
+    ${_CMAKE_COMMON_CACHE_ARGS_SYMBOLS}
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}\ -I\ ${_FINDPACKAGE_GSL_INCLUDE_DIR}\ -I\ ${_FINDPACKAGE_SQLITE3_INCLUDE_DIR}
     DEPENDS Boost Microsoft.GSL openssl cares ${PROTOBUF_TARGET} fmt yaml-cpp soralog tsl_hat_trie Boost.DI SQLiteModernCpp grpc
 )
