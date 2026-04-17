@@ -77,9 +77,15 @@ on:
         required: true
         default: true
         type: boolean
+      sgns_enable_release_symbols:
+        description: 'Enable SGNS release symbols in CMake configure'
+        required: true
+        default: false
+        type: boolean
 
 env:
   GH_TOKEN: ${{ secrets.GNUS_TOKEN_1 }}
+  SGNS_ENABLE_RELEASE_SYMBOLS: ${{ inputs.sgns_enable_release_symbols && 'ON' || 'OFF' }}
 jobs:
   resolve-runners:
     runs-on: ubuntu-latest
@@ -481,23 +487,23 @@ jobs:
 
       - name: Configure CMake for Mac
         if: ${{ matrix.target == 'OSX'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=MAC_UNIVERSAL -DSGNS_ENABLE_RELEASE_SYMBOLS=OFF
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=MAC_UNIVERSAL -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
 
       - name: Configure CMake for iOS
         if: ${{ matrix.target == 'iOS'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=OS64 -DSGNS_ENABLE_RELEASE_SYMBOLS=OFF
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=OS64 -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
 
       - name: Configure CMake for Android
         if: ${{ matrix.target == 'Android'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DANDROID_ABI=${{matrix.abi}} -DSGNS_ENABLE_RELEASE_SYMBOLS=OFF
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DANDROID_ABI=${{matrix.abi}} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
 
       - name: Configure CMake for Windows
         if: ${{ matrix.target == 'Windows' }}
-        run: cmake -S build/${{matrix.target}} -B $env:BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DSGNS_ENABLE_RELEASE_SYMBOLS=OFF
+        run: cmake -S build/${{matrix.target}} -B $env:BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
 
       - name: Configure CMake for Linux
         if: ${{ matrix.target == 'Linux' }}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DSGNS_ENABLE_RELEASE_SYMBOLS=OFF
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
 
       - name: Build thirdparty
         working-directory: ${{env.BUILD_DIRECTORY}}
