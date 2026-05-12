@@ -117,4 +117,9 @@ list(TRANSFORM BOOST_B2_FLAGS PREPEND "cxxflags=")
 set(OPENSSL_VARIANT $<IF:$<CONFIG:Debug>,--debug,--release>)
 
 option(MNN_BUILD_TESTS "Build MNN tests" OFF)
+option(MNN_SUPPORT_TRANSFORMER_FUSE "Enable MNN transformer fuse ops for OSX external build" ON)
+if (MNN_BUILD_TESTS)
+    set(MNN_TEST_BYPRODUCT "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/run_test.out")
+endif()
+
 
