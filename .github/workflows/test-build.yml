@@ -2,7 +2,9 @@ name: Multiplatform build
 
 on:
   workflow_dispatch:
-
+permissions:
+  contents: read
+  packages: read
 jobs:
   android-debug:
     uses: ./.github/workflows/build.yml

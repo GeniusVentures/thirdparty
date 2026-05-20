@@ -1,5 +1,8 @@
 name: Multiplatform build and upload
 
+permissions:
+  contents: write
+  packages: read
 on:
   workflow_dispatch:
     inputs:
@@ -224,7 +227,7 @@ jobs:
         run: |
           echo "=== PRE-CLEANUP DEBUG ==="
           echo "Current working directory: $(pwd)"
-          echo "Runner workspace: ${{runner.workspace}}"
+          echo "Runner workspace: ${RUNNER_WORKSPACE}"
           echo "GitHub workspace: ${{github.workspace}}"
           
           # Use sudo on Linux to handle root-owned files left by container jobs
@@ -249,9 +252,13 @@ jobs:
             ls -la thirdparty/ 2>/dev/null || echo "  (empty)"
           fi
         shell: bash
+        env:
+          RUNNER_WORKSPACE: ${{runner.workspace}}
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: true # We use the credentials later when uploading
 
       - name: Parallel checkout submodules
         run: git submodule update --init --recursive --jobs 4 --depth 1
@@ -370,25 +377,27 @@ jobs:
 
           echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
 
-          tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^\.|${{env.BUILD_DIRECTORY}}|g' -czf $FILE_NAME ./*/
+          tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^\.|${BUILD_DIRECTORY}|g' -czf $FILE_NAME ./*/
 
       - name: Set release tag
         shell: bash
         run: |
-          if ${{ github.event_name == 'workflow_dispatch' }} && [ '${{ github.event.inputs.tag }}' ]; then
-              RELEASE_TAG="${{ github.event.inputs.tag }}"
+          if ${{ github.event_name == 'workflow_dispatch' }} && [ "${GITHUB_EVENT_INPUTS_TAG}" ]; then
+              RELEASE_TAG="${GITHUB_EVENT_INPUTS_TAG}"
               IS_TAG_RELEASE="true"
           else
               if [ '${{matrix.abi}}' ]; then
-                RELEASE_TAG="${{ matrix.target }}-${{matrix.abi}}-${{ github.ref_name }}-${{ matrix.build-type }}"
+                RELEASE_TAG="${{ matrix.target }}-${{matrix.abi}}-${GITHUB_REF_NAME}-${{ matrix.build-type }}"
               else
-                RELEASE_TAG="${{ matrix.target }}-${{ github.ref_name }}-${{ matrix.build-type }}"
+                RELEASE_TAG="${{ matrix.target }}-${GITHUB_REF_NAME}-${{ matrix.build-type }}"
               fi
               IS_TAG_RELEASE="false"
           fi
 
           echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
           echo "IS_TAG_RELEASE=$IS_TAG_RELEASE" >> $GITHUB_ENV
+        env:
+          GITHUB_EVENT_INPUTS_TAG: ${{ github.event.inputs.tag }}
 
       - name: Create release tag
         if: github.ref_name == 'main' || github.ref_name == 'develop'
@@ -413,8 +422,8 @@ jobs:
           echo "Creating GitHub release $RELEASE_TAG..."
           gh release create "$RELEASE_TAG" \
           --target "${{ github.sha }}" \
-          -t "${{ matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
-          -n "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
+          -t "${{ matrix.target }} ${GITHUB_REF_NAME} ${{ matrix.build-type }} build" \
+          -n "Branch: ${GITHUB_REF_NAME} | SHA: ${{ github.sha }}" \
           $( [ "$IS_TAG_RELEASE" = "true" ] && echo "" || echo "--prerelease" )
 
       - name: Upload file

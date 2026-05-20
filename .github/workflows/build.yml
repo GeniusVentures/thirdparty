@@ -3,6 +3,9 @@ name: Build
 on:
   pull_request:
   workflow_dispatch:
+permissions:
+  contents: read
+  packages: read
 jobs:
   build:
     runs-on: ${{matrix.host}}
@@ -66,14 +69,13 @@ jobs:
             Write-Output "WARNING: bash.exe not found in PATH"
           }
 
-
       - name: Clean workspace (self-hosted runners)
         if: ${{ runner.environment == 'self-hosted' }}
         working-directory: ${{runner.workspace}}
         run: |
           echo "=== PRE-CLEANUP DEBUG ==="
           echo "Current working directory: $(pwd)"
-          echo "Runner workspace: ${{runner.workspace}}"
+          echo "Runner workspace: ${RUNNER_WORKSPACE}"
           echo "GitHub workspace: ${{github.workspace}}"
           
           # Use sudo on Linux to handle root-owned files left by container jobs
@@ -98,9 +100,13 @@ jobs:
             ls -la thirdparty/ 2>/dev/null || echo "  (empty)"
           fi
         shell: bash
+        env:
+          RUNNER_WORKSPACE: ${{runner.workspace}}
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
 
       - name: Parallel checkout submodules
         run: git submodule update --init --recursive --jobs 4 --depth 1
