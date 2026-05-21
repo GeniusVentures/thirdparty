@@ -377,7 +377,7 @@ jobs:
 
           echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
 
-          tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^\.|${BUILD_DIRECTORY}|g' -czf $FILE_NAME ./*/
+          tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^\.|${{env.BUILD_DIRECTORY}}|g' -czf $FILE_NAME ./*/
 
       - name: Set release tag
         shell: bash
