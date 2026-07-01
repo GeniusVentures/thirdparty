@@ -15,7 +15,7 @@ endif()
 
 project(OSX_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
-include(../CommonCompilerOptions.CMake)
+include(../CommonCompilerOptions.cmake)
 
 # OSX specific runtime options
 set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
@@ -294,4 +294,4 @@ set(_PROTOBUF_PLUGIN_EXTRA_CACHE_ARGS
     -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=12.1
 )
 
-include(../CommonTargets.CMake)
+include(../CommonTargets.cmake)
