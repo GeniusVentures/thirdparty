@@ -697,10 +697,15 @@ endif()
 # CMAKE_OSX_SYSROOT. There does not appear to be a direct way to obtain
 # this information from xcrun or xcodebuild.
 if(NOT DEFINED CMAKE_DEVELOPER_ROOT AND NOT CMAKE_GENERATOR MATCHES "Xcode")
-    get_filename_component(PLATFORM_SDK_DIR ${CMAKE_OSX_SYSROOT_INT} PATH)
-    get_filename_component(CMAKE_DEVELOPER_ROOT ${PLATFORM_SDK_DIR} PATH)
-    if(NOT EXISTS "${CMAKE_DEVELOPER_ROOT}")
-        message(FATAL_ERROR "Invalid CMAKE_DEVELOPER_ROOT: ${CMAKE_DEVELOPER_ROOT} does not exist.")
+    if(CMAKE_OSX_SYSROOT_INT)
+        get_filename_component(PLATFORM_SDK_DIR "${CMAKE_OSX_SYSROOT_INT}" DIRECTORY)
+        get_filename_component(CMAKE_DEVELOPER_ROOT "${PLATFORM_SDK_DIR}" DIRECTORY)
+        if(NOT EXISTS "${CMAKE_DEVELOPER_ROOT}")
+            # Non-fatal on Command Line Tools — developer root may not exist
+            set(CMAKE_DEVELOPER_ROOT "/Library/Developer/CommandLineTools")
+        endif()
+    else()
+        set(CMAKE_DEVELOPER_ROOT "/Library/Developer/CommandLineTools")
     endif()
 endif()
 
