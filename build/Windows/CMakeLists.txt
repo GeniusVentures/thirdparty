@@ -13,7 +13,7 @@ if(NOT CMAKE_VS_GLOBALS MATCHES "(^|;)EnforceProcessCountAcrossBuilds=")
     list(APPEND CMAKE_VS_GLOBALS EnforceProcessCountAcrossBuilds=true)
 endif()
 
-include(../CommonCompilerOptions.CMake)
+include(../CommonCompilerOptions.cmake)
 
 set(_WALLET_CORE_GENERATE_SCRIPT "${THIRDPARTY_DIR}/wallet-core/tools/win-generate-files.bat")
 
@@ -105,4 +105,4 @@ set(_ZKLLVM_EXTRA_PARAM
 )
 
 # build common targets
-include(../CommonTargets.CMake)
+include(../CommonTargets.cmake)

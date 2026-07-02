@@ -25,7 +25,7 @@ set(CMAKE_TOOLCHAIN_FILE "${CMAKE_ANDROID_NDK}/build/cmake/android.toolchain.cma
 
 project(ANDROID_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
-include(../CommonCompilerOptions.CMake)
+include(../CommonCompilerOptions.cmake)
 
 # Config param for android
 set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
@@ -183,4 +183,4 @@ set(_ZKLLVM_EXTRA_PARAM
     -DZKLLVM_BUILD_STD_LIB:BOOL=OFF
     -DZKLLVM_BUILD_EXECUTABLES:BOOL=OFF
 )
-include(../CommonTargets.CMake)
+include(../CommonTargets.cmake)

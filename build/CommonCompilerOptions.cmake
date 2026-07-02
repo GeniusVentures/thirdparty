@@ -72,6 +72,28 @@ if(MSVC)
     )
 endif()
 
+option(SGNS_ENABLE_RELEASE_SYMBOLS "Build Release with debug symbols for symbolication" ON)
+
+if(SGNS_ENABLE_RELEASE_SYMBOLS)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "^(AppleClang|Clang|GNU)$")
+        set(_RELEASE_SYMBOLS_C_FLAGS   "${CMAKE_C_FLAGS_RELEASE} -gline-tables-only")
+        set(_RELEASE_SYMBOLS_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} -gline-tables-only")
+    elseif(MSVC)
+        # /Z7 embeds debug info in .obj/.lib — no standalone PDB needed
+        set(_RELEASE_SYMBOLS_C_FLAGS   "${CMAKE_C_FLAGS_RELEASE} /Z7")
+        set(_RELEASE_SYMBOLS_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} /Z7")
+    else()
+        set(_RELEASE_SYMBOLS_C_FLAGS   "${CMAKE_C_FLAGS_RELEASE}")
+        set(_RELEASE_SYMBOLS_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE}")
+    endif()
+    set(_CMAKE_COMMON_CACHE_ARGS_SYMBOLS
+        -DCMAKE_C_FLAGS_RELEASE:STRING=${_RELEASE_SYMBOLS_C_FLAGS}
+        -DCMAKE_CXX_FLAGS_RELEASE:STRING=${_RELEASE_SYMBOLS_CXX_FLAGS}
+    )
+else()
+    set(_CMAKE_COMMON_CACHE_ARGS_SYMBOLS "")
+endif()
+
 string(STRIP "${CMAKE_C_FLAGS}" CMAKE_C_FLAGS)
 string(STRIP "${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS)
 

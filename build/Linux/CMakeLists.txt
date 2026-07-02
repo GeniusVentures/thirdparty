@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(LINUX_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
-include(../CommonCompilerOptions.CMake)
+include(../CommonCompilerOptions.cmake)
 
 # Check for Arm64
 string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" CMAKE_SYSTEM_PROCESSOR_LOWER)
@@ -100,4 +100,4 @@ set(_ZKLLVM_EXTRA_PARAM
     -DZKLLVM_BUILD_EXECUTABLES:BOOL=OFF
 )
 
-include(../CommonTargets.CMake)
+include(../CommonTargets.cmake)

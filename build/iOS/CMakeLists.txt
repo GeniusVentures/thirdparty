@@ -21,7 +21,7 @@ endif()
 
 project(iOS_SHARED_THIRD_PARTY LANGUAGES C CXX)
 
-include(../CommonCompilerOptions.CMake)
+include(../CommonCompilerOptions.cmake)
 
 set(_CMAKE_COMMON_CACHE_ARGS ${_CMAKE_COMMON_CACHE_ARGS}
     -DNAMED_LANGUAGE_SUPPORT:BOOL=${NAMED_LANGUAGE_SUPPORT}
@@ -156,4 +156,4 @@ set(_ZKLLVM_EXTRA_PARAM
     -DZKLLVM_BUILD_EXECUTABLES:BOOL=OFF
 )
 
-include(../CommonTargets.CMake)
+include(../CommonTargets.cmake)
