@@ -394,9 +394,8 @@ if(NOT ANDROID)
         SOURCE_DIR "${THIRDPARTY_DIR}/vk-bootstrap"
            CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        -DVulkanHeaders_DIR:PATH=<INSTALL_DIR>/share/cmake/VulkanHeaders
+        -DVulkanHeaders_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader/share/cmake/VulkanHeaders
         -DVK_BOOTSTRAP_TEST:BOOL=OFF
-        -DVK_BOOTSTRAP_INSTALL:BOOL=ON
         ${_CMAKE_COMMON_CACHE_ARGS}
         DEPENDS Vulkan-Headers
     )
