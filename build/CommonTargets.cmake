@@ -428,6 +428,7 @@ if(NOT ANDROID)
         -DSPIRV-Headers_SOURCE_DIR:PATH=${THIRDPARTY_DIR}/SPIRV-Headers
         -DSPIRV_SKIP_TESTS:BOOL=ON
         -DSPIRV_SKIP_EXECUTABLES:BOOL=ON
+        -DBUILD_SHARED_LIBS:BOOL=OFF
         ${_CMAKE_COMMON_CACHE_ARGS}
         DEPENDS SPIRV-Headers
     )
@@ -448,7 +449,7 @@ if(NOT ANDROID)
         else()
             add_library(SPIRV-Tools::SPIRV-Tools STATIC IMPORTED GLOBAL)
             set_target_properties(SPIRV-Tools::SPIRV-Tools PROPERTIES
-                IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/SPIRV-Tools/lib/libSPIRV-Tools.a"
+                IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/SPIRV-Tools/lib/${CMAKE_STATIC_LIBRARY_PREFIX}SPIRV-Tools${CMAKE_STATIC_LIBRARY_SUFFIX}"
                 INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/SPIRV-Tools/include"
             )
         endif()
@@ -483,7 +484,7 @@ if(NOT ANDROID)
     if(NOT TARGET shaderc::shaderc)
         add_library(shaderc::shaderc STATIC IMPORTED GLOBAL)
         set_target_properties(shaderc::shaderc PROPERTIES
-            IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/shaderc/lib/libshaderc_combined.a"
+            IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/shaderc/lib/${CMAKE_STATIC_LIBRARY_PREFIX}shaderc_combined${CMAKE_STATIC_LIBRARY_SUFFIX}"
             INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/shaderc/include"
         )
         add_dependencies(shaderc::shaderc shaderc)
