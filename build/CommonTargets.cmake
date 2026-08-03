@@ -391,58 +391,11 @@ if(NOT ANDROID)
     set(vulkanTarget Vulkan-Loader)
 endif()
 
-# SPIRV-Headers (required transitive dependency of the standalone SPIRV-Tools build below;
-# separate from shaderc's own nested, non-exported third_party/spirv-headers copy)
-ExternalProject_Add(
-    SPIRV-Headers
-    PREFIX SPIRV-Headers
-    SOURCE_DIR "${THIRDPARTY_DIR}/SPIRV-Headers"
-       CMAKE_CACHE_ARGS
-    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    ${_CMAKE_COMMON_CACHE_ARGS}
-)
-
-# SPIRV-Tools — vendored as its own, separately-linkable dependency (not reached through
-# shaderc's internal, non-exported build tree) so spvtools::SpirvTools::Validate() (the
-# SHADER-02 spirv-val gate) is directly callable. Pinned to the exact commit shaderc's own
-# v2024.3 DEPS file references, to avoid SPIR-V dialect skew between what shaderc emits and
-# what this validator checks.
-ExternalProject_Add(
-    SPIRV-Tools
-    PREFIX SPIRV-Tools
-    SOURCE_DIR "${THIRDPARTY_DIR}/SPIRV-Tools"
-       CMAKE_CACHE_ARGS
-    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    -DSPIRV-Headers_SOURCE_DIR:PATH=${THIRDPARTY_DIR}/SPIRV-Headers
-    -DSPIRV_SKIP_TESTS:BOOL=ON
-    -DSPIRV_SKIP_EXECUTABLES:BOOL=ON
-    -DBUILD_SHARED_LIBS:BOOL=OFF
-    ${_CMAKE_COMMON_CACHE_ARGS}
-    DEPENDS SPIRV-Headers
-)
-
-# SPIRV-Tools DOES install a CMake package config by default (confirmed via a real local
-# build+install spike, 2026-07-30) — but the exported targets are the bare, non-namespaced
-# `SPIRV-Tools-static`/`SPIRV-Tools-shared` (the upstream `SPIRV-Tools` ALIAS target is
-# build-tree-only and is never exported by install(EXPORT)). Prefer the installed config's
-# real target when available; fall back to a hand-written IMPORTED target only if the
-# installed config is ever unavailable (e.g. a future SPIRV-Tools version disables its
-# install-config path).
-if(NOT TARGET SPIRV-Tools::SPIRV-Tools)
-    find_package(SPIRV-Tools CONFIG QUIET PATHS "${CMAKE_CURRENT_BINARY_DIR}/SPIRV-Tools" NO_DEFAULT_PATH)
-    if(TARGET SPIRV-Tools-static)
-        add_library(SPIRV-Tools::SPIRV-Tools ALIAS SPIRV-Tools-static)
-    elseif(TARGET SPIRV-Tools-shared)
-        add_library(SPIRV-Tools::SPIRV-Tools ALIAS SPIRV-Tools-shared)
-    else()
-        add_library(SPIRV-Tools::SPIRV-Tools STATIC IMPORTED GLOBAL)
-        set_target_properties(SPIRV-Tools::SPIRV-Tools PROPERTIES
-            IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/SPIRV-Tools/lib/${CMAKE_STATIC_LIBRARY_PREFIX}SPIRV-Tools${CMAKE_STATIC_LIBRARY_SUFFIX}"
-            INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/SPIRV-Tools/include"
-        )
-    endif()
-    add_dependencies(SPIRV-Tools::SPIRV-Tools SPIRV-Tools)
-endif()
+# SPIRV-Tools and SPIRV-Headers are no longer built as standalone ExternalProjects.
+# libshaderc_combined (built by shaderc below) statically bundles the exact same SPIRV-Tools
+# code at the exact same pinned commit (v2024.3 DEPS), so linking shaderc::shaderc already
+# provides all SPIRV-Tools symbols. The spirv-tools include path is added to
+# shaderc::shaderc's INTERFACE_INCLUDE_DIRECTORIES below.
 
 # Platform-conditional Vulkan dependency wiring for vk-bootstrap.
 # Desktop: Vulkan-Headers is built inside if(NOT ANDROID) and installs to Vulkan-Loader prefix.
@@ -490,14 +443,15 @@ ExternalProject_Add(
 
 # shaderc — GLSL->SPIR-V compilation (SHADER-01). Builds its own nested, non-exported copy of
 # glslang/SPIRV-Tools/SPIRV-Headers from third_party/ (populated via shaderc's own
-# ./utils/git-sync-deps, not git submodules — see 02-02 vendoring commit), entirely
-# independently of the separately-vendored SPIRV-Tools/SPIRV-Headers above; both copies are
-# pinned to matching commits so the SPIR-V dialect stays consistent between what shaderc
-# emits and what this project's own SPIRV-Tools::SPIRV-Tools validates.
+# ./utils/git-sync-deps which reads DEPS for pinned commits).  libshaderc_combined
+# statically bundles all of these, so consumers linking shaderc::shaderc automatically
+# get SPIRV-Tools symbols for the SHADER-02 spirv-val gate.
 ExternalProject_Add(
     shaderc
     PREFIX shaderc
     SOURCE_DIR "${THIRDPARTY_DIR}/shaderc"
+       PATCH_COMMAND
+        python3 "${THIRDPARTY_DIR}/shaderc/utils/git-sync-deps"
        CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     -DSHADERC_SKIP_TESTS:BOOL=ON
@@ -511,13 +465,14 @@ ExternalProject_Add(
 # shaderc installs no CMake package config (confirmed via a real local build+install spike,
 # 2026-07-30, and cross-checked against github.com/google/shaderc/issues/1369 and
 # github.com/microsoft/vcpkg/issues/23208) — hand-written IMPORTED target required.
-# libshaderc_combined statically bundles glslang+SPIRV-Tools, minimizing separate-linking
-# bookkeeping for consumers.
+# libshaderc_combined statically bundles glslang+SPIRV-Tools, so consumers that link
+# shaderc::shaderc automatically get SPIRV-Tools symbols (SHADER-02 spirv-val gate).
+# The spirv-tools include path is added here so <spirv-tools/libspirv.hpp> resolves.
 if(NOT TARGET shaderc::shaderc)
     add_library(shaderc::shaderc STATIC IMPORTED GLOBAL)
     set_target_properties(shaderc::shaderc PROPERTIES
         IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/shaderc/lib/${CMAKE_STATIC_LIBRARY_PREFIX}shaderc_combined${CMAKE_STATIC_LIBRARY_SUFFIX}"
-        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/shaderc/include"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/shaderc/include;${THIRDPARTY_DIR}/shaderc/third_party/spirv-tools/include"
     )
     add_dependencies(shaderc::shaderc shaderc)
 endif()
