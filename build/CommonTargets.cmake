@@ -359,25 +359,25 @@ set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
 set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include")
 
-if(NOT ANDROID)
-    # Vulkan-Headers
-    ExternalProject_Add(
-        Vulkan-Headers
-        PREFIX Vulkan-Headers
-        SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Headers"
-           CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader
-        ${_CMAKE_COMMON_CACHE_ARGS}
-    )
+# Vulkan-Headers — single build for all platforms.
+ExternalProject_Add(
+    Vulkan-Headers
+    PREFIX Vulkan-Headers
+    SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Headers"
+       CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    ${_CMAKE_COMMON_CACHE_ARGS}
+)
 
-    # Vulkan-Loader
+# Vulkan-Loader — desktop only (Android/iOS use platform-native loaders).
+if(NOT ANDROID)
     ExternalProject_Add(
         Vulkan-Loader
         PREFIX Vulkan-Loader
         SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Loader"
            CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        -DVulkanHeaders_DIR:PATH=<INSTALL_DIR>/share/cmake/VulkanHeaders
+        -DVulkanHeaders_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers/share/cmake/VulkanHeaders
         -DBUILD_WSI_XCB_SUPPORT:BOOL=OFF
         -DBUILD_WSI_XLIB_SUPPORT:BOOL=OFF
         -DBUILD_WSI_WAYLAND_SUPPORT:BOOL=OFF
@@ -397,48 +397,17 @@ endif()
 # provides all SPIRV-Tools symbols. The spirv-tools include path is added to
 # shaderc::shaderc's INTERFACE_INCLUDE_DIRECTORIES below.
 
-# Platform-conditional Vulkan dependency wiring for vk-bootstrap.
-# Desktop: Vulkan-Headers is built inside if(NOT ANDROID) and installs to Vulkan-Loader prefix.
-# Android/iOS: Vulkan-Headers must be built from source since the NDK/MoltenVK only provide
-# raw headers, not a CMake package config.
-if(NOT ANDROID AND NOT IOS)
-    set(_VK_BOOTSTRAP_VULKAN_HEADERS_DIR "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader/share/cmake/VulkanHeaders")
-    set(_VK_BOOTSTRAP_DEPENDS Vulkan-Headers)
-elseif(ANDROID)
-    ExternalProject_Add(
-        Vulkan-Headers
-        PREFIX Vulkan-Headers
-        SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Headers"
-           CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        ${_CMAKE_COMMON_CACHE_ARGS}
-    )
-    set(_VK_BOOTSTRAP_VULKAN_HEADERS_DIR "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers/share/cmake/VulkanHeaders")
-    set(_VK_BOOTSTRAP_DEPENDS Vulkan-Headers)
-elseif(IOS)
-    ExternalProject_Add(
-        Vulkan-Headers
-        PREFIX Vulkan-Headers
-        SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Headers"
-           CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        ${_CMAKE_COMMON_CACHE_ARGS}
-    )
-    set(_VK_BOOTSTRAP_VULKAN_HEADERS_DIR "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers/share/cmake/VulkanHeaders")
-    set(_VK_BOOTSTRAP_DEPENDS Vulkan-Headers)
-endif()
-
-# vk-bootstrap
+# vk-bootstrap — depends on the single Vulkan-Headers build above.
 ExternalProject_Add(
     vk-bootstrap
     PREFIX vk-bootstrap
     SOURCE_DIR "${THIRDPARTY_DIR}/vk-bootstrap"
        CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    -DVulkanHeaders_DIR:PATH=${_VK_BOOTSTRAP_VULKAN_HEADERS_DIR}
+    -DVulkanHeaders_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers/share/cmake/VulkanHeaders
     -DVK_BOOTSTRAP_TEST:BOOL=OFF
     ${_CMAKE_COMMON_CACHE_ARGS}
-    DEPENDS ${_VK_BOOTSTRAP_DEPENDS}
+    DEPENDS Vulkan-Headers
 )
 
 # shaderc — GLSL->SPIR-V compilation (SHADER-01). Builds its own nested, non-exported copy of
