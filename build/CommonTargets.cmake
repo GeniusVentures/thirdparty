@@ -1,3 +1,6 @@
+# Python3 — required by shaderc patch step (git-sync-deps)
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
 # GTest
 ExternalProject_Add(GTest
     PREFIX GTest
@@ -420,7 +423,7 @@ ExternalProject_Add(
     PREFIX shaderc
     SOURCE_DIR "${THIRDPARTY_DIR}/shaderc"
        PATCH_COMMAND
-        python3 "${THIRDPARTY_DIR}/shaderc/utils/git-sync-deps"
+        ${Python3_EXECUTABLE} "${THIRDPARTY_DIR}/shaderc/utils/git-sync-deps"
        CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     -DSHADERC_SKIP_TESTS:BOOL=ON
