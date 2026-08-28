@@ -145,6 +145,11 @@ jobs:
     permissions:
       contents: write
       packages: read
+    env:
+      BUILD_DIRECTORY: build/${{ matrix.target }}/${{ matrix.build-type }}${{ matrix.abi && format('/{0}', matrix.abi) || '' }}
+      FILE_NAME: ${{ matrix.id }}-${{ matrix.build-type }}.tar.gz
+      IS_TAG_RELEASE: ${{ inputs.release-tag != '' }}
+      RELEASE_TAG: ${{ inputs.release-tag || format('{0}-{1}-{2}', matrix.id, github.ref_name, matrix.build-type) }}
     runs-on: ${{ fromJson(needs.resolve-runners.outputs[matrix.runner_key]) }}
     container:
       image: ${{matrix.container}}
@@ -155,23 +160,17 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.resolve-runners.outputs.matrix) }}
     steps:
-      - name: Configure Git Bash on Windows
+      - name: Configure bash on Windows (use Git Bash, not WSL)
         if: ${{ runner.environment == 'self-hosted' && matrix.target == 'Windows' }}
         run: |
-          $gitBinPath = "C:\Program Files\Git\bin"
-
-          if (Test-Path $gitBinPath) {
-            Add-Content -Path $env:GITHUB_PATH -Value $gitBinPath
-            $env:PATH = "$gitBinPath;$env:PATH"
+          foreach ($p in @("C:\Program Files\Git\bin", "C:\Program Files\Git\usr\bin")) {
+            if (Test-Path $p) {
+              Add-Content -Path $env:GITHUB_PATH -Value $p
+              $env:PATH = "$p;$env:PATH"
+            }
           }
-
-          Write-Output "Git Bash configured for bash shell commands"
-          $bashLocation = (Get-Command bash.exe -ErrorAction SilentlyContinue).Source
-          if ($bashLocation) {
-            Write-Output "Bash location: $bashLocation"
-          } else {
-            Write-Output "WARNING: bash.exe not found in PATH"
-          }
+          $bash = (Get-Command bash.exe -ErrorAction SilentlyContinue).Source
+          Write-Output $(if ($bash) { "Bash location: $bash" } else { "WARNING: bash.exe not found in PATH" })
 
       - name: Clean workspace (self-hosted runners)
         if: ${{ runner.environment == 'self-hosted' }}
@@ -206,10 +205,11 @@ jobs:
         shell: bash
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Keep submodule checkout explicit so we can control retries and fetch behavior.
           submodules: false
+          persist-credentials: true # Needed to push release tags later
 
       - name: Harden Git network settings
         shell: bash
@@ -315,16 +315,6 @@ jobs:
       - name: Add wasm Rust target
         run: rustup target add wasm32-unknown-emscripten
 
-      - name: Set build directory
-        run: |
-          if [ '${{matrix.abi}}' ]; then
-            BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build-type}}/${{matrix.abi}}
-          else
-            BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build-type}}
-          fi
-          echo "BUILD_DIRECTORY=$BUILD_DIRECTORY" >> $GITHUB_ENV
-        shell: bash
-
       - name: Configure CMake for Mac
         if: ${{ matrix.target == 'OSX'}}
         run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=MAC_UNIVERSAL -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
@@ -353,34 +343,7 @@ jobs:
         if: ${{ inputs.upload }}
         working-directory: ${{env.BUILD_DIRECTORY}}
         shell: bash
-        run: |
-          if [ '${{matrix.abi}}' ]; then
-            FILE_NAME="${{matrix.target}}-${{matrix.abi}}-${{matrix.build-type}}.tar.gz"
-          else
-            FILE_NAME="${{matrix.target}}-${{matrix.build-type}}.tar.gz"
-          fi
-
-          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
-
-          tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^\.|${{env.BUILD_DIRECTORY}}|g' -czf $FILE_NAME ./*/
-
-      - name: Set release tag
-        shell: bash
-        run: |
-          if [ -n '${{ inputs.release-tag }}' ]; then
-              RELEASE_TAG="${{ inputs.release-tag }}"
-              IS_TAG_RELEASE="true"
-          else
-              if [ '${{matrix.abi}}' ]; then
-                RELEASE_TAG="${{ matrix.target }}-${{matrix.abi}}-${{ github.ref_name }}-${{ matrix.build-type }}"
-              else
-                RELEASE_TAG="${{ matrix.target }}-${{ github.ref_name }}-${{ matrix.build-type }}"
-              fi
-              IS_TAG_RELEASE="false"
-          fi
-
-          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
-          echo "IS_TAG_RELEASE=$IS_TAG_RELEASE" >> $GITHUB_ENV
+        run: tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^\.|${{env.BUILD_DIRECTORY}}|g' -czf "$FILE_NAME" ./*/
 
       - name: Create release tag
         if: ${{ inputs.upload }}
@@ -434,4 +397,5 @@ jobs:
       - name: Upload file
         if: ${{ inputs.upload }}
         working-directory: ${{env.BUILD_DIRECTORY}}
-        run: gh release upload ${{env.RELEASE_TAG}} ${{env.FILE_NAME}} --clobber
+        shell: bash
+        run: gh release upload "$RELEASE_TAG" "$FILE_NAME" --clobber

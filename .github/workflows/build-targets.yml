@@ -2,85 +2,74 @@ name: Multiplatform build and upload
 
 on:
   pull_request:
+    paths-ignore:
+      - ".github/**"
+      - "README.md"
   workflow_dispatch:
     inputs:
       tag:
         description: "Release tag"
-        required: false
         type: string
-      build_android_arm64v8a_release:
-        description: 'Build Android arm64-v8a Release'
-        required: true
+      # Input names follow the SuperGenius convention build_<target>-<abi>_<build-type>;
+      # the prepare job maps them to uppercased env vars for the matrix filter.
+      build_Android-arm64-v8a_Release:
+        description: "Build Android arm64-v8a Release"
         default: true
         type: boolean
-      build_android_arm64v8a_debug:
-        description: 'Build Android arm64-v8a Debug'
-        required: true
+      build_Android-arm64-v8a_Debug:
+        description: "Build Android arm64-v8a Debug"
         default: true
         type: boolean
-      build_android_armv7a_release:
-        description: 'Build Android armeabi-v7a Release'
-        required: true
+      build_Android-armeabi-v7a_Release:
+        description: "Build Android armeabi-v7a Release"
         default: true
         type: boolean
-      build_android_armv7a_debug:
-        description: 'Build Android armeabi-v7a Debug'
-        required: true
+      build_Android-armeabi-v7a_Debug:
+        description: "Build Android armeabi-v7a Debug"
         default: true
         type: boolean
-      build_ios_release:
-        description: 'Build iOS Release'
-        required: true
+      build_iOS_Release:
+        description: "Build iOS Release"
         default: true
         type: boolean
-      build_ios_debug:
-        description: 'Build iOS Debug'
-        required: true
+      build_iOS_Debug:
+        description: "Build iOS Debug"
         default: true
         type: boolean
-      build_osx_release:
-        description: 'Build OSX Release'
-        required: true
+      build_OSX_Release:
+        description: "Build OSX Release"
         default: true
         type: boolean
-      build_osx_debug:
-        description: 'Build OSX Debug'
-        required: true
+      build_OSX_Debug:
+        description: "Build OSX Debug"
         default: true
         type: boolean
-      build_linux_x86_64_release:
-        description: 'Build Linux x86_64 Release'
-        required: true
+      build_Linux-x86_64_Release:
+        description: "Build Linux x86_64 Release"
         default: true
         type: boolean
-      build_linux_x86_64_debug:
-        description: 'Build Linux x86_64 Debug'
-        required: true
+      build_Linux-x86_64_Debug:
+        description: "Build Linux x86_64 Debug"
         default: true
         type: boolean
-      build_linux_aarch64_release:
-        description: 'Build Linux aarch64 Release'
-        required: true
+      build_Linux-aarch64_Release:
+        description: "Build Linux aarch64 Release"
         default: true
         type: boolean
-      build_linux_aarch64_debug:
-        description: 'Build Linux aarch64 Debug'
-        required: true
+      build_Linux-aarch64_Debug:
+        description: "Build Linux aarch64 Debug"
         default: true
         type: boolean
-      build_windows_release:
-        description: 'Build Windows Release'
-        required: true
+      build_Windows_Release:
+        description: "Build Windows Release"
         default: true
         type: boolean
-      build_windows_debug:
-        description: 'Build Windows Debug'
-        required: true
+      build_Windows_Debug:
+        description: "Build Windows Debug"
         default: true
         type: boolean
       sgns_enable_release_symbols:
-        description: 'Enable SGNS release symbols in CMake configure'
-        required: true
+        description: "Enable SGNS release symbols in CMake configure"
         default: false
         type: boolean
 
@@ -99,41 +88,43 @@ jobs:
         id: gen
         env:
           GATED: ${{ github.event_name == 'workflow_dispatch' }}
-          BUILD_ANDROID_ARM64V8A_RELEASE: ${{ inputs.build_android_arm64v8a_release }}
-          BUILD_ANDROID_ARM64V8A_DEBUG: ${{ inputs.build_android_arm64v8a_debug }}
-          BUILD_ANDROID_ARMV7A_RELEASE: ${{ inputs.build_android_armv7a_release }}
-          BUILD_ANDROID_ARMV7A_DEBUG: ${{ inputs.build_android_armv7a_debug }}
-          BUILD_IOS_RELEASE: ${{ inputs.build_ios_release }}
-          BUILD_IOS_DEBUG: ${{ inputs.build_ios_debug }}
-          BUILD_OSX_RELEASE: ${{ inputs.build_osx_release }}
-          BUILD_OSX_DEBUG: ${{ inputs.build_osx_debug }}
-          BUILD_LINUX_X86_64_RELEASE: ${{ inputs.build_linux_x86_64_release }}
-          BUILD_LINUX_X86_64_DEBUG: ${{ inputs.build_linux_x86_64_debug }}
-          BUILD_LINUX_AARCH64_RELEASE: ${{ inputs.build_linux_aarch64_release }}
-          BUILD_LINUX_AARCH64_DEBUG: ${{ inputs.build_linux_aarch64_debug }}
-          BUILD_WINDOWS_RELEASE: ${{ inputs.build_windows_release }}
-          BUILD_WINDOWS_DEBUG: ${{ inputs.build_windows_debug }}
+          BUILD_ANDROID_ARM64_V8A_RELEASE: ${{ inputs.build_Android-arm64-v8a_Release }}
+          BUILD_ANDROID_ARM64_V8A_DEBUG: ${{ inputs.build_Android-arm64-v8a_Debug }}
+          BUILD_ANDROID_ARMEABI_V7A_RELEASE: ${{ inputs.build_Android-armeabi-v7a_Release }}
+          BUILD_ANDROID_ARMEABI_V7A_DEBUG: ${{ inputs.build_Android-armeabi-v7a_Debug }}
+          BUILD_IOS_RELEASE: ${{ inputs.build_iOS_Release }}
+          BUILD_IOS_DEBUG: ${{ inputs.build_iOS_Debug }}
+          BUILD_OSX_RELEASE: ${{ inputs.build_OSX_Release }}
+          BUILD_OSX_DEBUG: ${{ inputs.build_OSX_Debug }}
+          BUILD_LINUX_X86_64_RELEASE: ${{ inputs.build_Linux-x86_64_Release }}
+          BUILD_LINUX_X86_64_DEBUG: ${{ inputs.build_Linux-x86_64_Debug }}
+          BUILD_LINUX_AARCH64_RELEASE: ${{ inputs.build_Linux-aarch64_Release }}
+          BUILD_LINUX_AARCH64_DEBUG: ${{ inputs.build_Linux-aarch64_Debug }}
+          BUILD_WINDOWS_RELEASE: ${{ inputs.build_Windows_Release }}
+          BUILD_WINDOWS_DEBUG: ${{ inputs.build_Windows_Debug }}
         run: |
           set -euo pipefail
 
           # One entry per supported target/ABI/build-type combination.
-          # `toggle` names the workflow_dispatch input that enables the entry;
-          # it is stripped before the matrix is handed to the build workflow.
+          # `id` is the platform-ABI identifier used for artifact and tag names;
+          # `toggle` is the workflow_dispatch input enabling the entry, in its
+          # uppercased env-var form. It is stripped before the matrix is handed
+          # to the build workflow.
           MATRIX='[
-            {"target":"Android","build-type":"Release","abi":"arm64-v8a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARM64V8A_RELEASE"},
-            {"target":"Android","build-type":"Debug","abi":"arm64-v8a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARM64V8A_DEBUG"},
-            {"target":"Android","build-type":"Release","abi":"armeabi-v7a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARMV7A_RELEASE"},
-            {"target":"Android","build-type":"Debug","abi":"armeabi-v7a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARMV7A_DEBUG"},
-            {"target":"iOS","build-type":"Release","abi":"","runner_key":"mac","toggle":"BUILD_IOS_RELEASE"},
-            {"target":"iOS","build-type":"Debug","abi":"","runner_key":"mac","toggle":"BUILD_IOS_DEBUG"},
-            {"target":"OSX","build-type":"Release","abi":"","runner_key":"mac","toggle":"BUILD_OSX_RELEASE"},
-            {"target":"OSX","build-type":"Debug","abi":"","runner_key":"mac","toggle":"BUILD_OSX_DEBUG"},
-            {"target":"Linux","build-type":"Release","abi":"x86_64","runner_key":"linux_x64","toggle":"BUILD_LINUX_X86_64_RELEASE","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
-            {"target":"Linux","build-type":"Debug","abi":"x86_64","runner_key":"linux_x64","toggle":"BUILD_LINUX_X86_64_DEBUG","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
-            {"target":"Linux","build-type":"Release","abi":"aarch64","runner_key":"linux_arm","toggle":"BUILD_LINUX_AARCH64_RELEASE","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
-            {"target":"Linux","build-type":"Debug","abi":"aarch64","runner_key":"linux_arm","toggle":"BUILD_LINUX_AARCH64_DEBUG","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
-            {"target":"Windows","build-type":"Release","abi":"","runner_key":"windows","toggle":"BUILD_WINDOWS_RELEASE"},
-            {"target":"Windows","build-type":"Debug","abi":"","runner_key":"windows","toggle":"BUILD_WINDOWS_DEBUG"}
+            {"target":"Android","id":"Android-arm64-v8a","build-type":"Release","abi":"arm64-v8a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARM64_V8A_RELEASE"},
+            {"target":"Android","id":"Android-arm64-v8a","build-type":"Debug","abi":"arm64-v8a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARM64_V8A_DEBUG"},
+            {"target":"Android","id":"Android-armeabi-v7a","build-type":"Release","abi":"armeabi-v7a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARMEABI_V7A_RELEASE"},
+            {"target":"Android","id":"Android-armeabi-v7a","build-type":"Debug","abi":"armeabi-v7a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARMEABI_V7A_DEBUG"},
+            {"target":"iOS","id":"iOS","build-type":"Release","abi":"","runner_key":"mac","toggle":"BUILD_IOS_RELEASE"},
+            {"target":"iOS","id":"iOS","build-type":"Debug","abi":"","runner_key":"mac","toggle":"BUILD_IOS_DEBUG"},
+            {"target":"OSX","id":"OSX","build-type":"Release","abi":"","runner_key":"mac","toggle":"BUILD_OSX_RELEASE"},
+            {"target":"OSX","id":"OSX","build-type":"Debug","abi":"","runner_key":"mac","toggle":"BUILD_OSX_DEBUG"},
+            {"target":"Linux","id":"Linux-x86_64","build-type":"Release","abi":"x86_64","runner_key":"linux_x64","toggle":"BUILD_LINUX_X86_64_RELEASE","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
+            {"target":"Linux","id":"Linux-x86_64","build-type":"Debug","abi":"x86_64","runner_key":"linux_x64","toggle":"BUILD_LINUX_X86_64_DEBUG","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
+            {"target":"Linux","id":"Linux-aarch64","build-type":"Release","abi":"aarch64","runner_key":"linux_arm","toggle":"BUILD_LINUX_AARCH64_RELEASE","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
+            {"target":"Linux","id":"Linux-aarch64","build-type":"Debug","abi":"aarch64","runner_key":"linux_arm","toggle":"BUILD_LINUX_AARCH64_DEBUG","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
+            {"target":"Windows","id":"Windows","build-type":"Release","abi":"","runner_key":"windows","toggle":"BUILD_WINDOWS_RELEASE"},
+            {"target":"Windows","id":"Windows","build-type":"Debug","abi":"","runner_key":"windows","toggle":"BUILD_WINDOWS_DEBUG"}
           ]'
 
           # On workflow_dispatch, drop the combinations whose toggle was unchecked.
@@ -146,7 +137,7 @@ jobs:
 
           COUNT=$(jq '.include | length' <<<"$MATRIX")
           echo "Building $COUNT combinations:"
-          jq -r '.include[] | "- \(.target) \(.abi) \(.["build-type"])"' <<<"$MATRIX"
+          jq -r '.include[] | "- \(.id) \(.["build-type"])"' <<<"$MATRIX"
 
           if [ "$COUNT" -eq 0 ]; then
             echo "No target combinations enabled; nothing to build." >&2
@@ -159,6 +150,7 @@ jobs:
     name: Build and upload
     needs: prepare
     permissions:
+      # Allow the called workflow to create and push release tags.
       contents: write
       packages: read
     uses: ./.github/workflows/build.yml
