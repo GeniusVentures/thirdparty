@@ -1,14 +1,151 @@
-name: Build
+name: Build thirdparty
 
+# Reusable build engine. Callers pass the matrix of target/ABI/build-type
+# combinations to build (see build-targets.yml for how it is generated).
 on:
-  pull_request:
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      matrix:
+        description: "JSON array of builds: {target, build-type, abi, runner_key, container?}"
+        required: true
+        type: string
+      upload:
+        description: "Upload build artifacts to a GitHub release"
+        required: false
+        default: false
+        type: boolean
+      release-tag:
+        description: "Shared release tag (when empty, per-target tags are derived from the branch)"
+        required: false
+        default: ""
+        type: string
+      sgns_enable_release_symbols:
+        description: "Enable SGNS release symbols in CMake configure"
+        required: false
+        default: false
+        type: boolean
+
 permissions:
   contents: read
   packages: read
+
+env:
+  GH_TOKEN: ${{ secrets.GNUS_TOKEN_1 }}
+  SGNS_ENABLE_RELEASE_SYMBOLS: ${{ inputs.sgns_enable_release_symbols && 'ON' || 'OFF' }}
+
 jobs:
+  resolve-runners:
+    runs-on: ubuntu-latest
+    outputs:
+      linux_x64: ${{ steps.pick.outputs.linux_x64 }}
+      linux_arm: ${{ steps.pick.outputs.linux_arm }}
+      windows: ${{ steps.pick.outputs.windows }}
+      mac: ${{ steps.pick.outputs.mac }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Check self-hosted runner availability
+        id: pick
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          ORG="${REPO%%/*}"
+          repo_err="$(mktemp)"
+          org_err="$(mktemp)"
+
+          # Some org-scoped runners may not show up via the repo endpoint for this token.
+          # Query both scopes and merge the results.
+          if repo_data="$(gh api "/repos/$REPO/actions/runners" --paginate 2>"$repo_err")"; then
+            echo "Repository runner API query succeeded for $REPO"
+          else
+            echo "Repository runner API query failed for $REPO; continuing with empty repo runner set"
+            repo_data='{"runners":[]}'
+          fi
+
+          if org_data="$(gh api "/orgs/$ORG/actions/runners" --paginate 2>"$org_err")"; then
+            echo "Organization runner API query succeeded for $ORG"
+          else
+            echo "Organization runner API query failed for $ORG; continuing with empty org runner set"
+            org_data='{"runners":[]}'
+          fi
+
+          data="$(jq -n --argjson repo "$repo_data" --argjson org "$org_data" '{runners: (($repo.runners // []) + ($org.runners // []) | unique_by(.id))}')"
+
+          repo_count="$(echo "$repo_data" | jq -r '(.runners // []) | length')"
+          org_count="$(echo "$org_data" | jq -r '(.runners // []) | length')"
+          merged_count="$(echo "$data" | jq -r '(.runners // []) | length')"
+
+          echo "Runner counts: repo=$repo_count org=$org_count merged=$merged_count"
+          if [ "$org_count" -eq 0 ] && [ -s "$org_err" ]; then
+            echo "Org endpoint error output:"
+            cat "$org_err"
+          fi
+
+          echo "Discovered self-hosted runners for $REPO (repo+org merged):"
+          echo "$data" | jq -r '.runners[]? | "- \(.name) | status=\(.status) | busy=\(.busy) | labels=\([.labels[].name] | join(", "))"'
+
+          {
+            echo "## Runner availability"
+            echo
+            echo "Repository: $REPO"
+            echo "Organization: $ORG"
+            echo "Counts: repo=$repo_count org=$org_count merged=$merged_count"
+            echo
+            echo "Discovered runners (repo+org merged):"
+            echo "$data" | jq -r '.runners[]? | "- \(.name) | status=\(.status) | busy=\(.busy) | labels=\([.labels[].name] | join(", "))"'
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # Define JSON arrays using single quotes so real double-quotes are preserved.
+          SH_LINUX_X64='["self-hosted","sg-ubuntu-linux"]'
+          SH_LINUX_ARM='["self-hosted","sg-arm-linux"]'
+          SH_WINDOWS='["self-hosted","SG-WIN11"]'
+          SH_MAC='["self-hosted","gv-OSX-Large"]'
+          FB_LINUX='["ubuntu-latest"]'
+          FB_LINUX_ARM='["ubuntu-24.04-arm"]'
+          FB_WINDOWS='["windows-2022"]'
+          FB_MAC='["macos-latest"]'
+
+          # Returns the self-hosted label array if at least one matching runner
+          # is online and not busy, otherwise returns the GitHub-hosted fallback.
+          # Match either runner name or label/tag text, case-insensitively.
+          pick_runner() {
+            local label="$1" self_hosted="$2" fallback="$3"
+            if echo "$data" | jq -e --arg L "$label" \
+              '.runners[]
+               | select(.status=="online" and (.busy|not))
+               | select((.name | ascii_downcase) == ($L | ascii_downcase)
+                 or any(.labels[]; (.name | ascii_downcase) == ($L | ascii_downcase)))' \
+              >/dev/null 2>&1; then
+              echo "Selector '$label' matched an available self-hosted runner" >&2
+              echo "- $label: self-hosted" >> "$GITHUB_STEP_SUMMARY"
+              echo "$self_hosted"
+            else
+              echo "Selector '$label' did not match an available self-hosted runner" >&2
+              echo "- $label: fallback" >> "$GITHUB_STEP_SUMMARY"
+              echo "$fallback"
+            fi
+          }
+
+          echo "linux_x64=$(pick_runner 'sg-ubuntu-linux' "$SH_LINUX_X64" "$FB_LINUX")"   >> "$GITHUB_OUTPUT"
+          echo "linux_arm=$(pick_runner 'sg-arm-linux'    "$SH_LINUX_ARM" "$FB_LINUX_ARM")" >> "$GITHUB_OUTPUT"
+          echo "windows=$(pick_runner   'SG-WIN11'        "$SH_WINDOWS"   "$FB_WINDOWS")" >> "$GITHUB_OUTPUT"
+          echo "mac=$(pick_runner       'gv-OSX-Large'    "$SH_MAC"       "$FB_MAC")"     >> "$GITHUB_OUTPUT"
+
+      # Forward the caller-provided matrix through a job output so the build
+      # job's strategy can read it from the needs context.
+      - name: Forward build matrix
+        id: matrix
+        env:
+          BUILD_MATRIX: ${{ inputs.matrix }}
+        run: echo "matrix=$BUILD_MATRIX" >> "$GITHUB_OUTPUT"
+
   build:
-    runs-on: ${{matrix.host}}
+    needs: resolve-runners
+    permissions:
+      contents: write
+      packages: read
+    runs-on: ${{ fromJson(needs.resolve-runners.outputs[matrix.runner_key]) }}
     container:
       image: ${{matrix.container}}
       credentials:
@@ -16,40 +153,7 @@ jobs:
         password: ${{secrets.GNUS_TOKEN_1}}
     strategy:
       fail-fast: false
-      matrix:
-        target: [ Android, iOS, OSX, Linux, Windows ]
-        build-type: [ Release ]
-        abi: [ "" ]
-        include:
-          - target: Linux
-            host: sg-ubuntu-linux
-            abi: x86_64
-            build-type: Release
-            container: ghcr.io/geniusventures/debian-bullseye:latest
-          - target: Linux
-            host: sg-arm-linux
-            abi: aarch64
-            build-type: Release
-            container: ghcr.io/geniusventures/debian-bullseye:latest
-          - target: Windows
-            host: SG-WIN11
-          - target: OSX
-            host: gv-OSX-Large
-          - target: iOS
-            host: gv-OSX-Large
-          - target: Android
-            host: sg-ubuntu-linux
-            build-type: Release
-            abi: arm64-v8a
-          - target: Android
-            host: sg-ubuntu-linux
-            build-type: Release
-            abi: armeabi-v7a
-        exclude:
-          - target: Android
-            abi: ""
-          - target: Linux
-            abi: ""
+      matrix: ${{ fromJson(needs.resolve-runners.outputs.matrix) }}
     steps:
       - name: Configure Git Bash on Windows
         if: ${{ runner.environment == 'self-hosted' && matrix.target == 'Windows' }}
@@ -60,7 +164,7 @@ jobs:
             Add-Content -Path $env:GITHUB_PATH -Value $gitBinPath
             $env:PATH = "$gitBinPath;$env:PATH"
           }
-          
+
           Write-Output "Git Bash configured for bash shell commands"
           $bashLocation = (Get-Command bash.exe -ErrorAction SilentlyContinue).Source
           if ($bashLocation) {
@@ -75,23 +179,23 @@ jobs:
         run: |
           echo "=== PRE-CLEANUP DEBUG ==="
           echo "Current working directory: $(pwd)"
-          echo "Runner workspace: ${RUNNER_WORKSPACE}"
+          echo "Runner workspace: ${{runner.workspace}}"
           echo "GitHub workspace: ${{github.workspace}}"
-          
+
           # Use sudo on Linux to handle root-owned files left by container jobs
           SUDO=""
           if [ "$(uname)" = "Linux" ]; then
             SUDO="sudo"
           fi
 
-          echo "=== CLEANUP ARTIFACTS ==="          
+          echo "=== CLEANUP ARTIFACTS ==="
           # Clean contents of thirdparty directory but keep the directory itself
           if [ -d "thirdparty" ]; then
             echo "Cleaning thirdparty directory contents..."
             $SUDO rm -rf thirdparty/* thirdparty/.* 2>/dev/null || true
             echo "thirdparty directory cleaned (kept the directory)"
           fi
-          
+
           echo "=== POST-CLEANUP DEBUG ==="
           echo "Runner workspace contents:"
           ls -la
@@ -100,16 +204,49 @@ jobs:
             ls -la thirdparty/ 2>/dev/null || echo "  (empty)"
           fi
         shell: bash
-        env:
-          RUNNER_WORKSPACE: ${{runner.workspace}}
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        uses: actions/checkout@v6
         with:
-          persist-credentials: false
+          # Keep submodule checkout explicit so we can control retries and fetch behavior.
+          submodules: false
 
-      - name: Parallel checkout submodules
-        run: git submodule update --init --recursive --jobs 4 --depth 1
+      - name: Harden Git network settings
+        shell: bash
+        run: |
+          # Self-hosted networks/proxies can behave better with HTTP/1.1 for many small fetches.
+          git config --global http.version HTTP/1.1
+          # Reduce concurrent HTTP requests to avoid TLS/socket churn on constrained links.
+          git config --global http.maxRequests 2
+          # Limit nested submodule fetch fanout per job.
+          git config --global submodule.fetchJobs 8
+
+      - name: Checkout submodules with retry
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ATTEMPTS=5
+          DELAY=5
+
+          for attempt in $(seq 1 "$ATTEMPTS"); do
+            echo "Submodule checkout attempt $attempt/$ATTEMPTS"
+            git submodule sync --recursive
+
+            if git submodule update --init --recursive --jobs 8; then
+              echo "Submodule checkout succeeded"
+              exit 0
+            fi
+
+            if [ "$attempt" -lt "$ATTEMPTS" ]; then
+              echo "Submodule checkout failed; retrying in ${DELAY}s"
+              sleep "$DELAY"
+              DELAY=$((DELAY * 2))
+            fi
+          done
+
+          echo "Submodule checkout failed after $ATTEMPTS attempts"
+          exit 1
 
       - name: Configure Linux host
         if: ${{ runner.os == 'Linux'}}
@@ -157,7 +294,7 @@ jobs:
         run: |
           NDK_VERSION="r27b"
           NDK_DIR="$HOME/android-ndk-$NDK_VERSION"
-          
+
           if [ ! -d "$NDK_DIR" ]; then
             echo "Downloading Android NDK..."
             wget https://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux.zip -O ndk.zip
@@ -190,24 +327,111 @@ jobs:
 
       - name: Configure CMake for Mac
         if: ${{ matrix.target == 'OSX'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=MAC_UNIVERSAL
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=MAC_UNIVERSAL -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
 
       - name: Configure CMake for iOS
         if: ${{ matrix.target == 'iOS'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=OS64
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=OS64 -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
 
       - name: Configure CMake for Android
         if: ${{ matrix.target == 'Android'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DANDROID_ABI=${{matrix.abi}}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DANDROID_ABI=${{matrix.abi}} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
 
       - name: Configure CMake for Windows
         if: ${{ matrix.target == 'Windows' }}
-        run: cmake -S build/${{matrix.target}} -B $env:BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
+        run: cmake -S build/${{matrix.target}} -B $env:BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
 
       - name: Configure CMake for Linux
         if: ${{ matrix.target == 'Linux' }}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
 
       - name: Build thirdparty
         working-directory: ${{env.BUILD_DIRECTORY}}
         run: cmake --build . --config ${{matrix.build-type}} -j
+
+      - name: Compress directories
+        if: ${{ inputs.upload }}
+        working-directory: ${{env.BUILD_DIRECTORY}}
+        shell: bash
+        run: |
+          if [ '${{matrix.abi}}' ]; then
+            FILE_NAME="${{matrix.target}}-${{matrix.abi}}-${{matrix.build-type}}.tar.gz"
+          else
+            FILE_NAME="${{matrix.target}}-${{matrix.build-type}}.tar.gz"
+          fi
+
+          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
+
+          tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^\.|${{env.BUILD_DIRECTORY}}|g' -czf $FILE_NAME ./*/
+
+      - name: Set release tag
+        shell: bash
+        run: |
+          if [ -n '${{ inputs.release-tag }}' ]; then
+              RELEASE_TAG="${{ inputs.release-tag }}"
+              IS_TAG_RELEASE="true"
+          else
+              if [ '${{matrix.abi}}' ]; then
+                RELEASE_TAG="${{ matrix.target }}-${{matrix.abi}}-${{ github.ref_name }}-${{ matrix.build-type }}"
+              else
+                RELEASE_TAG="${{ matrix.target }}-${{ github.ref_name }}-${{ matrix.build-type }}"
+              fi
+              IS_TAG_RELEASE="false"
+          fi
+
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+          echo "IS_TAG_RELEASE=$IS_TAG_RELEASE" >> $GITHUB_ENV
+
+      - name: Create release tag
+        if: ${{ inputs.upload }}
+        shell: bash
+        id: create-release-tag
+        run: |
+          echo "Checking if release $RELEASE_TAG exists..."
+
+          if [ "$IS_TAG_RELEASE" = "true" ]; then
+              # For explicit tags, all matrix jobs share the same release tag.
+              # Create once if missing; concurrent creators should not fail the job.
+              if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+                  echo "Release $RELEASE_TAG already exists; skipping create."
+              else
+                  echo "Release does not exist yet; creating tag/release for $RELEASE_TAG..."
+                  git tag "$RELEASE_TAG" "${{ github.sha }}" || true
+                  git push origin "$RELEASE_TAG" || true
+
+                  if ! gh release create "$RELEASE_TAG" \
+                    --target "${{ github.sha }}" \
+                    -t "$RELEASE_TAG" \
+                    -n "Tag: $RELEASE_TAG | SHA: ${{ github.sha }}"; then
+                    if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+                      echo "Release was created by another matrix job; continuing."
+                    else
+                      echo "Failed to create release $RELEASE_TAG for an unexpected reason."
+                      exit 1
+                    fi
+                  fi
+              fi
+          else
+              if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+                  echo "Deleting existing release/tag $RELEASE_TAG..."
+                  gh release delete "$RELEASE_TAG" --yes || true
+                  git push origin ":refs/tags/$RELEASE_TAG" || true
+                  git tag -d "$RELEASE_TAG" || true
+              fi
+
+              echo "Creating new tag $RELEASE_TAG..."
+              git tag -f "$RELEASE_TAG" "${{ github.sha }}"
+              git push origin "$RELEASE_TAG" --force
+
+              echo "Creating GitHub release $RELEASE_TAG..."
+              gh release create "$RELEASE_TAG" \
+              --target "${{ github.sha }}" \
+              -t "${{ matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
+              -n "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
+              --prerelease
+          fi
+
+      - name: Upload file
+        if: ${{ inputs.upload }}
+        working-directory: ${{env.BUILD_DIRECTORY}}
+        run: gh release upload ${{env.RELEASE_TAG}} ${{env.FILE_NAME}} --clobber
