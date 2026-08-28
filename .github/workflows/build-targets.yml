@@ -1,597 +1,162 @@
 name: Multiplatform build and upload
 
 on:
+  pull_request:
+    paths-ignore:
+      - ".github/**"
+      - "README.md"
   workflow_dispatch:
     inputs:
       tag:
         description: "Release tag"
-        required: false
         type: string
-      build_android_arm64v8a_release:
-        description: 'Build Android arm64-v8a Release'
-        required: true
+      # Input names follow the SuperGenius convention build_<target>-<abi>_<build-type>;
+      # the prepare job maps them to uppercased env vars for the matrix filter.
+      build_Android-arm64-v8a_Release:
+        description: "Build Android arm64-v8a Release"
         default: true
         type: boolean
-      build_android_arm64v8a_debug:
-        description: 'Build Android arm64-v8a Debug'
-        required: true
+      build_Android-arm64-v8a_Debug:
+        description: "Build Android arm64-v8a Debug"
         default: true
         type: boolean
-      build_android_armv7a_release:
-        description: 'Build Android armeabi-v7a Release'
-        required: true
+      build_Android-armeabi-v7a_Release:
+        description: "Build Android armeabi-v7a Release"
         default: true
         type: boolean
-      build_android_armv7a_debug:
-        description: 'Build Android armeabi-v7a Debug'
-        required: true
+      build_Android-armeabi-v7a_Debug:
+        description: "Build Android armeabi-v7a Debug"
         default: true
         type: boolean
-      build_ios_release:
-        description: 'Build iOS Release'
-        required: true
+      build_iOS_Release:
+        description: "Build iOS Release"
         default: true
         type: boolean
-      build_ios_debug:
-        description: 'Build iOS Debug'
-        required: true
+      build_iOS_Debug:
+        description: "Build iOS Debug"
         default: true
         type: boolean
-      build_osx_release:
-        description: 'Build OSX Release'
-        required: true
+      build_OSX_Release:
+        description: "Build OSX Release"
         default: true
         type: boolean
-      build_osx_debug:
-        description: 'Build OSX Debug'
-        required: true
+      build_OSX_Debug:
+        description: "Build OSX Debug"
         default: true
         type: boolean
-      build_linux_x86_64_release:
-        description: 'Build Linux x86_64 Release'
-        required: true
+      build_Linux-x86_64_Release:
+        description: "Build Linux x86_64 Release"
         default: true
         type: boolean
-      build_linux_x86_64_debug:
-        description: 'Build Linux x86_64 Debug'
-        required: true
+      build_Linux-x86_64_Debug:
+        description: "Build Linux x86_64 Debug"
         default: true
         type: boolean
-      build_linux_aarch64_release:
-        description: 'Build Linux aarch64 Release'
-        required: true
+      build_Linux-aarch64_Release:
+        description: "Build Linux aarch64 Release"
         default: true
         type: boolean
-      build_linux_aarch64_debug:
-        description: 'Build Linux aarch64 Debug'
-        required: true
+      build_Linux-aarch64_Debug:
+        description: "Build Linux aarch64 Debug"
         default: true
         type: boolean
-      build_windows_release:
-        description: 'Build Windows Release'
-        required: true
+      build_Windows_Release:
+        description: "Build Windows Release"
         default: true
         type: boolean
-      build_windows_debug:
-        description: 'Build Windows Debug'
-        required: true
+      build_Windows_Debug:
+        description: "Build Windows Debug"
         default: true
         type: boolean
       sgns_enable_release_symbols:
-        description: 'Enable SGNS release symbols in CMake configure'
-        required: true
+        description: "Enable SGNS release symbols in CMake configure"
         default: false
         type: boolean
 
-env:
-  GH_TOKEN: ${{ secrets.GNUS_TOKEN_1 }}
-  SGNS_ENABLE_RELEASE_SYMBOLS: ${{ inputs.sgns_enable_release_symbols && 'ON' || 'OFF' }}
+permissions:
+  contents: read
+  packages: read
+
 jobs:
-  resolve-runners:
+  prepare:
+    name: Generate build matrix
     runs-on: ubuntu-latest
     outputs:
-      linux_x64: ${{ steps.pick.outputs.linux_x64 }}
-      linux_arm: ${{ steps.pick.outputs.linux_arm }}
-      windows: ${{ steps.pick.outputs.windows }}
-      mac: ${{ steps.pick.outputs.mac }}
+      matrix: ${{ steps.gen.outputs.matrix }}
     steps:
-      - name: Check self-hosted runner availability
-        id: pick
+      - name: Generate build matrix
+        id: gen
         env:
-          REPO: ${{ github.repository }}
+          GATED: ${{ github.event_name == 'workflow_dispatch' }}
+          BUILD_ANDROID_ARM64_V8A_RELEASE: ${{ inputs.build_Android-arm64-v8a_Release }}
+          BUILD_ANDROID_ARM64_V8A_DEBUG: ${{ inputs.build_Android-arm64-v8a_Debug }}
+          BUILD_ANDROID_ARMEABI_V7A_RELEASE: ${{ inputs.build_Android-armeabi-v7a_Release }}
+          BUILD_ANDROID_ARMEABI_V7A_DEBUG: ${{ inputs.build_Android-armeabi-v7a_Debug }}
+          BUILD_IOS_RELEASE: ${{ inputs.build_iOS_Release }}
+          BUILD_IOS_DEBUG: ${{ inputs.build_iOS_Debug }}
+          BUILD_OSX_RELEASE: ${{ inputs.build_OSX_Release }}
+          BUILD_OSX_DEBUG: ${{ inputs.build_OSX_Debug }}
+          BUILD_LINUX_X86_64_RELEASE: ${{ inputs.build_Linux-x86_64_Release }}
+          BUILD_LINUX_X86_64_DEBUG: ${{ inputs.build_Linux-x86_64_Debug }}
+          BUILD_LINUX_AARCH64_RELEASE: ${{ inputs.build_Linux-aarch64_Release }}
+          BUILD_LINUX_AARCH64_DEBUG: ${{ inputs.build_Linux-aarch64_Debug }}
+          BUILD_WINDOWS_RELEASE: ${{ inputs.build_Windows_Release }}
+          BUILD_WINDOWS_DEBUG: ${{ inputs.build_Windows_Debug }}
         run: |
           set -euo pipefail
-          ORG="${REPO%%/*}"
-          repo_err="$(mktemp)"
-          org_err="$(mktemp)"
 
-          # Some org-scoped runners may not show up via the repo endpoint for this token.
-          # Query both scopes and merge the results.
-          if repo_data="$(gh api "/repos/$REPO/actions/runners" --paginate 2>"$repo_err")"; then
-            echo "Repository runner API query succeeded for $REPO"
-          else
-            echo "Repository runner API query failed for $REPO; continuing with empty repo runner set"
-            repo_data='{"runners":[]}'
+          # One entry per supported target/ABI/build-type combination.
+          # `id` is the platform-ABI identifier used for artifact and tag names;
+          # `toggle` is the workflow_dispatch input enabling the entry, in its
+          # uppercased env-var form. It is stripped before the matrix is handed
+          # to the build workflow.
+          MATRIX='[
+            {"target":"Android","id":"Android-arm64-v8a","build-type":"Release","abi":"arm64-v8a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARM64_V8A_RELEASE"},
+            {"target":"Android","id":"Android-arm64-v8a","build-type":"Debug","abi":"arm64-v8a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARM64_V8A_DEBUG"},
+            {"target":"Android","id":"Android-armeabi-v7a","build-type":"Release","abi":"armeabi-v7a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARMEABI_V7A_RELEASE"},
+            {"target":"Android","id":"Android-armeabi-v7a","build-type":"Debug","abi":"armeabi-v7a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARMEABI_V7A_DEBUG"},
+            {"target":"iOS","id":"iOS","build-type":"Release","abi":"","runner_key":"mac","toggle":"BUILD_IOS_RELEASE"},
+            {"target":"iOS","id":"iOS","build-type":"Debug","abi":"","runner_key":"mac","toggle":"BUILD_IOS_DEBUG"},
+            {"target":"OSX","id":"OSX","build-type":"Release","abi":"","runner_key":"mac","toggle":"BUILD_OSX_RELEASE"},
+            {"target":"OSX","id":"OSX","build-type":"Debug","abi":"","runner_key":"mac","toggle":"BUILD_OSX_DEBUG"},
+            {"target":"Linux","id":"Linux-x86_64","build-type":"Release","abi":"x86_64","runner_key":"linux_x64","toggle":"BUILD_LINUX_X86_64_RELEASE","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
+            {"target":"Linux","id":"Linux-x86_64","build-type":"Debug","abi":"x86_64","runner_key":"linux_x64","toggle":"BUILD_LINUX_X86_64_DEBUG","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
+            {"target":"Linux","id":"Linux-aarch64","build-type":"Release","abi":"aarch64","runner_key":"linux_arm","toggle":"BUILD_LINUX_AARCH64_RELEASE","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
+            {"target":"Linux","id":"Linux-aarch64","build-type":"Debug","abi":"aarch64","runner_key":"linux_arm","toggle":"BUILD_LINUX_AARCH64_DEBUG","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
+            {"target":"Windows","id":"Windows","build-type":"Release","abi":"","runner_key":"windows","toggle":"BUILD_WINDOWS_RELEASE"},
+            {"target":"Windows","id":"Windows","build-type":"Debug","abi":"","runner_key":"windows","toggle":"BUILD_WINDOWS_DEBUG"}
+          ]'
+
+          # On workflow_dispatch, drop the combinations whose toggle was unchecked.
+          if [ "$GATED" = "true" ]; then
+            MATRIX=$(jq -c '[ .[] | select((env[.toggle] // "false") == "true") ]' <<<"$MATRIX")
           fi
 
-          if org_data="$(gh api "/orgs/$ORG/actions/runners" --paginate 2>"$org_err")"; then
-            echo "Organization runner API query succeeded for $ORG"
-          else
-            echo "Organization runner API query failed for $ORG; continuing with empty org runner set"
-            org_data='{"runners":[]}'
+          # The build workflow's strategy consumes the canonical {include: [...]} form.
+          MATRIX=$(jq -c '{include: [.[] | del(.toggle)]}' <<<"$MATRIX")
+
+          COUNT=$(jq '.include | length' <<<"$MATRIX")
+          echo "Building $COUNT combinations:"
+          jq -r '.include[] | "- \(.id) \(.["build-type"])"' <<<"$MATRIX"
+
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No target combinations enabled; nothing to build." >&2
+            exit 1
           fi
 
-          data="$(jq -n --argjson repo "$repo_data" --argjson org "$org_data" '{runners: (($repo.runners // []) + ($org.runners // []) | unique_by(.id))}')"
-
-          repo_count="$(echo "$repo_data" | jq -r '(.runners // []) | length')"
-          org_count="$(echo "$org_data" | jq -r '(.runners // []) | length')"
-          merged_count="$(echo "$data" | jq -r '(.runners // []) | length')"
-
-          echo "Runner counts: repo=$repo_count org=$org_count merged=$merged_count"
-          if [ "$org_count" -eq 0 ] && [ -s "$org_err" ]; then
-            echo "Org endpoint error output:"
-            cat "$org_err"
-          fi
-
-          echo "Discovered self-hosted runners for $REPO (repo+org merged):"
-          echo "$data" | jq -r '.runners[]? | "- \(.name) | status=\(.status) | busy=\(.busy) | labels=\([.labels[].name] | join(", "))"'
-
-          {
-            echo "## Runner availability"
-            echo
-            echo "Repository: $REPO"
-            echo "Organization: $ORG"
-            echo "Counts: repo=$repo_count org=$org_count merged=$merged_count"
-            echo
-            echo "Discovered runners (repo+org merged):"
-            echo "$data" | jq -r '.runners[]? | "- \(.name) | status=\(.status) | busy=\(.busy) | labels=\([.labels[].name] | join(", "))"'
-            echo
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          # Define JSON arrays using single quotes so real double-quotes are preserved.
-          SH_LINUX_X64='["self-hosted","sg-ubuntu-linux"]'
-          SH_LINUX_ARM='["self-hosted","sg-arm-linux"]'
-          SH_WINDOWS='["self-hosted","SG-WIN11"]'
-          SH_MAC='["self-hosted","gv-OSX-Large"]'
-          FB_LINUX='["ubuntu-latest"]'
-          FB_LINUX_ARM='["ubuntu-24.04-arm"]'
-          FB_WINDOWS='["windows-2022"]'
-          FB_MAC='["macos-latest"]'
-
-          # Returns the self-hosted label array if at least one matching runner
-          # is online and not busy, otherwise returns the GitHub-hosted fallback.
-          # Match either runner name or label/tag text, case-insensitively.
-          pick_runner() {
-            local label="$1" self_hosted="$2" fallback="$3"
-            if echo "$data" | jq -e --arg L "$label" \
-              '.runners[]
-               | select(.status=="online" and (.busy|not))
-               | select((.name | ascii_downcase) == ($L | ascii_downcase)
-                 or any(.labels[]; (.name | ascii_downcase) == ($L | ascii_downcase)))' \
-              >/dev/null 2>&1; then
-              echo "Selector '$label' matched an available self-hosted runner" >&2
-              echo "- $label: self-hosted" >> "$GITHUB_STEP_SUMMARY"
-              echo "$self_hosted"
-            else
-              echo "Selector '$label' did not match an available self-hosted runner" >&2
-              echo "- $label: fallback" >> "$GITHUB_STEP_SUMMARY"
-              echo "$fallback"
-            fi
-          }
-
-          echo "linux_x64=$(pick_runner 'sg-ubuntu-linux' "$SH_LINUX_X64" "$FB_LINUX")"   >> "$GITHUB_OUTPUT"
-          echo "linux_arm=$(pick_runner 'sg-arm-linux'    "$SH_LINUX_ARM" "$FB_LINUX_ARM")" >> "$GITHUB_OUTPUT"
-          echo "windows=$(pick_runner   'SG-WIN11'        "$SH_WINDOWS"   "$FB_WINDOWS")" >> "$GITHUB_OUTPUT"
-          echo "mac=$(pick_runner       'gv-OSX-Large'    "$SH_MAC"       "$FB_MAC")"     >> "$GITHUB_OUTPUT"
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
 
   build:
-    needs: resolve-runners
-    runs-on: ${{ fromJson(needs.resolve-runners.outputs[matrix.runner_key]) }}
-    container:
-      image: ${{matrix.container}}
-      credentials:
-        username: ${{github.actor}}
-        password: ${{secrets.GNUS_TOKEN_1}}
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [ Android, iOS, OSX, Linux, Windows ]
-        build-type: [ Debug, Release ]
-        abi: [ "" ]
-        include:
-          - target: Linux
-            host: sg-ubuntu-linux
-            runner_key: linux_x64
-            abi: x86_64
-            build-type: Debug
-            container: ghcr.io/geniusventures/debian-bullseye:latest
-          - target: Linux
-            host: sg-ubuntu-linux
-            runner_key: linux_x64
-            abi: x86_64
-            build-type: Release
-            container: ghcr.io/geniusventures/debian-bullseye:latest
-          - target: Linux
-            host: sg-arm-linux
-            runner_key: linux_arm
-            abi: aarch64
-            build-type: Debug
-            container: ghcr.io/geniusventures/debian-bullseye:latest
-          - target: Linux
-            host: sg-arm-linux
-            runner_key: linux_arm
-            abi: aarch64
-            build-type: Release
-            container: ghcr.io/geniusventures/debian-bullseye:latest
-          - target: Windows
-            host: SG-WIN11
-            runner_key: windows
-          - target: OSX
-            host: gv-OSX-Large
-            runner_key: mac
-          - target: iOS
-            host: gv-OSX-Large
-            runner_key: mac
-          - target: Android
-            host: sg-ubuntu-linux
-            runner_key: linux_x64
-            build-type: Release
-            abi: arm64-v8a
-          - target: Android
-            host: sg-ubuntu-linux
-            runner_key: linux_x64
-            build-type: Release
-            abi: armeabi-v7a
-          - target: Android
-            host: sg-ubuntu-linux
-            runner_key: linux_x64
-            build-type: Debug
-            abi: arm64-v8a
-          - target: Android
-            host: sg-ubuntu-linux
-            runner_key: linux_x64
-            build-type: Debug
-            abi: armeabi-v7a
-        exclude:
-          - target: Android
-            abi: ""
-          - target: Linux
-            abi: ""
-    steps:
-      - name: Configure Git Bash on Windows
-        if: ${{ runner.environment == 'self-hosted' && matrix.target == 'Windows' }}
-        run: |
-          $gitBinPath = "C:\Program Files\Git\bin"
-
-          if (Test-Path $gitBinPath) {
-            Add-Content -Path $env:GITHUB_PATH -Value $gitBinPath
-            $env:PATH = "$gitBinPath;$env:PATH"
-          }
-          
-          Write-Output "Git Bash configured for bash shell commands"
-          $bashLocation = (Get-Command bash.exe -ErrorAction SilentlyContinue).Source
-          if ($bashLocation) {
-            Write-Output "Bash location: $bashLocation"
-          } else {
-            Write-Output "WARNING: bash.exe not found in PATH"
-          }
-
-      - name: Check if build should run
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        shell: bash
-        run: |
-          SHOULD_RUN="true"
-          # Only check inputs on workflow_dispatch events
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            case '${{matrix.target}}-${{matrix.abi}}-${{ matrix.build-type }}' in
-              Android-arm64-v8a-Release)
-                if [ '${{ inputs.build_android_arm64v8a_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              Android-arm64-v8a-Debug)
-                if [ '${{ inputs.build_android_arm64v8a_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              Android-armeabi-v7a-Release)
-                if [ '${{ inputs.build_android_armv7a_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              Android-armeabi-v7a-Debug)
-                if [ '${{ inputs.build_android_armv7a_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              iOS-*-Release)
-                if [ '${{ inputs.build_ios_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              iOS-*-Debug)
-                if [ '${{ inputs.build_ios_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              OSX-*-Release)
-                if [ '${{ inputs.build_osx_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              OSX-*-Debug)
-                if [ '${{ inputs.build_osx_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              Linux-x86_64-Release)
-                if [ '${{ inputs.build_linux_x86_64_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              Linux-x86_64-Debug)
-                if [ '${{ inputs.build_linux_x86_64_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              Linux-aarch64-Release)
-                if [ '${{ inputs.build_linux_aarch64_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              Linux-aarch64-Debug)
-                if [ '${{ inputs.build_linux_aarch64_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              Windows-*-Release)
-                if [ '${{ inputs.build_windows_release }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-              Windows-*-Debug)
-                if [ '${{ inputs.build_windows_debug }}' != 'true' ]; then SHOULD_RUN="false"; fi
-                ;;
-            esac
-          fi
-          if [ "$SHOULD_RUN" == "false" ]; then
-            echo "Skipping build for ${{ matrix.target }} ${{ matrix.abi }} ${{ matrix.build-type }}"
-            exit 78
-          fi
-
-      - name: Clean workspace (self-hosted runners)
-        if: ${{ runner.environment == 'self-hosted' }}
-        working-directory: ${{runner.workspace}}
-        run: |
-          echo "=== PRE-CLEANUP DEBUG ==="
-          echo "Current working directory: $(pwd)"
-          echo "Runner workspace: ${{runner.workspace}}"
-          echo "GitHub workspace: ${{github.workspace}}"
-          
-          # Use sudo on Linux to handle root-owned files left by container jobs
-          SUDO=""
-          if [ "$(uname)" = "Linux" ]; then
-            SUDO="sudo"
-          fi
-
-          echo "=== CLEANUP ARTIFACTS ==="          
-          # Clean contents of thirdparty directory but keep the directory itself
-          if [ -d "thirdparty" ]; then
-            echo "Cleaning thirdparty directory contents..."
-            $SUDO rm -rf thirdparty/* thirdparty/.* 2>/dev/null || true
-            echo "thirdparty directory cleaned (kept the directory)"
-          fi
-          
-          echo "=== POST-CLEANUP DEBUG ==="
-          echo "Runner workspace contents:"
-          ls -la
-          if [ -d "thirdparty" ]; then
-            echo "thirdparty directory exists and contains:"
-            ls -la thirdparty/ 2>/dev/null || echo "  (empty)"
-          fi
-        shell: bash
-
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          # Keep submodule checkout explicit so we can control retries and fetch behavior.
-          submodules: false
-
-      - name: Harden Git network settings
-        shell: bash
-        run: |
-          # Self-hosted networks/proxies can behave better with HTTP/1.1 for many small fetches.
-          git config --global http.version HTTP/1.1
-          # Reduce concurrent HTTP requests to avoid TLS/socket churn on constrained links.
-          git config --global http.maxRequests 2
-          # Limit nested submodule fetch fanout per job.
-          git config --global submodule.fetchJobs 8
-
-      - name: Checkout submodules with retry
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          ATTEMPTS=5
-          DELAY=5
-
-          for attempt in $(seq 1 "$ATTEMPTS"); do
-            echo "Submodule checkout attempt $attempt/$ATTEMPTS"
-            git submodule sync --recursive
-
-            if git submodule update --init --recursive --jobs 8; then
-              echo "Submodule checkout succeeded"
-              exit 0
-            fi
-
-            if [ "$attempt" -lt "$ATTEMPTS" ]; then
-              echo "Submodule checkout failed; retrying in ${DELAY}s"
-              sleep "$DELAY"
-              DELAY=$((DELAY * 2))
-            fi
-          done
-
-          echo "Submodule checkout failed after $ATTEMPTS attempts"
-          exit 1
-
-      - name: Configure Linux host
-        if: ${{ runner.os == 'Linux'}}
-        run: |
-          sudo update-alternatives --install /usr/bin/cc cc $(which clang) 100
-          sudo update-alternatives --install /usr/bin/c++ c++ $(which clang++) 100
-          sudo update-alternatives --set cc $(which clang)
-          sudo update-alternatives --set c++ $(which clang++)
-
-          sudo apt install libvulkan-dev ninja-build -y
-          echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
-
-      - name: Configure macOS host
-        if: ${{ runner.os == 'macOS'}}
-        run: |
-          brew install ninja bash gnu-tar
-
-          # Ensure GNU tar is first in PATH
-          if [ -d "/opt/homebrew/opt/gnu-tar/libexec/gnubin" ]; then
-            echo "PATH=/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH" >> $GITHUB_ENV
-            echo "Using GNU tar from /opt/homebrew"
-          elif [ -d "/usr/local/opt/gnu-tar/libexec/gnubin" ]; then
-            echo "PATH=/usr/local/opt/gnu-tar/libexec/gnubin:$PATH" >> $GITHUB_ENV
-            echo "Using GNU tar from /usr/local"
-          else
-            echo "WARNING: GNU tar installation not found in expected locations"
-            echo "Available tar: $(which tar)"
-          fi
-
-          echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
-
-      - name: Add Darwin toolchain
-        if: ${{ matrix.target == 'OSX'}}
-        run: rustup target add x86_64-apple-darwin
-
-      - name: Add iOS toolchain
-        if: ${{ matrix.target == 'iOS' }}
-        run: |
-          rustup toolchain install nightly-aarch64-apple-darwin
-          rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
-          rustup target add aarch64-apple-ios
-
-      - name: Add Android toolchain
-        if: ${{ matrix.target == 'Android' }}
-        run: |
-          NDK_VERSION="r27b"
-          NDK_DIR="$HOME/android-ndk-$NDK_VERSION"
-          
-          if [ ! -d "$NDK_DIR" ]; then
-            echo "Downloading Android NDK..."
-            wget https://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux.zip -O ndk.zip
-            unzip -o ndk.zip -d $HOME
-            rm ndk.zip
-          else
-            echo "Android NDK already exists at $NDK_DIR, skipping download"
-          fi
-
-          echo "ANDROID_NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
-
-          rustup target add aarch64-linux-android
-          rustup target add armv7-linux-androideabi
-
-      - name: Install bindgen
-        run: cargo install cbindgen
-
-      - name: Add wasm Rust target
-        run: rustup target add wasm32-unknown-emscripten
-
-      - name: Set build directory
-        run: |
-          if [ '${{matrix.abi}}' ]; then
-            BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build-type}}/${{matrix.abi}}
-          else
-            BUILD_DIRECTORY=build/${{matrix.target}}/${{matrix.build-type}}
-          fi
-          echo "BUILD_DIRECTORY=$BUILD_DIRECTORY" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Configure CMake for Mac
-        if: ${{ matrix.target == 'OSX'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=MAC_UNIVERSAL -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
-
-      - name: Configure CMake for iOS
-        if: ${{ matrix.target == 'iOS'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=OS64 -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
-
-      - name: Configure CMake for Android
-        if: ${{ matrix.target == 'Android'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DANDROID_ABI=${{matrix.abi}} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
-
-      - name: Configure CMake for Windows
-        if: ${{ matrix.target == 'Windows' }}
-        run: cmake -S build/${{matrix.target}} -B $env:BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
-
-      - name: Configure CMake for Linux
-        if: ${{ matrix.target == 'Linux' }}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
-
-      - name: Build thirdparty
-        working-directory: ${{env.BUILD_DIRECTORY}}
-        run: cmake --build . --config ${{matrix.build-type}} -j
-
-      - name: Compress directories
-        if: github.ref_name == 'main' || github.ref_name == 'develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag != '')
-        working-directory: ${{env.BUILD_DIRECTORY}}
-        shell: bash
-        run: |
-          if [ '${{matrix.abi}}' ]; then
-            FILE_NAME="${{matrix.target}}-${{matrix.abi}}-${{matrix.build-type}}.tar.gz"
-          else
-            FILE_NAME="${{matrix.target}}-${{matrix.build-type}}.tar.gz"
-          fi
-
-          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
-
-          tar --no-wildcards-match-slash --exclude='./*/src' --exclude='./*/tmp' --transform='s|^\.|${{env.BUILD_DIRECTORY}}|g' -czf $FILE_NAME ./*/
-
-      - name: Set release tag
-        shell: bash
-        run: |
-          if ${{ github.event_name == 'workflow_dispatch' }} && [ '${{ github.event.inputs.tag }}' ]; then
-              RELEASE_TAG="${{ github.event.inputs.tag }}"
-              IS_TAG_RELEASE="true"
-          else
-              if [ '${{matrix.abi}}' ]; then
-                RELEASE_TAG="${{ matrix.target }}-${{matrix.abi}}-${{ github.ref_name }}-${{ matrix.build-type }}"
-              else
-                RELEASE_TAG="${{ matrix.target }}-${{ github.ref_name }}-${{ matrix.build-type }}"
-              fi
-              IS_TAG_RELEASE="false"
-          fi
-
-          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
-          echo "IS_TAG_RELEASE=$IS_TAG_RELEASE" >> $GITHUB_ENV
-
-      - name: Create release tag
-        if: github.ref_name == 'main' || github.ref_name == 'develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag != '')
-        shell: bash
-        id: create-release-tag
-        run: |
-          echo "Checking if release $RELEASE_TAG exists..."
-
-          if [ "$IS_TAG_RELEASE" = "true" ]; then
-              # For explicit tags, all matrix jobs share the same release tag.
-              # Create once if missing; concurrent creators should not fail the job.
-              if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-                  echo "Release $RELEASE_TAG already exists; skipping create."
-              else
-                  echo "Release does not exist yet; creating tag/release for $RELEASE_TAG..."
-                  git tag "$RELEASE_TAG" "${{ github.sha }}" || true
-                  git push origin "$RELEASE_TAG" || true
-
-                  if ! gh release create "$RELEASE_TAG" \
-                    --target "${{ github.sha }}" \
-                    -t "$RELEASE_TAG" \
-                    -n "Tag: $RELEASE_TAG | SHA: ${{ github.sha }}"; then
-                    if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-                      echo "Release was created by another matrix job; continuing."
-                    else
-                      echo "Failed to create release $RELEASE_TAG for an unexpected reason."
-                      exit 1
-                    fi
-                  fi
-              fi
-          else
-              if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-                  echo "Deleting existing release/tag $RELEASE_TAG..."
-                  gh release delete "$RELEASE_TAG" --yes || true
-                  git push origin ":refs/tags/$RELEASE_TAG" || true
-                  git tag -d "$RELEASE_TAG" || true
-              fi
-
-              echo "Creating new tag $RELEASE_TAG..."
-              git tag -f "$RELEASE_TAG" "${{ github.sha }}"
-              git push origin "$RELEASE_TAG" --force
-
-              echo "Creating GitHub release $RELEASE_TAG..."
-              gh release create "$RELEASE_TAG" \
-              --target "${{ github.sha }}" \
-              -t "${{ matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
-              -n "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
-              --prerelease
-          fi
-
-      - name: Upload file
-        if: github.ref_name == 'main' || github.ref_name == 'develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag != '')
-        working-directory: ${{env.BUILD_DIRECTORY}}
-        run: gh release upload ${{env.RELEASE_TAG}} ${{env.FILE_NAME}} --clobber
+    name: Build and upload
+    needs: prepare
+    permissions:
+      # Allow the called workflow to create and push release tags.
+      contents: write
+      packages: read
+    uses: ./.github/workflows/build.yml
+    with:
+      matrix: ${{ needs.prepare.outputs.matrix }}
+      upload: ${{ github.ref_name == 'main' || github.ref_name == 'develop' || inputs.tag != '' }}
+      release-tag: ${{ inputs.tag }}
+      sgns_enable_release_symbols: ${{ inputs.sgns_enable_release_symbols }}
+    secrets: inherit

@@ -1,14 +1,10 @@
+# thirdparty
+
 This is the repository for third party of [SuperGenius](https://github.com/GeniusVentures/SuperGenius/).
 
-![Android](https://github.com/GeniusVentures/thirdparty/actions/workflows/Android.yml/badge.svg?branch=master)
-![iOS](https://github.com/GeniusVentures/thirdparty/actions/workflows/iOS.yml/badge.svg?branch=master)
-![Linux](https://github.com/GeniusVentures/thirdparty/actions/workflows/Linux.yml/badge.svg?branch=master)
-![macOS](https://github.com/GeniusVentures/thirdparty/actions/workflows/macOS.yml/badge.svg?branch=master)
-![Windows](https://github.com/GeniusVentures/thirdparty/actions/workflows/Windows.yml/badge.svg?branch=master)
+![Multiplatform build and upload](https://github.com/GeniusVentures/thirdparty/actions/workflows/build-targets.yml/badge.svg?branch=master)
 
-===================================
-
-# Download pre-built libraries
+## Download pre-built libraries
 
 Pre-built libraries are available on the [release page](https://github.com/GeniusVentures/thirdparty/releases). The tags are named with the following convention:
 
@@ -21,11 +17,11 @@ Where:
 
 The `master` branch has the release versions, for development download from the `develop` branch to get the newest builds.
 
-# Building
+## Building
 
 If you want to build `thirdparty` for yourself, you'll need to recursively checkout every submodule.
 
-## Requirements
+### Requirements
 
 - CMake
 - Perl
@@ -38,10 +34,10 @@ If you want to build `thirdparty` for yourself, you'll need to recursively check
 - `clang` or `MSVC` as a compiler
     - On Linux setting cc and c++ to clang might be needed (using `update-alternatives`)
 
-## Optional (but recommended)
+### Optional (but recommended)
 - Ninja
 
-### Android
+#### Android
 
 - NDK, preferably version 27b
   - Remember to set the environment variable `ANDROID_NDK_HOME` to point to the install path (.bash_profile/.bashrc/.zprofile etc.) 
@@ -53,7 +49,7 @@ If you want to build `thirdparty` for yourself, you'll need to recursively check
 
 Note: we do not test cross-compiling for Android using Windows.
 
-### iOS
+#### iOS
 
 - Rust iOS target and toolchain
 
@@ -63,7 +59,7 @@ rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
 rustup target add aarch64-apple-ios
 ```
 
-## CMake
+### CMake
 
 In the `build` directory, there'll be a folder for every supported platform, and inside each there will be a `CMakeLists.txt` file. To build, you must configure CMake using this platform-specific subdirectory and build from there.
 
@@ -77,7 +73,7 @@ cmake .. -CMAKE_BUILD_TYPE=Debug
 cmake --build Debug --config Debug -j
 ```
 
-## Ninja (recommended)
+### Ninja (recommended)
 
 Ninja is able to use parallel builds far better than CMake and picks up on # processors automatically.
 ```bash

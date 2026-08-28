@@ -21,7 +21,7 @@
 ## Critical developer workflows (repo-specific)
 - Initialize submodules before any build:
 ```bash
-git submodule update --init --recursive --jobs 4 --depth 1
+git submodule update --init --recursive --depth 1
 ```
 - Preferred configure/build pattern (matches README and CI):
 ```bash
@@ -31,7 +31,7 @@ ninja
 ```
 - macOS uses `-DPLATFORM=MAC_UNIVERSAL` in CI (`.github/workflows/build.yml`).
 - iOS uses `-DPLATFORM=OS64`; Android requires `-DANDROID_ABI=<abi>` and `ANDROID_NDK_HOME`.
-- Linux CI forces clang via `update-alternatives`; do not assume gcc parity without checking.
+- Linux CI forces clang via `update-alternatives`; do not assume GCC parity without checking.
 
 ## CI and release integration points
 - Main validation matrix: `.github/workflows/build.yml` (Android/iOS/OSX/Linux/Windows).
@@ -47,4 +47,3 @@ ninja
 - Make minimal, surgical changes in the relevant platform file and/or `build/CommonTargets.CMake`; avoid broad refactors across vendored sources.
 - When adding a dependency, update both `DEPENDS` and required `*_DIR`/include cache args for downstream consumers.
 - Validate changes by mirroring one CI configure/build path for the affected platform.
-
