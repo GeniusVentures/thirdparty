@@ -614,6 +614,9 @@ ExternalProject_Add(wallet-core
     SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"
     CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    # Use the in-tree json submodule checkout (v3.12.0) instead of wallet-core's own
+    # pinned copy, which predates the std::char_traits<unsigned char> fix (issue #114).
+    -DWALLET_CORE_JSON_INCLUDE_DIR:PATH=${THIRDPARTY_DIR}/json/include
     -Dabsl_DIR:PATH=${absl_DIR}
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
     -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
