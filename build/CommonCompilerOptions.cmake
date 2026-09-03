@@ -143,5 +143,3 @@ option(MNN_SUPPORT_TRANSFORMER_FUSE "Enable MNN transformer fuse ops for OSX ext
 if (MNN_BUILD_TESTS)
     set(MNN_TEST_BYPRODUCT "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/run_test.out")
 endif()
-
-

@@ -457,14 +457,22 @@ if(NOT APPLE OR (APPLE AND CMAKE_OSX_SYSROOT MATCHES "iPhoneOS"))
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         -DMNN_BUILD_SHARED_LIBS:BOOL=OFF
         -DMNN_BUILD_TEST:BOOL=${MNN_BUILD_TESTS}
+        -DMNN_BUILD_LLM:BOOL=ON
+        -DMNN_BUILD_LLM_OMNI:BOOL=ON
+        -DMNN_LOW_MEMORY:BOOL=ON
         -DMNN_BUILD_TOOLS:BOOL=OFF
         -DMNN_BUILD_PROTOBUFFER:BOOL=OFF
         -DMNN_VULKAN:BOOL=ON
+        -DMNN_VULKAN_IMAGE:BOOL=OFF
+        -DMNN_SUPPORT_TRANSFORMER_FUSE:BOOL=${MNN_SUPPORT_TRANSFORMER_FUSE}
         -DMNN_WIN_RUNTIME_MT:BOOL=ON
         -DMNN_LLM_BUILD_DEMO:BOOL=OFF
         ${_CMAKE_COMMON_CACHE_ARGS}
         ${_MNN_EXTRA_PARAM}
         DEPENDS ${_MNN_DEPENDS} ${vulkanTarget}
+        BUILD_BYPRODUCTS
+            "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/${CMAKE_STATIC_LIBRARY_PREFIX}MNN${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            ${MNN_TEST_BYPRODUCT}
     )
 
     set(_FINDPACKAGE_MNN_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/MNN/lib/cmake/MNN")
@@ -673,6 +681,9 @@ ExternalProject_Add(wallet-core
     SOURCE_DIR "${THIRDPARTY_DIR}/wallet-core"
     CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    # Use the in-tree json submodule checkout (v3.12.0) instead of wallet-core's own
+    # pinned copy, which predates the std::char_traits<unsigned char> fix (issue #114).
+    -DWALLET_CORE_JSON_INCLUDE_DIR:PATH=${THIRDPARTY_DIR}/json/include
     -Dabsl_DIR:PATH=${absl_DIR}
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
     -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
