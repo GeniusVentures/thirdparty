@@ -1,3 +1,6 @@
+# Python3 — required by shaderc patch step (git-sync-deps)
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
 # GTest
 ExternalProject_Add(GTest
     PREFIX GTest
@@ -359,25 +362,25 @@ set(_FINDPACKAGE_libp2p_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib/cmake
 set(_FINDPACKAGE_libp2p_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/lib")
 set(_FINDPACKAGE_LIBP2P_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libp2p/include")
 
-if(NOT ANDROID)
-    # Vulkan-Headers
-    ExternalProject_Add(
-        Vulkan-Headers
-        PREFIX Vulkan-Headers
-        SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Headers"
-           CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader
-        ${_CMAKE_COMMON_CACHE_ARGS}
-    )
+# Vulkan-Headers — single build for all platforms.
+ExternalProject_Add(
+    Vulkan-Headers
+    PREFIX Vulkan-Headers
+    SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Headers"
+       CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    ${_CMAKE_COMMON_CACHE_ARGS}
+)
 
-    # Vulkan-Loader
+# Vulkan-Loader — desktop only (Android/iOS use platform-native loaders).
+if(NOT ANDROID)
     ExternalProject_Add(
         Vulkan-Loader
         PREFIX Vulkan-Loader
         SOURCE_DIR "${THIRDPARTY_DIR}/Vulkan-Loader"
            CMAKE_CACHE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        -DVulkanHeaders_DIR:PATH=<INSTALL_DIR>/share/cmake/VulkanHeaders
+        -DVulkanHeaders_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers/share/cmake/VulkanHeaders
         -DBUILD_WSI_XCB_SUPPORT:BOOL=OFF
         -DBUILD_WSI_XLIB_SUPPORT:BOOL=OFF
         -DBUILD_WSI_WAYLAND_SUPPORT:BOOL=OFF
@@ -389,6 +392,61 @@ if(NOT ANDROID)
 
     set(ENV{VULKAN_SDK} "${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader")
     set(vulkanTarget Vulkan-Loader)
+endif()
+
+# SPIRV-Tools and SPIRV-Headers are no longer built as standalone ExternalProjects.
+# libshaderc_combined (built by shaderc below) statically bundles the exact same SPIRV-Tools
+# code at the exact same pinned commit (v2024.3 DEPS), so linking shaderc::shaderc already
+# provides all SPIRV-Tools symbols. The spirv-tools include path is added to
+# shaderc::shaderc's INTERFACE_INCLUDE_DIRECTORIES below.
+
+# vk-bootstrap — depends on the single Vulkan-Headers build above.
+ExternalProject_Add(
+    vk-bootstrap
+    PREFIX vk-bootstrap
+    SOURCE_DIR "${THIRDPARTY_DIR}/vk-bootstrap"
+       CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    -DVulkanHeaders_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Headers/share/cmake/VulkanHeaders
+    -DVK_BOOTSTRAP_TEST:BOOL=OFF
+    ${_CMAKE_COMMON_CACHE_ARGS}
+    DEPENDS Vulkan-Headers
+)
+
+# shaderc — GLSL->SPIR-V compilation (SHADER-01). Builds its own nested, non-exported copy of
+# glslang/SPIRV-Tools/SPIRV-Headers from third_party/ (populated via shaderc's own
+# ./utils/git-sync-deps which reads DEPS for pinned commits).  libshaderc_combined
+# statically bundles all of these, so consumers linking shaderc::shaderc automatically
+# get SPIRV-Tools symbols for the SHADER-02 spirv-val gate.
+ExternalProject_Add(
+    shaderc
+    PREFIX shaderc
+    SOURCE_DIR "${THIRDPARTY_DIR}/shaderc"
+       PATCH_COMMAND
+        ${Python3_EXECUTABLE} "${THIRDPARTY_DIR}/shaderc/utils/git-sync-deps"
+       CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    -DSHADERC_SKIP_TESTS:BOOL=ON
+    -DSHADERC_SKIP_EXAMPLES:BOOL=ON
+    -DSHADERC_SKIP_COPYRIGHT_CHECK:BOOL=ON
+    -DSHADERC_ENABLE_HLSL:BOOL=OFF
+    -DSHADERC_ENABLE_WGSL_OUTPUT:BOOL=OFF
+    ${_CMAKE_COMMON_CACHE_ARGS}
+)
+
+# shaderc installs no CMake package config (confirmed via a real local build+install spike,
+# 2026-07-30, and cross-checked against github.com/google/shaderc/issues/1369 and
+# github.com/microsoft/vcpkg/issues/23208) — hand-written IMPORTED target required.
+# libshaderc_combined statically bundles glslang+SPIRV-Tools, so consumers that link
+# shaderc::shaderc automatically get SPIRV-Tools symbols (SHADER-02 spirv-val gate).
+# The spirv-tools include path is added here so <spirv-tools/libspirv.hpp> resolves.
+if(NOT TARGET shaderc::shaderc)
+    add_library(shaderc::shaderc STATIC IMPORTED GLOBAL)
+    set_target_properties(shaderc::shaderc PROPERTIES
+        IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/shaderc/lib/${CMAKE_STATIC_LIBRARY_PREFIX}shaderc_combined${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/shaderc/include;${THIRDPARTY_DIR}/shaderc/third_party/spirv-tools/include"
+    )
+    add_dependencies(shaderc::shaderc shaderc)
 endif()
 
 if(NOT APPLE OR (APPLE AND CMAKE_OSX_SYSROOT MATCHES "iPhoneOS"))
@@ -408,6 +466,7 @@ if(NOT APPLE OR (APPLE AND CMAKE_OSX_SYSROOT MATCHES "iPhoneOS"))
         -DMNN_VULKAN_IMAGE:BOOL=OFF
         -DMNN_SUPPORT_TRANSFORMER_FUSE:BOOL=${MNN_SUPPORT_TRANSFORMER_FUSE}
         -DMNN_WIN_RUNTIME_MT:BOOL=ON
+        -DMNN_LLM_BUILD_DEMO:BOOL=OFF
         ${_CMAKE_COMMON_CACHE_ARGS}
         ${_MNN_EXTRA_PARAM}
         DEPENDS ${_MNN_DEPENDS} ${vulkanTarget}
