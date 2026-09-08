@@ -95,6 +95,23 @@ set(_OPENSSL_CACHE_ARGS
 # ed25519 crypto
 set(_ED25519_RANDOM bcryptgen)
 
+# MNN
+# MNN_USE_SYSTEM_LIB: link the thirdparty-built Vulkan loader directly instead
+# of MNN's dlopen wrapper. The wrapper mode (-DMNN_USE_LIB_WRAPPER) defines
+# every vk* name as a global function-pointer VARIABLE (data/STT_OBJECT
+# symbols) in MNN.lib. SuperGenius's SGProcessors compiles against the real
+# Vulkan prototypes and calls vk* directly, so those data definitions collide
+# with the call sites at link time (the same collision that hard-errors on
+# Android armeabi-v7a). This mirrors Linux/iOS/OSX, which already pass
+# MNN_USE_SYSTEM_LIB=ON via _MNN_EXTRA_PARAM. vulkan-1.lib is the import
+# library of the Vulkan-Loader ExternalProject (built on all non-Android
+# platforms by CommonTargets.cmake).
+set(_MNN_EXTRA_PARAM
+    -DMNN_USE_SYSTEM_LIB:BOOL=ON
+    -DVulkan_INCLUDE_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader/include
+    -DVulkan_LIBRARY:PATH=${CMAKE_CURRENT_BINARY_DIR}/Vulkan-Loader/lib/vulkan-1.lib
+)
+
 set(_ZKLLVM_EXTRA_PARAM
     -DZKLLVM_BUILD_TRANSPILER_LIB:BOOL=OFF
     -DZKLLVM_BUILD_EXAMPLES:BOOL=OFF
