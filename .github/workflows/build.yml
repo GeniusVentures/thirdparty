@@ -258,7 +258,22 @@ jobs:
           sudo update-alternatives --set cc $(which clang)
           sudo update-alternatives --set c++ $(which clang++)
 
-          sudo apt install libvulkan-dev ninja-build -y
+          # Native Linux builds run in the AlmaLinux 8 CI image (glibc 2.28
+          # floor, replacing the EOL Debian Bullseye image). The image ships
+          # clang, cmake, ninja, and Vulkan headers preinstalled, so the dnf
+          # branch is a guarded safety net that avoids repo traffic when the
+          # image already provides everything; Ubuntu runners (used by the
+          # Android builds, which run without a container) still need apt.
+          # perl + perl-IPC-Cmd are required by OpenSSL's Configure script:
+          # EL8's minimal perl splits IPC::Cmd into a subpackage (Debian ships
+          # it in perl core), so both are requested explicitly.
+          if command -v dnf >/dev/null 2>&1; then
+            if ! rpm -q vulkan-loader-devel vulkan-headers ninja-build perl perl-IPC-Cmd >/dev/null 2>&1; then
+              sudo dnf install -y vulkan-loader-devel vulkan-headers ninja-build perl perl-IPC-Cmd
+            fi
+          else
+            sudo apt install libvulkan-dev ninja-build -y
+          fi
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
       - name: Configure macOS host
