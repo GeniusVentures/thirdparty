@@ -103,6 +103,15 @@ set(_CMAKE_COMMON_CACHE_ARGS
     -DBUILD_STATIC_LIBS:BOOL=ON
     -DBUILD_TESTING:BOOL=OFF
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+    # Propagate the parent's compilers into every ExternalProject sub-build.
+    # Without this, each sub-build re-detects /usr/bin/c++, which on AlmaLinux 8
+    # is gcc 8.5 — too old for KleidiAI's aarch64 -march modifiers (+i8mm/+sve2
+    # need gcc>=10) that Debian bullseye's gcc 10.2 silently accepted. Sub-builds
+    # must use the same clang the parent selected (Android/iOS propagate their
+    # NDK toolchain compilers; MSVC propagates cl.exe; host builds propagate
+    # the clang pinned by the CI workflow).
+    -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
+    -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
     -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}
     -DCMAKE_C_FLAGS_RELEASE:STRING=${CMAKE_C_FLAGS_RELEASE}
     -DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}
