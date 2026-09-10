@@ -111,6 +111,11 @@ set(_CMAKE_COMMON_CACHE_ARGS
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
     -DCMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}
     -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON
+    # GNUInstallDirs resolves lib64 on RedHat-family 64-bit Linux (AlmaLinux 8)
+    # but lib on Debian. Every _FINDPACKAGE_*_CONFIG_DIR hint in
+    # CommonTargets.cmake (and downstream consumers) hardcodes the lib layout,
+    # so pin the install libdir to keep EL hosts identical to Debian/Windows/macOS.
+    -DCMAKE_INSTALL_LIBDIR:STRING=lib
     -DCMAKE_POLICY_DEFAULT_CMP0057:STRING=NEW
     -DCMAKE_POLICY_DEFAULT_CMP0074:STRING=NEW
     -DCMAKE_POLICY_DEFAULT_CMP0144:STRING=NEW
