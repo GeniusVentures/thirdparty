@@ -173,8 +173,21 @@ set(_rocksdb_EXTRA_PARAM
 set(_ED25519_RANDOM dev_urandom)
 
 # MNN
+# MNN_USE_SYSTEM_LIB: link the NDK's libvulkan.so stub directly instead of
+# MNN's dlopen wrapper. The wrapper mode (-DMNN_USE_LIB_WRAPPER) defines every
+# vk* name as a global function-pointer VARIABLE (data/STT_OBJECT symbols) in
+# libMNN.a. SuperGenius's SGProcessors compiles against the real Vulkan
+# prototypes and calls vk* directly, so the archive's data definitions collide
+# with those call sites: on armeabi-v7a, Thumb BL relocations (R_ARM_THM_CALL)
+# require an STT_FUNC target and lld hard-errors ("interworking not
+# performed"); on arm64-v8a the same binding silently resolves direct calls to
+# the address of the pointer table, which crashes if executed. The NDK stub
+# exports proper STT_FUNC symbols, matching how Linux/iOS/OSX already build
+# MNN via their _MNN_EXTRA_PARAM. find_package(Vulkan) inside MNN resolves the
+# stub from the NDK sysroot under this toolchain.
 set(_MNN_EXTRA_PARAM
     -DMNN_BUILD_FOR_ANDROID_COMMAND:BOOL=ON
+    -DMNN_USE_SYSTEM_LIB:BOOL=ON
 )
 
 set(_ZKLLVM_EXTRA_PARAM

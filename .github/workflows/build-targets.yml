@@ -158,5 +158,8 @@ jobs:
       matrix: ${{ needs.prepare.outputs.matrix }}
       upload: ${{ github.ref_name == 'main' || github.ref_name == 'develop' || inputs.tag != '' }}
       release-tag: ${{ inputs.tag }}
-      sgns_enable_release_symbols: ${{ inputs.sgns_enable_release_symbols }}
+      # inputs.* is empty on pull_request events; the == comparison coerces the
+      # value to a real boolean so the reusable workflow's boolean input
+      # validation doesn't reject an empty string.
+      sgns_enable_release_symbols: ${{ inputs.sgns_enable_release_symbols == true }}
     secrets: inherit
