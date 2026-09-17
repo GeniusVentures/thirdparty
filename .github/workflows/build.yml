@@ -400,4 +400,13 @@ jobs:
         if: ${{ inputs.upload }}
         working-directory: ${{env.BUILD_DIRECTORY}}
         shell: bash
-        run: gh release upload "$RELEASE_TAG" "$FILE_NAME" --clobber
+        # uploads.github.com intermittently fails large (1-2 GiB) assets with
+        # "HTTP 500: Error saving asset" — retry instead of burning the build.
+        run: |
+          for i in 1 2 3 4 5; do
+            gh release upload "$RELEASE_TAG" "$FILE_NAME" --clobber && exit 0
+            echo "Upload attempt $i/5 failed; retrying in 60s"
+            sleep 60
+          done
+          echo "Upload failed after 5 attempts" >&2
+          exit 1
