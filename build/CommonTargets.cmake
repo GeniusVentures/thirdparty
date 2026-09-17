@@ -426,6 +426,15 @@ ExternalProject_Add(
     shaderc
     PREFIX shaderc
     SOURCE_DIR "${THIRDPARTY_DIR}/shaderc"
+    # Short binary dir: the default (<prefix>/src/shaderc-build) pushes spirv-tools'
+    # MSBuild .tlog paths past the Windows MAX_PATH (260) limit on runners without
+    # OS long-path support (worst path 272 -> 254 chars). Must stay directly under a
+    # */src directory: build.yml's tarball step excludes build trees via
+    # --exclude='./*/src' — any other location leaks the whole glslang/SPIRV-Tools
+    # object tree into the release tarballs and blows the 2 GiB asset limit (HTTP 422).
+    # The install tree under <prefix> (= <build>/shaderc) and the shaderc::shaderc
+    # target are unaffected.
+    BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/scb/src"
        PATCH_COMMAND
         ${Python3_EXECUTABLE} "${THIRDPARTY_DIR}/shaderc/utils/git-sync-deps"
        CMAKE_CACHE_ARGS
