@@ -406,7 +406,7 @@ jobs:
                   echo "Release exists; retagging $RELEASE_TAG to ${{ github.sha }} (release + assets stay live)..."
                   retag
                   gh release edit "$RELEASE_TAG" \
-                    --note "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
+                    --notes "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
                     --prerelease || true
               else
                   echo "Creating tag/release $RELEASE_TAG..."
