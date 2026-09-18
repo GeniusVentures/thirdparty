@@ -449,8 +449,15 @@ jobs:
             exit 1
           fi
 
-          NEW_ID=$(gh release view "$RELEASE_TAG" --json assets --jq ".assets[] | select(.name == \"$STAGED_NAME\") | .id" | head -1)
-          OLD_ID=$(gh release view "$RELEASE_TAG" --json assets --jq ".assets[] | select(.name == \"$FILE_NAME\") | .id" | head -1)
+          # Asset swap. NOTE: `gh release view --json assets` returns GraphQL
+          # node IDs ("RA_..."), which the REST endpoints below reject with
+          # 404 — they require the numeric database IDs instead (run 35300444121).
+          # List assets through REST so the IDs match the DELETE/PATCH calls.
+          RELEASE_ID=$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/$RELEASE_TAG" --jq .id)
+          ASSETS_JSON=$(gh api "repos/${GITHUB_REPOSITORY}/releases/$RELEASE_ID/assets?per_page=100")
+
+          NEW_ID=$(echo "$ASSETS_JSON" | jq -r ".[] | select(.name == \"$STAGED_NAME\") | .id" | head -1)
+          OLD_ID=$(echo "$ASSETS_JSON" | jq -r ".[] | select(.name == \"$FILE_NAME\") | .id" | head -1)
 
           if [ -n "$OLD_ID" ]; then
             gh api -X DELETE "repos/${GITHUB_REPOSITORY}/releases/assets/$OLD_ID"
