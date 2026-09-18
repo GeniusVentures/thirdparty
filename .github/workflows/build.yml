@@ -211,7 +211,10 @@ jobs:
         with:
           # Keep submodule checkout explicit so we can control retries and fetch behavior.
           submodules: false
-          persist-credentials: true # Needed to push release tags later
+          # Authenticates the later "Checkout submodules with retry" step.
+          # (Release tags are created/moved via the REST API with GH_TOKEN,
+          # not via git push — see the "Create release tag" step.)
+          persist-credentials: true
 
       - name: Harden Git network settings
         shell: bash
@@ -368,8 +371,28 @@ jobs:
         if: ${{ inputs.upload }}
         shell: bash
         id: create-release-tag
+        env:
+          TARGET_SHA: ${{ github.sha }}
         run: |
           echo "Checking if release $RELEASE_TAG exists..."
+
+          # Create/move the release tag via the REST API instead of git push.
+          # The checkout-persisted GITHUB_TOKEN lacks the `workflows` scope, and
+          # GitHub rejects git pushes of commits that touch workflow files from
+          # it ("refusing to allow a GitHub App to create or update workflow
+          # ... without `workflows` permission"). The REST endpoint only needs
+          # contents:write and has no such restriction.
+          retag() {
+            if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+              gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/tags/$RELEASE_TAG" \
+                -f sha="$TARGET_SHA" -F force=true >/dev/null
+              echo "Moved existing tag $RELEASE_TAG -> $TARGET_SHA"
+            else
+              gh api -X POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+                -f ref="refs/tags/$RELEASE_TAG" -f sha="$TARGET_SHA" >/dev/null
+              echo "Created tag $RELEASE_TAG at $TARGET_SHA"
+            fi
+          }
 
           if [ "$IS_TAG_RELEASE" = "true" ]; then
               # For explicit tags, all matrix jobs share the same release tag.
@@ -378,8 +401,7 @@ jobs:
                   echo "Release $RELEASE_TAG already exists; skipping create."
               else
                   echo "Release does not exist yet; creating tag/release for $RELEASE_TAG..."
-                  git tag "$RELEASE_TAG" "${{ github.sha }}" || true
-                  git push origin "$RELEASE_TAG" || true
+                  # gh release create makes the tag server-side when missing.
 
                   if ! gh release create "$RELEASE_TAG" \
                     --target "${{ github.sha }}" \
@@ -395,26 +417,60 @@ jobs:
               fi
           else
               if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-                  echo "Deleting existing release/tag $RELEASE_TAG..."
-                  gh release delete "$RELEASE_TAG" --yes || true
-                  git push origin ":refs/tags/$RELEASE_TAG" || true
-                  git tag -d "$RELEASE_TAG" || true
+                  # Keep the existing release and its assets live while the
+                  # replacement uploads (the swap happens in the upload step).
+                  # A release follows its tag, so force-moving the tag is enough.
+                  echo "Release exists; retagging $RELEASE_TAG to ${{ github.sha }} (release + assets stay live)..."
+                  retag
+                  gh release edit "$RELEASE_TAG" \
+                    --note "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
+                    --prerelease || true
+              else
+                  echo "Creating tag/release $RELEASE_TAG..."
+                  retag
+
+                  gh release create "$RELEASE_TAG" \
+                    --target "${{ github.sha }}" \
+                    -t "${{ matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
+                    -n "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
+                    --prerelease
               fi
-
-              echo "Creating new tag $RELEASE_TAG..."
-              git tag -f "$RELEASE_TAG" "${{ github.sha }}"
-              git push origin "$RELEASE_TAG" --force
-
-              echo "Creating GitHub release $RELEASE_TAG..."
-              gh release create "$RELEASE_TAG" \
-              --target "${{ github.sha }}" \
-              -t "${{ matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
-              -n "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
-              --prerelease
           fi
 
       - name: Upload file
         if: ${{ inputs.upload }}
         working-directory: ${{env.BUILD_DIRECTORY}}
         shell: bash
-        run: gh release upload "$RELEASE_TAG" "$FILE_NAME" --clobber
+        # uploads.github.com intermittently fails large (1-2 GiB) assets with
+        # "HTTP 500: Error saving asset" — retry instead of burning the build.
+        # The new tarball is uploaded under a staged name so the previous asset
+        # stays downloadable for downstream consumers during the (long) upload;
+        # only after full success are the old asset deleted and the staged one
+        # renamed into place (near-atomic swap). On failure nothing changes.
+        run: |
+          set -euo pipefail
+
+          STAGED_NAME="$FILE_NAME.staged"
+          ln -f "$FILE_NAME" "$STAGED_NAME" 2>/dev/null || cp "$FILE_NAME" "$STAGED_NAME"
+
+          ok=0
+          for i in 1 2 3 4 5; do
+            gh release upload "$RELEASE_TAG" "$STAGED_NAME" --clobber && { ok=1; break; }
+            echo "Upload attempt $i/5 failed; retrying in 60s"
+            sleep 60
+          done
+
+          if [ "$ok" != 1 ]; then
+            echo "Upload failed after 5 attempts; previous asset left untouched" >&2
+            gh release delete-asset "$RELEASE_TAG" "$STAGED_NAME" --yes || true
+            exit 1
+          fi
+
+          NEW_ID=$(gh release view "$RELEASE_TAG" --json assets --jq ".assets[] | select(.name == \"$STAGED_NAME\") | .id" | head -1)
+          OLD_ID=$(gh release view "$RELEASE_TAG" --json assets --jq ".assets[] | select(.name == \"$FILE_NAME\") | .id" | head -1)
+
+          if [ -n "$OLD_ID" ]; then
+            gh api -X DELETE "repos/${GITHUB_REPOSITORY}/releases/assets/$OLD_ID"
+          fi
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/releases/assets/$NEW_ID" -f name="$FILE_NAME"
+          rm -f "$STAGED_NAME"
