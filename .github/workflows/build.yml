@@ -211,7 +211,10 @@ jobs:
         with:
           # Keep submodule checkout explicit so we can control retries and fetch behavior.
           submodules: false
-          persist-credentials: true # Needed to push release tags later
+          # Authenticates the later "Checkout submodules with retry" step.
+          # (Release tags are created/moved via the REST API with GH_TOKEN,
+          # not via git push — see the "Create release tag" step.)
+          persist-credentials: true
 
       - name: Harden Git network settings
         shell: bash
@@ -351,8 +354,28 @@ jobs:
         if: ${{ inputs.upload }}
         shell: bash
         id: create-release-tag
+        env:
+          TARGET_SHA: ${{ github.sha }}
         run: |
           echo "Checking if release $RELEASE_TAG exists..."
+
+          # Create/move the release tag via the REST API instead of git push.
+          # The checkout-persisted GITHUB_TOKEN lacks the `workflows` scope, and
+          # GitHub rejects git pushes of commits that touch workflow files from
+          # it ("refusing to allow a GitHub App to create or update workflow
+          # ... without `workflows` permission"). The REST endpoint only needs
+          # contents:write and has no such restriction.
+          retag() {
+            if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+              gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/tags/$RELEASE_TAG" \
+                -f sha="$TARGET_SHA" -F force=true >/dev/null
+              echo "Moved existing tag $RELEASE_TAG -> $TARGET_SHA"
+            else
+              gh api -X POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+                -f ref="refs/tags/$RELEASE_TAG" -f sha="$TARGET_SHA" >/dev/null
+              echo "Created tag $RELEASE_TAG at $TARGET_SHA"
+            fi
+          }
 
           if [ "$IS_TAG_RELEASE" = "true" ]; then
               # For explicit tags, all matrix jobs share the same release tag.
@@ -361,8 +384,7 @@ jobs:
                   echo "Release $RELEASE_TAG already exists; skipping create."
               else
                   echo "Release does not exist yet; creating tag/release for $RELEASE_TAG..."
-                  git tag "$RELEASE_TAG" "${{ github.sha }}" || true
-                  git push origin "$RELEASE_TAG" || true
+                  # gh release create makes the tag server-side when missing.
 
                   if ! gh release create "$RELEASE_TAG" \
                     --target "${{ github.sha }}" \
@@ -382,15 +404,13 @@ jobs:
                   # replacement uploads (the swap happens in the upload step).
                   # A release follows its tag, so force-moving the tag is enough.
                   echo "Release exists; retagging $RELEASE_TAG to ${{ github.sha }} (release + assets stay live)..."
-                  git tag -f "$RELEASE_TAG" "${{ github.sha }}"
-                  git push origin "$RELEASE_TAG" --force
+                  retag
                   gh release edit "$RELEASE_TAG" \
                     --note "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
                     --prerelease || true
               else
                   echo "Creating tag/release $RELEASE_TAG..."
-                  git tag "$RELEASE_TAG" "${{ github.sha }}"
-                  git push origin "$RELEASE_TAG"
+                  retag
 
                   gh release create "$RELEASE_TAG" \
                     --target "${{ github.sha }}" \
