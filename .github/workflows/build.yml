@@ -261,7 +261,20 @@ jobs:
           sudo update-alternatives --set cc $(which clang)
           sudo update-alternatives --set c++ $(which clang++)
 
-          sudo apt install libvulkan-dev ninja-build -y
+          # Native Linux builds run in the AlmaLinux 8 CI image (glibc 2.28
+          # floor, replacing the EOL Debian Bullseye image). The image ships
+          # clang, cmake, ninja, Vulkan headers, `which`, and the perl modules
+          # OpenSSL's Configure needs, so the dnf branch is a guarded safety
+          # net that avoids repo traffic when the image already provides
+          # everything; Ubuntu runners (used by the Android builds, which run
+          # without a container) still need apt.
+          if command -v dnf >/dev/null 2>&1; then
+            if ! rpm -q vulkan-loader-devel vulkan-headers ninja-build which perl perl-IPC-Cmd >/dev/null 2>&1; then
+              sudo dnf install -y vulkan-loader-devel vulkan-headers ninja-build which perl perl-IPC-Cmd
+            fi
+          else
+            sudo apt install libvulkan-dev ninja-build -y
+          fi
           echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
 
       - name: Configure macOS host
@@ -338,7 +351,11 @@ jobs:
 
       - name: Configure CMake for Linux
         if: ${{ matrix.target == 'Linux' }}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
+        # Pin clang explicitly rather than relying on the /usr/bin/cc and
+        # /usr/bin/c++ update-alternatives symlinks: sub-builds inherit this
+        # choice via _CMAKE_COMMON_CACHE_ARGS, and EL8's default /usr/bin/c++
+        # (gcc 8.5) cannot compile MNN/KleidiAI's aarch64 -march flags.
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DCMAKE_C_COMPILER="$(which clang)" -DCMAKE_CXX_COMPILER="$(which clang++)" -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
 
       - name: Build thirdparty
         working-directory: ${{env.BUILD_DIRECTORY}}

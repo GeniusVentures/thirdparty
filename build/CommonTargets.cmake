@@ -26,6 +26,9 @@ if(CMAKE_CROSSCOMPILING)
         -DBUILD_TESTING:BOOL=OFF
         -DCMAKE_BUILD_TYPE:STRING=Release
         -DCMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}
+        # Match _CMAKE_COMMON_CACHE_ARGS: pin libdir so EL hosts (lib64 default)
+        # land in the hardcoded ${PROTOBUF_HOST_PREFIX}/lib layout below.
+        -DCMAKE_INSTALL_LIBDIR:STRING=lib
         -Dprotobuf_BUILD_TESTS:BOOL=OFF
         -Dprotobuf_MODULE_COMPATIBLE:BOOL=ON
         -Dprotobuf_INSTALL:BOOL=ON
