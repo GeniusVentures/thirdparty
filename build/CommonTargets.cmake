@@ -805,9 +805,3 @@ ExternalProject_Add(json
     ${_OPENSSL_CACHE_ARGS}
     DEPENDS Boost
 )
-
-# jsonrpc-lean
-install(
-    DIRECTORY ${THIRDPARTY_DIR}/jsonrpc-lean
-    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/jsonrpc-lean
-)
