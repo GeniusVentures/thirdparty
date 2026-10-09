@@ -253,13 +253,23 @@ jobs:
       - name: Configure Linux host
         if: ${{ runner.os == 'Linux'}}
         run: |
-          sudo update-alternatives --install /usr/bin/cc cc $(which clang) 100
-          sudo update-alternatives --install /usr/bin/c++ c++ $(which clang++) 100
-          sudo update-alternatives --set cc $(which clang)
-          sudo update-alternatives --set c++ $(which clang++)
-
-          sudo apt install libvulkan-dev ninja-build -y
-          echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
+          # The native Linux jobs use the AlmaLinux 8 container. Android builds
+          # still run on Ubuntu hosts and must retain apt-based setup.
+          if command -v dnf >/dev/null 2>&1; then
+            if ! rpm -q ninja-build vulkan-loader-devel vulkan-headers >/dev/null 2>&1; then
+              sudo dnf install -y ninja-build vulkan-loader-devel vulkan-headers
+            fi
+            # /usr/bin/c++ on AlmaLinux is GCC-owned, not an alternatives link.
+            echo "CC=$(command -v clang)" >> "$GITHUB_ENV"
+            echo "CXX=$(command -v clang++)" >> "$GITHUB_ENV"
+          else
+            sudo update-alternatives --install /usr/bin/cc cc "$(command -v clang)" 100
+            sudo update-alternatives --install /usr/bin/c++ c++ "$(command -v clang++)" 100
+            sudo update-alternatives --set cc "$(command -v clang)"
+            sudo update-alternatives --set c++ "$(command -v clang++)"
+            sudo apt install libvulkan-dev ninja-build -y
+          fi
+          echo "CMAKE_GENERATOR=Ninja" >> "$GITHUB_ENV"
 
       - name: Configure macOS host
         if: ${{ runner.os == 'macOS'}}
@@ -335,7 +345,7 @@ jobs:
 
       - name: Configure CMake for Linux
         if: ${{ matrix.target == 'Linux' }}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }} -DCMAKE_C_COMPILER="$(command -v clang)" -DCMAKE_CXX_COMPILER="$(command -v clang++)"
 
       - name: Build thirdparty
         working-directory: ${{env.BUILD_DIRECTORY}}
