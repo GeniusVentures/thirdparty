@@ -119,10 +119,10 @@ jobs:
             {"target":"iOS","id":"iOS","build-type":"Debug","abi":"","runner_key":"mac","toggle":"BUILD_IOS_DEBUG"},
             {"target":"OSX","id":"OSX","build-type":"Release","abi":"","runner_key":"mac","toggle":"BUILD_OSX_RELEASE"},
             {"target":"OSX","id":"OSX","build-type":"Debug","abi":"","runner_key":"mac","toggle":"BUILD_OSX_DEBUG"},
-            {"target":"Linux","id":"Linux-x86_64","build-type":"Release","abi":"x86_64","runner_key":"linux_x64","toggle":"BUILD_LINUX_X86_64_RELEASE","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
-            {"target":"Linux","id":"Linux-x86_64","build-type":"Debug","abi":"x86_64","runner_key":"linux_x64","toggle":"BUILD_LINUX_X86_64_DEBUG","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
-            {"target":"Linux","id":"Linux-aarch64","build-type":"Release","abi":"aarch64","runner_key":"linux_arm","toggle":"BUILD_LINUX_AARCH64_RELEASE","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
-            {"target":"Linux","id":"Linux-aarch64","build-type":"Debug","abi":"aarch64","runner_key":"linux_arm","toggle":"BUILD_LINUX_AARCH64_DEBUG","container":"ghcr.io/geniusventures/debian-bullseye:latest"},
+            {"target":"Linux","id":"Linux-x86_64","build-type":"Release","abi":"x86_64","runner_key":"linux_x64","toggle":"BUILD_LINUX_X86_64_RELEASE","container":"ghcr.io/geniusventures/almalinux-8:latest"},
+            {"target":"Linux","id":"Linux-x86_64","build-type":"Debug","abi":"x86_64","runner_key":"linux_x64","toggle":"BUILD_LINUX_X86_64_DEBUG","container":"ghcr.io/geniusventures/almalinux-8:latest"},
+            {"target":"Linux","id":"Linux-aarch64","build-type":"Release","abi":"aarch64","runner_key":"linux_arm","toggle":"BUILD_LINUX_AARCH64_RELEASE","container":"ghcr.io/geniusventures/almalinux-8:latest"},
+            {"target":"Linux","id":"Linux-aarch64","build-type":"Debug","abi":"aarch64","runner_key":"linux_arm","toggle":"BUILD_LINUX_AARCH64_DEBUG","container":"ghcr.io/geniusventures/almalinux-8:latest"},
             {"target":"Windows","id":"Windows","build-type":"Release","abi":"","runner_key":"windows","toggle":"BUILD_WINDOWS_RELEASE"},
             {"target":"Windows","id":"Windows","build-type":"Debug","abi":"","runner_key":"windows","toggle":"BUILD_WINDOWS_DEBUG"}
           ]'
