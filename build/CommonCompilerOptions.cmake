@@ -103,6 +103,15 @@ set(_CMAKE_COMMON_CACHE_ARGS
     -DBUILD_STATIC_LIBS:BOOL=ON
     -DBUILD_TESTING:BOOL=OFF
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+    # Propagate the parent's compilers into every ExternalProject sub-build.
+    # Without this, each sub-build re-detects /usr/bin/c++, which on AlmaLinux 8
+    # is gcc 8.5 — too old for KleidiAI's aarch64 -march modifiers (+i8mm/+sve2
+    # need gcc>=10) that Debian bullseye's gcc 10.2 silently accepted. Sub-builds
+    # must use the same clang the parent selected (Android/iOS propagate their
+    # NDK toolchain compilers; MSVC propagates cl.exe; host builds propagate
+    # the clang pinned by the CI workflow).
+    -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
+    -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
     -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}
     -DCMAKE_C_FLAGS_RELEASE:STRING=${CMAKE_C_FLAGS_RELEASE}
     -DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}
@@ -111,6 +120,11 @@ set(_CMAKE_COMMON_CACHE_ARGS
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
     -DCMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}
     -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON
+    # GNUInstallDirs resolves lib64 on RedHat-family 64-bit Linux (AlmaLinux 8)
+    # but lib on Debian. Every _FINDPACKAGE_*_CONFIG_DIR hint in
+    # CommonTargets.cmake (and downstream consumers) hardcodes the lib layout,
+    # so pin the install libdir to keep EL hosts identical to Debian/Windows/macOS.
+    -DCMAKE_INSTALL_LIBDIR:STRING=lib
     -DCMAKE_POLICY_DEFAULT_CMP0057:STRING=NEW
     -DCMAKE_POLICY_DEFAULT_CMP0074:STRING=NEW
     -DCMAKE_POLICY_DEFAULT_CMP0144:STRING=NEW

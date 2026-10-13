@@ -148,11 +148,22 @@ set(_ED25519_RANDOM dev_urandom)
 # MNN
 set(_MNN_APPLE_LINKER_FLAGS "-framework CoreFoundation -framework CoreGraphics -framework CoreServices -framework IOKit -framework IOSurface -framework Metal -framework QuartzCore -framework Foundation -framework AppKit")
 
+# -funwind-tables: MNN's own flags append -fno-exceptions, which on
+# arm64-apple also suppresses __compact_unwind — every MNN object then
+# carries NO unwind metadata. SuperGenius force_loads the whole archive
+# into consumer binaries, so MNN's weak libc++ inline copies (e.g.
+# std::function<void()>::operator()) win symbol selection by link order;
+# any C++ exception whose unwind crosses such a frame dies in phase-1
+# (observed: genius-tube atom_stores_test "terminating due to uncaught
+# exception" with a working try/catch in AtomStore::Notify). -funwind-
+# tables restores the unwind metadata without enabling exceptions in MNN
+# (verified: order-independent vs the later -fno-exceptions; patched
+# archive relink turns the abort into the caught-and-logged path).
 set(_MNN_EXTRA_PARAM
         -DMNN_USE_SYSTEM_LIB:BOOL=ON
         -DVulkan_INCLUDE_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/include
         -DVulkan_LIBRARY:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/lib/MoltenVK.xcframework
-        -DCMAKE_CXX_FLAGS:STRING=-include\ cstdint
+        -DCMAKE_CXX_FLAGS:STRING=-include\ cstdint\ -funwind-tables
         "-DCMAKE_EXE_LINKER_FLAGS:STRING=${CMAKE_EXE_LINKER_FLAGS} ${_MNN_APPLE_LINKER_FLAGS}"
         "-DCMAKE_SHARED_LINKER_FLAGS:STRING=${CMAKE_SHARED_LINKER_FLAGS} ${_MNN_APPLE_LINKER_FLAGS}"
 )
