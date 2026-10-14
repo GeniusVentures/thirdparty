@@ -159,6 +159,17 @@ ExternalProject_Add(rocksdb
     -DWITH_TOOLS:BOOL=OFF
     -DWITH_SNAPPY:BOOL=ON
     -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
+    # rocksdb's USE_RTTI default is AUTO: RTTI in Debug, -fno-rtti in Release.
+    # Downstream TUs that subclass rocksdb types (genius-ai-boss's storage
+    # engine subclasses rocksdb::SliceTransform) then fail the final link in
+    # Release — "typeinfo for rocksdb::Customizable" is undefined, because
+    # the no-RTTI Release lib emits no typeinfo at all. Downstream cannot
+    # compile its subclassing TU -fno-rtti either: libp2p's bundled outcome
+    # headers use typeid unconditionally, so RTTI must stay on there. Build
+    # rocksdb with RTTI in every config to make Debug/Release artifacts
+    # consistent for subclassing consumers (cost: typeinfo sections on
+    # polymorphic classes only).
+    -DUSE_RTTI:STRING=ON
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_rocksdb_EXTRA_PARAM}
     # these need to be at the end to override previous cached args line
