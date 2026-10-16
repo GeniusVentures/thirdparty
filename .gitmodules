@@ -70,6 +70,7 @@
 [submodule "MoltenVK"]
     path = MoltenVK
     url = https://github.com/KhronosGroup/MoltenVK.git
+    ignore = dirty
 [submodule "Vulkan-Headers"]
     path = Vulkan-Headers
     url = https://github.com/KhronosGroup/Vulkan-Headers.git

@@ -128,18 +128,27 @@ set(_OPENSSL_CACHE_ARGS
     -DOpenSSL_DIR:PATH=${OPENSSL_ROOT_DIR}/lib/cmake/OpenSSL
 )
 
-# MoltenVK
-set(_MVK_ROOT "${CMAKE_CURRENT_BINARY_DIR}/MoltenVK/build/")
+# MoltenVK — built with upstream's CMake build system. The patch script
+# (MoltenVK-build/MoltenVKStatic.cmake) makes libMoltenVK static and installs a
+# single self-contained archive that prelinks ShaderConverter/SPIRV-Cross/
+# SPIRV-Tools, matching what the old Xcode package build produced. Upstream's
+# CMake fetches its pinned dependencies (Vulkan-Headers, SPIRV-*, cereal) via
+# CPM at configure time (cached in ~/.cache/CPM), replacing fetchDependencies.
+set(_MVK_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/moltenvk")
 ExternalProject_Add(MoltenVK
     PREFIX moltenvk
     SOURCE_DIR "${THIRDPARTY_DIR}/MoltenVK"
-    CONFIGURE_COMMAND ""
-    PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/MoltenVK-build/build.sh ${BOOST_BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK --deployment-target=${CMAKE_OSX_DEPLOYMENT_TARGET}
-    INSTALL_COMMAND ""
     UPDATE_COMMAND ""
+    PATCH_COMMAND ${CMAKE_COMMAND} "-DMVK_SOURCE_DIR=${THIRDPARTY_DIR}/MoltenVK" -P ${CMAKE_CURRENT_LIST_DIR}/MoltenVK-build/MoltenVKStatic.cmake
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    # Parity with the old Xcode build.sh: MVK_CONFIG_LOG_LEVEL=1 (error)
+    -DMVK_CONFIG_LOG_LEVEL:STRING=error
+    ${_CMAKE_COMMON_CACHE_ARGS}
     BUILD_BYPRODUCTS
-    "${_MVK_ROOT}/lib/MoltenVK.xcframework"
+    "${_MVK_INSTALL_DIR}/lib/libMoltenVK.a"
+    "${_MVK_INSTALL_DIR}/include/vulkan/vulkan_core.h"
+    "${_MVK_INSTALL_DIR}/include/MoltenVK/vk_mvk_moltenvk.h"
 )
 
 # ed25519 crypto
@@ -161,8 +170,8 @@ set(_MNN_APPLE_LINKER_FLAGS "-framework CoreFoundation -framework CoreGraphics -
 # archive relink turns the abort into the caught-and-logged path).
 set(_MNN_EXTRA_PARAM
         -DMNN_USE_SYSTEM_LIB:BOOL=ON
-        -DVulkan_INCLUDE_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/include
-        -DVulkan_LIBRARY:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/lib/MoltenVK.xcframework
+        -DVulkan_INCLUDE_DIR:PATH=${_MVK_INSTALL_DIR}/include
+        -DVulkan_LIBRARY:PATH=${_MVK_INSTALL_DIR}/lib/libMoltenVK.a
         -DCMAKE_CXX_FLAGS:STRING=-include\ cstdint\ -funwind-tables
         "-DCMAKE_EXE_LINKER_FLAGS:STRING=${CMAKE_EXE_LINKER_FLAGS} ${_MNN_APPLE_LINKER_FLAGS}"
         "-DCMAKE_SHARED_LINKER_FLAGS:STRING=${CMAKE_SHARED_LINKER_FLAGS} ${_MNN_APPLE_LINKER_FLAGS}"
