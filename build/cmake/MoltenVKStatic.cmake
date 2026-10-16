@@ -1,15 +1,22 @@
-# Applied by ../CMakeLists.txt (ExternalProject_Add(MoltenVK) PATCH_COMMAND)
-# before configuring MoltenVK's upstream CMake build. Idempotent — safe to
-# re-run on every patch step.
+# Applied by the Apple platform builds (thirdparty/build/OSX/CMakeLists.txt,
+# thirdparty/build/iOS/CMakeLists.txt) as the ExternalProject_Add(MoltenVK)
+# PATCH_COMMAND, before configuring MoltenVK's upstream CMake build.
+# Idempotent — safe to re-run on every patch step.
 #
 # 1. Upstream declares libMoltenVK as SHARED; drop the hardcoded type so
 #    BUILD_SHARED_LIBS=OFF (from _CMAKE_COMMON_CACHE_ARGS) yields a static
 #    archive.
-# 2. Append GNUS install rules that merge the MoltenVK archive with its
+# 2. Upstream's Common/CMakeLists.txt looks up AppKit with find_library(…
+#    REQUIRED) unconditionally. AppKit does not exist on iOS/tvOS/visionOS
+#    (UIKit instead) and every AppKit include in the sources is guarded by
+#    MVK_MACOS, so gate the lookup; an undefined APPKIT_LIBRARY simply drops
+#    out of the target_link_libraries list.
+# 3. Append GNUS install rules that merge the MoltenVK archive with its
 #    static dependencies (ShaderConverter, Common, SPIRV-Cross, SPIRV-Tools)
 #    into a single self-contained libMoltenVK.a — the same prelinked-archive
-#    layout the old Xcode "MoltenVK Package (macOS only)" scheme produced —
-#    and install the Vulkan/MoltenVK headers.
+#    layout the old Xcode "MoltenVK Package" schemes produced — and install
+#    the Vulkan/MoltenVK headers from the CPM-fetched Vulkan-Headers source
+#    dir.
 
 if(NOT DEFINED MVK_SOURCE_DIR)
     message(FATAL_ERROR "MVK_SOURCE_DIR must be passed with -D")
@@ -33,7 +40,7 @@ if(EXISTS "${_vh_external}/.git")
         ERROR_QUIET
         RESULT_VARIABLE _vh_result
     )
-    if(NOT _vh_result EQUAL 0 OR NOT _vh_present STREQUAL _vh_pinned)
+    if(NOT _vh_result EQUAL 0 OR NOT _vh_present STREQUAL "${_vh_pinned}")
         message(STATUS "MoltenVKStatic: removing stale legacy External/ tree")
         file(REMOVE_RECURSE "${MVK_SOURCE_DIR}/External")
     endif()
@@ -51,6 +58,25 @@ if(NOT _mvk_pos EQUAL -1)
     message(STATUS "MoltenVKStatic: static library type enabled")
 endif()
 
+# AppKit is macOS-only; upstream resolves it unconditionally, which fails the
+# configure step on iOS/tvOS/visionOS SDKs. When the lookup is skipped the
+# variable stays undefined and ${APPKIT_LIBRARY} expands to no link item.
+set(_mvk_common_cml "${MVK_SOURCE_DIR}/Common/CMakeLists.txt")
+file(READ "${_mvk_common_cml}" _mvk_common_contents)
+string(FIND "${_mvk_common_contents}" "GNUS_APPKIT_GATE" _mvk_pos)
+if(_mvk_pos EQUAL -1)
+    string(FIND "${_mvk_common_contents}" "find_library(APPKIT_LIBRARY AppKit REQUIRED)" _mvk_pos)
+    if(_mvk_pos EQUAL -1)
+        message(FATAL_ERROR "MoltenVKStatic: AppKit find_library not found in Common/CMakeLists.txt — upstream layout changed, update the patch")
+    endif()
+    string(REPLACE
+        "find_library(APPKIT_LIBRARY AppKit REQUIRED)"
+        "# GNUS_APPKIT_GATE: AppKit exists on macOS only; iOS/tvOS/visionOS use UIKit\n# and all AppKit includes in the sources are guarded by MVK_MACOS. An\n# undefined APPKIT_LIBRARY drops out of the link list below.\nif(NOT CMAKE_SYSTEM_NAME MATCHES \"iOS|tvOS|visionOS\")\n\tfind_library(APPKIT_LIBRARY AppKit REQUIRED)\nendif()"
+        _mvk_common_contents "${_mvk_common_contents}")
+    file(WRITE "${_mvk_common_cml}" "${_mvk_common_contents}")
+    message(STATUS "MoltenVKStatic: AppKit lookup gated to macOS")
+endif()
+
 set(_mvk_root_cml "${MVK_SOURCE_DIR}/CMakeLists.txt")
 file(READ "${_mvk_root_cml}" _mvk_root_contents)
 string(FIND "${_mvk_root_contents}" "GNUS_THIRDPARTY_STATIC_BUNDLE" _mvk_pos)
@@ -58,7 +84,8 @@ if(_mvk_pos EQUAL -1)
     file(APPEND "${_mvk_root_cml}" "
 
 ################################################################################
-# GNUS_THIRDPARTY_STATIC_BUNDLE — appended by thirdparty/build/OSX build
+# GNUS_THIRDPARTY_STATIC_BUNDLE — appended by the thirdparty Apple builds
+# (build/OSX, build/iOS)
 #
 # Static consumers link only libMoltenVK.a, so bundle everything the Vulkan
 # implementation needs (ShaderConverter incl. SPIRV-Cross/SPIRV-Tools, Common)

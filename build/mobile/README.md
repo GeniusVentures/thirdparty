@@ -108,9 +108,10 @@ Additional platform-specific outputs:
 
 - **Android:** Vulkan loader is provided by the NDK as `libvulkan.so` — loaded at runtime
   on the device. No separate build step required.
-- **iOS:** MoltenVK (Vulkan-over-Metal) is built separately by
-  `thirdparty/build/iOS/CMakeLists.txt` and produces
-  `thirdparty/build/iOS/Debug/moltenvk/build/lib/MoltenVK.xcframework`.
+- **iOS:** MoltenVK (Vulkan-over-Metal) is built by
+  `thirdparty/build/iOS/CMakeLists.txt` (same upstream-CMake static flow as
+  the macOS build) and produces
+  `thirdparty/build/iOS/Debug/moltenvk/lib/libMoltenVK.a`.
 
 ---
 

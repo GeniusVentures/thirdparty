@@ -121,24 +121,37 @@ set(_OPENSSL_CACHE_ARGS
     -DOpenSSL_DIR:PATH=${OPENSSL_ROOT_DIR}/lib/cmake/OpenSSL
 )
 
-# MoltenVK
-set(_MVK_ROOT "${CMAKE_CURRENT_BINARY_DIR}/MoltenVK/build/")
+# MoltenVK — built with upstream's CMake build system (same flow as the
+# macOS build in ../OSX). The shared patch script (../cmake/MoltenVKStatic.cmake)
+# makes libMoltenVK static, gates the macOS-only AppKit framework lookup, and
+# installs a single self-contained archive (prelinking ShaderConverter/
+# SPIRV-Cross/SPIRV-Tools) plus the Vulkan headers, replacing the old
+# fetchDependencies + xcodebuild xcframework flow. Upstream's CMake fetches
+# its pinned dependencies (Vulkan-Headers, SPIRV-*, cereal) via CPM at
+# configure time (cached in ~/.cache/CPM).
+set(_MVK_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/moltenvk")
 ExternalProject_Add(MoltenVK
     PREFIX moltenvk
     SOURCE_DIR "${THIRDPARTY_DIR}/MoltenVK"
-    CONFIGURE_COMMAND ""
-    PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/MoltenVK-build/build.sh ${BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK
-    INSTALL_COMMAND ""
     UPDATE_COMMAND ""
+    PATCH_COMMAND ${CMAKE_COMMAND} "-DMVK_SOURCE_DIR=${THIRDPARTY_DIR}/MoltenVK" -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/MoltenVKStatic.cmake
+    CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    # Parity with the old Xcode build.sh: MVK_CONFIG_LOG_LEVEL=1 (error)
+    -DMVK_CONFIG_LOG_LEVEL:STRING=error
+    ${_CMAKE_COMMON_CACHE_ARGS}
+    BUILD_BYPRODUCTS
+    "${_MVK_INSTALL_DIR}/lib/libMoltenVK.a"
+    "${_MVK_INSTALL_DIR}/include/vulkan/vulkan_core.h"
+    "${_MVK_INSTALL_DIR}/include/MoltenVK/vk_mvk_moltenvk.h"
 )
 
 # MNN
 set(_MNN_EXTRA_PARAM
     -DMNN_USE_SYSTEM_LIB:BOOL=ON
     -DCMAKE_CXX_FLAGS:STRING=-funwind-tables
-        -DVulkan_INCLUDE_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/include
-    -DVulkan_LIBRARY:PATH=${CMAKE_CURRENT_BINARY_DIR}/moltenvk/build/lib/MoltenVK.xcframework
+    -DVulkan_INCLUDE_DIR:PATH=${_MVK_INSTALL_DIR}/include
+    -DVulkan_LIBRARY:PATH=${_MVK_INSTALL_DIR}/lib/libMoltenVK.a
 )
 set(_MNN_DEPENDS MoltenVK)
 

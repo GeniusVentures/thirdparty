@@ -128,18 +128,19 @@ set(_OPENSSL_CACHE_ARGS
     -DOpenSSL_DIR:PATH=${OPENSSL_ROOT_DIR}/lib/cmake/OpenSSL
 )
 
-# MoltenVK — built with upstream's CMake build system. The patch script
-# (MoltenVK-build/MoltenVKStatic.cmake) makes libMoltenVK static and installs a
-# single self-contained archive that prelinks ShaderConverter/SPIRV-Cross/
-# SPIRV-Tools, matching what the old Xcode package build produced. Upstream's
-# CMake fetches its pinned dependencies (Vulkan-Headers, SPIRV-*, cereal) via
-# CPM at configure time (cached in ~/.cache/CPM), replacing fetchDependencies.
+# MoltenVK — built with upstream's CMake build system. The shared patch
+# script (../cmake/MoltenVKStatic.cmake, also used by the iOS build) makes
+# libMoltenVK static and installs a single self-contained archive that
+# prelinks ShaderConverter/SPIRV-Cross/SPIRV-Tools, matching what the old
+# Xcode package build produced. Upstream's CMake fetches its pinned
+# dependencies (Vulkan-Headers, SPIRV-*, cereal) via CPM at configure time
+# (cached in ~/.cache/CPM), replacing fetchDependencies.
 set(_MVK_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/moltenvk")
 ExternalProject_Add(MoltenVK
     PREFIX moltenvk
     SOURCE_DIR "${THIRDPARTY_DIR}/MoltenVK"
     UPDATE_COMMAND ""
-    PATCH_COMMAND ${CMAKE_COMMAND} "-DMVK_SOURCE_DIR=${THIRDPARTY_DIR}/MoltenVK" -P ${CMAKE_CURRENT_LIST_DIR}/MoltenVK-build/MoltenVKStatic.cmake
+    PATCH_COMMAND ${CMAKE_COMMAND} "-DMVK_SOURCE_DIR=${THIRDPARTY_DIR}/MoltenVK" -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/MoltenVKStatic.cmake
     CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     # Parity with the old Xcode build.sh: MVK_CONFIG_LOG_LEVEL=1 (error)
