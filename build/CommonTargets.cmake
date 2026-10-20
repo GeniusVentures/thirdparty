@@ -775,6 +775,43 @@ ExternalProject_Add(AsyncIOManager
     DEPENDS libssh2 openssl ipfs-lite-cpp ipfs-bitswap-cpp protobuf ${PROTOBUF_TARGET} Boost MNN
 )
 
+# sgns-blockstore
+ExternalProject_Add(sgns-blockstore
+    PREFIX sgns-blockstore
+    SOURCE_DIR "${THIRDPARTY_DIR}/sgns-blockstore"
+   CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    -Dabsl_DIR:PATH=${absl_DIR}
+    -DBoost.DI_DIR:PATH=${_FINDPACKAGE_BOOST_DI_CONFIG_DIR}
+    -Dc-ares_DIR:PATH=${_FINDPACKAGE_CARES_CONFIG_DIR}
+    -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
+    -DGSL_INCLUDE_DIR:PATH=${_FINDPACKAGE_GSL_INCLUDE_DIR}
+    -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
+    -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
+    -DProtobuf_DIR:PATH=${Protobuf_DIR}
+    -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
+    -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
+    -Dsqlite3_dir:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
+    -DSQLiteModernCpp_DIR:PATH=${_FINDPACKAGE_SQLITECPP_CONFIG_DIR}
+    -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
+    -Dutf8_range_DIR:PATH=${utf8_range_DIR}
+    -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
+    ${_ZLIB_PACKAGE_ARGS}
+    ${_BOOST_CACHE_ARGS}
+    ${_OPENSSL_CACHE_ARGS}
+    ${_CMAKE_COMMON_CACHE_ARGS}
+    # MUST stay the LAST cache arg: _CMAKE_COMMON_CACHE_ARGS forces
+    # -DBUILD_TESTING:BOOL=OFF above, and later cache args win under
+    # ExternalProject's initial-cache FORCE semantics. The repo's test gate
+    # is named TESTING (never BUILD_TESTING), so this is what re-enables
+    # tests through the superbuild.
+    -DTESTING:BOOL=ON
+    DEPENDS libp2p
+    BUILD_BYPRODUCTS
+    "${CMAKE_CURRENT_BINARY_DIR}/sgns-blockstore/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sgns-blockstore${CMAKE_STATIC_LIBRARY_SUFFIX}"
+)
+set(_FINDPACKAGE_SGNS_BLOCKSTORE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/sgns-blockstore/lib/cmake/sgns-blockstore")
+
 # gnus_upnp
 ExternalProject_Add(gnus_upnp
     PREFIX gnus_upnp

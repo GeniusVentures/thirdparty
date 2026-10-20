@@ -96,6 +96,9 @@
 [submodule "AsyncIOManager"]
     path = AsyncIOManager
     url = ../AsyncIOManager.git
+[submodule "sgns-blockstore"]
+    path = sgns-blockstore
+    url = ../sgns-blockstore.git
 [submodule "stb"]
     path = stb
     url = https://github.com/nothings/stb.git
