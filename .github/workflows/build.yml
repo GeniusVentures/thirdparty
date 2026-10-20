@@ -361,6 +361,17 @@ jobs:
         working-directory: ${{env.BUILD_DIRECTORY}}
         run: cmake --build . --config ${{matrix.build-type}} -j
 
+      # sgns-blockstore hermetic test lane (research Q1 resolution: ctest in
+      # the build tree; SuperGenius CI consumes prebuilt thirdparty releases
+      # and runs no thirdparty tests). Gated off iOS/Android legs - their
+      # cross-compiled test executables cannot run on the host. The
+      # superbuild entry hard-codes -DTESTING:BOOL=ON after the common args,
+      # so the binaries are already built by the step above.
+      - name: Run sgns-blockstore tests
+        if: ${{ matrix.target == 'Windows' || matrix.target == 'Linux' || matrix.target == 'OSX' }}
+        working-directory: ${{env.BUILD_DIRECTORY}}
+        run: ctest --test-dir sgns-blockstore/src/sgns-blockstore-build -C ${{matrix.build-type}} --output-on-failure
+
       - name: Compress directories
         if: ${{ inputs.upload }}
         working-directory: ${{env.BUILD_DIRECTORY}}
