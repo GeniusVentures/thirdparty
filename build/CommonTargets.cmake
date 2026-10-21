@@ -775,6 +775,90 @@ ExternalProject_Add(AsyncIOManager
     DEPENDS libssh2 openssl ipfs-lite-cpp ipfs-bitswap-cpp protobuf ${PROTOBUF_TARGET} Boost MNN
 )
 
+# Nlohmann JSON
+# (lives here — above the minio-cpp entry — because minio-cpp's DEPENDS json
+# requires the target to already exist at ExternalProject_Add time, and
+# miniocpp-deps.cmake consumes the config-dir export directly below.)
+ExternalProject_Add(json
+    PREFIX json
+    SOURCE_DIR "${THIRDPARTY_DIR}/json"
+   CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    -DJSON_BuildTests:BOOL=OFF
+    ${_CMAKE_COMMON_CACHE_ARGS}
+    ${_BOOST_CACHE_ARGS}
+    ${_OPENSSL_CACHE_ARGS}
+    DEPENDS Boost
+)
+
+# nlohmann_json config-dir export — consumed by minio-cpp's cmake/miniocpp-deps.cmake
+# (find_package(nlohmann_json CONFIG REQUIRED), line 21). Declared here, before the
+# minio-cpp entry below, because the minio-cpp ExternalProject must precede the
+# sgns-blockstore entry (which consumes _FINDPACKAGE_MINIOCPP_CONFIG_DIR) while the
+# json ExternalProject_Add itself sits later in this file. OBSERVED install layout
+# (2026-10-21 spike): nlohmann_json's own CMake installs its config package to
+# <prefix>/share/cmake/nlohmann_json (GNUInstallDirs datadir), NOT lib/cmake.
+set(_FINDPACKAGE_JSON_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/json/share/cmake/nlohmann_json")
+
+# pugixml — provisioned per the BUILD-02/SC1 letter amendment (Q1, user-selected
+# 2026-10-21): upstream's cmake/miniocpp-deps.cmake has NO source fallback for
+# pugixml (hard FATAL_ERROR without a pre-provisioned package), so pugixml ships
+# as its own upstream submodule (tag v1.16) with its own ExternalProject entry.
+# The operative BUILD-02 red lines hold: upstream absolute URL (no fork),
+# statically linked, non-exported; minio-cpp's own nested deps (cpp-httplib
+# v0.53.1, inih r58) stay governed by upstream's pins (D-12). Separate entry
+# coupled to minio-cpp only via DEPENDS + -Dpugixml_DIR — never merged targets.
+ExternalProject_Add(pugixml
+    PREFIX pugixml
+    SOURCE_DIR "${THIRDPARTY_DIR}/pugixml"
+   CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    ${_CMAKE_COMMON_CACHE_ARGS}
+    BUILD_BYPRODUCTS
+    "${CMAKE_CURRENT_BINARY_DIR}/pugixml/lib/${CMAKE_STATIC_LIBRARY_PREFIX}pugixml${CMAKE_STATIC_LIBRARY_SUFFIX}"
+)
+set(_FINDPACKAGE_PUGIXML_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/pugixml/lib/cmake/pugixml")
+
+# minio-cpp — S3 client SDK behind sgns-blockstore's internal S3Client adapter
+# seam (rocksdb-backup Phase 3, BUILD-02/BUILD-03). D-12: upstream's own
+# dependency mechanism (cmake/miniocpp-deps.cmake) runs AS-IS at configure
+# time — it git-clones cpp-httplib (pinned v0.53.1) and inih (pinned r58) into
+# <binary>/_deps using upstream's own pins. NO PATCH_COMMAND, no GNUS pin file
+# or fetch script; a clone failure fails the configure loudly (surfaced, never
+# pre-solved). The Q1 pugixml provision + this D-12 posture amend BUILD-02's
+# letter where the shaderc entry below documents its git-sync-deps patch.
+# Short binary dir (shaderc trick): miniocpp-deps.cmake clones into
+# ${CMAKE_CURRENT_BINARY_DIR}/_deps — the default (<prefix>/src/minio-cpp-build)
+# pushes those MSBuild .tlog paths past the Windows MAX_PATH (260) limit on
+# runners without OS long-path support. Must stay directly under a */src
+# directory: build.yml's tarball step excludes build trees via
+# --exclude='./*/src' — any other location leaks the whole _deps object tree
+# into the release tarballs and blows the 2 GiB asset limit (HTTP 422).
+ExternalProject_Add(minio-cpp
+    PREFIX minio-cpp
+    SOURCE_DIR "${THIRDPARTY_DIR}/minio-cpp"
+    BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mcb/src"
+   CMAKE_CACHE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    -DMINIO_CPP_TEST:BOOL=OFF
+    -DMINIO_CPP_MAKE_DOC:BOOL=OFF
+    -DMINIO_CPP_ENABLE_RDMA:BOOL=OFF
+    -Dpugixml_DIR:PATH=${_FINDPACKAGE_PUGIXML_CONFIG_DIR}
+    -Dnlohmann_json_DIR:PATH=${_FINDPACKAGE_JSON_CONFIG_DIR}
+    ${_ZLIB_PACKAGE_ARGS}
+    ${_OPENSSL_CACHE_ARGS}
+    # The CMAKE_TOOLCHAIN_FILE arg inside _CMAKE_COMMON_CACHE_ARGS (defined but
+    # empty on desktop builds) also neutralizes minio-cpp's VCPKG_ROOT
+    # auto-toolchain hijack — do not remove it (03-RESEARCH.md Pitfall 5).
+    ${_CMAKE_COMMON_CACHE_ARGS}
+    DEPENDS pugixml json
+    # NOTE the artifact name: target miniocpp, OUTPUT_NAME minio
+    # -> libminio.a / minio.lib (never libminiocpp).
+    BUILD_BYPRODUCTS
+    "${CMAKE_CURRENT_BINARY_DIR}/minio-cpp/lib/${CMAKE_STATIC_LIBRARY_PREFIX}minio${CMAKE_STATIC_LIBRARY_SUFFIX}"
+)
+set(_FINDPACKAGE_MINIOCPP_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/minio-cpp/lib/cmake/miniocpp")
+
 # sgns-blockstore
 ExternalProject_Add(sgns-blockstore
     PREFIX sgns-blockstore
@@ -788,6 +872,7 @@ ExternalProject_Add(sgns-blockstore
     -DGSL_INCLUDE_DIR:PATH=${_FINDPACKAGE_GSL_INCLUDE_DIR}
     -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
     -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
+    -Dminiocpp_DIR:PATH=${_FINDPACKAGE_MINIOCPP_CONFIG_DIR}
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
     -DRocksDB_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}
     -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
@@ -808,7 +893,7 @@ ExternalProject_Add(sgns-blockstore
     # is named TESTING (never BUILD_TESTING), so this is what re-enables
     # tests through the superbuild.
     -DTESTING:BOOL=ON
-    DEPENDS libp2p rocksdb
+    DEPENDS libp2p rocksdb minio-cpp
     BUILD_BYPRODUCTS
     "${CMAKE_CURRENT_BINARY_DIR}/sgns-blockstore/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sgns-blockstore${CMAKE_STATIC_LIBRARY_SUFFIX}"
 )
@@ -832,15 +917,3 @@ ExternalProject_Add(gnus_upnp
     DEPENDS Boost fmt spdlog tsl_hat_trie yaml-cpp
 )
 
-# Nlohmann JSON
-ExternalProject_Add(json
-    PREFIX json
-    SOURCE_DIR "${THIRDPARTY_DIR}/json"
-   CMAKE_CACHE_ARGS
-    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    -DJSON_BuildTests:BOOL=OFF
-    ${_CMAKE_COMMON_CACHE_ARGS}
-    ${_BOOST_CACHE_ARGS}
-    ${_OPENSSL_CACHE_ARGS}
-    DEPENDS Boost
-)

@@ -126,3 +126,9 @@
 [submodule "shaderc"]
 	path = shaderc
 	url = https://github.com/google/shaderc.git
+[submodule "minio-cpp"]
+	path = minio-cpp
+	url = https://github.com/minio/minio-cpp.git
+[submodule "pugixml"]
+	path = pugixml
+	url = https://github.com/zeux/pugixml.git
