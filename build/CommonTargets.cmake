@@ -871,8 +871,14 @@ ExternalProject_Add(sgns-blockstore
     -Dfmt_DIR:PATH=${_FINDPACKAGE_FMT_CONFIG_DIR}
     -DGSL_INCLUDE_DIR:PATH=${_FINDPACKAGE_GSL_INCLUDE_DIR}
     -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
+    -Dhttplib_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/minio-cpp/lib/cmake/httplib
     -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
     -Dminiocpp_DIR:PATH=${_FINDPACKAGE_MINIOCPP_CONFIG_DIR}
+    # The consumer-side miniocpp-config.cmake re-runs miniocpp-deps.cmake in
+    # THIS project's context (nlohmann_json/httplib/pugixml must resolve here
+    # too; inih is reused via the exported miniocpp::miniocpp_inih target).
+    -Dnlohmann_json_DIR:PATH=${_FINDPACKAGE_JSON_CONFIG_DIR}
+    -Dpugixml_DIR:PATH=${_FINDPACKAGE_PUGIXML_CONFIG_DIR}
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
     -DRocksDB_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}
     -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
@@ -883,7 +889,15 @@ ExternalProject_Add(sgns-blockstore
     -Dtsl_hat_trie_DIR:PATH=${_FINDPACKAGE_TSL_HAT_TRIE_CONFIG_DIR}
     -Dutf8_range_DIR:PATH=${utf8_range_DIR}
     -Dyaml-cpp_DIR:PATH=${_FINDPACKAGE_YAMLCPP_CONFIG_DIR}
-    ${_ZLIB_PACKAGE_ARGS}
+    # ZLIB resolves through the superbuild-local FindZLIB module override
+    # (NEVER config mode in this entry): cpp-httplib v0.53.1's installed
+    # config re-runs find_package(ZLIB) via CMake >= 3.26's hash-guarded
+    # find_dependency, and ZLIBConfig.cmake's @PACKAGE_INIT@ macros then
+    # corrupt httplibConfig.cmake's header-path check with the zlib prefix
+    # (rocksdb-backup Phase-3 spike finding, 2026-10-21). The shim imports
+    # the zlib targets file directly - see thirdparty/build/cmake/FindZLIB.cmake.
+    -DCMAKE_MODULE_PATH:PATH=${CMAKE_CURRENT_SOURCE_DIR}/../cmake
+    -DZLIB_SUPERBUILD_TARGETS_FILE:FILEPATH=${CMAKE_CURRENT_BINARY_DIR}/zlib/lib/cmake/zlib/ZLIB-static.cmake
     ${_BOOST_CACHE_ARGS}
     ${_OPENSSL_CACHE_ARGS}
     ${_CMAKE_COMMON_CACHE_ARGS}
@@ -892,6 +906,11 @@ ExternalProject_Add(sgns-blockstore
     # ExternalProject's initial-cache FORCE semantics. The repo's test gate
     # is named TESTING (never BUILD_TESTING), so this is what re-enables
     # tests through the superbuild.
+    # PREFER_CONFIG must come after _CMAKE_COMMON_CACHE_ARGS too (it forces
+    # =ON at CommonCompilerOptions.cmake:122): config-first re-routes the
+    # httplib chain's ZLIB find into ZLIBConfig.cmake and defeats the
+    # FindZLIB shim above.
+    -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=OFF
     -DTESTING:BOOL=ON
     DEPENDS libp2p rocksdb minio-cpp
     BUILD_BYPRODUCTS
