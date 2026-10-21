@@ -789,6 +789,8 @@ ExternalProject_Add(sgns-blockstore
     -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
     -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
     -DProtobuf_DIR:PATH=${Protobuf_DIR}
+    -DRocksDB_DIR:PATH=${_FINDPACKAGE_ROCKSDB_DIR}
+    -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
     -Dsoralog_DIR:PATH=${_FINDPACKAGE_SORALOG_CONFIG_DIR}
     -Dspdlog_DIR:PATH=${_FINDPACKAGE_SPDLOG_CONFIG_DIR}
     -Dsqlite3_dir:PATH=${_FINDPACKAGE_SQLITE3_CONFIG_DIR}
@@ -806,7 +808,7 @@ ExternalProject_Add(sgns-blockstore
     # is named TESTING (never BUILD_TESTING), so this is what re-enables
     # tests through the superbuild.
     -DTESTING:BOOL=ON
-    DEPENDS libp2p
+    DEPENDS libp2p rocksdb
     BUILD_BYPRODUCTS
     "${CMAKE_CURRENT_BINARY_DIR}/sgns-blockstore/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sgns-blockstore${CMAKE_STATIC_LIBRARY_SUFFIX}"
 )
