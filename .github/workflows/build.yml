@@ -367,10 +367,15 @@ jobs:
       # cross-compiled test executables cannot run on the host. The
       # superbuild entry hard-codes -DTESTING:BOOL=ON after the common args,
       # so the binaries are already built by the step above.
+      # D-13 (Phase 5): -L Tier1 restricts the lane to the hermetic tier and
+      # FAILS CLOSED - ctest -L never includes an unlabeled test (a -LE form
+      # would fail open and let unlabeled tests leak into the hermetic lane);
+      # --no-tests=error fails an empty selection so a label typo cannot
+      # pass vacuously. Dev-machine full runs stay unlabeled ctest.
       - name: Run sgns-blockstore tests
         if: ${{ matrix.target == 'Windows' || matrix.target == 'Linux' || matrix.target == 'OSX' }}
         working-directory: ${{env.BUILD_DIRECTORY}}
-        run: ctest --test-dir sgns-blockstore/src/sgns-blockstore-build -C ${{matrix.build-type}} --output-on-failure
+        run: ctest --test-dir sgns-blockstore/src/sgns-blockstore-build -C ${{matrix.build-type}} --output-on-failure -L Tier1 --no-tests=error
 
       - name: Compress directories
         if: ${{ inputs.upload }}
