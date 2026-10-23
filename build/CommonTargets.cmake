@@ -872,6 +872,7 @@ ExternalProject_Add(sgns-blockstore
     -DGSL_INCLUDE_DIR:PATH=${_FINDPACKAGE_GSL_INCLUDE_DIR}
     -DGTest_DIR:PATH=${_FINDPACKAGE_GTEST_CONFIG_DIR}
     -Dhttplib_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/minio-cpp/lib/cmake/httplib
+    -Dipfs-lite-cpp_DIR:PATH=${_FINDPACKAGE_IPFS_LITE_CONFIG_DIR}
     -Dlibp2p_DIR:PATH=${_FINDPACKAGE_libp2p_CONFIG_DIR}
     -Dminiocpp_DIR:PATH=${_FINDPACKAGE_MINIOCPP_CONFIG_DIR}
     # The consumer-side miniocpp-config.cmake re-runs miniocpp-deps.cmake in
@@ -912,7 +913,7 @@ ExternalProject_Add(sgns-blockstore
     # FindZLIB shim above.
     -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=OFF
     -DTESTING:BOOL=ON
-    DEPENDS libp2p rocksdb minio-cpp
+    DEPENDS libp2p rocksdb minio-cpp ipfs-lite-cpp
     BUILD_BYPRODUCTS
     "${CMAKE_CURRENT_BINARY_DIR}/sgns-blockstore/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sgns-blockstore${CMAKE_STATIC_LIBRARY_SUFFIX}"
 )
