@@ -854,6 +854,14 @@ ExternalProject_Add(minio-cpp
     # zstd::libzstd ... already exists" (iOS leg, run 40608346530). OFF makes
     # the branch compile to if(0) everywhere, identical to the Windows install
     # tree; S3 traffic needs neither zstd nor brotli content-encoding.
+    # HTTPLIB_USE_NON_BLOCKING_GETADDRINFO (default ON) compiles cpp-httplib's
+    # glibc async-DNS path (getaddrinfo_a/gai_suspend/gai_cancel/gai_error)
+    # into libminio.a; those symbols live in libanl, which nothing on the
+    # link line pulls in, so every glibc-Linux executable linking miniocpp
+    # fails with undefined references (Linux legs, run 40620972829). OFF
+    # emits plain blocking getaddrinfo from libc and links everywhere;
+    # DNS-resolution cost against fixed S3 endpoints is negligible.
+    -DHTTPLIB_USE_NON_BLOCKING_GETADDRINFO:BOOL=OFF
     -DHTTPLIB_USE_ZSTD_IF_AVAILABLE:BOOL=OFF
     -DHTTPLIB_USE_BROTLI_IF_AVAILABLE:BOOL=OFF
     -Dpugixml_DIR:PATH=${_FINDPACKAGE_PUGIXML_CONFIG_DIR}
