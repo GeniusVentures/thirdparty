@@ -843,6 +843,19 @@ ExternalProject_Add(minio-cpp
     -DMINIO_CPP_TEST:BOOL=OFF
     -DMINIO_CPP_MAKE_DOC:BOOL=OFF
     -DMINIO_CPP_ENABLE_RDMA:BOOL=OFF
+    # Deterministic httplib feature set across runner environments. cpp-httplib
+    # v0.53.1's *_IF_AVAILABLE auto-detections (zstd/brotli default ON) bake
+    # runner-dependent branches into the INSTALLED httplibConfig.cmake. With
+    # zstd ON (Mac runners see Homebrew zstd >= 1.5.6), that config creates a
+    # `zstd::libzstd` ALIAS on EVERY execution — and consumers execute it
+    # TWICE (sgns-blockstore's explicit find_package(httplib) followed by
+    # miniocpp-deps.cmake's QUIET re-find, which re-runs the config under
+    # CMake >= 3.26 hash-guarded re-entry) -> "add_library cannot create ALIAS
+    # zstd::libzstd ... already exists" (iOS leg, run 40608346530). OFF makes
+    # the branch compile to if(0) everywhere, identical to the Windows install
+    # tree; S3 traffic needs neither zstd nor brotli content-encoding.
+    -DHTTPLIB_USE_ZSTD_IF_AVAILABLE:BOOL=OFF
+    -DHTTPLIB_USE_BROTLI_IF_AVAILABLE:BOOL=OFF
     -Dpugixml_DIR:PATH=${_FINDPACKAGE_PUGIXML_CONFIG_DIR}
     -Dnlohmann_json_DIR:PATH=${_FINDPACKAGE_JSON_CONFIG_DIR}
     ${_ZLIB_PACKAGE_ARGS}
@@ -851,7 +864,29 @@ ExternalProject_Add(minio-cpp
     # empty on desktop builds) also neutralizes minio-cpp's VCPKG_ROOT
     # auto-toolchain hijack — do not remove it (03-RESEARCH.md Pitfall 5).
     ${_CMAKE_COMMON_CACHE_ARGS}
-    DEPENDS pugixml json
+    # Same FindZLIB-shim posture as the sgns-blockstore entry below: with
+    # PREFER_CONFIG=ON (forced by _CMAKE_COMMON_CACHE_ARGS), miniocpp-deps.cmake's
+    # find_package(ZLIB) loads ZLIBConfig.cmake, whose @PACKAGE_INIT@ corrupts
+    # httplibConfig.cmake's set_and_check header-path validation with the zlib
+    # prefix. Harmless on fresh CI trees (no install tree yet -> httplib is
+    # built from source and the installed config never loads), but ANY
+    # incremental reconfigure of this entry finds the previously installed
+    # httplibConfig via CMAKE_INSTALL_PREFIX (a standard search prefix) and
+    # dies on "HTTPLIB_HEADER_PATH ... zlib/include/httplib.h does not exist".
+    # The shim imports the zlib targets file directly and PREFER_CONFIG=OFF
+    # (must follow _CMAKE_COMMON_CACHE_ARGS to win) keeps ZLIB in module mode.
+    -DCMAKE_MODULE_PATH:PATH=${CMAKE_CURRENT_SOURCE_DIR}/../cmake
+    -DZLIB_SUPERBUILD_TARGETS_FILE:FILEPATH=${CMAKE_CURRENT_BINARY_DIR}/zlib/lib/cmake/zlib/ZLIB-static.cmake
+    -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=OFF
+    # miniocpp-deps.cmake does REQUIRED find_package calls for OpenSSL (line
+    # 19) and ZLIB (line 20) at configure time, so the sub-configure MUST NOT
+    # run before those superbuild installs exist. Without the explicit deps,
+    # clean CI builds race them (run 40608346530): Windows failed "Could NOT
+    # find OpenSSL" while openssl was still compiling; Android's configure
+    # fell back to the HOST x86_64 libcrypto (/usr/lib/x86_64-linux-gnu) and
+    # the cross-build of signer.cc then died on a missing openssl/evp.h
+    # include path for the NDK target.
+    DEPENDS pugixml json zlib openssl
     # NOTE the artifact name: target miniocpp, OUTPUT_NAME minio
     # -> libminio.a / minio.lib (never libminiocpp).
     BUILD_BYPRODUCTS
