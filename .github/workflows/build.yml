@@ -361,22 +361,16 @@ jobs:
         working-directory: ${{env.BUILD_DIRECTORY}}
         run: cmake --build . --config ${{matrix.build-type}} -j
 
-      # sgns-blockstore hermetic test lane (research Q1 resolution: ctest in
-      # the build tree; SuperGenius CI consumes prebuilt thirdparty releases
-      # and runs no thirdparty tests). Gated off iOS/Android legs - their
-      # cross-compiled test executables cannot run on the host. The
-      # superbuild entry hard-codes -DTESTING:BOOL=ON after the common args,
-      # so the binaries are already built by the step above.
-      # D-13 (Phase 5): -L Tier1 restricts the lane to the hermetic tier and
-      # FAILS CLOSED - ctest -L never includes an unlabeled test (a -LE form
-      # would fail open and let unlabeled tests leak into the hermetic lane);
-      # --no-tests=error fails an empty selection so a label typo cannot
-      # pass vacuously. Dev-machine full runs stay unlabeled ctest.
-      - name: Run sgns-blockstore tests
-        if: ${{ matrix.target == 'Windows' || matrix.target == 'Linux' || matrix.target == 'OSX' }}
-        working-directory: ${{env.BUILD_DIRECTORY}}
-        run: ctest --test-dir sgns-blockstore/src/sgns-blockstore-build -C ${{matrix.build-type}} --output-on-failure -L Tier1 --no-tests=error
-
+      # sgns-blockstore test EXECUTION moved out of this workflow (user
+      # decision, 2026-10-28): the thirdparty superbuild is too heavy a place
+      # to run them - a single wedged test held four Linux legs ~4h (run
+      # 40627475215, since-fixed LoopbackHttpStub::Stop() deadlock). Tests now
+      # run in the sgns-blockstore repo's own CI (test/ lane there), which
+      # consumes this workflow's release artifacts exactly like SuperGenius
+      # does. The superbuild entry still hard-codes -DTESTING:BOOL=ON, so test
+      # binaries KEEP COMPILING on every platform leg here - compile coverage
+      # (e.g. the MSVC-only localtime_s catch) is preserved; only the ctest
+      # run is gone.
       - name: Compress directories
         if: ${{ inputs.upload }}
         working-directory: ${{env.BUILD_DIRECTORY}}
