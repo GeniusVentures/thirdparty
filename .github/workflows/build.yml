@@ -431,7 +431,7 @@ jobs:
 
                   gh release create "$RELEASE_TAG" \
                     --target "${{ github.sha }}" \
-                    -t "${{ matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
+                    -t "${{ matrix.abi == 'arm64-simulator' && 'iOS Simulator' || matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
                     -n "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
                     --prerelease
               fi
