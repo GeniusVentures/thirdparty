@@ -339,7 +339,7 @@ jobs:
 
       - name: Configure CMake for iOS
         if: ${{ matrix.target == 'iOS'}}
-        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=OS64 -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
+        run: cmake -S build/${{matrix.target}} -B $BUILD_DIRECTORY -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DPLATFORM=${{ matrix.abi == 'arm64-simulator' && 'SIMULATORARM64' || 'OS64' }} -DSGNS_ENABLE_RELEASE_SYMBOLS=${{ env.SGNS_ENABLE_RELEASE_SYMBOLS }}
 
       - name: Configure CMake for Android
         if: ${{ matrix.target == 'Android'}}
@@ -431,7 +431,7 @@ jobs:
 
                   gh release create "$RELEASE_TAG" \
                     --target "${{ github.sha }}" \
-                    -t "${{ matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
+                    -t "${{ matrix.abi == 'arm64-simulator' && 'iOS Simulator' || matrix.target }} ${{ github.ref_name }} ${{ matrix.build-type }} build" \
                     -n "Branch: ${{ github.ref_name }} | SHA: ${{ github.sha }}" \
                     --prerelease
               fi

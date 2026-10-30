@@ -103,13 +103,24 @@ set(_BOOST_CACHE_ARGS
 )
 
 # OpenSSL
+# PLATFORM=SIMULATORARM64 builds the arm64 iOS Simulator slice; every other
+# value keeps the device build exactly as before.
+if(PLATFORM STREQUAL "SIMULATORARM64")
+    set(_OPENSSL_IOS_TARGET ios-sim-cross-arm64)
+    set(_MVK_SDK_ARG --sdk=iphonesimulator)
+    set(WALLET_CORE_ARCH_ABI arm64-simulator)
+else()
+    set(_OPENSSL_IOS_TARGET ios64-cross-arm64)
+    set(_MVK_SDK_ARG "")
+endif()
+
 set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl/build")
 
 ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR "${THIRDPARTY_DIR}/openssl"
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build-libssl.sh $<$<CONFIG:Debug>:--debug> --version=3.3.1 --targets=ios64-cross-arm64 --src-dir=${THIRDPARTY_DIR}/openssl --build-dir=${OPENSSL_ROOT_DIR} --deprecated
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Openssl-build/build-libssl.sh $<$<CONFIG:Debug>:--debug> --version=3.3.1 --targets=${_OPENSSL_IOS_TARGET} --src-dir=${THIRDPARTY_DIR}/openssl --build-dir=${OPENSSL_ROOT_DIR} --deprecated
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
@@ -128,7 +139,7 @@ ExternalProject_Add(MoltenVK
     SOURCE_DIR "${THIRDPARTY_DIR}/MoltenVK"
     CONFIGURE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/MoltenVK-build/build.sh ${BUILD_VARIANT} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK
+    BUILD_COMMAND ${CMAKE_CURRENT_LIST_DIR}/MoltenVK-build/build.sh ${BUILD_VARIANT} ${_MVK_SDK_ARG} --build-dir=${_MVK_ROOT} --src-dir=${THIRDPARTY_DIR}/MoltenVK
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )

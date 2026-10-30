@@ -473,7 +473,7 @@ if(NOT TARGET shaderc::shaderc)
     add_dependencies(shaderc::shaderc shaderc)
 endif()
 
-if(NOT APPLE OR (APPLE AND CMAKE_OSX_SYSROOT MATCHES "iPhoneOS"))
+if(NOT APPLE OR (APPLE AND CMAKE_OSX_SYSROOT MATCHES "iPhone(OS|Simulator)"))
     ExternalProject_Add(MNN
         PREFIX MNN
         SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
