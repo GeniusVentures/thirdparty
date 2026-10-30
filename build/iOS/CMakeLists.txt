@@ -108,6 +108,7 @@ set(_BOOST_CACHE_ARGS
 if(PLATFORM STREQUAL "SIMULATORARM64")
     set(_OPENSSL_IOS_TARGET ios-sim-cross-arm64)
     set(_MVK_SDK_ARG --sdk=iphonesimulator)
+    set(WALLET_CORE_ARCH_ABI arm64-simulator)
 else()
     set(_OPENSSL_IOS_TARGET ios64-cross-arm64)
     set(_MVK_SDK_ARG "")
@@ -168,14 +169,3 @@ set(_ZKLLVM_EXTRA_PARAM
 )
 
 include(../CommonTargets.cmake)
-
-# wallet-core's rust-bindgen builds every Apple Rust target but installs only
-# the device lib; the simulator build swaps in the matching slice.
-if(PLATFORM STREQUAL "SIMULATORARM64")
-    ExternalProject_Add_Step(wallet-core install_simulator_rust_lib
-        COMMAND ${CMAKE_COMMAND} -E copy
-            "${THIRDPARTY_DIR}/wallet-core/rust/target/aarch64-apple-ios-sim/$<IF:$<CONFIG:Release>,release,debug>/libwallet_core_rs.a"
-            "<INSTALL_DIR>/lib/libwallet_core_rs.a"
-        DEPENDEES install
-    )
-endif()
