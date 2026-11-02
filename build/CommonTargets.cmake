@@ -147,6 +147,17 @@ ExternalProject_Add(rocksdb
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     -DFAIL_ON_WARNINGS:BOOL=OFF
     -DPORTABLE:BOOL=ON
+    # USE_RTTI=ON overrides rocksdb's USE_RTTI=AUTO default (RTTI in Debug
+    # builds only, -fno-rtti in Release): Release librocksdb otherwise
+    # defines no typeinfo for its polymorphic classes, so any RTTI-on
+    # consumer deriving from one (genius-ai-boss scaffold: SlashPrefixTransform
+    # : rocksdb::SliceTransform) fails to link on GCC/Clang with
+    # `undefined reference to typeinfo for rocksdb::Customizable` — MSVC
+    # links (no eager base-class typeinfo emission) which hid the gap
+    # (genius-ai-boss runs 41539560294/41541247884). RTTI ON is additive:
+    # typeinfo objects appear, class layout is unchanged, consumers that
+    # ignore RTTI are unaffected.
+    -DUSE_RTTI:STRING=ON
     -DROCKSDB_BUILD_SHARED:BOOL=OFF
     -DROCKSDB_INSTALL_ON_WINDOWS:BOOL=ON
     -DWITH_ALL_TESTS:BOOL=OFF
