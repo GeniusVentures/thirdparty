@@ -36,6 +36,14 @@ on:
         description: "Build iOS Debug"
         default: true
         type: boolean
+      build_iOS-arm64-simulator_Release:
+        description: "Build iOS arm64 Simulator Release"
+        default: true
+        type: boolean
+      build_iOS-arm64-simulator_Debug:
+        description: "Build iOS arm64 Simulator Debug"
+        default: true
+        type: boolean
       build_OSX_Release:
         description: "Build OSX Release"
         default: true
@@ -94,6 +102,8 @@ jobs:
           BUILD_ANDROID_ARMEABI_V7A_DEBUG: ${{ inputs.build_Android-armeabi-v7a_Debug }}
           BUILD_IOS_RELEASE: ${{ inputs.build_iOS_Release }}
           BUILD_IOS_DEBUG: ${{ inputs.build_iOS_Debug }}
+          BUILD_IOS_ARM64_SIMULATOR_RELEASE: ${{ inputs.build_iOS-arm64-simulator_Release }}
+          BUILD_IOS_ARM64_SIMULATOR_DEBUG: ${{ inputs.build_iOS-arm64-simulator_Debug }}
           BUILD_OSX_RELEASE: ${{ inputs.build_OSX_Release }}
           BUILD_OSX_DEBUG: ${{ inputs.build_OSX_Debug }}
           BUILD_LINUX_X86_64_RELEASE: ${{ inputs.build_Linux-x86_64_Release }}
@@ -117,6 +127,8 @@ jobs:
             {"target":"Android","id":"Android-armeabi-v7a","build-type":"Debug","abi":"armeabi-v7a","runner_key":"linux_x64","toggle":"BUILD_ANDROID_ARMEABI_V7A_DEBUG"},
             {"target":"iOS","id":"iOS","build-type":"Release","abi":"","runner_key":"mac","toggle":"BUILD_IOS_RELEASE"},
             {"target":"iOS","id":"iOS","build-type":"Debug","abi":"","runner_key":"mac","toggle":"BUILD_IOS_DEBUG"},
+            {"target":"iOS","id":"iOS-arm64-simulator","build-type":"Release","abi":"arm64-simulator","runner_key":"mac","toggle":"BUILD_IOS_ARM64_SIMULATOR_RELEASE"},
+            {"target":"iOS","id":"iOS-arm64-simulator","build-type":"Debug","abi":"arm64-simulator","runner_key":"mac","toggle":"BUILD_IOS_ARM64_SIMULATOR_DEBUG"},
             {"target":"OSX","id":"OSX","build-type":"Release","abi":"","runner_key":"mac","toggle":"BUILD_OSX_RELEASE"},
             {"target":"OSX","id":"OSX","build-type":"Debug","abi":"","runner_key":"mac","toggle":"BUILD_OSX_DEBUG"},
             {"target":"Linux","id":"Linux-x86_64","build-type":"Release","abi":"x86_64","runner_key":"linux_x64","toggle":"BUILD_LINUX_X86_64_RELEASE","container":"ghcr.io/geniusventures/almalinux-8:latest"},
