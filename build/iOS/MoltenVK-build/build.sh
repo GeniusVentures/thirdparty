@@ -4,6 +4,7 @@ SRC_DIR="."
 BUILD_DIR="`pwd`/build"
 MACOSX_DEPLOYMENT_TARGET=10.12
 VARIANT="Release"
+SDK="iphoneos"
 
 # Process command line arguments
 for i in "$@"
@@ -21,6 +22,10 @@ case $i in
     MACOSX_DEPLOYMENT_TARGET="${i#*=}"
     shift
     ;;
+    --sdk=*)
+      SDK="${i#*=}"
+      shift
+      ;;
     --debug)
       VARIANT="Debug"
       shift
@@ -34,16 +39,20 @@ done
 INSTALL_DIR=$BUILD_DIR
 LIB_DIR="$INSTALL_DIR/lib"
 
-IOS_SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+IOS_SDK_PATH=$(xcrun --sdk ${SDK} --show-sdk-path)
 echo "BUILDDIR ${INSTALL_DIR}"
 echo "Getting dependencies..."
 cd $SRC_DIR
 echo "Src Dir ${SRC_DIR}"
-./fetchDependencies --ios
+if [ "${SDK}" = "iphonesimulator" ]; then
+  ./fetchDependencies --iossim
+else
+  ./fetchDependencies --ios
+fi
 
 echo "building..."
 
-xcodebuild build -quiet -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package (iOS only)" -configuration "${VARIANT}" -sdk iphoneos -archivePath "${INSTALL_DIR}"
+xcodebuild build -quiet -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package (iOS only)" -configuration "${VARIANT}" -sdk ${SDK} -archivePath "${INSTALL_DIR}"
 
 mkdir -p ${LIB_DIR}
 cp -R ./Package/"${VARIANT}"/MoltenVK/include "${INSTALL_DIR}"/
