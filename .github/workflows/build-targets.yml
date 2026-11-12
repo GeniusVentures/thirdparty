@@ -88,7 +88,7 @@ permissions:
 jobs:
   prepare:
     name: Generate build matrix
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, sg-ubuntu-linux]
     outputs:
       matrix: ${{ steps.gen.outputs.matrix }}
     steps:
