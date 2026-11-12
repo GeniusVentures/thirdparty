@@ -147,17 +147,6 @@ ExternalProject_Add(rocksdb
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     -DFAIL_ON_WARNINGS:BOOL=OFF
     -DPORTABLE:BOOL=ON
-    # USE_RTTI=ON overrides rocksdb's USE_RTTI=AUTO default (RTTI in Debug
-    # builds only, -fno-rtti in Release): Release librocksdb otherwise
-    # defines no typeinfo for its polymorphic classes, so any RTTI-on
-    # consumer deriving from one (genius-ai-boss scaffold: SlashPrefixTransform
-    # : rocksdb::SliceTransform) fails to link on GCC/Clang with
-    # `undefined reference to typeinfo for rocksdb::Customizable` — MSVC
-    # links (no eager base-class typeinfo emission) which hid the gap
-    # (genius-ai-boss runs 41539560294/41541247884). RTTI ON is additive:
-    # typeinfo objects appear, class layout is unchanged, consumers that
-    # ignore RTTI are unaffected.
-    -DUSE_RTTI:STRING=ON
     -DROCKSDB_BUILD_SHARED:BOOL=OFF
     -DROCKSDB_INSTALL_ON_WINDOWS:BOOL=ON
     -DWITH_ALL_TESTS:BOOL=OFF
@@ -170,6 +159,17 @@ ExternalProject_Add(rocksdb
     -DWITH_TOOLS:BOOL=OFF
     -DWITH_SNAPPY:BOOL=ON
     -DSnappy_DIR:PATH=${_FINDPACKAGE_SNAPPY_DIR}
+    # rocksdb's USE_RTTI default is AUTO: RTTI in Debug, -fno-rtti in Release.
+    # Downstream TUs that subclass rocksdb types (genius-ai-boss's storage
+    # engine subclasses rocksdb::SliceTransform) then fail the final link in
+    # Release — "typeinfo for rocksdb::Customizable" is undefined, because
+    # the no-RTTI Release lib emits no typeinfo at all. Downstream cannot
+    # compile its subclassing TU -fno-rtti either: libp2p's bundled outcome
+    # headers use typeid unconditionally, so RTTI must stay on there. Build
+    # rocksdb with RTTI in every config to make Debug/Release artifacts
+    # consistent for subclassing consumers (cost: typeinfo sections on
+    # polymorphic classes only).
+    -DUSE_RTTI:STRING=ON
     ${_CMAKE_COMMON_CACHE_ARGS}
     ${_rocksdb_EXTRA_PARAM}
     # these need to be at the end to override previous cached args line
@@ -473,7 +473,7 @@ if(NOT TARGET shaderc::shaderc)
     add_dependencies(shaderc::shaderc shaderc)
 endif()
 
-if(NOT APPLE OR (APPLE AND CMAKE_OSX_SYSROOT MATCHES "iPhoneOS"))
+if(NOT APPLE OR (APPLE AND CMAKE_OSX_SYSROOT MATCHES "iPhone(OS|Simulator)"))
     ExternalProject_Add(MNN
         PREFIX MNN
         SOURCE_DIR "${THIRDPARTY_DIR}/MNN"
