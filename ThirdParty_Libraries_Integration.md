@@ -122,9 +122,9 @@ The following libraries are supported across SuperGenius submodules, as listed i
     - **Purpose**: Neural network inference for ML applications.
     - **Integration**: Configure via `find_package(MNN CONFIG REQUIRED)` in `CommonBuildParameters.cmake`. Include directories from `${_THIRDPARTY_BUILD_DIR}/MNN/include` and link against `MNN::MNN`.
 
-30. **MoltenVK** (Version: Unknown)
+30. **MoltenVK** (~1.4.3, follows submodule pin)
     - **Purpose**: Vulkan API for macOS/iOS.
-    - **Integration**: Configure in `apple.toolchain.cmake` for iOS builds. Include headers from `${_THIRDPARTY_BUILD_DIR}/MoltenVK/include` and link the library.
+    - **Integration**: Built by `thirdparty/build/OSX/CMakeLists.txt` and `thirdparty/build/iOS/CMakeLists.txt` with upstream's CMake build (static; a single self-contained `libMoltenVK.a` that prelinks the shader converter/SPIRV dependencies). The shared patch script `thirdparty/build/cmake/MoltenVKStatic.cmake` (applied as the ExternalProject `PATCH_COMMAND`) drops the hardcoded shared type, gates the macOS-only AppKit lookup for iOS, and appends the merge+install rules. Apple consumers (macOS and iOS alike) include headers from `${_THIRDPARTY_BUILD_DIR}/moltenvk/include` and link `${_THIRDPARTY_BUILD_DIR}/moltenvk/lib/libMoltenVK.a` (usually via `Vulkan::Vulkan`; supply the Metal/UIKit framework set on iOS instead of AppKit).
 
 31. **openssl** (~1.1.1t or 3.0.x)
     - **Purpose**: Cryptographic functions for security.

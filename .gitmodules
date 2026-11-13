@@ -70,6 +70,7 @@
 [submodule "MoltenVK"]
     path = MoltenVK
     url = https://github.com/KhronosGroup/MoltenVK.git
+    ignore = dirty
 [submodule "Vulkan-Headers"]
     path = Vulkan-Headers
     url = https://github.com/KhronosGroup/Vulkan-Headers.git
@@ -96,6 +97,9 @@
 [submodule "AsyncIOManager"]
     path = AsyncIOManager
     url = ../AsyncIOManager.git
+[submodule "sgns-blockstore"]
+    path = sgns-blockstore
+    url = ../sgns-blockstore.git
 [submodule "stb"]
     path = stb
     url = https://github.com/nothings/stb.git
@@ -123,3 +127,9 @@
 [submodule "shaderc"]
 	path = shaderc
 	url = https://github.com/google/shaderc.git
+[submodule "minio-cpp"]
+	path = minio-cpp
+	url = https://github.com/minio/minio-cpp.git
+[submodule "pugixml"]
+	path = pugixml
+	url = https://github.com/zeux/pugixml.git
